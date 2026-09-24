@@ -49,15 +49,15 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 
 ## Delivery Status Canon
 
-- **Current delivery stage:** `Pending`
+- **Current delivery stage:** `Local-Implemented`
 - **Qualifiers:** `none`
-- **Next exact step:** executar e aguardar os três reviewers R13 sobre o mesmo HEAD imutável registrado no pacote R13; se todas as lanes retornarem `GO`, consolidar as evidências e iniciar os gates de completion/closeout.
+- **Next exact step:** repetir a suíte completa e os fingerprints no candidato consolidado, congelar um commit imutável para a revisão final independente e, se limpa, executar o closeout.
 
 ## Active Work State
 
 - **Work state:** `review`
-- **Why this state now:** test-quality e cutover R12 retornaram `GO`; arquitetura R12 confirmou a temporalidade e encontrou apenas `ARCH-ADH-R12-01`, duas classes não canônicas no ledger R11, agora remapeadas à taxonomia do projeto para confirmação R13.
-- **Exit condition:** delivery R13 sem release-blocker em todas as lanes, matrizes 1:1 adjudicadas e gates de completion/closeout prontos para execução.
+- **Why this state now:** arquitetura, test-quality e cutover R13 retornaram `GO`; a implementação local está validada e permanece em `review` para completion, final review e closeout.
+- **Exit condition:** completion/final review/closeout verdes, TODO movido para `completed/process/`, suíte pós-move verde e `origin/main` publicado no commit final.
 
 ## Routine-Executor Implementation Evidence — 2026-09-24
 
@@ -66,14 +66,14 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 - **Local evidence:** historical draft evidence is superseded by the reproducible R3 `python3 -B` suite and validator; original chronology remains unverified.
 - **Privacy evidence:** prohibited token material is assembled only inside `TemporaryDirectory` by the negative test; no persistently stored sample matches the validator pattern.
 - **Boundary evidence:** product and `delphi-ai` status were inspected read-only; their pre-existing changes were not edited by this executor.
-- **Remaining owner:** independent test-quality, final-review, cutover-integrity, completion, and closeout gates remain delivery-side responsibilities.
-- **Hardening evidence:** validator now checks the frozen file/module/index/manifest/ledger/link-anchor/privacy boundaries and mutation suite coverage; Git Bash `./delphi-ai/verify_context.sh` returned `Environment Verified: PACED-Ready.` on 2026-09-24. Delivery gates remain pending.
-- **Delivery-review RED→GREEN record:** independent delivery probes reported gaps TQ-01..TQ-04, CUTOVER, and ARCH in the initial validator draft; those findings are active remediation evidence, not clean audit results. The immutable run evidence for the first 9-test draft was not preserved and must not be used as delivery proof (TQ-05). This hardening round first reproduced privacy detection on previously excluded test source, then removed privacy exemptions and retained only runtime-built prohibited samples. GREEN evidence is the post-fix command output recorded below; review/closeout gates remain pending.
+- **Remaining owner at this checkpoint:** independent test-quality, final-review, cutover-integrity, completion, and closeout gates were delivery-side responsibilities; R13 and completion later closed all except final review/closeout.
+- **Hardening evidence:** validator checks the frozen file/module/index/manifest/ledger/link-anchor/privacy boundaries and mutation suite coverage; Git Bash `./delphi-ai/verify_context.sh` returned `Environment Verified: PACED-Ready.` on 2026-09-24. This is historical implementation evidence; current gate truth is recorded below.
+- **Delivery-review RED→GREEN record:** independent delivery probes reported gaps TQ-01..TQ-04, CUTOVER, and ARCH in the initial validator draft. The immutable run evidence for the first 9-test draft was not preserved and is not used as delivery proof (TQ-05). This hardening round first reproduced privacy detection on previously excluded test source, then removed privacy exemptions and retained only runtime-built prohibited samples. R13 and the current completion guard supersede this historical checkpoint.
 
 ## Validator Remediation — 2026-09-24
 
 - **Reviewer RED probes addressed:** lifecycle-path ambiguity, section-blind legacy permission, substring deletion checks, identity/scope under-specification, and excluded privacy surfaces.
-- **Post-fix GREEN target:** the validator now derives the single active/completed lifecycle, requires exact ledger rows by section, rejects every frozen `Delete` path independently, validates D-01/D-05 contracts, and scans every persisted file. Delivery, audit, and closeout gates remain pending; this entry does not mark them clean or complete.
+- **Post-fix GREEN target:** the validator derives the single active/completed lifecycle, requires exact ledger rows by section, rejects every frozen `Delete` path independently, validates D-01/D-05 contracts, and scans every persisted file. This historical checkpoint was later confirmed by R13 and the current completion guard; final review/closeout remain the only active gates.
 
 ## Round-2 Remediation — 2026-09-24
 
@@ -191,7 +191,7 @@ Test quality and cutover integrity returned `GO`; architecture confirmed `ARCH-A
 
 | Finding | Classification | Integrated remediation | Status |
 | --- | --- | --- | --- |
-| `ARCH-ADH-R12-01` | release-blocker | replace the rejected generic labels with `release-blocker` for corrected evidence and `by-design/no-action` for the proven runner boundary | integrated locally; delivery R13 pending |
+| `ARCH-ADH-R12-01` | release-blocker | replace the rejected generic labels with `release-blocker` for corrected evidence and `by-design/no-action` for the proven runner boundary | confirmed at `dc1d869` |
 
 ## Post-Implementation Decision Adherence Validation
 
@@ -215,23 +215,23 @@ Test quality and cutover integrity returned `GO`; architecture confirmed `ARCH-A
 
 ## Blocker Notes
 
-- **Blocker:** `n/a`; delivery R13 is the next active gate, not an impasse.
-- **Why blocked now:** `n/a`; completion remains unavailable until `ARCH-ADH-R12-01` receives clean independent confirmation.
-- **What unblocks it:** clean delivery R13 test-quality, architecture-adherence and cutover-integrity results on one immutable taxonomy-correction commit.
+- **Blocker:** `n/a`; delivery R13 convergiu em `GO` e não há impasse.
+- **Why blocked now:** `n/a`; o candidato segue para completion, revisão final independente e closeout.
+- **What unblocks it:** guards de conclusão verdes e revisão final limpa sobre um commit imutável do candidato completo.
 - **Owner / source:** owner do TODO; autoridade humana permanece responsável pelo novo approval.
-- **Last confirmed truth:** D-01..D-05 approval remains valid; R12 test-quality/cutover are clean, R8-R11 findings are resolved, and only the R12 taxonomy correction awaits immutable R13 review.
+- **Last confirmed truth:** D-01..D-05 approval remains valid; R13 confirmou todas as remediações R8-R12 e retornou `GO` em arquitetura, test-quality e cutover sobre `dc1d86985c66e04384e59b582132d2309bae2b76`.
 
 ## Scope
 
-- [ ] `S-01` Inventariar a verdade atual do Monitor de Notas no código, banco documentado, infraestrutura, testes e READMEs, distinguindo comportamento comprovado de intenção futura.
-- [ ] `S-02` Definir e aplicar a identidade canônica do produto e da Foundation em títulos, links, namespaces e linguagem de domínio.
-- [ ] `S-03` Reescrever mandato, constituição, entidades, baseline tecnológico, lifecycle e roadmap para refletirem exclusivamente o projeto atual.
-- [ ] `S-04` Substituir os módulos herdados pelos seis módulos congelados do Monitor de Notas: fronteira externa e leitura de eventos/classificação, tratamentos/histórico, identidade/equipe, invalidação em tempo real, monitoramento operacional e runtime/deploy; escrita da tabela externa de produção `logs` permanece exclusivamente Routerfy, e a réplica local derivada somente pode ser populada pela ferramenta explícita de espelhamento.
-- [ ] `S-05` Reconciliar backlog, decisões, contratos e políticas com os owners canônicos novos, sem transportar decisões do LeadsHug como se fossem decisões do Monitor de Notas.
-- [ ] `S-06` Remover do tree atual TODOs, artefatos e documentos herdados do LeadsHug que não pertençam ao Monitor de Notas; o histórico Git será a única retenção do legado removido.
-- [ ] `S-07` Atualizar a governança para declarar o `delphi-ai` como distribuição local obrigatória do método PACED: todo trabalho do projeto passa por seus workflows e guards, com `APROVADO` e authority guard `go` antes de implementação.
-- [ ] `S-08` Criar ou adaptar validações determinísticas proporcionais para referências, identidade, links, schemas documentais e ausência de autoridade ativa do LeadsHug.
-- [ ] `S-09` Validar o pacote final contra o repositório real, registrar evidência 1:1 e concluir o cutover documental sem alterar código, banco ou runtime.
+- [x] `S-01` Inventariar a verdade atual do Monitor de Notas no código, banco documentado, infraestrutura, testes e READMEs, distinguindo comportamento comprovado de intenção futura.
+- [x] `S-02` Definir e aplicar a identidade canônica do produto e da Foundation em títulos, links, namespaces e linguagem de domínio.
+- [x] `S-03` Reescrever mandato, constituição, entidades, baseline tecnológico, lifecycle e roadmap para refletirem exclusivamente o projeto atual.
+- [x] `S-04` Substituir os módulos herdados pelos seis módulos congelados do Monitor de Notas: fronteira externa e leitura de eventos/classificação, tratamentos/histórico, identidade/equipe, invalidação em tempo real, monitoramento operacional e runtime/deploy; escrita da tabela externa de produção `logs` permanece exclusivamente Routerfy, e a réplica local derivada somente pode ser populada pela ferramenta explícita de espelhamento.
+- [x] `S-05` Reconciliar backlog, decisões, contratos e políticas com os owners canônicos novos, sem transportar decisões do LeadsHug como se fossem decisões do Monitor de Notas.
+- [x] `S-06` Remover do tree atual TODOs, artefatos e documentos herdados do LeadsHug que não pertençam ao Monitor de Notas; o histórico Git será a única retenção do legado removido.
+- [x] `S-07` Atualizar a governança para declarar o `delphi-ai` como distribuição local obrigatória do método PACED: todo trabalho do projeto passa por seus workflows e guards, com `APROVADO` e authority guard `go` antes de implementação.
+- [x] `S-08` Criar ou adaptar validações determinísticas proporcionais para referências, identidade, links, schemas documentais e ausência de autoridade ativa do LeadsHug.
+- [x] `S-09` Validar o pacote final contra o repositório real, registrar evidência 1:1 e concluir o cutover documental sem alterar código, banco ou runtime.
 
 ## Out of Scope
 
@@ -252,7 +252,7 @@ Test quality and cutover integrity returned `GO`; architecture confirmed `ARCH-A
 - [x] `D-02` Excluir do tree atual o conteúdo herdado do LeadsHug que não pertença ao Monitor de Notas, sem criar arquivo legado interno. O histórico Git preserva a proveniência sem manter autoridade documental concorrente. Decisão confirmada pelo usuário em 2026-09-24.
 - [x] `D-03` O `delphi-ai` distribui o método **PACED** (*Progressively Accelerated Controlled Engineering through Determinism*) e é passagem obrigatória para todo trabalho do projeto. `uninotas-foundation` governa a verdade específica do produto; PACED governa método, workflows e guards. Alterar o núcleo compartilhado do `delphi-ai` continua exigindo TODO próprio. Decisão confirmada pelo usuário em 2026-09-24.
 - [x] `D-04` A tabela externa de produção `logs` pertence ao Routerfy e é somente leitura para o Monitor de Notas; a aplicação escreve apenas em suas próprias tabelas de usuários e tratamentos. A réplica local de desenvolvimento é derivada, descartável, não autoritativa e somente a ferramenta explícita de espelhamento pode populá-la. Decisão consolidada da evidência já incluída no contrato aprovado (`README.md`, `backend/README.md`, Prisma, ferramenta de espelhamento e DDL local isolado).
-- [x] `D-05` O produto atual não possui tenancy comprovada. Para satisfazer o contrato PACED de scope/subscope sem inventar domínio, a política local será reescrita com um único scope `monitor-de-notas`, subscopes iguais aos seis módulos congelados e `EnvironmentType=landlord` somente como adapter técnico do vocabulário PACED para superfícies únicas do projeto; isso não cria landlord/tenant de negócio. Decisão proposta a partir do código e sujeita ao novo `APROVADO`.
+- [x] `D-05` O produto atual não possui tenancy comprovada. Para satisfazer o contrato PACED de scope/subscope sem inventar domínio, a política local usa um único scope `monitor-de-notas`, subscopes iguais aos seis módulos congelados e `EnvironmentType=landlord` somente como adapter técnico do vocabulário PACED para superfícies únicas do projeto; isso não cria landlord/tenant de negócio. Decisão confirmada pelo novo `APROVADO` em 2026-09-24.
 
 ## Decision Baseline — Frozen Before Implementation
 
@@ -269,56 +269,65 @@ Test quality and cutover integrity returned `GO`; architecture confirmed `ARCH-A
 
 ## Definition of Done
 
-- [ ] `DOD-01` Nenhum documento canônico ativo apresenta o LeadsHug ou seu domínio como autoridade, produto ou arquitetura atual.
-- [ ] `DOD-02` README, mandato, constituição, entidades, lifecycle, baseline tecnológico e roadmap descrevem de forma coerente o Monitor de Notas comprovado.
-- [ ] `DOD-03` Os seis módulos usam os anchors obrigatórios de `delphi-ai/templates/module_template.md`, declaram o scope/subscope de `D-05` e possuem ownership, invariantes, capacidades e contratos correspondentes aos limites reais do sistema.
-- [ ] `DOD-04` Backlog, decisões, contratos, políticas e TODOs ativos estão reconciliados com a nova identidade e não mantêm estado vivo conflitante.
-- [ ] `DOD-05` Todo conteúdo herdado do LeadsHug sem função no Monitor de Notas foi removido do tree atual e permanece acessível apenas pelo histórico Git.
-- [ ] `DOD-06` A divisão de autoridade entre `uninotas-foundation`, `delphi-ai` e o repositório do produto está documentada sem links quebrados.
-- [ ] `DOD-07` Validações determinísticas e inspeções de referências passam no tree final e possuem evidência específica.
-- [ ] `DOD-08` O diff fica restrito aos paths aprovados da Foundation; código, configuração, segredos e runtime permanecem inalterados.
-- [ ] `DOD-09` Decisões estáveis e evidências finais foram consolidadas nos owners canônicos antes do TODO ser movido para `completed/`.
-- [ ] `DOD-10` Nenhum documento, artifact, código-fonte de teste ou fixture persistida contém PII real/sintética em formato detectável, payload bruto de produção, JWT montado, credencial ou exemplo operacional não redigido; amostras proibidas são montadas somente em diretório temporário durante o teste a partir de fragmentos inofensivos.
-- [ ] `DOD-11` O contrato de setup documenta e valida como uma checkout limpa materializa `foundation_documentation -> uninotas-foundation` sem versionar o symlink no produto.
+- [x] `DOD-01` Nenhum documento canônico ativo apresenta o LeadsHug ou seu domínio como autoridade, produto ou arquitetura atual.
+- [x] `DOD-02` README, mandato, constituição, entidades, lifecycle, baseline tecnológico e roadmap descrevem de forma coerente o Monitor de Notas comprovado.
+- [x] `DOD-03` Os seis módulos usam os anchors obrigatórios de `delphi-ai/templates/module_template.md`, declaram o scope/subscope de `D-05` e possuem ownership, invariantes, capacidades e contratos correspondentes aos limites reais do sistema.
+- [x] `DOD-04` Backlog, decisões, contratos, políticas e TODOs ativos estão reconciliados com a nova identidade e não mantêm estado vivo conflitante.
+- [x] `DOD-05` Todo conteúdo herdado do LeadsHug sem função no Monitor de Notas foi removido do tree atual e permanece acessível apenas pelo histórico Git.
+- [x] `DOD-06` A divisão de autoridade entre `uninotas-foundation`, `delphi-ai` e o repositório do produto está documentada sem links quebrados.
+- [x] `DOD-07` Validações determinísticas e inspeções de referências passam no tree final e possuem evidência específica.
+- [x] `DOD-08` O diff fica restrito aos paths aprovados da Foundation; código, configuração, segredos e runtime permanecem inalterados.
+- [x] `DOD-09` Decisões estáveis e evidências finais foram consolidadas nos owners canônicos antes do TODO ser movido para `completed/`.
+- [x] `DOD-10` Nenhum documento, artifact, código-fonte de teste ou fixture persistida contém PII real/sintética em formato detectável, payload bruto de produção, JWT montado, credencial ou exemplo operacional não redigido; amostras proibidas são montadas somente em diretório temporário durante o teste a partir de fragmentos inofensivos.
+- [x] `DOD-11` O contrato de setup documenta e valida como uma checkout limpa materializa `foundation_documentation -> uninotas-foundation` sem versionar o symlink no produto.
 
 ## Validation Steps
 
-- [ ] `VAL-01` Verificar links internos e anchors em todos os documentos canônicos alterados.
-- [ ] `VAL-02` Executar busca fail-closed por `LeadsHug|leadshug|WhatsApp|Typebot|Evolution|Baileys|Belluga|Bóora` e classificar cada ocorrência restante como histórica permitida ou falha.
-- [ ] `VAL-03` Comparar stack, rotas, módulos, entidades e invariantes documentados com `backend/`, `frontend/`, `Dockerfile`, `docker-compose.yml`, `railway.json` e READMEs do produto.
-- [ ] `VAL-04` Executar os guards aplicáveis do `delphi-ai` para escopo, autoridade, expectativa de diff, conclusão e closeout.
-- [ ] `VAL-05` Executar `git diff --check` e confirmar ausência de segredos, artefatos gerados ou mudanças fora do contrato.
-- [ ] `VAL-06` Revisar a matriz de evidências critério a critério; resumo agregado não substitui evidência 1:1.
-- [ ] `VAL-07` Confirmar que o repositório do produto e o `delphi-ai` não receberam mudanças durante a execução.
-- [ ] `VAL-08` Executar o mesmo scan automatizado de segredo/JWT/PII de alto risco sobre todo o tree persistido, inclusive código/fixtures de teste, e revisão manual de privacidade; mutation tests montam amostras proibidas somente em diretório temporário e provam a falha do scanner.
-- [ ] `VAL-09` Em workspace limpo no runner Git Bash comprovado, criar/verificar os aliases e executar o entrypoint existente `./delphi-ai/verify_context.sh` até obter `Environment Verified: PACED-Ready.`.
+- [x] `VAL-01` Verificar links internos e anchors em todos os documentos canônicos alterados.
+- [x] `VAL-02` Executar busca fail-closed por `LeadsHug|leadshug|WhatsApp|Typebot|Evolution|Baileys|Belluga|Bóora` e classificar cada ocorrência restante como histórica permitida ou falha.
+- [x] `VAL-03` Comparar stack, rotas, módulos, entidades e invariantes documentados com `backend/`, `frontend/`, `Dockerfile`, `docker-compose.yml`, `railway.json` e READMEs do produto.
+- [x] `VAL-04` Executar os guards aplicáveis do `delphi-ai` para escopo, autoridade, expectativa de diff e conclusão; reservar o closeout guard para o movimento pós-final-review.
+- [x] `VAL-05` Executar `git diff --check` e confirmar ausência de segredos, artefatos gerados ou mudanças fora do contrato.
+- [x] `VAL-06` Revisar a matriz de evidências critério a critério; resumo agregado não substitui evidência 1:1.
+- [x] `VAL-07` Confirmar que o repositório do produto e o `delphi-ai` não receberam mudanças durante a execução.
+- [x] `VAL-08` Executar o mesmo scan automatizado de segredo/JWT/PII de alto risco sobre todo o tree persistido, inclusive código/fixtures de teste, e revisão manual de privacidade; mutation tests montam amostras proibidas somente em diretório temporário e provam a falha do scanner.
+- [x] `VAL-09` Em workspace limpo no runner Git Bash comprovado, criar/verificar os aliases e executar o entrypoint existente `./delphi-ai/verify_context.sh` até obter `Environment Verified: PACED-Ready.`.
 
 ## Completion Evidence Matrix
 
-Cada critério possui evidência planejada 1:1; nenhum resumo agregado substitui estas linhas antes de qualquer alegação `Local-Implemented` ou movimento para `completed/`.
+Cada critério possui evidência concluída 1:1; nenhum resumo agregado substitui estas linhas antes do movimento para `completed/`.
 
 | Criterion ID | Source Section | Criterion | Evidence Type | Evidence Artifact / Command | Runtime Target | Status | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `DOD-01` | `Definition of Done` | nenhuma autoridade LeadsHug ativa | `test+review` | `python3 -B deterministic/validate_foundation.py --root .` + manifesto de exceções históricas | `local` | `planned` | superfície ativa e história possuem regras distintas |
-| `DOD-02` | `Definition of Done` | owners raiz descrevem o produto atual | `doc+traceability` | `artifacts/analysis/monitor-de-notas-product-truth-20260924.md` | `local` | `planned` | cada afirmação material aponta a código/configuração |
-| `DOD-03` | `Definition of Done` | módulos correspondem aos limites reais | `doc+review` | module map + anchors de `module_template.md` + scope policy + architecture adherence | `local` | `planned` | seis owners coesos e fechados antes da execução |
-| `DOD-04` | `Definition of Done` | owners auxiliares reconciliados | `manifest+review` | `Tracked Foundation File Disposition Manifest` | `local` | `planned` | uma disposição por arquivo de entrada |
-| `DOD-05` | `Definition of Done` | legado removido do tree | `git+test` | `git ls-files` + validator de paths/autoridade | `local` | `planned` | histórico Git é a única retenção não explicitamente permitida |
-| `DOD-06` | `Definition of Done` | fronteiras Foundation/PACED/produto sem links quebrados | `test` | validator de links + setup contract | `local` | `planned` | não duplica regras PACED |
-| `DOD-07` | `Definition of Done` | checks determinísticos passam | `test` | `python3 -B -m unittest discover -s deterministic/tests -p 'test_*.py'` | `local` | `planned` | inclui fixtures positivas e negativas |
-| `DOD-08` | `Definition of Done` | diff restrito à Foundation | `git+guard` | `todo_diff_expectation_guard.py` + fingerprints dos repositórios read-only | `local` | `planned` | mudanças preexistentes não são atribuídas ao TODO |
-| `DOD-09` | `Definition of Done` | decisões promovidas aos owners | `review` | matriz de owners + closeout guard | `local` | `planned` | TODO deixa de ser owner de verdade estável |
-| `DOD-10` | `Definition of Done` | ausência de PII/payload/segredo persistido | `scan+review` | validator high-risk patterns + checklist manual de privacidade | `local` | `planned` | até amostras sintéticas proibidas existem apenas em temp runtime |
-| `DOD-11` | `Definition of Done` | alias PACED reproduzível | `setup test` | comando Git Bash documentado + `delphi-ai/verify_context.sh` | `clean Windows workspace` | `planned` | WSL não é evidência aceita enquanto houver caveat CRLF |
-| `VAL-01` | `Validation Steps` | links e anchors válidos | `test` | `python3 -B deterministic/validate_foundation.py --root .` | `local` | `planned` | fail-closed |
-| `VAL-02` | `Validation Steps` | legado classificado por superfície | `test` | validator + `deterministic/legacy_reference_exceptions.json` | `local` | `planned` | exceção exige path, razão e owner |
-| `VAL-03` | `Validation Steps` | documentação coerente com produto | `traceability review` | product-truth artifact + hashes da evidence snapshot | `read-only product tree` | `planned` | sem consulta mutante ao banco |
-| `VAL-04` | `Validation Steps` | guards PACED aplicáveis passam | `guard` | comandos listados em Rules/Gates | `local` | `planned` | registrar saída específica por gate |
-| `VAL-05` | `Validation Steps` | higiene do diff | `git+scan` | `git diff --check` + scan de segredo/artefato | `local` | `planned` | nenhum `.env` ou valor sensível |
-| `VAL-06` | `Validation Steps` | evidência 1:1 completa | `review` | esta matriz sem `planned|pending` | `local` | `planned` | bloqueia completion |
-| `VAL-07` | `Validation Steps` | produto e Delphi inalterados | `fingerprint` | repetir comandos de `Read-Only Evidence Snapshot` | `workspace` | `planned` | igualdade exata dos digests |
-| `VAL-08` | `Validation Steps` | privacidade e segredo | `scan+review` | scan do tree inteiro + mutation test em `tempfile.TemporaryDirectory` + inspeção manual | `local` | `planned` | nenhuma allowlist para o corpus de teste |
-| `VAL-09` | `Validation Steps` | setup reproduzível | `setup test` | `"C:\Program Files\Git\bin\bash.exe" -lc "cd /c/Unifast/MonitorDeNotas && ./delphi-ai/verify_context.sh"` | `clean Windows workspace` | `planned` | entrypoint comprovado; sem commit de link no produto |
+| `S-01` | `Scope` | `S-01` Inventariar a verdade atual do Monitor de Notas no código, banco documentado, infraestrutura, testes e READMEs, distinguindo comportamento comprovado de intenção futura. | `traceability` | `PT-01..PT-11`; 53 hashes verificados sobre 45 paths em `78bf271341dfccb2595389f0dbac0e01e8532a7b` | `produto congelado read-only` | `passed` | R13 confirmou zero divergências |
+| `S-02` | `Scope` | `S-02` Definir e aplicar a identidade canônica do produto e da Foundation em títulos, links, namespaces e linguagem de domínio. | `doc+test` | `README.md`; `project_mandate.md`; Foundation validator; R13 architecture `GO` | `Foundation local` | `passed` | identidade Monitor de Notas/MonitorDeNotas/uninotas-foundation confirmada |
+| `S-03` | `Scope` | `S-03` Reescrever mandato, constituição, entidades, baseline tecnológico, lifecycle e roadmap para refletirem exclusivamente o projeto atual. | `doc+review` | owners raiz no manifesto de 38 paths; R13 architecture `GO` | `Foundation local` | `passed` | owners canônicos revisados contra product truth |
+| `S-04` | `Scope` | `S-04` Substituir os módulos herdados pelos seis módulos congelados do Monitor de Notas: fronteira externa e leitura de eventos/classificação, tratamentos/histórico, identidade/equipe, invalidação em tempo real, monitoramento operacional e runtime/deploy; escrita da tabela externa de produção `logs` permanece exclusivamente Routerfy, e a réplica local derivada somente pode ser populada pela ferramenta explícita de espelhamento. | `doc+review` | `modules/README.md`; seis módulos; `PT-11`; R13 architecture `GO` | `Foundation local + produto read-only` | `passed` | seis subscopes exatos e D-04 aderente |
+| `S-05` | `Scope` | `S-05` Reconciliar backlog, decisões, contratos e políticas com os owners canônicos novos, sem transportar decisões do LeadsHug como se fossem decisões do Monitor de Notas. | `manifest+review` | disposition manifest 1:1; Foundation validator; R13 architecture `GO` | `Foundation local` | `passed` | nenhum estado vivo conflitante |
+| `S-06` | `Scope` | `S-06` Remover do tree atual TODOs, artefatos e documentos herdados do LeadsHug que não pertençam ao Monitor de Notas; o histórico Git será a única retenção do legado removido. | `git+test` | diff `b73b0eb..dc1d869`; `DELETE_PATHS`; R13 cutover: 34/34 ausentes | `Git tree Foundation` | `passed` | histórico Git preserva recuperação |
+| `S-07` | `Scope` | `S-07` Atualizar a governança para declarar o `delphi-ai` como distribuição local obrigatória do método PACED: todo trabalho do projeto passa por seus workflows e guards, com `APROVADO` e authority guard `go` antes de implementação. | `guard+doc` | `project_constitution.md`; approval record; authority guard `go` | `Foundation + Delphi read-only` | `passed` | D-03 e roteamento PACED aplicados em todas as rodadas |
+| `S-08` | `Scope` | `S-08` Criar ou adaptar validações determinísticas proporcionais para referências, identidade, links, schemas documentais e ausência de autoridade ativa do LeadsHug. | `test` | `python3 -B -m unittest discover -s deterministic/tests -p 'test_*.py' -v`: 10 testes `OK`; validator de schema documental `PASS` | `Foundation local e clean-copy` | `passed` | inclui mutações negativas e proteção de symlink |
+| `S-09` | `Scope` | `S-09` Validar o pacote final contra o repositório real, registrar evidência 1:1 e concluir o cutover documental sem alterar código, banco ou runtime. | `fingerprint+review` | R13 triple `GO`; produto/Delphi HEAD, status e diff iguais ao snapshot | `workspace read-only` | `passed` | somente a Foundation mudou |
+| `DOD-01` | `Definition of Done` | `DOD-01` Nenhum documento canônico ativo apresenta o LeadsHug ou seu domínio como autoridade, produto ou arquitetura atual. | `test+review` | Foundation validator `PASS`; exact historical exception ledger; R13 architecture `GO` | `Foundation local` | `passed` | superfície ativa e história possuem regras distintas |
+| `DOD-02` | `Definition of Done` | `DOD-02` README, mandato, constituição, entidades, lifecycle, baseline tecnológico e roadmap descrevem de forma coerente o Monitor de Notas comprovado. | `doc+traceability` | `artifacts/analysis/monitor-de-notas-product-truth-20260924.md`; 53/45 hashes sem divergência | `produto congelado read-only` | `passed` | cada afirmação material aponta a código/configuração |
+| `DOD-03` | `Definition of Done` | `DOD-03` Os seis módulos usam os anchors obrigatórios de `delphi-ai/templates/module_template.md`, declaram o scope/subscope de `D-05` e possuem ownership, invariantes, capacidades e contratos correspondentes aos limites reais do sistema. | `doc+review` | module map, scope policy, validator e R13 architecture `GO` | `Foundation local` | `passed` | seis owners coesos e exatos |
+| `DOD-04` | `Definition of Done` | `DOD-04` Backlog, decisões, contratos, políticas e TODOs ativos estão reconciliados com a nova identidade e não mantêm estado vivo conflitante. | `manifest+review` | disposition manifest; publication manifest; R13 taxonomy/architecture `GO` | `Foundation local` | `passed` | owners auxiliares reconciliados |
+| `DOD-05` | `Definition of Done` | `DOD-05` Todo conteúdo herdado do LeadsHug sem função no Monitor de Notas foi removido do tree atual e permanece acessível apenas pelo histórico Git. | `git+test` | `git diff --name-status b73b0eb..dc1d869`; 34 exact deletes; validator `PASS` | `Git tree Foundation` | `passed` | histórico Git é a única retenção não ledgerada |
+| `DOD-06` | `Definition of Done` | `DOD-06` A divisão de autoridade entre `uninotas-foundation`, `delphi-ai` e o repositório do produto está documentada sem links quebrados. | `test` | Foundation validator link/anchor scan `PASS`; alias contract; constitution | `Foundation local` | `passed` | não duplica regras PACED |
+| `DOD-07` | `Definition of Done` | `DOD-07` Validações determinísticas e inspeções de referências passam no tree final e possuem evidência específica. | `test` | 10 unittest `OK`; Foundation/TODO validators `PASS`; R13 fresh reviews | `Foundation local e clean-copy` | `passed` | fixtures positivas e negativas executadas |
+| `DOD-08` | `Definition of Done` | `DOD-08` O diff fica restrito aos paths aprovados da Foundation; código, configuração, segredos e runtime permanecem inalterados. | `git+guard` | diff guard `go`: 67/67, zero forbidden/unclassified; fingerprints exatos | `workspace e produto read-only` | `passed` | integration test `n/a` por desvio structure-only aprovado: nenhum fluxo observável muda; mudanças externas preexistentes não são atribuídas ao TODO |
+| `DOD-09` | `Definition of Done` | `DOD-09` Decisões estáveis e evidências finais foram consolidadas nos owners canônicos antes do TODO ser movido para `completed/`. | `review` | D-01..D-05 `Adherent`; five frozen module decisions `Superseded (Approved)`; R13 architecture `GO` | `Foundation local` | `passed` | TODO retém somente histórico/evidência de execução |
+| `DOD-10` | `Definition of Done` | `DOD-10` Nenhum documento, artifact, código-fonte de teste ou fixture persistida contém PII real/sintética em formato detectável, payload bruto de produção, JWT montado, credencial ou exemplo operacional não redigido; amostras proibidas são montadas somente em diretório temporário durante o teste a partir de fragmentos inofensivos. | `scan+review` | validator high-risk patterns `PASS`; privacy mutation matrix 10 tests `OK`; R13 test-quality `GO` | `Foundation tree + TemporaryDirectory` | `passed` | integration test `n/a` por desvio structure-only aprovado: nenhum fluxo observável muda; PII/payload/JWT/credencial somente em temp runtime |
+| `DOD-11` | `Definition of Done` | `DOD-11` O contrato de setup documenta e valida como uma checkout limpa materializa `foundation_documentation -> uninotas-foundation` sem versionar o symlink no produto. | `setup test` | Git Bash `./delphi-ai/verify_context.sh`: `Environment Verified: PACED-Ready.`; alias contract | `Git Bash workspace Windows` | `passed` | `foundation_documentation -> uninotas-foundation`; link não versionado no produto |
+| `VAL-01` | `Validation Steps` | `VAL-01` Verificar links internos e anchors em todos os documentos canônicos alterados. | `test` | `python3 -B deterministic/validate_foundation.py --root .`: `Foundation validation passed.` | `Foundation local` | `passed` | scan fail-closed de links/anchors |
+| `VAL-02` | `Validation Steps` | legado classificado por superfície | `test` | Foundation validator `PASS`; `deterministic/legacy_reference_exceptions.json`; raw/normalized digests | `Foundation local` | `passed` | `VAL-02` Executar busca fail-closed por `LeadsHug|leadshug|WhatsApp|Typebot|Evolution|Baileys|Belluga|Bóora` e classificar cada ocorrência restante como histórica permitida ou falha. |
+| `VAL-03` | `Validation Steps` | `VAL-03` Comparar stack, rotas, módulos, entidades e invariantes documentados com `backend/`, `frontend/`, `Dockerfile`, `docker-compose.yml`, `railway.json` e READMEs do produto. | `traceability review` | `PT-01..PT-11`; 53 pares/45 paths via Git-object bytes; R13 triple `GO` | `produto congelado read-only` | `passed` | sem consulta mutante ao banco |
+| `VAL-04` | `Validation Steps` | `VAL-04` Executar os guards aplicáveis do `delphi-ai` para escopo, autoridade, expectativa de diff e conclusão; reservar o closeout guard para o movimento pós-final-review. | `guard` | TODO deterministic `PASS`; authority `go`; diff expectation `go`; completion guard command no candidato | `Foundation local` | `passed` | closeout guard fica no gate pós-final-review conforme o próprio critério |
+| `VAL-05` | `Validation Steps` | `VAL-05` Executar `git diff --check` e confirmar ausência de segredos, artefatos gerados ou mudanças fora do contrato. | `git+scan` | `git diff --check`; validator privacy scan; diff guard 67/67 | `Foundation local` | `passed` | nenhum `.env`, bytecode ou valor sensível |
+| `VAL-06` | `Validation Steps` | `VAL-06` Revisar a matriz de evidências critério a critério; resumo agregado não substitui evidência 1:1. | `review` | 29 linhas `S-01..S-09`, `DOD-01..DOD-11`, `VAL-01..VAL-09`, todas `passed` | `Foundation local` | `passed` | cobertura 1:1 revisada antes do completion guard |
+| `VAL-07` | `Validation Steps` | `VAL-07` Confirmar que o repositório do produto e o `delphi-ai` não receberam mudanças durante a execução. | `fingerprint` | produto `78bf271` + status/diff congelados; Delphi `9ba43e8` + status/diff vazios | `workspace read-only` | `passed` | igualdade exata dos digests em R13 |
+| `VAL-08` | `Validation Steps` | `VAL-08` Executar o mesmo scan automatizado de segredo/JWT/PII de alto risco sobre todo o tree persistido, inclusive código/fixtures de teste, e revisão manual de privacidade; mutation tests montam amostras proibidas somente em diretório temporário e provam a falha do scanner. | `scan+review` | validator inteiro + privacy mutation test + R13 test-quality audit | `Foundation tree + TemporaryDirectory` | `passed` | integration test `n/a` por desvio structure-only aprovado: nenhum fluxo observável muda; nenhuma allowlist |
+| `VAL-09` | `Validation Steps` | `VAL-09` Em workspace limpo no runner Git Bash comprovado, criar/verificar os aliases e executar o entrypoint existente `./delphi-ai/verify_context.sh` até obter `Environment Verified: PACED-Ready.`. | `setup test` | `"C:\Program Files\Git\bin\bash.exe" -lc "cd /c/Unifast/MonitorDeNotas && ./delphi-ai/verify_context.sh"` | `Git Bash workspace Windows` | `passed` | saída exata `Environment Verified: PACED-Ready.`; sem commit de link no produto |
 
 ## Execution Lane Tracking
 
@@ -331,8 +340,8 @@ Cada critério possui evidência planejada 1:1; nenhum resumo agregado substitui
 
 | Scope Item | Local Branch/Commit | PR to lane threshold | PR to `stage` | PR to `main` | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| baseline do contrato | `main@pending` | `n/a — autoridade Foundation single-branch` | `n/a` | `direct push guarded` | `planned` |
-| cutover da Foundation | `main@pending` | `n/a — autoridade Foundation single-branch` | `n/a` | `direct push after closeout gates` | `planned` |
+| baseline do contrato | `main@dc1d869` | `n/a — autoridade Foundation single-branch` | `n/a` | `direct push guarded` | `local-implemented` |
+| cutover da Foundation | `main@dc1d869` | `n/a — autoridade Foundation single-branch` | `n/a` | `direct push after closeout gates` | `local-implemented` |
 
 ## Diff Expectation Contract
 
@@ -410,8 +419,8 @@ Hashes individuais que sustentam as decisões de ownership ficam no `Pre-Executi
 | From Profile | To Profile | Why the Handoff Exists | Touched Surfaces | Status / Evidence |
 | --- | --- | --- | --- | --- |
 | `Strategic / CTO-Tech-Lead` | `routine-executor` | executar a substituição documental já decidida sem redefinir o contrato | `uninotas-foundation/**` | `completed; R3 remediation locally green` |
-| `routine-executor` | `Assurance / Tester-Quality` | desafiar evidência, links, referências e ausência de autoridade concorrente | diff e validações da Foundation | `delivery R12 test-quality go; R13 joint confirmation pending` |
-| `Assurance / Tester-Quality` | `formal-reviewer` | revisar aderência arquitetural e integridade do cutover | pacote final consolidado | `delivery R12 cutover go; architecture taxonomy blocker integrated; R13 pending` |
+| `routine-executor` | `Assurance / Tester-Quality` | desafiar evidência, links, referências e ausência de autoridade concorrente | diff e validações da Foundation | `delivery R13 test-quality GO on dc1d869` |
+| `Assurance / Tester-Quality` | `formal-reviewer` | revisar aderência arquitetural e integridade do cutover | pacote final consolidado | `delivery R13 architecture/cutover GO; final review is the next independent gate` |
 
 ## Complexity
 
@@ -559,7 +568,7 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 
 ## Module Decision Consistency Gate
 
-- **Status:** `delivery-R12-reviewed`; D-01..D-05 estão `Adherent`, as cinco decisões permanecem `Superseded (Approved)` e a correção taxonômica aguarda confirmação conjunta R13.
+- **Status:** `delivery-R13-clean`; D-01..D-05 estão `Adherent`, as cinco decisões permanecem `Superseded (Approved)` e R13 confirmou a consistência do pacote `Local-Implemented`.
 - **Finding:** todas as decisões de módulos herdadas pertencem ao LeadsHug; nenhuma deve ser preservada como verdade do Monitor de Notas.
 - **Resolution:** supersessão intencional integral, autorizada por `D-02`, com substituição pelos módulos listados em `S-04`.
 - **Evidence:** conteúdo atual de `modules/*.md`, estrutura do backend/frontend e READMEs do produto.
@@ -635,8 +644,8 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
 - **Adherence review package:** `bounded-file-set`
-- **Adherence review status:** `findings_integrated`
-- **Adherence review evidence / resolution:** architecture delivery R12 on `a973e5207d52f55cdddb4dd5b8dc8fb72e32f1f3` confirmed `ARCH-ADH-R11-01` resolved and returned only `ARCH-ADH-R12-01`; R11 observations now use the exact four-class project taxonomy.
+- **Adherence review status:** `no_material_findings`
+- **Adherence review evidence / resolution:** fresh architecture delivery R13 returned `GO` on immutable `dc1d86985c66e04384e59b582132d2309bae2b76`, confirmed `ARCH-ADH-R12-01` resolved and found no new issue.
 - **No-go handling:** retornar ao diagnóstico/decisão ou ao loop de evidência; não alegar execução ou conclusão com divergência aberta.
 
 ## Assumptions Preview
@@ -742,17 +751,17 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 
 ### Failure Modes & Edge Cases
 
-- [ ] Excluir um arquivo genérico ainda útil junto com conteúdo LeadsHug; mitigar reconstruindo por owner/propósito e validando links.
-- [ ] Canonizar contagens operacionais temporárias como verdade permanente; manter números voláteis fora dos invariantes.
-- [ ] Documentar `logs` como tabela Prisma ou gravável; validar ownership read-only contra schema/SQL.
-- [ ] Duplicar regras PACED na Foundation; validar que docs locais referenciam o owner compartilhado.
-- [ ] Deixar TODOs ativos LeadsHug autorizando trabalho; scan deve falhar para qualquer autoridade ativa residual.
-- [ ] Copiar valores de `.env`; usar apenas nomes/redações e executar scan de segredos.
+- [x] Excluir um arquivo genérico ainda útil junto com conteúdo LeadsHug; mitigado pela reconstrução por owner/propósito e validação de links.
+- [x] Canonizar contagens operacionais temporárias como verdade permanente; mitigado mantendo números voláteis fora dos invariantes.
+- [x] Documentar `logs` como tabela Prisma ou gravável; mitigado pela validação de ownership read-only contra schema/SQL.
+- [x] Duplicar regras PACED na Foundation; mitigado referenciando o owner compartilhado nos docs locais.
+- [x] Deixar TODOs ativos LeadsHug autorizando trabalho; mitigado pelo scan fail-closed de autoridade ativa residual.
+- [x] Copiar valores de `.env`; mitigado usando somente nomes/redações e scan de segredos.
 
 ### Residual Unknowns / Risks
 
-- [ ] O conteúdo exato dos novos módulos será refinado durante o inventário, sem alterar o conjunto de domínios aprovado em `S-04`.
-- [ ] O setup doctor PACED não valida semântica de produto; o validator local e a revisão de rastreabilidade precisam cobrir essa lacuna.
+- [x] O conteúdo exato dos novos módulos foi refinado durante o inventário sem alterar o conjunto de domínios aprovado em `S-04`.
+- [x] A lacuna semântica do setup doctor PACED foi coberta pelo validator local, pelos 53 pares de hash e pelas revisões independentes.
 
 ## Audit Trigger Matrix
 
@@ -808,6 +817,27 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 
 - **Evidence / reference:** R4 dispatch `/tmp/monitor-foundation-review.tJs1Sm/critique-r4-dispatch.json`; reviewer `fresh-stateless-closure-critique-r4`; zero findings; posições `performance/operational=acceptable`, `elegance/structural=strong_positive`.
 - **Waiver authority / reference:** `n/a`
+
+## Pipeline/Copilot P1/P2 Preflight
+
+| Reviewer Surface / Package | Review Focus | Status | Evidence Artifact / Command | Findings | Resolution / Notes |
+| --- | --- | --- | --- | --- | --- |
+| immutable Foundation R13 package `dc1d86985c66e04384e59b582132d2309bae2b76` | CI/Copilot-style P1/P2 contract, test-quality, architecture and cutover failure modes | `passed` | three fresh R13 reviewers over `/tmp/monitor-foundation-copilot-r13/review-packet.md`; 10 tests; validators/extractors | `none` | all three lanes `GO`; no P1 or P2 finding; prior rows are resolved in the canonical ledger |
+
+## Rule-Spirit Anti-Pattern Hunt
+
+| Rule / Principle Surface | Bypass or Anti-Pattern Search Lens | Status | Evidence Artifact / Command | Findings | Resolution / Notes |
+| --- | --- | --- | --- | --- | --- |
+| all ingested PACED rules, workflows and project invariants | direct violation, disguised bypass, fallback, scope escape and test-only shortcut | `passed` | normalized `rule_spirit_anti_pattern_scan.sh --repo . --stack all --path . --json-output /tmp/foundation-rule-spirit-r13.json` | `none`; zero heuristic findings; severity `none` | R13 manual reviews also confirmed no bypass; no allowlist used |
+
+## Verification Debt Adjudication
+
+- **Audit outcome:** `none` after manual adjudication of `/tmp/foundation-verification-debt-r13.txt`.
+- **Short rationale:** the helper's `high` heuristic consists of historical remediation rows, intentional unchecked `Out of Scope` non-goals, canonical paths/labels containing the word `TODO`, explicit `n/a` fields and the accepted Git Bash runner boundary; all current S/DoD/VAL requirements have concrete `passed` evidence and completion is `go`.
+- **Inline code TODO debt classification:** `accepted`; no executable source marker was introduced—the matches are the governing TODO filename, ledger owner `TODO owner`, PACED commands and documentary governance prose.
+- **Promotion debt:** `none`; stable identity, ownership, module and validation conclusions are in canonical owners, with the tactical record retaining only provenance and review history.
+- **Accepted residual debt:** `none`; the unpreserved first-draft chronology is not used as proof, and the WSL CRLF observation is `by-design/no-action` because Git Bash is the accepted runner and Delphi is read-only.
+- **Material issue cards:** `none`; no audit signal requires implementation or a follow-up TODO.
 
 ## Promotion Finding Routing Ledger
 
@@ -874,7 +904,7 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 | `ARCH-ADH-R11-01` | `medium` | `release-blocker` | make the immediate action current at immutable review time | governing TODO temporal coherence is required by D-03 | `confirmed at a973e52` | `Delivery R11 Finding Classification`; R12 architecture |
 | `TQ-R11-OBS-01` | `low` | `release-blocker` | update current suite count/status to observed evidence | inaccurate current closeout evidence cannot be promoted | `confirmed at a973e52; no residual follow-up` | `Delivery R11 Finding Classification`; R12 test-quality |
 | `ENV-R11-OBS-01` | `low` | `by-design/no-action` | retain Git Bash runner; do not modify Delphi in this TODO | the accepted Git Bash runner passes; WSL is not an acceptance runner and Delphi is read-only | `classified; no follow-up warranted` | `PACED Workspace Alias Contract`; Git Bash PACED-ready evidence |
-| `ARCH-ADH-R12-01` | `medium` | `release-blocker` | remap generic observation labels to the exact project taxonomy | finding classification is canonical governance | `integrated; R13 pending` | `Delivery R12 Finding Classification` |
+| `ARCH-ADH-R12-01` | `medium` | `release-blocker` | remap generic observation labels to the exact project taxonomy | finding classification is canonical governance | `confirmed at dc1d869` | `Delivery R12 Finding Classification`; R13 architecture |
 
 ## Independent Test Quality Audit Gate
 
@@ -887,8 +917,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Audit isolation mode:** `fresh internal no-context reviewer`
 - **Internal reviewer mandate:** `required after implementation`
 - **Audit status:** `no_material_findings`
-- **Findings summary:** delivery R12 returned `GO`; 10 tests passed, validators/extractors/symlink protection remained valid, and the R11 suite-count correction was confirmed.
-- **Evidence / reference:** immutable delivery R12 baseline `a973e5207d52f55cdddb4dd5b8dc8fb72e32f1f3`; fresh R12 test-quality review.
+- **Findings summary:** delivery R13 returned `GO`; 10 tests passed, validators/extractors/symlink protection remained valid, and no new test-quality finding was raised.
+- **Evidence / reference:** immutable delivery R13 baseline `dc1d86985c66e04384e59b582132d2309bae2b76`; fresh R13 test-quality review over `/tmp/monitor-foundation-copilot-r13/review-packet.md`.
 - **Waiver authority / reference:** `n/a`
 
 ## Independent No-Context Final Review Gate
@@ -913,8 +943,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Package mode:** `bounded-file-set`
 - **Canonical multi-lane audit protocol:** `n/a`
 - **Cutover audit status:** `no_material_findings`
-- **Findings summary:** delivery R12 returned `GO`: temporal state, canonical enums/carry-forward, 34 exact deletions, lifecycle-aware 38-path tree, ledger through R11, 53 pairs over 45 product paths, frozen fingerprints and Foundation-only scope all passed.
-- **Evidence / reference:** immutable delivery R12 baseline `a973e5207d52f55cdddb4dd5b8dc8fb72e32f1f3`; fresh R12 cutover review.
+- **Findings summary:** delivery R13 returned `GO`: temporal state, canonical taxonomy/carry-forward, 34 exact deletions, lifecycle-aware 38-path tree, ledger through R12, 53 pairs over 45 product paths, frozen fingerprints and Foundation-only scope all passed.
+- **Evidence / reference:** immutable delivery R13 baseline `dc1d86985c66e04384e59b582132d2309bae2b76`; fresh R13 cutover review over `/tmp/monitor-foundation-copilot-r13/review-packet.md`.
 - **Waiver authority / reference:** `n/a`
 
 ## Execution Plan — Approved; Guard-Gated
@@ -937,7 +967,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 16. `Concluído com no-go parcial`: delivery R10 sobre `d269bc269f761de68587abc83813480a23cfd200` confirmou test-quality/cutover `GO`, confirmou `ARCH-ADH-R9-01` resolvido e encontrou somente `ARCH-ADH-R10-01` nos enums PACED.
 17. `Concluído com no-go parcial`: delivery R11 sobre `a72780df68156eae85a88a6071989fa3730ded8a` confirmou test-quality/cutover `GO`, confirmou `ARCH-ADH-R10-01` resolvido e encontrou somente `ARCH-ADH-R11-01` no passo temporal; `TQ-R11-OBS-01` foi integrado e `ENV-R11-OBS-01` classificado fora do escopo.
 18. `Concluído com no-go parcial`: delivery R12 sobre `a973e5207d52f55cdddb4dd5b8dc8fb72e32f1f3` confirmou test-quality/cutover `GO`, confirmou `ARCH-ADH-R11-01` resolvido e encontrou somente `ARCH-ADH-R12-01` na taxonomia do ledger.
-19. `Em andamento`: correção taxonômica R12 congelada em `b43d04708bf9678a500430318dcb46f2f54fb34d`; executar e aguardar delivery R13 no mesmo HEAD imutável e, após resultado limpo, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
+19. `Concluído`: delivery R13 sobre `dc1d86985c66e04384e59b582132d2309bae2b76` retornou `GO` conjunto em arquitetura, test-quality e cutover, sem blocker ou finding novo.
+20. `Em andamento`: consolidar evidência 1:1, executar completion e dívida de verificação, congelar o candidato para revisão final independente e, se limpa, executar closeout, mover o TODO, repetir a suíte e publicar `main`.
 
 ### Touched Surfaces
 
@@ -1027,9 +1058,9 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 
 ## Local CI-Equivalent Suite Matrix
 
-| Repository / CI Surface | Why In Scope | Behavior / Scenario Covered | Preconditions | Local CI-Equivalent Command | Required Before | Status | Evidence | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `uninotas-foundation / structural validation` | documentos e checks foram alterados | identidade, links, owner único, privacy patterns e ausência de autoridade concorrente | authority `go` e candidate tree | `python3 -B -m unittest discover -s deterministic/tests -p 'test_*.py' && python3 -B deterministic/validate_foundation.py --root .` | `completion/closeout` | `passed; 10 tests` | R11 fresh audit: 10 tests `OK`; Foundation/TODO validators `PASS` | nenhuma suíte genérica substitui estes checks específicos |
+| Repository / CI Surface | Why In Scope | Local CI-Equivalent Command | Required Before | Status | Evidence Artifact / Command | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| `uninotas-foundation / structural validation` | documentos e checks alterados: identidade, links, owner único, privacy patterns e ausência de autoridade concorrente | `python3 -B -m unittest discover -s deterministic/tests -p 'test_*.py' && python3 -B deterministic/validate_foundation.py --root .` | `completion/closeout` | `passed` | R13: 10 tests `OK`; Foundation/TODO validators `PASS` | candidate tree com authority `go`; nenhuma suíte genérica substitui estes checks específicos |
 
 ## Security Risk Assessment
 
@@ -1072,11 +1103,11 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 - **Authority guard:** must return `go` only after explicit `APROVADO`, rule ingestion and resolved decisions.
 - **Completion and closeout guards:** required before `Local-Implemented` or movement to `completed/`.
 - **Cutover integrity audit:** required because the work retires one active documentary authority and establishes another.
-- **Delivery R12 architecture/test-quality/cutover review:** test-quality/cutover `GO` on `a973e52`; architecture confirmed R11 fixed and found only noncanonical observation labels, now mapped to the project taxonomy for the required R13 rerun.
+- **Delivery R13 architecture/test-quality/cutover review:** all three fresh lanes returned `GO` on immutable `dc1d869`; no P1/P2, blocker or new finding remained.
 
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
-- **Disposition reason:** approved implementation and delivery R12 taxonomy correction remain local; delivery R13 and delivery/closeout gates remain pending.
-- **Post-commit/push status:** `delivery R12 taxonomy correction committed at b43d04708bf9678a500430318dcb46f2f54fb34d; origin/main remains at b73b0eb approval checkpoint`
+- **Disposition reason:** approved implementation and delivery R13 clean evidence remain local; completion, final review and closeout gates remain pending.
+- **Post-commit/push status:** `delivery R13 review baseline committed at dc1d86985c66e04384e59b582132d2309bae2b76; origin/main remains at b73b0eb approval checkpoint`
 - **Next path/status action:** permanecer em `todos/active/process/` até implementação, evidência, reviews e closeout completos.

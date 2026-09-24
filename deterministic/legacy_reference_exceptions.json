@@ -92,9 +92,9 @@
     "owner": "TODO owner",
     "lifecycle": "active_until_closeout_move",
     "line_hashes": [
-      "4315baf105f3706f6fcb483ce2b08cd1092fb9952ede4f9f084b1fa3da337975",
-      "58a2cdbc9b65b6691dc7110c9b4276261cc0a1da9f1619886eeb9c2bff9d86d9",
-      "990e90432a099ab732fe901199964dbb9dfff7ef2f0e5cdf68a9c3c3361db1dd"
+      "1e9d6fa3664aedf332077abfa9a443341ac672d3c189db73e9e2009c4c4bb1a8",
+      "62c67918ef64604370bd298aa2e945fb84ba6f8fc431bc619b8ba976fdc9e02c",
+      "dabba754063d03979e340b2490b1776e0ab54bd162b799a7fe12baa66333bf5d"
     ]
   },
   {
@@ -118,8 +118,8 @@
     "owner": "TODO owner",
     "lifecycle": "active_until_closeout_move",
     "line_hashes": [
-      "8761dbd125073530a9c6c78a0f4d2aae440d0366240978c35cfc94e628858f0c",
-      "a585f9c69f3058c1766e923b9fe727ed3a9abaf71979723ed65fd4f551eee597"
+      "313fab44a4331c3aa6002eb20dca0a255aa6d24968e50740d485bcced27c9904",
+      "ddb1fac2fd2dadee0286f7400ca642dd765cd1ce0870e66ca8fd72db3f0170f8"
     ]
   },
   {
@@ -131,7 +131,7 @@
     "owner": "TODO owner",
     "lifecycle": "active_until_closeout_move",
     "line_hashes": [
-      "0ea331738926affe434e54561138f6d8683aa0f14316bf7764d7222b314bb84b"
+      "a6dc9efe640c7bcdc79d8d41b41b23fb2b3648ba5d5bc663781ee107a9ae7fa3"
     ]
   },
   {
@@ -143,7 +143,7 @@
     "owner": "TODO owner",
     "lifecycle": "active_until_closeout_move",
     "line_hashes": [
-      "0ea331738926affe434e54561138f6d8683aa0f14316bf7764d7222b314bb84b"
+      "a6dc9efe640c7bcdc79d8d41b41b23fb2b3648ba5d5bc663781ee107a9ae7fa3"
     ]
   },
   {
@@ -155,7 +155,7 @@
     "owner": "TODO owner",
     "lifecycle": "active_until_closeout_move",
     "line_hashes": [
-      "0ea331738926affe434e54561138f6d8683aa0f14316bf7764d7222b314bb84b"
+      "a6dc9efe640c7bcdc79d8d41b41b23fb2b3648ba5d5bc663781ee107a9ae7fa3"
     ]
   },
   {
@@ -167,7 +167,7 @@
     "owner": "TODO owner",
     "lifecycle": "active_until_closeout_move",
     "line_hashes": [
-      "0ea331738926affe434e54561138f6d8683aa0f14316bf7764d7222b314bb84b"
+      "a6dc9efe640c7bcdc79d8d41b41b23fb2b3648ba5d5bc663781ee107a9ae7fa3"
     ]
   },
   {
@@ -179,7 +179,7 @@
     "owner": "TODO owner",
     "lifecycle": "active_until_closeout_move",
     "line_hashes": [
-      "0ea331738926affe434e54561138f6d8683aa0f14316bf7764d7222b314bb84b"
+      "a6dc9efe640c7bcdc79d8d41b41b23fb2b3648ba5d5bc663781ee107a9ae7fa3"
     ]
   },
   {
@@ -191,7 +191,7 @@
     "owner": "TODO owner",
     "lifecycle": "active_until_closeout_move",
     "line_hashes": [
-      "0ea331738926affe434e54561138f6d8683aa0f14316bf7764d7222b314bb84b"
+      "a6dc9efe640c7bcdc79d8d41b41b23fb2b3648ba5d5bc663781ee107a9ae7fa3"
     ]
   },
   {
@@ -203,7 +203,7 @@
     "owner": "TODO owner",
     "lifecycle": "active_until_closeout_move",
     "line_hashes": [
-      "0ea331738926affe434e54561138f6d8683aa0f14316bf7764d7222b314bb84b"
+      "a6dc9efe640c7bcdc79d8d41b41b23fb2b3648ba5d5bc663781ee107a9ae7fa3"
     ]
   },
   {
@@ -215,7 +215,84 @@
     "owner": "TODO owner",
     "lifecycle": "active_until_closeout_move",
     "line_hashes": [
-      "633a87a3c23f890c096f02f81597cb6c156d9f157ada7f3f8f587ccca335d8d9"
+      "0696916876ccdccd949f50780e43cbc547afbf2cd43ebdfcbcab0983a9e59f3f",
+      "3e9a75dbd9e2dc82f5cd440e56ed7d0d56dcf2654d8d0947bf2be260a9b2b304",
+      "80da7f25bd13ce908b410a2c72bd0453cf903f16b63a08025c5801405335a986",
+      "c0e72dbbb581fb8f7ca54f10ca7be9d5d6126e66eb5e6ace0ab3ac0ea46b565c",
+      "cee745e4b5ec2e75ca570ae58114be47e70046648609c5312cc39cc268fea395",
+      "e67642a0eefffa6b0f1dc3149aeeae8a808a79173b7a1287cd138e81a1c6dbd6"
+    ]
+  },
+  {
+    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "term": "whatsapp",
+    "context_kind": "historical_migration_record",
+    "section": "Completion Evidence Matrix",
+    "reason": "Frozen historical cutover reference.",
+    "owner": "TODO owner",
+    "lifecycle": "active_until_closeout_move",
+    "line_hashes": [
+      "c0e72dbbb581fb8f7ca54f10ca7be9d5d6126e66eb5e6ace0ab3ac0ea46b565c"
+    ]
+  },
+  {
+    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "term": "typebot",
+    "context_kind": "historical_migration_record",
+    "section": "Completion Evidence Matrix",
+    "reason": "Frozen historical cutover reference.",
+    "owner": "TODO owner",
+    "lifecycle": "active_until_closeout_move",
+    "line_hashes": [
+      "c0e72dbbb581fb8f7ca54f10ca7be9d5d6126e66eb5e6ace0ab3ac0ea46b565c"
+    ]
+  },
+  {
+    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "term": "evolution",
+    "context_kind": "historical_migration_record",
+    "section": "Completion Evidence Matrix",
+    "reason": "Frozen historical cutover reference.",
+    "owner": "TODO owner",
+    "lifecycle": "active_until_closeout_move",
+    "line_hashes": [
+      "c0e72dbbb581fb8f7ca54f10ca7be9d5d6126e66eb5e6ace0ab3ac0ea46b565c"
+    ]
+  },
+  {
+    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "term": "baileys",
+    "context_kind": "historical_migration_record",
+    "section": "Completion Evidence Matrix",
+    "reason": "Frozen historical cutover reference.",
+    "owner": "TODO owner",
+    "lifecycle": "active_until_closeout_move",
+    "line_hashes": [
+      "c0e72dbbb581fb8f7ca54f10ca7be9d5d6126e66eb5e6ace0ab3ac0ea46b565c"
+    ]
+  },
+  {
+    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "term": "belluga",
+    "context_kind": "historical_migration_record",
+    "section": "Completion Evidence Matrix",
+    "reason": "Frozen historical cutover reference.",
+    "owner": "TODO owner",
+    "lifecycle": "active_until_closeout_move",
+    "line_hashes": [
+      "c0e72dbbb581fb8f7ca54f10ca7be9d5d6126e66eb5e6ace0ab3ac0ea46b565c"
+    ]
+  },
+  {
+    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "term": "bóora",
+    "context_kind": "historical_migration_record",
+    "section": "Completion Evidence Matrix",
+    "reason": "Frozen historical cutover reference.",
+    "owner": "TODO owner",
+    "lifecycle": "active_until_closeout_move",
+    "line_hashes": [
+      "c0e72dbbb581fb8f7ca54f10ca7be9d5d6126e66eb5e6ace0ab3ac0ea46b565c"
     ]
   },
   {
@@ -404,8 +481,8 @@
     "line_hashes": [
       "7bde08cb4dc689f429bb0d509cf0952f17dc00f4d22287146db38538ce855a76",
       "7d5a90e9b4ee5203279fd077b14a1632454bad5f71b23e137e4f11541aca20d1",
-      "7f11cc0cb02a8e6f78adc386ee75ee0a04fb5926931124a5667158339fc80979",
-      "ec8d7dcf222e4ce5a8e16099c06f00a6d6e8e43329945acb296e14173e9a267c"
+      "ae4aeab2c14d36852fa678cc8370694e8ddb8c2d28b349e2fa153d938a380380",
+      "c986c55e64e30aa7ca69bdad8a3a847c302a0cbeb17f56e7e11c90786f1ab34b"
     ]
   },
   {
