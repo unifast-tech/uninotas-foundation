@@ -3,7 +3,7 @@
 ## Artifact Identity
 
 - **Artifact type:** `tactical_execution_contract`
-- **Lifecycle state:** `Approved — execution pending PACED authority gates`
+- **Lifecycle state:** `Approved — Blocked at PACED review baseline freeze`
 - **Created:** `2026-09-24`
 - **Owner:** `Delphi / Strategic CTO-Tech-Lead`, sob autoridade humana do usuário
 
@@ -49,14 +49,22 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 ## Delivery Status Canon
 
 - **Current delivery stage:** `Pending`
-- **Qualifiers:** `none`
-- **Next exact step:** congelar e publicar o baseline do TODO, executar as revisões/guards PACED pendentes e liberar a implementação somente após o authority guard retornar `go`.
+- **Qualifiers:** `Blocked`
+- **Next exact step:** conceder ao usuário GitHub `Lpaifer` permissão de escrita em `UnifastTech/uninotas-foundation` (ou disponibilizar outra credencial autorizada) e publicar os commits locais de baseline; só então iniciar as revisões PACED.
 
 ## Active Work State
 
-- **Work state:** `review`
-- **Why this state now:** o usuário aprovou o contrato, mas os gates PACED de baseline, crítica, coerência e autoridade ainda precisam convergir antes da implementação.
-- **Exit condition:** gates pré-execução verdes e authority guard pós-aprovação em `go`, quando o estado muda para `implementation`.
+- **Work state:** `blocked`
+- **Why this state now:** o baseline local foi commitado, mas o GitHub recusou o push necessário antes das revisões PACED.
+- **Exit condition:** `origin/main` contém o baseline aprovado e o gate de freeze pode prosseguir.
+
+## Blocker Notes
+
+- **Blocker:** `git push origin main` retorna `permission denied` para a conta GitHub autenticada `Lpaifer`.
+- **Why blocked now:** PACED exige baseline commitado e publicado antes da primeira revisão/guard de planejamento; revisão ou implementação antes disso violaria o gate.
+- **What unblocks it:** permissão de escrita para `Lpaifer` em `UnifastTech/uninotas-foundation` ou outra credencial GitHub autorizada neste ambiente.
+- **Owner / source:** administração do repositório/organização `UnifastTech` no GitHub.
+- **Last confirmed truth:** commit local `a83e331` foi criado em `main`; `git.exe push` autenticou e foi rejeitado pelo remoto; SSH não possui chave autorizada.
 
 ## Scope
 
@@ -327,9 +335,9 @@ Preencher com uma linha individual para cada item de `DOD-01..DOD-09` e `VAL-01.
 - **Baseline branch:** `main`
 - **Baseline commit:** `pending`
 - **Baseline push reference:** `origin/main@pending`
-- **Gate status:** `not_run`
-- **Findings summary:** contrato preparado; commit/push ainda pendentes.
-- **Evidence / reference:** executar `git_write_authority_guard.py` para commit e push, então registrar SHA.
+- **Gate status:** `blocked`
+- **Findings summary:** commit local `a83e331` criado; publicação recusada pelo GitHub por falta de permissão da conta autenticada `Lpaifer`.
+- **Evidence / reference:** commit/push authority guards retornaram `go`; `git.exe push origin main` retornou `remote rejected: permission denied`.
 - **Waiver authority / reference:** `n/a`
 - **Pre-freeze packet-prep rule:** toda revisão abaixo permanece `prepared-pre-freeze`; nenhuma está marcada como aprovada antes do baseline publicado.
 
@@ -596,7 +604,7 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 
 | Dependency | Why It Matters | Status | Last Verified | Verification Method | Adjustment / Workaround |
 | --- | --- | --- | --- | --- | --- |
-| `origin/main` de `uninotas-foundation` | baseline freeze e publicação final | `unknown` | `2026-09-24` | remote configurado; push ainda não testado | authority guard antes de qualquer push |
+| `origin/main` de `uninotas-foundation` | baseline freeze e publicação final | `failing` | `2026-09-24` | push autenticado como `Lpaifer` recusado por permissão | conceder write ou disponibilizar credencial autorizada |
 | `delphi-ai` local | workflows e guards PACED | `healthy with runner caveat` | `2026-09-24` | `verify_context.sh` via Git Bash passou | scripts CRLF rodam pelo Git Bash; Python guards rodam no WSL |
 | PostgreSQL/Railway | somente evidência read-only de arquitetura | `healthy` | `2026-09-24` | `/api/v1/saude` retornou banco `ok` | nenhuma mutação/seed/E2E neste TODO |
 
@@ -611,7 +619,7 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 
 ## TODO Closeout Disposition
 
-- **Disposition:** `keep-active`
-- **Disposition reason:** contrato aprovado, porém ainda em review PACED até baseline/revisões/authority guard liberarem execução.
+- **Disposition:** `blocked`
+- **Disposition reason:** baseline local existe, mas o push obrigatório ao owner canônico foi recusado; PACED proíbe iniciar reviews ou implementação antes do freeze publicado.
 - **Post-commit/push status:** `pending`
 - **Next path/status action:** permanecer em `todos/active/process/` até implementação, evidência, reviews e closeout completos.
