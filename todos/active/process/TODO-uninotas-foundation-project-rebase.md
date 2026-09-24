@@ -893,7 +893,7 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 12. `Concluído com no-go`: delivery R6 executada sobre `04b865ea35501d5f59f0e6a9e7d7b953d7d9598d`; findings classificados dentro de D-01..D-05.
 13. `Concluído com no-go parcial`: arquitetura R7 retornou `GO`; test-quality/cutover R7 sobre `1374caedafa63935fd390c273a346365ea88109e` encontraram findings e uma rota de modelo inválida, todos classificados no ledger canônico.
 14. `Concluído com no-go parcial`: delivery R8 sobre `de909878b014c708fa103dd2d3b9213f0abe1c33` retornou cutover `GO` e os blockers `ARCH-ADH-R8-01`/`TQ-R8-01`, classificados no ledger canônico.
-15. `Em andamento`: remediações R8 integradas localmente; executar delivery R9 corretamente roteada no HEAD imutável e, após resultado limpo, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
+15. `Em andamento`: remediações R8 congeladas em `1dfdda8331026a2f4e5896f9b9bece3ea6d40ac3`; executar delivery R9 corretamente roteada no HEAD imutável e, após resultado limpo, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
 
 ### Touched Surfaces
 
@@ -1034,5 +1034,5 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 
 - **Disposition:** `keep-active`
 - **Disposition reason:** approved implementation and delivery R8 remediation remain local; delivery R9 and delivery/closeout gates remain pending.
-- **Post-commit/push status:** `delivery R8 remediation is local and uncommitted; origin/main remains at b73b0eb approval checkpoint`
+- **Post-commit/push status:** `delivery R8 remediation committed at 1dfdda8331026a2f4e5896f9b9bece3ea6d40ac3; origin/main remains at b73b0eb approval checkpoint`
 - **Next path/status action:** permanecer em `todos/active/process/` até implementação, evidência, reviews e closeout completos.
