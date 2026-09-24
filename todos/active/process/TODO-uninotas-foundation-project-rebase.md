@@ -913,7 +913,7 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 14. `Concluído com no-go parcial`: delivery R8 sobre `de909878b014c708fa103dd2d3b9213f0abe1c33` retornou cutover `GO` e os blockers `ARCH-ADH-R8-01`/`TQ-R8-01`, classificados no ledger canônico.
 15. `Concluído com no-go parcial`: delivery R9 sobre `222a8a9b0d63c47f002b3b752f2a83bd548260e0` confirmou test-quality/cutover `GO`, confirmou os blockers R8 resolvidos e encontrou somente `ARCH-ADH-R9-01` na sincronização de estado.
 16. `Concluído com no-go parcial`: delivery R10 sobre `d269bc269f761de68587abc83813480a23cfd200` confirmou test-quality/cutover `GO`, confirmou `ARCH-ADH-R9-01` resolvido e encontrou somente `ARCH-ADH-R10-01` nos enums PACED.
-17. `Em andamento`: normalização de enums R10 integrada localmente; congelar o novo HEAD, executar delivery R11 corretamente roteada e, após resultado limpo, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
+17. `Em andamento`: normalização de enums R10 congelada em `c2b7ffea0d6d030ef24213f8ad9702e3faf8e7c3`; congelar o HEAD de estado seguinte, executar delivery R11 corretamente roteada e, após resultado limpo, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
 
 ### Touched Surfaces
 
@@ -1054,5 +1054,5 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 
 - **Disposition:** `keep-active`
 - **Disposition reason:** approved implementation and delivery R10 enum normalization remain local; delivery R11 and delivery/closeout gates remain pending.
-- **Post-commit/push status:** `delivery R10 enum normalization is local and uncommitted; origin/main remains at b73b0eb approval checkpoint`
+- **Post-commit/push status:** `delivery R10 enum normalization committed at c2b7ffea0d6d030ef24213f8ad9702e3faf8e7c3; origin/main remains at b73b0eb approval checkpoint`
 - **Next path/status action:** permanecer em `todos/active/process/` até implementação, evidência, reviews e closeout completos.
