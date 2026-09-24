@@ -3,7 +3,7 @@
 ## Artifact Identity
 
 - **Artifact type:** `tactical_execution_contract`
-- **Lifecycle state:** `Review — material PACED findings being integrated`
+- **Lifecycle state:** `Review — final PACED convergence before renewed approval`
 - **Created:** `2026-09-24`
 - **Owner:** `Delphi / Strategic CTO-Tech-Lead`, sob autoridade humana do usuário
 
@@ -50,22 +50,22 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 ## Delivery Status Canon
 
 - **Current delivery stage:** `Pending`
-- **Qualifiers:** `Blocked`
-- **Next exact step:** integrar os achados `RF-01..RF-08`, publicar um baseline imutável novo e repetir arquitetura/crítica contra o snapshot exato antes dos guards de coerência, drift e preflight.
+- **Qualifiers:** `none`
+- **Next exact step:** publicar o baseline sincronizado após `RF-15..RF-16`, executar a checagem final de arquitetura/crítica e, se limpa, exigir `preflight-go` antes de solicitar novo `APROVADO`.
 
 ## Active Work State
 
-- **Work state:** `blocked`
-- **Why this state now:** arquitetura e crítica independentes convergiram em `no-go` de execução com achados materiais de planejamento.
-- **Exit condition:** `RF-01..RF-08` estão integrados, o review do baseline renovado não possui achado material aberto e os guards de coerência, drift e preflight retornam `go|preflight-go` conforme seu contrato.
+- **Work state:** `review`
+- **Why this state now:** `RF-01..RF-14` foram substantivamente encerrados; R3 pediu apenas sincronização do lifecycle e uma estratégia de fixtures não autorrejeitável, integradas em `RF-15..RF-16`.
+- **Exit condition:** review final sem achado material aberto, coerência e drift em `go`, authority preflight em `preflight-go` e novo `APROVADO` humano registrado.
 
 ## Blocker Notes
 
-- **Blocker:** o pacote ainda não satisfaz o piso de planejamento PACED; não existe autoridade de execução.
-- **Why blocked now:** inventário definidor de arquitetura, baseline de evidência, manifesto destrutivo e critérios determinísticos estavam incompletos; além disso, o review não estava ligado aos bytes imutáveis do baseline registrado.
-- **What unblocks it:** integrar o ledger de achados, publicar/refazer o freeze com commit + blob/hash, repetir os reviews e obter novo `APROVADO` após todos os guards pré-aprovação.
-- **Owner / source:** owner do TODO, com decisão humana no novo gate de aprovação.
-- **Last confirmed truth:** reviewers internos `architecture_opinion` e `critique` retornaram `no-go` em 2026-09-24; direção de hard cutover foi mantida, mas execução foi recusada.
+- **Blocker:** `n/a` para continuidade do review; execução continua não autorizada por ausência do novo `APROVADO` e do authority guard pós-aprovação.
+- **Why blocked now:** `n/a`; o trabalho está no gate de review, não em estado bloqueado.
+- **What unblocks it:** `n/a` para review; execução só começa pela sequência explícita em `Execution Plan`.
+- **Owner / source:** owner do TODO; autoridade humana permanece responsável pelo novo approval.
+- **Last confirmed truth:** R3 manteve hard cutover e `RF-01..RF-14`; `ARCH-R3-01`/`CRIT-R3-01..02` foram integrados como `RF-15..RF-16` antes do último freeze.
 
 ## Scope
 
@@ -124,7 +124,7 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 - [ ] `DOD-07` Validações determinísticas e inspeções de referências passam no tree final e possuem evidência específica.
 - [ ] `DOD-08` O diff fica restrito aos paths aprovados da Foundation; código, configuração, segredos e runtime permanecem inalterados.
 - [ ] `DOD-09` Decisões estáveis e evidências finais foram consolidadas nos owners canônicos antes do TODO ser movido para `completed/`.
-- [ ] `DOD-10` Nenhum documento, artifact ou fixture persiste PII real, payload bruto de produção, JWT, credencial ou exemplo operacional não redigido.
+- [ ] `DOD-10` Nenhum documento, artifact, código-fonte de teste ou fixture persistida contém PII real/sintética em formato detectável, payload bruto de produção, JWT montado, credencial ou exemplo operacional não redigido; amostras proibidas são montadas somente em diretório temporário durante o teste a partir de fragmentos inofensivos.
 - [ ] `DOD-11` O contrato de setup documenta e valida como uma checkout limpa materializa `foundation_documentation -> uninotas-foundation` sem versionar o symlink no produto.
 
 ## Validation Steps
@@ -136,7 +136,7 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 - [ ] `VAL-05` Executar `git diff --check` e confirmar ausência de segredos, artefatos gerados ou mudanças fora do contrato.
 - [ ] `VAL-06` Revisar a matriz de evidências critério a critério; resumo agregado não substitui evidência 1:1.
 - [ ] `VAL-07` Confirmar que o repositório do produto e o `delphi-ai` não receberam mudanças durante a execução.
-- [ ] `VAL-08` Executar scan automatizado de segredo/JWT/PII de alto risco e revisão manual de privacidade nos documentos, artifacts e fixtures novos.
+- [ ] `VAL-08` Executar o mesmo scan automatizado de segredo/JWT/PII de alto risco sobre todo o tree persistido, inclusive código/fixtures de teste, e revisão manual de privacidade; mutation tests montam amostras proibidas somente em diretório temporário e provam a falha do scanner.
 - [ ] `VAL-09` Em workspace limpo no runner Git Bash comprovado, criar/verificar os aliases e executar o entrypoint existente `./delphi-ai/verify_context.sh` até obter `Environment Verified: PACED-Ready.`.
 
 ## Completion Evidence Matrix
@@ -154,7 +154,7 @@ Cada critério possui evidência planejada 1:1; nenhum resumo agregado substitui
 | `DOD-07` | `Definition of Done` | checks determinísticos passam | `test` | `python3 -m unittest discover -s deterministic/tests -p 'test_*.py'` | `local` | `planned` | inclui fixtures positivas e negativas |
 | `DOD-08` | `Definition of Done` | diff restrito à Foundation | `git+guard` | `todo_diff_expectation_guard.py` + fingerprints dos repositórios read-only | `local` | `planned` | mudanças preexistentes não são atribuídas ao TODO |
 | `DOD-09` | `Definition of Done` | decisões promovidas aos owners | `review` | matriz de owners + closeout guard | `local` | `planned` | TODO deixa de ser owner de verdade estável |
-| `DOD-10` | `Definition of Done` | ausência de PII/payload/segredo persistido | `scan+review` | validator high-risk patterns + checklist manual de privacidade | `local` | `planned` | exemplos somente sintéticos/redigidos |
+| `DOD-10` | `Definition of Done` | ausência de PII/payload/segredo persistido | `scan+review` | validator high-risk patterns + checklist manual de privacidade | `local` | `planned` | até amostras sintéticas proibidas existem apenas em temp runtime |
 | `DOD-11` | `Definition of Done` | alias PACED reproduzível | `setup test` | comando Git Bash documentado + `delphi-ai/verify_context.sh` | `clean Windows workspace` | `planned` | WSL não é evidência aceita enquanto houver caveat CRLF |
 | `VAL-01` | `Validation Steps` | links e anchors válidos | `test` | `python3 deterministic/validate_foundation.py --root .` | `local` | `planned` | fail-closed |
 | `VAL-02` | `Validation Steps` | legado classificado por superfície | `test` | validator + `deterministic/legacy_reference_exceptions.json` | `local` | `planned` | exceção exige path, razão e owner |
@@ -163,7 +163,7 @@ Cada critério possui evidência planejada 1:1; nenhum resumo agregado substitui
 | `VAL-05` | `Validation Steps` | higiene do diff | `git+scan` | `git diff --check` + scan de segredo/artefato | `local` | `planned` | nenhum `.env` ou valor sensível |
 | `VAL-06` | `Validation Steps` | evidência 1:1 completa | `review` | esta matriz sem `planned|pending` | `local` | `planned` | bloqueia completion |
 | `VAL-07` | `Validation Steps` | produto e Delphi inalterados | `fingerprint` | repetir comandos de `Read-Only Evidence Snapshot` | `workspace` | `planned` | igualdade exata dos digests |
-| `VAL-08` | `Validation Steps` | privacidade e segredo | `scan+review` | high-risk pattern scan + inspeção manual registrada | `local` | `planned` | inclui fixtures/artifacts |
+| `VAL-08` | `Validation Steps` | privacidade e segredo | `scan+review` | scan do tree inteiro + mutation test em `tempfile.TemporaryDirectory` + inspeção manual | `local` | `planned` | nenhuma allowlist para o corpus de teste |
 | `VAL-09` | `Validation Steps` | setup reproduzível | `setup test` | `"C:\Program Files\Git\bin\bash.exe" -lc "cd /c/Unifast/MonitorDeNotas && ./delphi-ai/verify_context.sh"` | `clean Windows workspace` | `planned` | entrypoint comprovado; sem commit de link no produto |
 
 ## Execution Lane Tracking
@@ -404,7 +404,7 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 | `deterministic/validate_foundation.py` | validator canônico local |
 | `deterministic/legacy_reference_exceptions.json` | exceções históricas com path, razão e owner |
 | `deterministic/tests/test_validate_foundation.py` | testes positivos e mutation-style negativos |
-| `deterministic/tests/fixtures/**` | trees sintéticos sem PII/segredo real |
+| `deterministic/tests/fixtures/**` | somente trees persistidos válidos e fragmentos não detectáveis; casos proibidos são montados em temp runtime |
 
 ## Module Decision Consistency Gate
 
@@ -457,8 +457,8 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Historical surfaces:** após o closeout move, a entrada muda para o path em `todos/completed/process/` e `lifecycle=historical`; outros completed TODOs/artifacts só são permitidos quando listados sem wildcard em `deterministic/legacy_reference_exceptions.json`.
 - **Closeout sequence:** validar tree candidato com a exceção ativa estrita; executar reviews/guards; mover o TODO; atualizar somente o path/lifecycle da exceção; repetir a suíte inteira antes do commit/push final.
 - **Fail-closed checks:** arquivos obrigatórios incluindo `policies/scope_subscope_governance.md`, anchors do `module_template.md` nos seis módulos, consistência scope/subscope, links/anchors relativos, ausência dos paths `Delete`, owner único, nenhuma autoridade ativa LeadsHug, exception ledger sem wildcard amplo e nenhum arquivo não classificado pelo publication manifest.
-- **Privacy checks:** rejeitar JWT-like tokens, private-key markers, atribuições de segredo e identificadores pessoais plausíveis em artifacts/fixtures; nomes de variáveis e exemplos sintéticos explicitamente marcados são permitidos.
-- **Mutation fixtures:** autoridade legada em owner ativo, menção histórica permitida no governing TODO, mesma menção como autoridade ativa proibida, exception sem owner/razão/lifecycle, link quebrado, módulo órfão, anchor obrigatório ausente, scope divergente, owner ausente e fixture com JWT/PII sintético proibido.
+- **Privacy checks:** rejeitar JWT-like tokens, private-key markers, atribuições de segredo e identificadores pessoais plausíveis em todo o tree, inclusive fontes/fixtures de teste; nomes de variáveis e fragmentos que isoladamente não formam o padrão proibido são permitidos.
+- **Mutation fixtures:** autoridade legada em owner ativo, menção histórica permitida no governing TODO, mesma menção como autoridade ativa proibida, exception sem owner/razão/lifecycle, link quebrado, módulo órfão, anchor obrigatório ausente, scope divergente e owner ausente podem usar trees persistidos inofensivos; JWT/PII/segredo proibido deve ser montado somente em `tempfile.TemporaryDirectory` durante o teste, concatenando fragmentos fonte que não acionam o scan do repositório.
 - **Manual complement:** revisar semanticamente que nenhuma ocorrência permitida apresenta o legado como verdade atual e que nenhum exemplo deriva de payload real.
 
 ### PACED Workspace Alias Contract
@@ -479,7 +479,7 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set`
 - **Decision review status:** `findings_integrated`
-- **Decision review evidence / resolution:** R1 confirmou hard cutover e gerou `RF-01..RF-08`; R2 validou a resolução de `RF-01..06,RF-08`, reabriu `RF-07` e encontrou `ARCH-R2-01..04`, integrados como `RF-09..RF-12`; terceiro review obrigatório após novo freeze.
+- **Decision review evidence / resolution:** R1 gerou `RF-01..RF-08`; R2 gerou `RF-09..RF-14`; R3 confirmou a arquitetura e encontrou apenas estado canônico stale (`ARCH-R3-01`), integrado em `RF-15`; último rerun obrigatório após sincronização.
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -518,11 +518,11 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Baseline push reference:** `origin/main`
 - **Baseline TODO blob:** `24bd55ba4d210bd66edf39155c267f8a78f7aaa4`
 - **Baseline snapshot SHA-256:** `aed235f9ac6c0d39eddf24bd77b70676bf26bd2135b63d0e606d35830639cfa0`
-- **Gate status:** `no_material_findings`
-- **Findings summary:** `RF-09..RF-14` integrados; terceiro package ligado a commit, ref real, blob e SHA-256 antes do review.
-- **Evidence / reference:** git-write guards `go`; push `57a4111..700f585`; `ls-remote` confirmou o SHA integral; snapshot imutável `/tmp/monitor-foundation-review.tJs1Sm/review-package-700f585.md` possui o SHA-256 registrado.
+- **Gate status:** `blocked`
+- **Findings summary:** R3 gerou `RF-15..RF-16`; lifecycle/execution e estratégia de fixtures são seções materiais e exigem freeze final novo.
+- **Evidence / reference:** baseline `700f585` permanece evidência imutável da R3; próximo package deve renovar commit/blob/hash.
 - **Waiver authority / reference:** `n/a`
-- **Pre-freeze packet-prep rule:** toda revisão abaixo permanece `prepared-pre-freeze`; nenhuma está marcada como aprovada antes do baseline publicado.
+- **Review packet rule:** cada rodada usa snapshot derivado de commit publicado, com blob e SHA-256; evidência pós-freeze não altera o pacote material salvo quando um finding exige novo baseline.
 
 ## Gate: Review Scope Drift
 
@@ -532,14 +532,14 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Baseline source:** `Review Baseline Freeze -> Baseline commit`
 - **Material sections compared:** `Context|Contract Boundary|Scope|Out of Scope|Definition of Done|Validation Steps|Execution Lane Tracking|Canonical Module Anchors|Decisions|Decision Baseline|Architecture Change Governance|Questions To Close|Assumptions Preview|Execution Plan|Flow Evidence Planning Matrix|Local CI-Equivalent Suite Matrix|Runtime / Rollout Notes|Security Risk Assessment|Performance & Concurrency Risk Assessment`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo uninotas-foundation/todos/active/process/TODO-uninotas-foundation-project-rebase.md`
-- **Gate status:** `no_material_findings`
-- **Findings summary:** zero seções materiais divergiram do baseline `700f585`; push ref `origin/main` resolveu corretamente.
-- **Evidence / reference:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo uninotas-foundation/todos/active/process/TODO-uninotas-foundation-project-rebase.md` — `Overall outcome: go`; `Changed material sections: 0` em 2026-09-24.
+- **Gate status:** `blocked`
+- **Findings summary:** guard foi `go` contra `700f585`, mas `RF-15..RF-16` mudaram lifecycle/execution/validation e exigem novo baseline e rerun.
+- **Evidence / reference:** resultado anterior preservado como histórico; rerun pendente do freeze final.
 - **Waiver authority / reference:** `n/a`
 
 ## Plan Review Gate
 
-- **Status:** `findings_integrated — rerun required on renewed immutable baseline`
+- **Status:** `findings_integrated — final rerun required on synchronized baseline`
 
 ### Review Sections
 
@@ -636,7 +636,7 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Audit session / round evidence:** `n/a`
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
 - **Critique status:** `findings_integrated`
-- **Findings summary:** reviewer confirmou a direção de hard cutover, mas recusou execução por aprovação fora de ordem, dispatch mutável, evidência read-only não congelada, decisões destrutivas incompletas, scan legado ambíguo, privacidade incompleta e escopo raiz contraditório.
+- **Findings summary:** R1/R2 fecharam arquitetura, evidência e validação; R3 manteve o hard cutover e pediu apenas sincronização do estado e isolamento runtime das amostras de segurança, integrados em `RF-15..RF-16`.
 - **Resolution ledger:** achados originais da crítica, antes da deduplicação `RF-01..RF-08`.
 
 | Finding ID | Resolution (`Integrated|Challenged|Deferred`) | Usefulness (`useful|noise|mixed|unknown`) | Formalizable (`yes|partial|no|unknown`) | Candidate Rule Level (`paced|project|none|unknown`) | Candidate Rule ID | Rationale / Evidence |
@@ -652,8 +652,10 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 | `CRIT-R2-02` | `Integrated` | `useful` | `no` | `none` | `n/a` | `Baseline push reference` agora contém o ref Git resolvível `origin/main` em `RF-14` |
 | `CRIT-R2-03` | `Integrated` | `useful` | `yes` | `paced` | `n/a` | scope policy mudou de `Delete` para `Rewrite` e ganhou contrato `D-05` em `RF-09` |
 | `CRIT-R2-04` | `Integrated` | `useful` | `partial` | `paced` | `n/a` | acceptance usa entrypoint existente e runner Git Bash comprovado; WSL fica explicitamente não aceito em `RF-10` |
+| `CRIT-R3-01` | `Integrated` | `useful` | `partial` | `paced` | `n/a` | lifecycle, next step, blocker notes, execution plan e `D-01..D-05` foram sincronizados em `RF-15` |
+| `CRIT-R3-02` | `Integrated` | `useful` | `partial` | `project` | `n/a` | amostras JWT/PII proibidas agora são montadas somente em temp runtime; tree persistido inteiro continua sob scan em `RF-16` |
 
-- **Evidence / reference:** R1 dispatch/merge validado; R2 dispatch `/tmp/monitor-foundation-review.tJs1Sm/critique-r2-dispatch.json`; `CRIT-R2-01..04` integrados em `RF-09,RF-10,RF-13,RF-14`; novo rerun pendente.
+- **Evidence / reference:** R1/R2 integrados; R3 dispatch `/tmp/monitor-foundation-review.tJs1Sm/critique-r3-dispatch.json`; `CRIT-R3-01..02` integrados em `RF-15..RF-16`; último rerun pendente.
 - **Waiver authority / reference:** `n/a`
 
 ## Promotion Finding Routing Ledger
@@ -662,20 +664,22 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 
 | Finding ID | Severity | Classification | Routing Decision | Same TODO / Split Rationale | Status | Approval / Follow-up Reference |
 | --- | --- | --- | --- | --- | --- | --- |
-| `RF-01` (`ARCH-OP-02`,`CRIT-01`) | `high` | `release-blocker` | tratar aprovação anterior como intenção; exigir novo `APROVADO` pós-gates | ordem de autoridade é parte do contrato atual | `integrated; gate rerun pending` | `Approval.Current authority`; novo approval pendente |
-| `RF-02` (`ARCH-OP-03`,`CRIT-02`) | `high` | `release-blocker` | commit + TODO blob/hash no dispatch e freeze renovado | reproducibilidade do review atual | `integrated; baseline refresh pending` | `Gate: Review Baseline Freeze` |
-| `RF-03` (`ARCH-OP-01`,`CRIT-04`) | `high` | `release-blocker` | inventário read-only, seis módulos fechados e disposition 1:1 antes da execução | elimina discricionariedade destrutiva do executor | `integrated; rerun pending` | `PT-01..PT-09`; module map; disposition manifest |
-| `RF-04` (`CRIT-03`) | `high` | `release-blocker` | HEAD/status/diff/content fingerprints para produto e Delphi | prova `VAL-07` e ancora assumptions em bytes | `integrated; guard rerun pending` | `Read-Only Evidence Snapshot` |
-| `RF-05` (`ARCH-OP-04`,`CRIT-05`) | `medium` | `release-blocker` | validator por superfície + exception ledger explícito + mutation fixtures | `DOD-01/VAL-02` dependem dessa semântica | `integrated; delivery evidence pending` | `Deterministic Validator Contract` |
-| `RF-06` (`CRIT-06`) | `medium` | `release-blocker` | proibir PII/payload/JWT/credencial e exigir scan + revisão manual | artefatos persistentes fazem parte da entrega atual | `integrated; delivery evidence pending` | `DOD-10`; `VAL-08`; Security Risk Assessment |
-| `RF-07` (`ARCH-OP-05`) | `medium` | `release-blocker` | documentar owner/comandos/aceitação do alias em workspace limpo | setup PACED é condição operacional atual | `integrated; clean-workspace evidence pending` | `DOD-11`; `VAL-09`; alias contract |
-| `RF-08` (`CRIT-07`) | `medium` | `release-blocker` | declarar aliases preestabelecidos/read-only e remover escrita raiz do touched scope | mantém diff enforcement determinístico | `integrated; diff guard pending` | `Touched Surfaces`; `Diff Expectation Contract` |
-| `RF-09` (`ARCH-R2-01`,`CRIT-R2-03`) | `high` | `release-blocker` | reescrever, não excluir, a policy de scope/subscope obrigatória | os seis módulos precisam dessa autoridade canônica | `integrated; rerun pending` | `D-05`; disposition manifest; module map |
-| `RF-10` (`ARCH-R2-02`,`CRIT-R2-04`) | `high` | `release-blocker` | usar `delphi-ai/verify_context.sh` no Git Bash comprovado e não alegar WSL | reabre e corrige o acceptance inexequível de `RF-07` | `integrated; clean-workspace evidence pending` | `DOD-11`; `VAL-09`; alias contract |
-| `RF-11` (`ARCH-R2-03`) | `medium` | `release-blocker` | remover “ingestão”, distribuir `PT-08` pelos módulos funcionais e exigir `module_template.md` | fecha ownership e blueprint dos seis módulos | `integrated; rerun pending` | `S-04`; Planned Additions; Rules Ingestion |
-| `RF-12` (`ARCH-R2-04`) | `medium` | `release-blocker` | classificar termos históricos do governing TODO por seção/owner/lifecycle e repetir suite após move | evita ciclo impossível ou allowlist ampla | `integrated; delivery evidence pending` | `Deterministic Validator Contract` |
+| `RF-01` (`ARCH-OP-02`,`CRIT-01`) | `high` | `release-blocker` | tratar aprovação anterior como intenção; exigir novo `APROVADO` pós-gates | ordem de autoridade é parte do contrato atual | `resolved in planning` | `Approval.Current authority`; novo approval pendente |
+| `RF-02` (`ARCH-OP-03`,`CRIT-02`) | `high` | `release-blocker` | commit + TODO blob/hash no dispatch e freeze renovado | reproducibilidade do review atual | `resolved in planning` | `Gate: Review Baseline Freeze` |
+| `RF-03` (`ARCH-OP-01`,`CRIT-04`) | `high` | `release-blocker` | inventário read-only, seis módulos fechados e disposition 1:1 antes da execução | elimina discricionariedade destrutiva do executor | `resolved in planning` | `PT-01..PT-09`; module map; disposition manifest |
+| `RF-04` (`CRIT-03`) | `high` | `release-blocker` | HEAD/status/diff/content fingerprints para produto e Delphi | prova `VAL-07` e ancora assumptions em bytes | `resolved in planning` | `Read-Only Evidence Snapshot` |
+| `RF-05` (`ARCH-OP-04`,`CRIT-05`) | `medium` | `release-blocker` | validator por superfície + exception ledger explícito + mutation fixtures | `DOD-01/VAL-02` dependem dessa semântica | `resolved in planning; delivery evidence in DoD` | `Deterministic Validator Contract` |
+| `RF-06` (`CRIT-06`) | `medium` | `release-blocker` | proibir PII/payload/JWT/credencial e exigir scan + revisão manual | artefatos persistentes fazem parte da entrega atual | `resolved in planning; delivery evidence in DoD` | `DOD-10`; `VAL-08`; Security Risk Assessment |
+| `RF-07` (`ARCH-OP-05`) | `medium` | `release-blocker` | documentar owner/comandos/aceitação do alias em workspace limpo | setup PACED é condição operacional atual | `resolved in planning; delivery evidence in DoD` | `DOD-11`; `VAL-09`; alias contract |
+| `RF-08` (`CRIT-07`) | `medium` | `release-blocker` | declarar aliases preestabelecidos/read-only e remover escrita raiz do touched scope | mantém diff enforcement determinístico | `resolved in planning` | `Touched Surfaces`; `Diff Expectation Contract` |
+| `RF-09` (`ARCH-R2-01`,`CRIT-R2-03`) | `high` | `release-blocker` | reescrever, não excluir, a policy de scope/subscope obrigatória | os seis módulos precisam dessa autoridade canônica | `resolved in planning` | `D-05`; disposition manifest; module map |
+| `RF-10` (`ARCH-R2-02`,`CRIT-R2-04`) | `high` | `release-blocker` | usar `delphi-ai/verify_context.sh` no Git Bash comprovado e não alegar WSL | reabre e corrige o acceptance inexequível de `RF-07` | `resolved in planning; delivery evidence in DoD` | `DOD-11`; `VAL-09`; alias contract |
+| `RF-11` (`ARCH-R2-03`) | `medium` | `release-blocker` | remover “ingestão”, distribuir `PT-08` pelos módulos funcionais e exigir `module_template.md` | fecha ownership e blueprint dos seis módulos | `resolved in planning` | `S-04`; Planned Additions; Rules Ingestion |
+| `RF-12` (`ARCH-R2-04`) | `medium` | `release-blocker` | classificar termos históricos do governing TODO por seção/owner/lifecycle e repetir suite após move | evita ciclo impossível ou allowlist ampla | `resolved in planning; delivery evidence in DoD` | `Deterministic Validator Contract` |
 | `RF-13` (`CRIT-R2-01`) | `high` | `release-blocker` | incluir paths de código diretamente em `A-01` | guard não dereferencia `PT-01..PT-09` | `resolved; coherence guard go` | `Assumptions Preview.A-01`; guard 2026-09-24 |
 | `RF-14` (`CRIT-R2-02`) | `high` | `release-blocker` | usar ref real `origin/main` e manter SHA em campo separado | guard precisa resolver o ref com Git | `resolved; scope-drift guard go` | `Gate: Review Baseline Freeze`; guard 2026-09-24 |
+| `RF-15` (`ARCH-R3-01`,`CRIT-R3-01`) | `high` | `release-blocker` | sincronizar lifecycle, next step, work state, blockers, execution plan, questions e closeout | elimina instruções concorrentes antes do novo approval | `integrated; final rerun pending` | seções canônicas de estado + `Execution Plan` |
+| `RF-16` (`CRIT-R3-02`) | `medium` | `release-blocker` | gerar padrões proibidos apenas em temp runtime a partir de fragmentos inofensivos | evita validator rejeitar o próprio corpus ou exigir allowlist ampla | `integrated; final rerun pending` | `DOD-10`; `VAL-08`; validator/test contracts |
 
 ## Independent Test Quality Audit Gate
 
@@ -720,14 +724,14 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 
 ## Execution Plan — Draft, Not Authorized
 
-1. Tratar a aprovação anterior como intenção de planejamento e integrar `RF-01..RF-08`.
-2. Congelar/publicar o TODO com inventário `PT-01..PT-09`, mapa final de seis módulos, disposition 1:1 e contratos exatos de validação.
-3. Repetir arquitetura e crítica sobre snapshot ligado a commit/blob/hash; executar coerência, scope drift e authority preflight.
-4. Solicitar novo `APROVADO`; somente depois executar o authority guard normal e exigir `go`.
-5. Reescrever a camada canônica raiz e a divisão de autoridades conforme o manifesto congelado.
-6. Reconstruir módulos, contratos, decisões, backlog, políticas e TODO governance exatamente nos targets aprovados.
-7. Remover do tree atual os paths `Delete`, preservando proveniência somente no histórico Git.
-8. Implementar test-first o validator/fixtures e executar validações, reviews delivery-side, consolidação e closeout.
+1. Publicar o freeze sincronizado após `RF-15..RF-16` e executar a última arquitetura/crítica sobre commit/blob/hash exatos.
+2. Com review limpo, repetir coerência e scope drift, executar `todo_authority_guard.py --pre-approval` e exigir `preflight-go`.
+3. Solicitar novo `APROVADO` para `D-01..D-05`, `S-01..S-09`, mapa de seis módulos, disposition manifest e validações congeladas.
+4. Após registrar a aprovação, ingerir regras no binding ativo, executar o authority guard normal e exigir `go`; este é o primeiro ponto que autoriza execução.
+5. Implementar test-first o validator e seus trees/fixtures persistidos inofensivos; amostras de segurança proibidas existem somente em temp runtime.
+6. Reescrever a camada canônica raiz, a policy de scope/subscope e a divisão de autoridades conforme o manifesto congelado.
+7. Reconstruir os seis módulos, contratos, decisões, backlog, políticas e TODO governance exatamente nos targets aprovados.
+8. Remover do tree atual os paths `Delete`, validar, executar reviews delivery-side, consolidar owners, mover o TODO e repetir a suíte antes do closeout/push final.
 
 ### Touched Surfaces
 
@@ -740,7 +744,7 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 
 - **Strategy:** `test-first` para o validator local; `review-after` para documentos canônicos.
 - **Why:** fixtures negativas precisam provar que o guard falha para identidade legada, links inválidos e autoridade concorrente antes da implementação final.
-- **Fail-first targets:** testes temporários/fixtures do validator para ocorrência proibida em superfície ativa, link quebrado e owner canônico ausente.
+- **Fail-first targets:** trees temporários do validator para ocorrência proibida em superfície ativa, link quebrado, owner canônico ausente e padrões JWT/PII montados em runtime; o corpus persistido permanece elegível ao scan normal.
 - **Exact local suite:** `python3 -m unittest discover -s deterministic/tests -p 'test_*.py' && python3 deterministic/validate_foundation.py --root .`.
 
 ### Runtime / Rollout Notes
@@ -751,7 +755,7 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 
 ## Questions To Close
 
-- [x] Nenhuma questão material aberta; `D-01..D-04` formam a baseline congelada.
+- [x] Nenhuma questão material aberta para review; `D-01..D-05` formam a baseline proposta, e `D-05` exige confirmação no novo `APROVADO`.
 
 ## Rules Acknowledgement / Ingestion
 
@@ -842,7 +846,7 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 
 ## TODO Closeout Disposition
 
-- **Disposition:** `blocked`
-- **Disposition reason:** findings de planejamento foram integrados, mas freeze/reviews/guards renovados e novo `APROVADO` ainda são obrigatórios antes de executar.
-- **Post-commit/push status:** `renewed baseline pending`
+- **Disposition:** `keep-active`
+- **Disposition reason:** contrato está em convergência final de review; execução continua pendente de preflight e novo `APROVADO`.
+- **Post-commit/push status:** `final synchronized baseline pending`
 - **Next path/status action:** permanecer em `todos/active/process/` até implementação, evidência, reviews e closeout completos.
