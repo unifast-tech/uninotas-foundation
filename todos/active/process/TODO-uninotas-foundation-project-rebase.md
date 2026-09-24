@@ -629,6 +629,18 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
 - **Critique status:** `findings_integrated`
 - **Findings summary:** reviewer confirmou a direção de hard cutover, mas recusou execução por aprovação fora de ordem, dispatch mutável, evidência read-only não congelada, decisões destrutivas incompletas, scan legado ambíguo, privacidade incompleta e escopo raiz contraditório.
+- **Resolution ledger:** achados originais da crítica, antes da deduplicação `RF-01..RF-08`.
+
+| Finding ID | Resolution (`Integrated|Challenged|Deferred`) | Usefulness (`useful|noise|mixed|unknown`) | Formalizable (`yes|partial|no|unknown`) | Candidate Rule Level (`paced|project|none|unknown`) | Candidate Rule ID | Rationale / Evidence |
+| --- | --- | --- | --- | --- | --- | --- |
+| `CRIT-01` | `Integrated` | `useful` | `yes` | `paced` | `n/a` | aprovação anterior rebaixada a intenção; novo `APROVADO` tornou-se obrigatório em `RF-01` |
+| `CRIT-02` | `Integrated` | `useful` | `yes` | `paced` | `n/a` | freeze renovado registra commit, push, blob e SHA-256 em `RF-02` |
+| `CRIT-03` | `Integrated` | `useful` | `yes` | `paced` | `n/a` | snapshot read-only registra HEAD/status/diff/content digests e paths/hash em `RF-04` |
+| `CRIT-04` | `Integrated` | `useful` | `yes` | `paced` | `n/a` | mapa final de módulos, disposition 1:1 e evidence matrix foram congelados em `RF-03` |
+| `CRIT-05` | `Integrated` | `useful` | `yes` | `project` | `n/a` | validator por superfície, exception ledger e mutation fixtures definidos em `RF-05` |
+| `CRIT-06` | `Integrated` | `useful` | `partial` | `project` | `n/a` | `DOD-10`, `VAL-08` e security assessment cobrem PII/payload/JWT/segredo em `RF-06` |
+| `CRIT-07` | `Integrated` | `useful` | `partial` | `project` | `n/a` | aliases declarados preestabelecidos/read-only e removidos do touched scope em `RF-08` |
+
 - **Evidence / reference:** dispatch `/tmp/monitor-foundation-review.tJs1Sm/critique-dispatch.json`; merge validado pelo schema; achados `CRIT-01..07` deduplicados em `RF-01..RF-08`.
 - **Waiver authority / reference:** `n/a`
 
