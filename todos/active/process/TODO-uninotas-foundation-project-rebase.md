@@ -506,11 +506,13 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Why this decision:** o pacote é `big`, altera toda a autoridade documental e precisa de baseline imutável antes das revisões independentes.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `main`
-- **Baseline commit:** `3325bc28aa3b68f2dfdb35c8d4f1bfe97e428aca`
-- **Baseline push reference:** `origin/main@3325bc28aa3b68f2dfdb35c8d4f1bfe97e428aca`
-- **Gate status:** `blocked`
-- **Findings summary:** reviewers detectaram que o branch avançou para `b62927b` e os dispatches apontaram a path mutável; a integração de `RF-01..RF-08` também altera seções materiais e exige novo freeze.
-- **Evidence / reference:** primeiro freeze preservado como histórico; próximo freeze deve registrar commit, `origin/main`, blob ID do TODO, SHA-256 do snapshot e delta classificado entre baseline e tip.
+- **Baseline commit:** `092b099fd7d49d1f1859586026dd6c70ce90f2e7`
+- **Baseline push reference:** `origin/main@092b099fd7d49d1f1859586026dd6c70ce90f2e7`
+- **Baseline TODO blob:** `f393bb904b2aec6faa003ffff784f6e5f22103a6`
+- **Baseline snapshot SHA-256:** `2f89a72e2bac26f7428129accd69d5ee951fbd12cef4ae09141ffa316e6ba91c`
+- **Gate status:** `no_material_findings`
+- **Findings summary:** `RF-01..RF-08` foram integrados em pacote material novo; commit, remoto, blob e snapshot exato estão ligados antes do rerun.
+- **Evidence / reference:** git-write guards `go`; push `b62927b..092b099`; `ls-remote` confirmou o SHA integral; package imutável `/tmp/monitor-foundation-review.tJs1Sm/review-package-092b099.md` possui o SHA-256 registrado.
 - **Waiver authority / reference:** `n/a`
 - **Pre-freeze packet-prep rule:** toda revisão abaixo permanece `prepared-pre-freeze`; nenhuma está marcada como aprovada antes do baseline publicado.
 
@@ -522,9 +524,9 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Baseline source:** `Review Baseline Freeze -> Baseline commit`
 - **Material sections compared:** `Context|Contract Boundary|Scope|Out of Scope|Definition of Done|Validation Steps|Execution Lane Tracking|Canonical Module Anchors|Decisions|Decision Baseline|Architecture Change Governance|Questions To Close|Assumptions Preview|Execution Plan|Flow Evidence Planning Matrix|Local CI-Equivalent Suite Matrix|Runtime / Rollout Notes|Security Risk Assessment|Performance & Concurrency Risk Assessment`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo uninotas-foundation/todos/active/process/TODO-uninotas-foundation-project-rebase.md`
-- **Gate status:** `blocked`
-- **Findings summary:** primeira execução observada pelo reviewer retornou mismatch entre baseline registrado e tip; rerun somente depois do novo freeze e da repetição dos reviews.
-- **Evidence / reference:** finding `RF-02`; comando canônico permanece inalterado.
+- **Gate status:** `not_run`
+- **Findings summary:** baseline material renovado e ligado; executar após o segundo ciclo de reviews.
+- **Evidence / reference:** finding histórico `RF-02` integrado; comando canônico permanece inalterado.
 - **Waiver authority / reference:** `n/a`
 
 ## Plan Review Gate
@@ -793,7 +795,7 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 
 | Dependency | Why It Matters | Status | Last Verified | Verification Method | Adjustment / Workaround |
 | --- | --- | --- | --- | --- | --- |
-| `origin/main` de `uninotas-foundation` | baseline freeze e publicação final | `healthy; refresh pending` | `2026-09-24` | push autenticado aceito; tip confirmado em `b62927be0b5c38ec3e6c529562e8707f1de28bfc` antes desta integração | publicar o baseline renovado e atualizar commit/blob/hash de review |
+| `origin/main` de `uninotas-foundation` | baseline freeze e publicação final | `healthy` | `2026-09-24` | `ls-remote` confirmou `092b099fd7d49d1f1859586026dd6c70ce90f2e7`; blob/hash do package registrados | publicar somente novas evidências não materiais até o review convergir |
 | `delphi-ai` local | workflows e guards PACED | `healthy with runner caveat` | `2026-09-24` | `verify_context.sh` via Git Bash passou | scripts CRLF rodam pelo Git Bash; Python guards rodam no WSL |
 | PostgreSQL/Railway | somente evidência read-only de arquitetura | `healthy` | `2026-09-24` | `/api/v1/saude` retornou banco `ok` | nenhuma mutação/seed/E2E neste TODO |
 
