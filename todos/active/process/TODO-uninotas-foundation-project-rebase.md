@@ -514,13 +514,13 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Why this decision:** o pacote é `big`, altera toda a autoridade documental e precisa de baseline imutável antes das revisões independentes.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `main`
-- **Baseline commit:** `700f585bcd3ffce74f3d9600f46f99da731186d0`
+- **Baseline commit:** `7f28cd8a506f8c36b4cdd5cd40192748bc4efb7f`
 - **Baseline push reference:** `origin/main`
-- **Baseline TODO blob:** `24bd55ba4d210bd66edf39155c267f8a78f7aaa4`
-- **Baseline snapshot SHA-256:** `aed235f9ac6c0d39eddf24bd77b70676bf26bd2135b63d0e606d35830639cfa0`
-- **Gate status:** `blocked`
-- **Findings summary:** R3 gerou `RF-15..RF-16`; lifecycle/execution e estratégia de fixtures são seções materiais e exigem freeze final novo.
-- **Evidence / reference:** baseline `700f585` permanece evidência imutável da R3; próximo package deve renovar commit/blob/hash.
+- **Baseline TODO blob:** `13fced0c1ca6ec4470631aebb559de29dfaa1602`
+- **Baseline snapshot SHA-256:** `3524658154b2f7372e1c24d3a13bec42432318fa3eac5186e758ecfb0f67caa0`
+- **Gate status:** `no_material_findings`
+- **Findings summary:** `RF-15..RF-16` integrados; package final sincronizado e ligado a commit, ref, blob e SHA-256.
+- **Evidence / reference:** git-write guards `go`; push `dfe6603..7f28cd8`; `ls-remote` confirmou o SHA integral; snapshot `/tmp/monitor-foundation-review.tJs1Sm/review-package-7f28cd8.md`.
 - **Waiver authority / reference:** `n/a`
 - **Review packet rule:** cada rodada usa snapshot derivado de commit publicado, com blob e SHA-256; evidência pós-freeze não altera o pacote material salvo quando um finding exige novo baseline.
 
@@ -532,9 +532,9 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Baseline source:** `Review Baseline Freeze -> Baseline commit`
 - **Material sections compared:** `Context|Contract Boundary|Scope|Out of Scope|Definition of Done|Validation Steps|Execution Lane Tracking|Canonical Module Anchors|Decisions|Decision Baseline|Architecture Change Governance|Questions To Close|Assumptions Preview|Execution Plan|Flow Evidence Planning Matrix|Local CI-Equivalent Suite Matrix|Runtime / Rollout Notes|Security Risk Assessment|Performance & Concurrency Risk Assessment`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo uninotas-foundation/todos/active/process/TODO-uninotas-foundation-project-rebase.md`
-- **Gate status:** `blocked`
-- **Findings summary:** guard foi `go` contra `700f585`, mas `RF-15..RF-16` mudaram lifecycle/execution/validation e exigem novo baseline e rerun.
-- **Evidence / reference:** resultado anterior preservado como histórico; rerun pendente do freeze final.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** zero seções materiais divergiram do baseline final `7f28cd8`; `origin/main` resolveu e contém o commit.
+- **Evidence / reference:** guard canônico — `Overall outcome: go`; `Changed material sections: 0` em 2026-09-24.
 - **Waiver authority / reference:** `n/a`
 
 ## Plan Review Gate
@@ -831,7 +831,7 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 
 | Dependency | Why It Matters | Status | Last Verified | Verification Method | Adjustment / Workaround |
 | --- | --- | --- | --- | --- | --- |
-| `origin/main` de `uninotas-foundation` | baseline freeze e publicação final | `healthy` | `2026-09-24` | `ls-remote` confirmou `700f585bcd3ffce74f3d9600f46f99da731186d0`; blob/hash do package registrados | publicar somente novas evidências não materiais até o review convergir |
+| `origin/main` de `uninotas-foundation` | baseline freeze e publicação final | `healthy` | `2026-09-24` | `ls-remote` confirmou `7f28cd8a506f8c36b4cdd5cd40192748bc4efb7f`; blob/hash do package registrados | publicar somente novas evidências não materiais até o review convergir |
 | `delphi-ai` local | workflows e guards PACED | `healthy with runner caveat` | `2026-09-24` | `verify_context.sh` via Git Bash passou | scripts CRLF rodam pelo Git Bash; Python guards rodam no WSL |
 | PostgreSQL/Railway | somente evidência read-only de arquitetura | `healthy` | `2026-09-24` | `/api/v1/saude` retornou banco `ok` | nenhuma mutação/seed/E2E neste TODO |
 
