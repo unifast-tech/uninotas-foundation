@@ -72,7 +72,7 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 - [ ] `S-01` Inventariar a verdade atual do Monitor de Notas no código, banco documentado, infraestrutura, testes e READMEs, distinguindo comportamento comprovado de intenção futura.
 - [ ] `S-02` Definir e aplicar a identidade canônica do produto e da Foundation em títulos, links, namespaces e linguagem de domínio.
 - [ ] `S-03` Reescrever mandato, constituição, entidades, baseline tecnológico, lifecycle e roadmap para refletirem exclusivamente o projeto atual.
-- [ ] `S-04` Substituir os módulos herdados por módulos do Monitor de Notas, incluindo pelo menos ingestão/leitura de eventos, classificação, tratamentos, identidade/equipe, tempo real/monitoramento e operação/deploy.
+- [ ] `S-04` Substituir os módulos herdados pelos seis módulos congelados do Monitor de Notas: fronteira externa e leitura de eventos/classificação, tratamentos/histórico, identidade/equipe, invalidação em tempo real, monitoramento operacional e runtime/deploy; ingestão/escrita de `logs` permanece exclusivamente Routerfy.
 - [ ] `S-05` Reconciliar backlog, decisões, contratos e políticas com os owners canônicos novos, sem transportar decisões do LeadsHug como se fossem decisões do Monitor de Notas.
 - [ ] `S-06` Remover do tree atual TODOs, artefatos e documentos herdados do LeadsHug que não pertençam ao Monitor de Notas; o histórico Git será a única retenção do legado removido.
 - [ ] `S-07` Atualizar a governança para declarar o `delphi-ai` como distribuição local obrigatória do método PACED: todo trabalho do projeto passa por seus workflows e guards, com `APROVADO` e authority guard `go` antes de implementação.
@@ -98,6 +98,7 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 - [x] `D-02` Excluir do tree atual o conteúdo herdado do LeadsHug que não pertença ao Monitor de Notas, sem criar arquivo legado interno. O histórico Git preserva a proveniência sem manter autoridade documental concorrente. Decisão confirmada pelo usuário em 2026-09-24.
 - [x] `D-03` O `delphi-ai` distribui o método **PACED** (*Progressively Accelerated Controlled Engineering through Determinism*) e é passagem obrigatória para todo trabalho do projeto. `uninotas-foundation` governa a verdade específica do produto; PACED governa método, workflows e guards. Alterar o núcleo compartilhado do `delphi-ai` continua exigindo TODO próprio. Decisão confirmada pelo usuário em 2026-09-24.
 - [x] `D-04` A tabela externa `logs` pertence ao Routerfy e é somente leitura para o Monitor de Notas; a aplicação escreve apenas em suas próprias tabelas de usuários e tratamentos. Decisão consolidada da evidência já incluída no contrato aprovado (`README.md`, `backend/README.md`, Prisma e SQL isolado).
+- [x] `D-05` O produto atual não possui tenancy comprovada. Para satisfazer o contrato PACED de scope/subscope sem inventar domínio, a política local será reescrita com um único scope `monitor-de-notas`, subscopes iguais aos seis módulos congelados e `EnvironmentType=landlord` somente como adapter técnico do vocabulário PACED para superfícies únicas do projeto; isso não cria landlord/tenant de negócio. Decisão proposta a partir do código e sujeita ao novo `APROVADO`.
 
 ## Decision Baseline — Frozen Before Implementation
 
@@ -105,6 +106,7 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 - [x] `D-02` Política de legado aprovada: remoção do tree atual e retenção somente pelo histórico Git.
 - [x] `D-03` Fronteira aprovada: Foundation como autoridade do produto e `delphi-ai`/PACED como autoridade obrigatória do processo de engenharia.
 - [x] `D-04` Ownership de dados congelado: `logs` read-only; `monitor_usuarios` e `monitor_tratamentos` pertencem à aplicação.
+- [x] `D-05` Scope congelado para o próximo review: produto single-scope sem tenancy; seis subscopes canônicos; `landlord` apenas como classificação técnica PACED, não entidade de domínio.
 
 ## Bounded But Elastic Guardrails
 
@@ -115,7 +117,7 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 
 - [ ] `DOD-01` Nenhum documento canônico ativo apresenta o LeadsHug ou seu domínio como autoridade, produto ou arquitetura atual.
 - [ ] `DOD-02` README, mandato, constituição, entidades, lifecycle, baseline tecnológico e roadmap descrevem de forma coerente o Monitor de Notas comprovado.
-- [ ] `DOD-03` Os módulos possuem ownership, invariantes, capacidades e contratos correspondentes aos limites reais do sistema.
+- [ ] `DOD-03` Os seis módulos usam os anchors obrigatórios de `delphi-ai/templates/module_template.md`, declaram o scope/subscope de `D-05` e possuem ownership, invariantes, capacidades e contratos correspondentes aos limites reais do sistema.
 - [ ] `DOD-04` Backlog, decisões, contratos, políticas e TODOs ativos estão reconciliados com a nova identidade e não mantêm estado vivo conflitante.
 - [ ] `DOD-05` Todo conteúdo herdado do LeadsHug sem função no Monitor de Notas foi removido do tree atual e permanece acessível apenas pelo histórico Git.
 - [ ] `DOD-06` A divisão de autoridade entre `uninotas-foundation`, `delphi-ai` e o repositório do produto está documentada sem links quebrados.
@@ -135,7 +137,7 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 - [ ] `VAL-06` Revisar a matriz de evidências critério a critério; resumo agregado não substitui evidência 1:1.
 - [ ] `VAL-07` Confirmar que o repositório do produto e o `delphi-ai` não receberam mudanças durante a execução.
 - [ ] `VAL-08` Executar scan automatizado de segredo/JWT/PII de alto risco e revisão manual de privacidade nos documentos, artifacts e fixtures novos.
-- [ ] `VAL-09` Em checkout/workspace limpo, criar ou verificar o alias pelo comando canônico e executar `bash delphi-ai/bootloaders/verify_context.sh` com sucesso.
+- [ ] `VAL-09` Em workspace limpo no runner Git Bash comprovado, criar/verificar os aliases e executar o entrypoint existente `./delphi-ai/verify_context.sh` até obter `Environment Verified: PACED-Ready.`.
 
 ## Completion Evidence Matrix
 
@@ -145,7 +147,7 @@ Cada critério possui evidência planejada 1:1; nenhum resumo agregado substitui
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `DOD-01` | `Definition of Done` | nenhuma autoridade LeadsHug ativa | `test+review` | `python3 deterministic/validate_foundation.py --root .` + manifesto de exceções históricas | `local` | `planned` | superfície ativa e história possuem regras distintas |
 | `DOD-02` | `Definition of Done` | owners raiz descrevem o produto atual | `doc+traceability` | `artifacts/analysis/monitor-de-notas-product-truth-20260924.md` | `local` | `planned` | cada afirmação material aponta a código/configuração |
-| `DOD-03` | `Definition of Done` | módulos correspondem aos limites reais | `doc+review` | `Canonical Target Module Map` + architecture adherence review | `local` | `planned` | seis owners coesos e fechados antes da execução |
+| `DOD-03` | `Definition of Done` | módulos correspondem aos limites reais | `doc+review` | module map + anchors de `module_template.md` + scope policy + architecture adherence | `local` | `planned` | seis owners coesos e fechados antes da execução |
 | `DOD-04` | `Definition of Done` | owners auxiliares reconciliados | `manifest+review` | `Tracked Foundation File Disposition Manifest` | `local` | `planned` | uma disposição por arquivo de entrada |
 | `DOD-05` | `Definition of Done` | legado removido do tree | `git+test` | `git ls-files` + validator de paths/autoridade | `local` | `planned` | histórico Git é a única retenção não explicitamente permitida |
 | `DOD-06` | `Definition of Done` | fronteiras Foundation/PACED/produto sem links quebrados | `test` | validator de links + setup contract | `local` | `planned` | não duplica regras PACED |
@@ -153,7 +155,7 @@ Cada critério possui evidência planejada 1:1; nenhum resumo agregado substitui
 | `DOD-08` | `Definition of Done` | diff restrito à Foundation | `git+guard` | `todo_diff_expectation_guard.py` + fingerprints dos repositórios read-only | `local` | `planned` | mudanças preexistentes não são atribuídas ao TODO |
 | `DOD-09` | `Definition of Done` | decisões promovidas aos owners | `review` | matriz de owners + closeout guard | `local` | `planned` | TODO deixa de ser owner de verdade estável |
 | `DOD-10` | `Definition of Done` | ausência de PII/payload/segredo persistido | `scan+review` | validator high-risk patterns + checklist manual de privacidade | `local` | `planned` | exemplos somente sintéticos/redigidos |
-| `DOD-11` | `Definition of Done` | alias PACED reproduzível | `setup test` | comando de setup documentado + `verify_context.sh` | `clean workspace` | `planned` | symlink continua local e não versionado no produto |
+| `DOD-11` | `Definition of Done` | alias PACED reproduzível | `setup test` | comando Git Bash documentado + `delphi-ai/verify_context.sh` | `clean Windows workspace` | `planned` | WSL não é evidência aceita enquanto houver caveat CRLF |
 | `VAL-01` | `Validation Steps` | links e anchors válidos | `test` | `python3 deterministic/validate_foundation.py --root .` | `local` | `planned` | fail-closed |
 | `VAL-02` | `Validation Steps` | legado classificado por superfície | `test` | validator + `deterministic/legacy_reference_exceptions.json` | `local` | `planned` | exceção exige path, razão e owner |
 | `VAL-03` | `Validation Steps` | documentação coerente com produto | `traceability review` | product-truth artifact + hashes da evidence snapshot | `read-only product tree` | `planned` | sem consulta mutante ao banco |
@@ -162,7 +164,7 @@ Cada critério possui evidência planejada 1:1; nenhum resumo agregado substitui
 | `VAL-06` | `Validation Steps` | evidência 1:1 completa | `review` | esta matriz sem `planned|pending` | `local` | `planned` | bloqueia completion |
 | `VAL-07` | `Validation Steps` | produto e Delphi inalterados | `fingerprint` | repetir comandos de `Read-Only Evidence Snapshot` | `workspace` | `planned` | igualdade exata dos digests |
 | `VAL-08` | `Validation Steps` | privacidade e segredo | `scan+review` | high-risk pattern scan + inspeção manual registrada | `local` | `planned` | inclui fixtures/artifacts |
-| `VAL-09` | `Validation Steps` | setup reproduzível | `setup test` | alias canônico + `bash delphi-ai/bootloaders/verify_context.sh` | `clean workspace` | `planned` | sem commit de link no produto |
+| `VAL-09` | `Validation Steps` | setup reproduzível | `setup test` | `"C:\Program Files\Git\bin\bash.exe" -lc "cd /c/Unifast/MonitorDeNotas && ./delphi-ai/verify_context.sh"` | `clean Windows workspace` | `planned` | entrypoint comprovado; sem commit de link no produto |
 
 ## Execution Lane Tracking
 
@@ -308,6 +310,8 @@ Os hashes completos foram obtidos por `sha256sum` no snapshot de 2026-09-24 e de
 
 O índice `modules/README.md` apontará exatamente para estes seis módulos. Adição, remoção, merge ou split material exige atualizar esta tabela e renovar `APROVADO`.
 
+Todos os seis módulos terão `Core scope=monitor-de-notas`, um subscope igual ao nome canônico sem `.md`, `EnvironmentType=landlord` somente como adapter PACED conforme `D-05`, e os anchors obrigatórios de `delphi-ai/templates/module_template.md`. Nenhum módulo poderá inferir tenancy, BU, canal ou organização a partir desse adapter técnico.
+
 ## Module Decision Baseline Snapshot
 
 | Module Decision Ref | Current Module Decision | Planned Handling | Evidence |
@@ -353,7 +357,7 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 | `policies/central_whatsapp_independent_legacy_policy.md` | `Delete` | política de domínio inexistente |
 | `policies/engineering_guardrails.md` | `Rewrite` | guardrails locais que referenciam PACED sem duplicá-lo |
 | `policies/query_path_guardrails.md` | `Rewrite` | invariantes read-only/query de `logs` comprovados |
-| `policies/scope_subscope_governance.md` | `Delete` | política LeadsHug sem owner atual comprovado |
+| `policies/scope_subscope_governance.md` | `Rewrite` | policy obrigatória PACED: scope único `monitor-de-notas`, seis subscopes e ausência explícita de tenancy de negócio conforme `D-05` |
 | `policies/validation_evidence_policy.md` | `Rewrite` | evidência 1:1, privacidade e fingerprints read-only |
 | `policies/web_to_app_promotion_policy.md` | `Delete` | lane inexistente no projeto atual |
 | `project_constitution.md` | `Rewrite` | constituição Monitor de Notas |
@@ -391,12 +395,12 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 | `artifacts/analysis/monitor-de-notas-product-truth-20260924.md` | matriz completa de verdade → código/hash |
 | `artifacts/analysis/monitor-de-notas-foundation-cutover-map-20260924.md` | before/after, disposition e prova de cutover |
 | `decisions/monitor-de-notas-foundation-decisions.md` | racional/proveniência de `D-01..D-04` promovidos |
-| `modules/events-and-classification.md` | `PT-01..PT-03` |
-| `modules/treatments-and-history.md` | `PT-02,PT-04` |
-| `modules/identity-and-team.md` | `PT-05` |
-| `modules/realtime-invalidation.md` | `PT-06` |
+| `modules/events-and-classification.md` | `PT-01..PT-03` + consumidores de lista/detalhe/export em `PT-08` |
+| `modules/treatments-and-history.md` | `PT-02,PT-04` + consumidor de tratamento/detalhe em `PT-08` |
+| `modules/identity-and-team.md` | `PT-05` + consumidor de equipe/sessão em `PT-08` |
+| `modules/realtime-invalidation.md` | `PT-06` + consumer hook em `PT-08` |
 | `modules/operational-monitoring.md` | `PT-07` |
-| `modules/runtime-and-deployment.md` | `PT-08,PT-09` |
+| `modules/runtime-and-deployment.md` | `PT-09` |
 | `deterministic/validate_foundation.py` | validator canônico local |
 | `deterministic/legacy_reference_exceptions.json` | exceções históricas com path, razão e owner |
 | `deterministic/tests/test_validate_foundation.py` | testes positivos e mutation-style negativos |
@@ -448,11 +452,13 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 ### Deterministic Validator Contract
 
 - **Canonical commands:** `python3 -m unittest discover -s deterministic/tests -p 'test_*.py'` e `python3 deterministic/validate_foundation.py --root .`.
-- **Active-authority surfaces:** documentos raiz, `modules/`, `backlog/`, `contracts/`, `decisions/`, `policies/`, `todos/README.md` e `todos/active/`.
-- **Historical surfaces:** `todos/completed/` e artifacts de migração permitidos somente quando listados em `deterministic/legacy_reference_exceptions.json` com `path`, `term`, `reason` e `owner`.
-- **Fail-closed checks:** arquivos obrigatórios, índice de seis módulos, links/anchors relativos, ausência dos paths marcados `Delete`, owner único, nenhuma autoridade ativa LeadsHug, exception ledger sem wildcard amplo e nenhum arquivo não classificado pelo publication manifest.
+- **Active-authority surfaces:** documentos raiz, `modules/`, `backlog/`, `contracts/`, `decisions/`, `policies/`, `todos/README.md` e TODOs ativos diferentes do contrato de migração governante.
+- **Governing migration TODO:** enquanto este arquivo estiver em `todos/active/process/`, cada termo legado permitido deve possuir linha exata no ledger com `path`, `term`, `context_kind=historical_migration_record`, `section`, `reason`, `owner` e `lifecycle=active_until_closeout_move`; isso registra proveniência, não autoriza o termo em owners canônicos.
+- **Historical surfaces:** após o closeout move, a entrada muda para o path em `todos/completed/process/` e `lifecycle=historical`; outros completed TODOs/artifacts só são permitidos quando listados sem wildcard em `deterministic/legacy_reference_exceptions.json`.
+- **Closeout sequence:** validar tree candidato com a exceção ativa estrita; executar reviews/guards; mover o TODO; atualizar somente o path/lifecycle da exceção; repetir a suíte inteira antes do commit/push final.
+- **Fail-closed checks:** arquivos obrigatórios incluindo `policies/scope_subscope_governance.md`, anchors do `module_template.md` nos seis módulos, consistência scope/subscope, links/anchors relativos, ausência dos paths `Delete`, owner único, nenhuma autoridade ativa LeadsHug, exception ledger sem wildcard amplo e nenhum arquivo não classificado pelo publication manifest.
 - **Privacy checks:** rejeitar JWT-like tokens, private-key markers, atribuições de segredo e identificadores pessoais plausíveis em artifacts/fixtures; nomes de variáveis e exemplos sintéticos explicitamente marcados são permitidos.
-- **Mutation fixtures:** autoridade legada em owner ativo, menção histórica permitida, exception sem owner/razão, link quebrado, módulo órfão, owner ausente e fixture com JWT/PII sintético proibido.
+- **Mutation fixtures:** autoridade legada em owner ativo, menção histórica permitida no governing TODO, mesma menção como autoridade ativa proibida, exception sem owner/razão/lifecycle, link quebrado, módulo órfão, anchor obrigatório ausente, scope divergente, owner ausente e fixture com JWT/PII sintético proibido.
 - **Manual complement:** revisar semanticamente que nenhuma ocorrência permitida apresenta o legado como verdade atual e que nenhum exemplo deriva de payload real.
 
 ### PACED Workspace Alias Contract
@@ -461,7 +467,9 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Required topology:** `foundation_documentation -> uninotas-foundation` e `delphi-ai -> C:\Unifast\delphi-ai` (ou paths equivalentes no host).
 - **Canonical Windows command:** `cmd /c mklink /D foundation_documentation uninotas-foundation` quando o alias ainda não existir; para o Delphi, `cmd /c mklink /D delphi-ai C:\Unifast\delphi-ai`.
 - **WSL equivalent:** `ln -s uninotas-foundation foundation_documentation` e `ln -s /mnt/c/Unifast/delphi-ai delphi-ai`, somente depois de confirmar que o destino não existe.
-- **Acceptance:** `test -L foundation_documentation && test -L delphi-ai` e `bash delphi-ai/bootloaders/verify_context.sh` devem passar em workspace limpo.
+- **Acceptance runner comprovado:** no host Windows com Git for Windows, `"C:\Program Files\Git\bin\bash.exe" -lc "cd /c/Unifast/MonitorDeNotas && ./delphi-ai/verify_context.sh"`; execução em 2026-09-24 retornou `Environment Verified: PACED-Ready.`.
+- **WSL limitation:** `bash delphi-ai/verify_context.sh` não é aceito como evidência enquanto o wrapper CRLF falhar no WSL; corrigir o Delphi exige TODO separado e não bloqueia o runner Git Bash comprovado.
+- **Acceptance:** no runner declarado, verificar os dois symlinks e executar o entrypoint existente `delphi-ai/verify_context.sh`; `delphi-ai/bootloaders/verify_context.sh` não existe e não deve ser referenciado.
 - **Scope boundary:** os aliases atuais são infraestrutura local preestabelecida e read-only neste TODO; recriação para validar setup não é mudança persistente do produto nem autoriza qualquer outro path raiz.
 
 ## Architecture Review Gates
@@ -471,7 +479,7 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set`
 - **Decision review status:** `findings_integrated`
-- **Decision review evidence / resolution:** reviewer `fresh-stateless-paced-architecture-reviewer`; hard cutover confirmado, achados `ARCH-OP-01..05` deduplicados em `RF-01..RF-08`; novo review obrigatório sobre baseline renovado e imutável.
+- **Decision review evidence / resolution:** R1 confirmou hard cutover e gerou `RF-01..RF-08`; R2 validou a resolução de `RF-01..06,RF-08`, reabriu `RF-07` e encontrou `ARCH-R2-01..04`, integrados como `RF-09..RF-12`; terceiro review obrigatório após novo freeze.
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -484,7 +492,7 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 
 | Assumption ID | Assumption | Evidence | If False | Confidence | Handling |
 | --- | --- | --- | --- | --- | --- |
-| `A-01` | O snapshot de código/configuração é a fonte técnica para reconstruir a verdade do produto; READMEs somente corroboram. | `PT-01..PT-09`, paths e SHA-256 exatos no snapshot `HEAD 78bf271341dfccb2595389f0dbac0e01e8532a7b` | qualquer hash divergente reabre inventário e scope review | `High` | `Keep as Assumption` |
+| `A-01` | O snapshot de código/configuração é a fonte técnica para reconstruir a verdade do produto; READMEs somente corroboram. | `backend/prisma/schema.prisma`; `backend/src/logs/logs.sql.ts`; `backend/src/logs/logs.service.ts`; `backend/src/realtime/realtime.service.ts`; `backend/src/monitoramento/monitoramento.service.ts`; `backend/src/auth/auth.service.ts`; `backend/src/usuarios/usuarios.service.ts`; `frontend/src/api/eventos.ts`; `frontend/src/hooks/useTempoReal.ts`; `PT-01..PT-09` e SHA-256 exatos no snapshot `HEAD 78bf271341dfccb2595389f0dbac0e01e8532a7b` | qualquer hash divergente reabre inventário e scope review | `High` | `Keep as Assumption` |
 | `A-02` | A tabela `logs` permanece read-only e pertence ao Routerfy. | `backend/prisma/schema.prisma@cb53048b…`, `backend/src/logs/logs.sql.ts@142c26ab…`, `backend/docs/tabela-logs.md@151fbc85…` | muda invariantes, contratos e módulos | `High` | `Promoted to D-04` |
 | `A-03` | `uninotas-foundation` é a autoridade específica do produto e `delphi-ai` distribui o PACED obrigatório para todo trabalho. | `D-03`; `delphi-ai/README.md` no commit `9ba43e8bba3618d029320bf6d7b40415881a0287`; alias contract local | muda links, responsabilidades e gates | `High` | `Promoted to D-03` |
 
@@ -496,8 +504,8 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Guard scope:** `A-01,A-02,A-03`
 - **Guard command:** `python3 delphi-ai/tools/assumption_code_coherence_guard.py --todo uninotas-foundation/todos/active/process/TODO-uninotas-foundation-project-rebase.md`
 - **Gate status:** `findings_integrated`
-- **Findings summary:** primeira leitura detectou que `A-01` não possuía paths/hashes concretos; o snapshot `PT-01..PT-09` integrou a correção.
-- **Evidence / reference:** `Read-Only Evidence Snapshot` + `Pre-Execution Product Truth Baseline`; execução determinística final permanece pendente do review renovado.
+- **Findings summary:** R2 detectou que o guard não dereferencia `PT-01..PT-09`; `A-01` agora cita paths de código diretamente e o guard passou.
+- **Evidence / reference:** `python3 delphi-ai/tools/assumption_code_coherence_guard.py --todo uninotas-foundation/todos/active/process/TODO-uninotas-foundation-project-rebase.md` — `Overall outcome: go`; `Live assumptions checked: 1` em 2026-09-24.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Baseline Freeze
@@ -507,12 +515,12 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `main`
 - **Baseline commit:** `092b099fd7d49d1f1859586026dd6c70ce90f2e7`
-- **Baseline push reference:** `origin/main@092b099fd7d49d1f1859586026dd6c70ce90f2e7`
+- **Baseline push reference:** `origin/main`
 - **Baseline TODO blob:** `f393bb904b2aec6faa003ffff784f6e5f22103a6`
 - **Baseline snapshot SHA-256:** `2f89a72e2bac26f7428129accd69d5ee951fbd12cef4ae09141ffa316e6ba91c`
-- **Gate status:** `no_material_findings`
-- **Findings summary:** `RF-01..RF-08` foram integrados em pacote material novo; commit, remoto, blob e snapshot exato estão ligados antes do rerun.
-- **Evidence / reference:** git-write guards `go`; push `b62927b..092b099`; `ls-remote` confirmou o SHA integral; package imutável `/tmp/monitor-foundation-review.tJs1Sm/review-package-092b099.md` possui o SHA-256 registrado.
+- **Gate status:** `blocked`
+- **Findings summary:** R2 encontrou `RF-09..RF-14`; sua integração altera decisões, validação, módulos e manifests, portanto o snapshot `092b099` permanece apenas como baseline histórico da segunda rodada.
+- **Evidence / reference:** R2 foi corretamente ligado a `092b099`, blob `f393bb9…` e SHA-256 `2f89a72e…`; publicar novo freeze depois desta integração.
 - **Waiver authority / reference:** `n/a`
 - **Pre-freeze packet-prep rule:** toda revisão abaixo permanece `prepared-pre-freeze`; nenhuma está marcada como aprovada antes do baseline publicado.
 
@@ -524,9 +532,9 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Baseline source:** `Review Baseline Freeze -> Baseline commit`
 - **Material sections compared:** `Context|Contract Boundary|Scope|Out of Scope|Definition of Done|Validation Steps|Execution Lane Tracking|Canonical Module Anchors|Decisions|Decision Baseline|Architecture Change Governance|Questions To Close|Assumptions Preview|Execution Plan|Flow Evidence Planning Matrix|Local CI-Equivalent Suite Matrix|Runtime / Rollout Notes|Security Risk Assessment|Performance & Concurrency Risk Assessment`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo uninotas-foundation/todos/active/process/TODO-uninotas-foundation-project-rebase.md`
-- **Gate status:** `not_run`
-- **Findings summary:** baseline material renovado e ligado; executar após o segundo ciclo de reviews.
-- **Evidence / reference:** finding histórico `RF-02` integrado; comando canônico permanece inalterado.
+- **Gate status:** `blocked`
+- **Findings summary:** R2 comprovou que a push reference descritiva não era resolvível; `RF-14` corrige para `origin/main`, mas requer novo freeze e rerun.
+- **Evidence / reference:** findings históricos `RF-02`/`RF-14`; comando canônico permanece inalterado.
 - **Waiver authority / reference:** `n/a`
 
 ## Plan Review Gate
@@ -640,8 +648,12 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 | `CRIT-05` | `Integrated` | `useful` | `yes` | `project` | `n/a` | validator por superfície, exception ledger e mutation fixtures definidos em `RF-05` |
 | `CRIT-06` | `Integrated` | `useful` | `partial` | `project` | `n/a` | `DOD-10`, `VAL-08` e security assessment cobrem PII/payload/JWT/segredo em `RF-06` |
 | `CRIT-07` | `Integrated` | `useful` | `partial` | `project` | `n/a` | aliases declarados preestabelecidos/read-only e removidos do touched scope em `RF-08` |
+| `CRIT-R2-01` | `Integrated` | `useful` | `no` | `none` | `n/a` | paths relativos concretos foram adicionados diretamente à evidência de `A-01` em `RF-13` |
+| `CRIT-R2-02` | `Integrated` | `useful` | `no` | `none` | `n/a` | `Baseline push reference` agora contém o ref Git resolvível `origin/main` em `RF-14` |
+| `CRIT-R2-03` | `Integrated` | `useful` | `yes` | `paced` | `n/a` | scope policy mudou de `Delete` para `Rewrite` e ganhou contrato `D-05` em `RF-09` |
+| `CRIT-R2-04` | `Integrated` | `useful` | `partial` | `paced` | `n/a` | acceptance usa entrypoint existente e runner Git Bash comprovado; WSL fica explicitamente não aceito em `RF-10` |
 
-- **Evidence / reference:** dispatch `/tmp/monitor-foundation-review.tJs1Sm/critique-dispatch.json`; merge validado pelo schema; achados `CRIT-01..07` deduplicados em `RF-01..RF-08`.
+- **Evidence / reference:** R1 dispatch/merge validado; R2 dispatch `/tmp/monitor-foundation-review.tJs1Sm/critique-r2-dispatch.json`; `CRIT-R2-01..04` integrados em `RF-09,RF-10,RF-13,RF-14`; novo rerun pendente.
 - **Waiver authority / reference:** `n/a`
 
 ## Promotion Finding Routing Ledger
@@ -658,6 +670,12 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 | `RF-06` (`CRIT-06`) | `medium` | `release-blocker` | proibir PII/payload/JWT/credencial e exigir scan + revisão manual | artefatos persistentes fazem parte da entrega atual | `integrated; delivery evidence pending` | `DOD-10`; `VAL-08`; Security Risk Assessment |
 | `RF-07` (`ARCH-OP-05`) | `medium` | `release-blocker` | documentar owner/comandos/aceitação do alias em workspace limpo | setup PACED é condição operacional atual | `integrated; clean-workspace evidence pending` | `DOD-11`; `VAL-09`; alias contract |
 | `RF-08` (`CRIT-07`) | `medium` | `release-blocker` | declarar aliases preestabelecidos/read-only e remover escrita raiz do touched scope | mantém diff enforcement determinístico | `integrated; diff guard pending` | `Touched Surfaces`; `Diff Expectation Contract` |
+| `RF-09` (`ARCH-R2-01`,`CRIT-R2-03`) | `high` | `release-blocker` | reescrever, não excluir, a policy de scope/subscope obrigatória | os seis módulos precisam dessa autoridade canônica | `integrated; rerun pending` | `D-05`; disposition manifest; module map |
+| `RF-10` (`ARCH-R2-02`,`CRIT-R2-04`) | `high` | `release-blocker` | usar `delphi-ai/verify_context.sh` no Git Bash comprovado e não alegar WSL | reabre e corrige o acceptance inexequível de `RF-07` | `integrated; clean-workspace evidence pending` | `DOD-11`; `VAL-09`; alias contract |
+| `RF-11` (`ARCH-R2-03`) | `medium` | `release-blocker` | remover “ingestão”, distribuir `PT-08` pelos módulos funcionais e exigir `module_template.md` | fecha ownership e blueprint dos seis módulos | `integrated; rerun pending` | `S-04`; Planned Additions; Rules Ingestion |
+| `RF-12` (`ARCH-R2-04`) | `medium` | `release-blocker` | classificar termos históricos do governing TODO por seção/owner/lifecycle e repetir suite após move | evita ciclo impossível ou allowlist ampla | `integrated; delivery evidence pending` | `Deterministic Validator Contract` |
+| `RF-13` (`CRIT-R2-01`) | `high` | `release-blocker` | incluir paths de código diretamente em `A-01` | guard não dereferencia `PT-01..PT-09` | `resolved; coherence guard go` | `Assumptions Preview.A-01`; guard 2026-09-24 |
+| `RF-14` (`CRIT-R2-02`) | `high` | `release-blocker` | usar ref real `origin/main` e manter SHA em campo separado | guard precisa resolver o ref com Git | `integrated; guard rerun pending` | `Gate: Review Baseline Freeze` |
 
 ## Independent Test Quality Audit Gate
 
@@ -748,6 +766,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 | `delphi-ai/workflows/docker/todo-approval-gates-method.md` | `APROVADO` recebido e precisa de evidência persistente | freeze, crítica, coerência e scope drift | tratar aprovação em chat como único gate | execução aguarda gates convergirem |
 | `delphi-ai/workflows/docker/todo-execution-boundary-method.md` | controla implementação pós-aprovação | single-writer e authority guard | worktree/checkout auxiliar ou expansão oculta | executor limitado à Foundation |
 | `delphi-ai/rules/core/delphi-project-setup-model-decision.md` | pedido explícito de adoção PACED | readiness + recalibração + TODO | feature work com drift material | este TODO é a normalização exigida |
+| `delphi-ai/templates/module_template.md` | seis módulos canônicos serão criados | anchors de intent/boundaries, coverage, rules, contracts e cross-module concerns | módulos livres ou espelhos de pastas runtime | validator exige anchors aplicáveis em cada módulo |
+| `uninotas-foundation/policies/scope_subscope_governance.md` | policy obrigatória para module ownership | `D-05`, scope único e seis subscopes comprovados | importar tenancy LeadsHug ou expandir scope implicitamente | reescrever antes de consolidar módulos e validar consistência |
 
 ## Agent Routing Preflight
 
