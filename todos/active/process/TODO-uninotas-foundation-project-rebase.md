@@ -927,7 +927,7 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 15. `Concluído com no-go parcial`: delivery R9 sobre `222a8a9b0d63c47f002b3b752f2a83bd548260e0` confirmou test-quality/cutover `GO`, confirmou os blockers R8 resolvidos e encontrou somente `ARCH-ADH-R9-01` na sincronização de estado.
 16. `Concluído com no-go parcial`: delivery R10 sobre `d269bc269f761de68587abc83813480a23cfd200` confirmou test-quality/cutover `GO`, confirmou `ARCH-ADH-R9-01` resolvido e encontrou somente `ARCH-ADH-R10-01` nos enums PACED.
 17. `Concluído com no-go parcial`: delivery R11 sobre `a72780df68156eae85a88a6071989fa3730ded8a` confirmou test-quality/cutover `GO`, confirmou `ARCH-ADH-R10-01` resolvido e encontrou somente `ARCH-ADH-R11-01` no passo temporal; `TQ-R11-OBS-01` foi integrado e `ENV-R11-OBS-01` classificado fora do escopo.
-18. `Em andamento`: correção temporal R11 integrada localmente; executar e aguardar delivery R12 no mesmo HEAD imutável e, após resultado limpo, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
+18. `Em andamento`: correção temporal R11 congelada em `7fad8c31bb2e5df8f898dd760ba88cf37b742edd`; executar e aguardar delivery R12 no mesmo HEAD imutável e, após resultado limpo, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
 
 ### Touched Surfaces
 
@@ -1068,5 +1068,5 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 
 - **Disposition:** `keep-active`
 - **Disposition reason:** approved implementation and delivery R11 temporal-state correction remain local; delivery R12 and delivery/closeout gates remain pending.
-- **Post-commit/push status:** `delivery R11 temporal-state correction is local and uncommitted; origin/main remains at b73b0eb approval checkpoint`
+- **Post-commit/push status:** `delivery R11 temporal-state correction committed at 7fad8c31bb2e5df8f898dd760ba88cf37b742edd; origin/main remains at b73b0eb approval checkpoint`
 - **Next path/status action:** permanecer em `todos/active/process/` até implementação, evidência, reviews e closeout completos.
