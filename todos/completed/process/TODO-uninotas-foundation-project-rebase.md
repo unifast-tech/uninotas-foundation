@@ -3,7 +3,7 @@
 ## Artifact Identity
 
 - **Artifact type:** `tactical_execution_contract`
-- **Lifecycle state:** `Completed — closeout committed locally; publication pending`
+- **Lifecycle state:** `Completed — lane promoted`
 - **Created:** `2026-09-24`
 - **Owner:** `Delphi / Strategic CTO-Tech-Lead`, sob autoridade humana do usuário
 
@@ -49,15 +49,15 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 
 ## Delivery Status Canon
 
-- **Current delivery stage:** `Local-Implemented`
+- **Current delivery stage:** `Lane-Promoted`
 - **Qualifiers:** `none`
-- **Next exact step:** executar os guards finais, publicar o HEAD atual em `origin/main` e verificar igualdade do SHA remoto.
+- **Next exact step:** `none — TODO fechado; novo trabalho exige novo contrato aprovado`.
 
 ## Active Work State
 
-- **Work state:** `review`
-- **Why this state now:** o TODO está em `completed/process/`; R23 retornou `GO`, confirmou `FINAL-R22-01` e `CLOSEOUT-TQ-01` resolvidos e encontrou zero finding material/P1/P2/release blocker; resta somente publicação.
-- **Exit condition:** guards finais verdes e `origin/main` igual ao commit final de closeout.
+- **Work state:** `completed`
+- **Why this state now:** o TODO está em `completed/process/`, R23 retornou `GO` e o closeout commit `ea47f72901b7f3b9a39ac703ddada6fa5925ca88` foi publicado e verificado em `origin/main`.
+- **Exit condition:** `achieved — local HEAD and origin/main matched ea47f72901b7f3b9a39ac703ddada6fa5925ca88 after the guarded push`.
 
 ## Routine-Executor Implementation Evidence — 2026-09-24
 
@@ -297,8 +297,8 @@ R22 confirmed every prior TODO-state finding and `CLOSEOUT-TQ-01` resolved. Its 
 ## Blocker Notes
 
 - **Blocker:** `n/a`; R23 retornou `GO` e não há impasse.
-- **Why blocked now:** `n/a`; todos os gates estão verdes e resta somente a publicação autorizada.
-- **What unblocks it:** `n/a`; push do commit final e verificação do SHA remoto.
+- **Why blocked now:** `n/a`; todos os gates e a publicação estão concluídos.
+- **What unblocks it:** `n/a`; não há ação restante neste TODO.
 - **Owner / source:** owner do TODO; D-01..D-05 continuam autorizados pelo `APROVADO` vigente e nenhuma nova aprovação está pendente.
 - **Last confirmed truth:** R23 retornou `GO` sobre `683a98060cdbfd74c2bc848d7a7a40f741aa8e8d`, confirmou `FINAL-R22-01`/`CLOSEOUT-TQ-01` resolvidos e encontrou zero finding material/P1/P2/release blocker.
 
@@ -421,8 +421,8 @@ Cada critério possui evidência concluída 1:1; nenhum resumo agregado substitu
 
 | Scope Item | Local Branch/Commit | PR to lane threshold | PR to `stage` | PR to `main` | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| baseline do contrato | `main@HEAD` — R23-clean closeout record over `683a980` | `n/a — autoridade Foundation single-branch` | `n/a` | `direct push guarded` | `local-implemented; publication authorized` |
-| cutover da Foundation | `main@HEAD` — R23-clean closeout record over `683a980` | `n/a — autoridade Foundation single-branch` | `n/a` | `direct push after closeout gates` | `local-implemented; publication authorized` |
+| baseline do contrato | `main@ea47f72` | `n/a — autoridade Foundation single-branch` | `n/a` | `published and SHA-verified` | `lane-promoted` |
+| cutover da Foundation | `main@ea47f72` | `n/a — autoridade Foundation single-branch` | `n/a` | `published and SHA-verified` | `lane-promoted` |
 
 ## Diff Expectation Contract
 
@@ -1072,7 +1072,7 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 29. `Concluído com no-go`: R21 sobre `6128d03f22e33b23d9a4d0b85a0b3dc40535cc03` reconfirmou o closeout técnico e encontrou somente `FINAL-R21-01` na semântica Completed/Lane-Promoted e em uma linha de intake.
 30. `Concluído com no-go`: R22 sobre `fa2bf566b81ea557719404924dce8a7e56727370` confirmou o TODO e closeout técnico, encontrando somente `FINAL-R22-01` em três referências duráveis externas a lifecycle ativo.
 31. `Concluído`: R23 sobre `683a98060cdbfd74c2bc848d7a7a40f741aa8e8d` retornou `GO`, confirmou `FINAL-R22-01`/`CLOSEOUT-TQ-01` resolvidos e encontrou zero finding material/P1/P2/release blocker.
-32. `Em andamento`: executar guards finais, publicar `main` em `origin/main` e verificar igualdade do SHA remoto.
+32. `Concluído`: guards finais verdes; `ea47f72901b7f3b9a39ac703ddada6fa5925ca88` publicado em `origin/main` e igualdade local/remota verificada por `git ls-remote`.
 
 ### Touched Surfaces
 
@@ -1195,7 +1195,7 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 
 | Dependency | Why It Matters | Status | Last Verified | Verification Method | Adjustment / Workaround |
 | --- | --- | --- | --- | --- | --- |
-| `origin/main` de `uninotas-foundation` | baseline freeze e publicação final | `healthy; candidate unpublished` | `2026-09-24` | `origin/main` confirmado em `b73b0ebc79daeb74acd6c377b4b307438095c848`; implementação/remediação permanece somente local até os gates finais | publicar apenas após completion/closeout verdes |
+| `origin/main` de `uninotas-foundation` | baseline freeze e publicação final | `healthy; lane promoted` | `2026-09-24` | local HEAD e `refs/heads/main` remota confirmados em `ea47f72901b7f3b9a39ac703ddada6fa5925ca88` | nenhuma; publicação concluída |
 | `delphi-ai` local | workflows e guards PACED | `healthy with runner caveat` | `2026-09-24` | `verify_context.sh` via Git Bash passou | scripts CRLF rodam pelo Git Bash; Python guards rodam no WSL |
 | PostgreSQL/Railway | somente evidência read-only de arquitetura | `healthy` | `2026-09-24` | `/api/v1/saude` retornou banco `ok` | nenhuma mutação/seed/E2E neste TODO |
 
@@ -1216,6 +1216,6 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 ## TODO Closeout Disposition
 
 - **Disposition:** `move-completed`
-- **Disposition reason:** implementação, delivery, completion, closeout técnico e R23 estão verdes; somente publicação permanece.
-- **Post-commit/push status:** `R23-clean candidate 683a98060cdbfd74c2bc848d7a7a40f741aa8e8d is local; closeout evidence record is at main@HEAD; origin/main remains at b73b0eb until the authorized push`
-- **Next path/status action:** executar guards finais, publicar `main` em `origin/main` e verificar o SHA remoto.
+- **Disposition reason:** implementação, delivery, completion, closeout técnico, R23 e publicação estão verdes; nenhum trabalho permanece.
+- **Post-commit/push status:** `closeout evidence commit ea47f72901b7f3b9a39ac703ddada6fa5925ca88 published to origin/main and remote SHA verified`
+- **Next path/status action:** `none — retained under todos/completed/process/ as historical execution evidence`.
