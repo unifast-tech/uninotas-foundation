@@ -51,13 +51,13 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 
 - **Current delivery stage:** `Local-Implemented`
 - **Qualifiers:** `none`
-- **Next exact step:** executar revisão final R19 sobre o HEAD imutável atual e, se limpa, publicar `main` em `origin/main`.
+- **Next exact step:** executar revisão final R20 sobre o HEAD imutável atual e, se limpa, publicar `main` em `origin/main`.
 
 ## Active Work State
 
 - **Work state:** `review`
-- **Why this state now:** o TODO está em `completed/process/`; R18 confirmou `CLOSEOUT-TQ-01` resolvido e encontrou somente `FINAL-R18-01` em duas instruções de freeze já executado, agora substituídas por R19/publicação como ações únicas.
-- **Exit condition:** R19 e guards finais verdes, seguidos pela publicação em `origin/main`.
+- **Why this state now:** o TODO está em `completed/process/`; R19 confirmou o closeout técnico e encontrou somente `FINAL-R19-01/02` em dois blocos normativos antigos, agora integrados para R20.
+- **Exit condition:** R20 e guards finais verdes, seguidos pela publicação em `origin/main`.
 
 ## Routine-Executor Implementation Evidence — 2026-09-24
 
@@ -231,7 +231,16 @@ R18 reconfirmed `CLOSEOUT-TQ-01` resolved and the technical tree unchanged from 
 
 | Finding | Classification | Integrated remediation | Status |
 | --- | --- | --- | --- |
-| `FINAL-R18-01` | release-blocker | make R19 on the current immutable HEAD and publication the only remaining actions; remove every instruction to redo an existing freeze | integrated locally; R19 required |
+| `FINAL-R18-01` | release-blocker | make R19 on the current immutable HEAD and publication the only remaining actions; remove every instruction to redo an existing freeze | integrated; R19 exposed two residual normative blocks |
+
+## Final Review R19 Finding Classification — 2026-09-24
+
+R19 reconfirmed `CLOSEOUT-TQ-01` and the technical closeout. Its two P2 `release-blocker` findings were limited to an old planning imperative and stale promotion rows presented as current.
+
+| Finding | Classification | Integrated remediation | Status |
+| --- | --- | --- | --- |
+| `FINAL-R19-01` | release-blocker | mark execution-plan items 1–2 explicitly completed/historical instead of live imperatives | integrated locally; R20 required |
+| `FINAL-R19-02` | release-blocker | make promotion evidence point to current `main@HEAD` and R20, retaining `65ae750` only in historical R16 evidence | integrated locally; R20 required |
 
 ## Post-Implementation Decision Adherence Validation
 
@@ -256,10 +265,10 @@ R18 reconfirmed `CLOSEOUT-TQ-01` resolved and the technical tree unchanged from 
 ## Blocker Notes
 
 - **Blocker:** `n/a`; R17 encontrou um release blocker temporal corrigível, não um impasse.
-- **Why blocked now:** `n/a`; `CLOSEOUT-TQ-01` está confirmado, `FINAL-R18-01` está integrado e somente R19 mais publicação permanecem.
-- **What unblocks it:** `n/a`; revisão R19 limpa, guards finais e publicação já autorizada.
+- **Why blocked now:** `n/a`; `CLOSEOUT-TQ-01` está confirmado, `FINAL-R19-01/02` estão integrados e somente R20 mais publicação permanecem.
+- **What unblocks it:** `n/a`; revisão R20 limpa, guards finais e publicação já autorizada.
 - **Owner / source:** owner do TODO; D-01..D-05 continuam autorizados pelo `APROVADO` vigente e nenhuma nova aprovação está pendente.
-- **Last confirmed truth:** R18 revisou `d057ee3acbe3a8125d3973bfffa3672e1d4046b0`, reconfirmou `CLOSEOUT-TQ-01` resolvido e encontrou somente `FINAL-R18-01` em duas instruções temporais; a correção está em `main@HEAD` para R19.
+- **Last confirmed truth:** R19 revisou `9190d32b7dbc9fbb19ad691323a4a4648b7b0abb`, reconfirmou `CLOSEOUT-TQ-01` resolvido e encontrou somente `FINAL-R19-01/02` em dois blocos normativos; a correção está em `main@HEAD` para R20.
 
 ## Scope
 
@@ -380,8 +389,8 @@ Cada critério possui evidência concluída 1:1; nenhum resumo agregado substitu
 
 | Scope Item | Local Branch/Commit | PR to lane threshold | PR to `stage` | PR to `main` | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| baseline do contrato | `main@65ae750` | `n/a — autoridade Foundation single-branch` | `n/a` | `direct push guarded` | `local-implemented; final review clean` |
-| cutover da Foundation | `main@65ae750` | `n/a — autoridade Foundation single-branch` | `n/a` | `direct push after closeout gates` | `local-implemented; final review clean` |
+| baseline do contrato | `main@HEAD` — R19 normative-state remediation over `9190d32` | `n/a — autoridade Foundation single-branch` | `n/a` | `direct push guarded` | `local-implemented; R20 pending` |
+| cutover da Foundation | `main@HEAD` — R19 normative-state remediation over `9190d32` | `n/a — autoridade Foundation single-branch` | `n/a` | `direct push after closeout gates` | `local-implemented; R20 pending` |
 
 ## Diff Expectation Contract
 
@@ -949,7 +958,9 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 | `FINAL-R15-01` | `medium` | `release-blocker` | synchronize the undated live Blocker Notes with the actual completion/final-review state | no competing lifecycle truth may remain before closeout | `confirmed at 65ae750` | `Final Review R15 Finding Classification`; R16 |
 | `CLOSEOUT-TQ-01` | `high` | `release-blocker` | remove active-path assumptions from the persisted closeout test harness | completed lifecycle must pass the same clean-copy/mutation suite before publication | `confirmed technically at 5a1ff88 by R17` | `Closeout Post-Move Finding Classification`; post-move suite |
 | `FINAL-R17-01` | `medium` | `release-blocker` | synchronize all live post-move fields with committed candidate and R18/publication as the only remaining actions | completed governing record must not canonize false lifecycle/publication state | `integrated at d057ee3; R18 found residual FINAL-R18-01` | `Final Review R17 Finding Classification`; R17 reviewer |
-| `FINAL-R18-01` | `medium` | `release-blocker` | remove instructions to redo the already committed freeze | current immutable HEAD review and publication must be the only live actions | `integrated locally; R19 pending` | `Final Review R18 Finding Classification`; R18 reviewer |
+| `FINAL-R18-01` | `medium` | `release-blocker` | remove instructions to redo the already committed freeze | current immutable HEAD review and publication must be the only live actions | `integrated at 9190d32; R19 found residual FINAL-R19-01/02` | `Final Review R18 Finding Classification`; R18 reviewer |
+| `FINAL-R19-01` | `medium` | `release-blocker` | convert old planning imperatives into explicitly completed historical steps | no completed preapproval work may remain a live instruction | `integrated locally; R20 pending` | `Final Review R19 Finding Classification`; R19 reviewer |
+| `FINAL-R19-02` | `medium` | `release-blocker` | synchronize current promotion rows with `main@HEAD` and the active review gate | promotion evidence must not present historical R16 as current HEAD | `integrated locally; R20 pending` | `Final Review R19 Finding Classification`; R19 reviewer |
 
 ## Independent Test Quality Audit Gate
 
@@ -976,8 +987,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Internal reviewer mandate:** `required after implementation and test audit`
 - **Canonical multi-lane audit protocol:** `n/a`
 - **Final review status:** `findings_integrated`
-- **Findings summary:** R18 on immutable `d057ee3acbe3a8125d3973bfffa3672e1d4046b0` reconfirmed `CLOSEOUT-TQ-01` resolved and found only P2 `FINAL-R18-01` in two instructions to redo the committed freeze; those instructions now name only R19 and publication.
-- **Evidence / reference:** reviewer `/root/foundation_final_review_r18`; packet `/tmp/monitor-foundation-final-r18/review-packet.md`; R19 required on the current immutable HEAD.
+- **Findings summary:** R19 on immutable `9190d32b7dbc9fbb19ad691323a4a4648b7b0abb` reconfirmed `CLOSEOUT-TQ-01` resolved and found only `FINAL-R19-01/02` in an old planning imperative and stale current-promotion rows; both are integrated for R20.
+- **Evidence / reference:** reviewer `/root/foundation_final_review_r19`; packet `/tmp/monitor-foundation-final-r19/review-packet.md`; R20 required on the current immutable HEAD.
 - **Waiver authority / reference:** `n/a`
 
 ## Independent Cutover Integrity Audit Gate
@@ -994,8 +1005,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 
 ## Execution Plan — Approved; Guard-Gated
 
-1. Publicar o freeze sincronizado após `RF-15..RF-16` e executar a última arquitetura/crítica sobre commit/blob/hash exatos.
-2. Com review limpo, repetir coerência e scope drift, executar `todo_authority_guard.py --pre-approval` e exigir `preflight-go`.
+1. `Concluído no planejamento`: freeze sincronizado após `RF-15..RF-16` publicado e última arquitetura/crítica executada sobre commit/blob/hash exatos.
+2. `Concluído antes do APROVADO`: coerência e scope drift repetidos; `todo_authority_guard.py --pre-approval` retornou `preflight-go`.
 3. `Concluído em 2026-09-24`: novo `APROVADO` recebido para `D-01..D-05`, `S-01..S-09`, mapa de seis módulos, disposition manifest e validações congeladas.
 4. `Concluído`: regras ingeridas, authority guard normal `go` e execução limitada à Foundation.
 5. `Concluído com ressalva cronológica`: mutation RED→GREEN reproduzível entregue; o RED inicial imutável não foi preservado e test-first original não é alegado.
@@ -1020,7 +1031,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 24. `Concluído com finding integrado`: guards finais e movimento para `completed/process/` concluídos; ledger/manifest atualizados; a primeira suíte pós-move encontrou `CLOSEOUT-TQ-01`, o harness foi tornado lifecycle-aware e a repetição passou 10/10 em 134.909s.
 25. `Concluído com no-go`: candidato pós-move congelado em `5a1ff884ae883e5bd0e50b27d9a463aa5d53085e`; R17 confirmou a correção técnica e encontrou somente `FINAL-R17-01` nos campos temporais.
 26. `Concluído com no-go`: `FINAL-R17-01` foi integrado em `d057ee3acbe3a8125d3973bfffa3672e1d4046b0`; R18 reconfirmou a correção técnica e encontrou somente `FINAL-R18-01` em duas instruções de freeze já executado.
-27. `Em andamento`: executar R19 sobre o HEAD imutável atual que contém `FINAL-R18-01` e, se limpa, publicar `main`.
+27. `Concluído com no-go`: R19 sobre `9190d32b7dbc9fbb19ad691323a4a4648b7b0abb` reconfirmou o closeout técnico e encontrou somente `FINAL-R19-01/02` nos passos históricos 1–2 e nas linhas atuais de promoção.
+28. `Em andamento`: executar R20 sobre o HEAD imutável atual que contém `FINAL-R19-01/02` e, se limpa, publicar `main`.
 
 ### Touched Surfaces
 
@@ -1158,12 +1170,12 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 - **Delivery R13 architecture/test-quality/cutover review:** all three fresh lanes returned `GO` on immutable `dc1d869`; no P1/P2, blocker or new finding remained.
 - **Independent final review R16:** `GO` on immutable `65ae750`; `FINAL-R14-01` and `FINAL-R15-01` confirmed resolved; no material finding/P1/P2/release blocker at that baseline.
 - **Post-move test correction:** R17 confirmed `CLOSEOUT-TQ-01` resolved at `5a1ff88`; 10/10, validator, 39 ledger rows and manifest move are exact.
-- **Final review R17/R18:** technical closeout `GO`; R18 reconfirmed `CLOSEOUT-TQ-01` and only `FINAL-R18-01` temporal wording remains for R19 confirmation.
+- **Final reviews R17–R19:** technical closeout `GO`; R19 reconfirmed `CLOSEOUT-TQ-01` and only `FINAL-R19-01/02` normative wording remains for R20 confirmation.
 - **Pre-move closeout guard:** `go` sobre cópia byte-idêntica (`cmp -s`) em path temporário real `foundation_documentation/todos/active/process/`, com `--repo` apontando ao Git real da Foundation; isso compensa o `Path.resolve()` do guard, que elimina o nome do alias e classificaria incorretamente o path direto como `other`.
 
 ## TODO Closeout Disposition
 
 - **Disposition:** `move-completed`
-- **Disposition reason:** implementação, delivery, completion e closeout técnico estão verdes; `FINAL-R18-01` está integrado e somente R19 precede a publicação.
-- **Post-commit/push status:** `technical closeout is committed at 5a1ff884ae883e5bd0e50b27d9a463aa5d53085e; temporal remediation through FINAL-R18-01 is at main@HEAD; origin/main remains at b73b0eb approval checkpoint`
-- **Next path/status action:** obter R19 limpa sobre o HEAD imutável atual e publicar `main` em `origin/main`.
+- **Disposition reason:** implementação, delivery, completion e closeout técnico estão verdes; `FINAL-R19-01/02` estão integrados e somente R20 precede a publicação.
+- **Post-commit/push status:** `technical closeout is committed at 5a1ff884ae883e5bd0e50b27d9a463aa5d53085e; normative-state remediation through FINAL-R19-02 is at main@HEAD; origin/main remains at b73b0eb approval checkpoint`
+- **Next path/status action:** obter R20 limpa sobre o HEAD imutável atual e publicar `main` em `origin/main`.
