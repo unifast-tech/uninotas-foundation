@@ -937,7 +937,7 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 16. `Concluído com no-go parcial`: delivery R10 sobre `d269bc269f761de68587abc83813480a23cfd200` confirmou test-quality/cutover `GO`, confirmou `ARCH-ADH-R9-01` resolvido e encontrou somente `ARCH-ADH-R10-01` nos enums PACED.
 17. `Concluído com no-go parcial`: delivery R11 sobre `a72780df68156eae85a88a6071989fa3730ded8a` confirmou test-quality/cutover `GO`, confirmou `ARCH-ADH-R10-01` resolvido e encontrou somente `ARCH-ADH-R11-01` no passo temporal; `TQ-R11-OBS-01` foi integrado e `ENV-R11-OBS-01` classificado fora do escopo.
 18. `Concluído com no-go parcial`: delivery R12 sobre `a973e5207d52f55cdddb4dd5b8dc8fb72e32f1f3` confirmou test-quality/cutover `GO`, confirmou `ARCH-ADH-R11-01` resolvido e encontrou somente `ARCH-ADH-R12-01` na taxonomia do ledger.
-19. `Em andamento`: correção taxonômica R12 integrada localmente; executar e aguardar delivery R13 no mesmo HEAD imutável e, após resultado limpo, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
+19. `Em andamento`: correção taxonômica R12 congelada em `b43d04708bf9678a500430318dcb46f2f54fb34d`; executar e aguardar delivery R13 no mesmo HEAD imutável e, após resultado limpo, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
 
 ### Touched Surfaces
 
@@ -1078,5 +1078,5 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 
 - **Disposition:** `keep-active`
 - **Disposition reason:** approved implementation and delivery R12 taxonomy correction remain local; delivery R13 and delivery/closeout gates remain pending.
-- **Post-commit/push status:** `delivery R12 taxonomy correction is local and uncommitted; origin/main remains at b73b0eb approval checkpoint`
+- **Post-commit/push status:** `delivery R12 taxonomy correction committed at b43d04708bf9678a500430318dcb46f2f54fb34d; origin/main remains at b73b0eb approval checkpoint`
 - **Next path/status action:** permanecer em `todos/active/process/` até implementação, evidência, reviews e closeout completos.
