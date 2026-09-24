@@ -51,12 +51,12 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 
 - **Current delivery stage:** `Local-Implemented`
 - **Qualifiers:** `none`
-- **Next exact step:** validar e congelar a remediação de coerência `FINAL-R14-01`, repetir a revisão final independente sobre o novo HEAD imutável e, se limpa, executar o closeout.
+- **Next exact step:** validar e congelar a remediação integral de coerência `FINAL-R14-01`/`FINAL-R15-01`, repetir a revisão final independente R16 sobre o novo HEAD imutável e, se limpa, executar o closeout.
 
 ## Active Work State
 
 - **Work state:** `review`
-- **Why this state now:** arquitetura, test-quality e cutover R13 retornaram `GO`, completion está `go` e o único blocker da revisão final R14 foi integrado; o novo HEAD ainda precisa de confirmação final independente antes do closeout.
+- **Why this state now:** arquitetura, test-quality e cutover R13 retornaram `GO`, completion está `go` e os blockers de coerência R14/R15 foram integrados; o novo HEAD ainda precisa de confirmação final independente R16 antes do closeout.
 - **Exit condition:** completion/final review/closeout verdes, TODO movido para `completed/process/`, suíte pós-move verde e `origin/main` publicado no commit final.
 
 ## Routine-Executor Implementation Evidence — 2026-09-24
@@ -199,7 +199,15 @@ The independent final review found no content, runtime, performance or elegance 
 
 | Finding | Classification | Integrated remediation | Status |
 | --- | --- | --- | --- |
-| `FINAL-R14-01` | release-blocker | synchronize current candidate reference, next action, final-review state, execution plan and closeout disposition after completion | integrated locally; R15 final review required |
+| `FINAL-R14-01` | release-blocker | synchronize current candidate reference, next action, final-review state, execution plan and closeout disposition after completion | integrated; R15 exposed one residual live block |
+
+## Final Review R15 Finding Classification — 2026-09-24
+
+The independent R15 review found no content/runtime defect and narrowed the remaining coherence issue to the undated live `Blocker Notes`. The P2 `release-blocker` is integrated below and requires one fresh R16 confirmation.
+
+| Finding | Classification | Integrated remediation | Status |
+| --- | --- | --- | --- |
+| `FINAL-R15-01` | release-blocker | synchronize `Blocker Notes` with green completion, valid approval, integrated R14/R15 remediation and R16/closeout as the only remaining gates | integrated locally; R16 final review required |
 
 ## Post-Implementation Decision Adherence Validation
 
@@ -223,11 +231,11 @@ The independent final review found no content, runtime, performance or elegance 
 
 ## Blocker Notes
 
-- **Blocker:** `n/a`; delivery R13 convergiu em `GO` e não há impasse.
-- **Why blocked now:** `n/a`; o candidato segue para completion, revisão final independente e closeout.
-- **What unblocks it:** guards de conclusão verdes e revisão final limpa sobre um commit imutável do candidato completo.
-- **Owner / source:** owner do TODO; autoridade humana permanece responsável pelo novo approval.
-- **Last confirmed truth:** D-01..D-05 approval remains valid; R13 confirmou todas as remediações R8-R12 e retornou `GO` em arquitetura, test-quality e cutover sobre `dc1d86985c66e04384e59b582132d2309bae2b76`.
+- **Blocker:** `n/a`; R15 encontrou um release blocker corrigível, não um impasse.
+- **Why blocked now:** `n/a`; completion está `go`, a remediação R14/R15 está integrada e somente confirmação R16 mais closeout permanecem.
+- **What unblocks it:** revisão final R16 limpa sobre o novo commit imutável, seguida pelos guards e movimento de closeout.
+- **Owner / source:** owner do TODO; D-01..D-05 continuam autorizados pelo `APROVADO` vigente e nenhuma nova aprovação está pendente.
+- **Last confirmed truth:** R15 revisou `4124b1f9a821cbdcdd56b9188edd96cb98980ce2`, encontrou somente `FINAL-R15-01` no bloco vivo acima e nenhum defeito de conteúdo/runtime; completion permanece `go` e a correção integral está em `main@HEAD` para R16.
 
 ## Scope
 
@@ -348,8 +356,8 @@ Cada critério possui evidência concluída 1:1; nenhum resumo agregado substitu
 
 | Scope Item | Local Branch/Commit | PR to lane threshold | PR to `stage` | PR to `main` | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| baseline do contrato | `main@HEAD` — R14 coherence remediation over `92787e5` | `n/a — autoridade Foundation single-branch` | `n/a` | `direct push guarded` | `local-implemented` |
-| cutover da Foundation | `main@HEAD` — R14 coherence remediation over `92787e5` | `n/a — autoridade Foundation single-branch` | `n/a` | `direct push after closeout gates` | `local-implemented` |
+| baseline do contrato | `main@HEAD` — R15 coherence remediation over `4124b1f` | `n/a — autoridade Foundation single-branch` | `n/a` | `direct push guarded` | `local-implemented` |
+| cutover da Foundation | `main@HEAD` — R15 coherence remediation over `4124b1f` | `n/a — autoridade Foundation single-branch` | `n/a` | `direct push after closeout gates` | `local-implemented` |
 
 ## Diff Expectation Contract
 
@@ -913,7 +921,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 | `TQ-R11-OBS-01` | `low` | `release-blocker` | update current suite count/status to observed evidence | inaccurate current closeout evidence cannot be promoted | `confirmed at a973e52; no residual follow-up` | `Delivery R11 Finding Classification`; R12 test-quality |
 | `ENV-R11-OBS-01` | `low` | `by-design/no-action` | retain Git Bash runner; do not modify Delphi in this TODO | the accepted Git Bash runner passes; WSL is not an acceptance runner and Delphi is read-only | `classified; no follow-up warranted` | `PACED Workspace Alias Contract`; Git Bash PACED-ready evidence |
 | `ARCH-ADH-R12-01` | `medium` | `release-blocker` | remap generic observation labels to the exact project taxonomy | finding classification is canonical governance | `confirmed at dc1d869` | `Delivery R12 Finding Classification`; R13 architecture |
-| `FINAL-R14-01` | `medium` | `release-blocker` | synchronize all live lifecycle fields after completion and first final review | governing TODO must expose one truthful current state before closeout | `integrated locally; R15 pending` | `Final Review R14 Finding Classification`; `/tmp/monitor-foundation-final-r14/review-packet.md` |
+| `FINAL-R14-01` | `medium` | `release-blocker` | synchronize all live lifecycle fields after completion and first final review | governing TODO must expose one truthful current state before closeout | `integrated; R15 found residual FINAL-R15-01` | `Final Review R14 Finding Classification`; `/tmp/monitor-foundation-final-r14/review-packet.md` |
+| `FINAL-R15-01` | `medium` | `release-blocker` | synchronize the undated live Blocker Notes with the actual completion/final-review state | no competing lifecycle truth may remain before closeout | `integrated locally; R16 pending` | `Final Review R15 Finding Classification`; `/tmp/monitor-foundation-final-r15/review-packet.md` |
 
 ## Independent Test Quality Audit Gate
 
@@ -940,8 +949,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Internal reviewer mandate:** `required after implementation and test audit`
 - **Canonical multi-lane audit protocol:** `n/a`
 - **Final review status:** `findings_integrated`
-- **Findings summary:** R14 on immutable `92787e564258998aac8643c45a3b8346b03a9fcc` returned one P2 `FINAL-R14-01` for contradictory live lifecycle state and no content/runtime/performance/elegance defect; the five cited fields are synchronized for R15 confirmation.
-- **Evidence / reference:** fresh no-context reviewer `/root/foundation_final_review_r14`; packet `/tmp/monitor-foundation-final-r14/review-packet.md`; R15 rerun required on the remediation commit.
+- **Findings summary:** R15 on immutable `4124b1f9a821cbdcdd56b9188edd96cb98980ce2` confirmed the R14 fields but found one residual P2 `FINAL-R15-01` in live `Blocker Notes`; no content/runtime defect was found, and the residual is integrated for R16 confirmation.
+- **Evidence / reference:** fresh no-context reviewers `/root/foundation_final_review_r14` and `/root/foundation_final_review_r15`; packets under `/tmp/monitor-foundation-final-r14/` and `/tmp/monitor-foundation-final-r15/`; R16 required on the new remediation commit.
 - **Waiver authority / reference:** `n/a`
 
 ## Independent Cutover Integrity Audit Gate
@@ -979,7 +988,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 19. `Concluído`: delivery R13 sobre `dc1d86985c66e04384e59b582132d2309bae2b76` retornou `GO` conjunto em arquitetura, test-quality e cutover, sem blocker ou finding novo.
 20. `Concluído`: evidência 1:1 consolidada; suíte 10/10, Foundation/TODO validators, diff, authority e completion guards verdes; dívida de verificação adjudicada como `none`; candidato congelado em `92787e564258998aac8643c45a3b8346b03a9fcc`.
 21. `Concluído com no-go`: revisão final R14 sobre `92787e564258998aac8643c45a3b8346b03a9fcc` encontrou somente `FINAL-R14-01`, um P2 de coerência temporal no TODO, sem defeito de conteúdo ou runtime.
-22. `Em andamento`: validar e congelar a remediação `FINAL-R14-01`, executar R15 no novo HEAD e, se limpa, executar closeout, mover o TODO, repetir a suíte e publicar `main`.
+22. `Concluído com no-go`: a remediação R14 foi congelada em `4124b1f9a821cbdcdd56b9188edd96cb98980ce2`; R15 encontrou somente `FINAL-R15-01` no `Blocker Notes`, sem defeito de conteúdo/runtime.
+23. `Em andamento`: validar e congelar a remediação integral R14/R15, executar R16 no novo HEAD e, se limpa, executar closeout, mover o TODO, repetir a suíte e publicar `main`.
 
 ### Touched Surfaces
 
@@ -1119,6 +1129,6 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
-- **Disposition reason:** implementação aprovada, delivery R13 e completion estão verdes; `FINAL-R14-01` foi integrado localmente e somente sua confirmação R15 mais o closeout permanecem pendentes.
-- **Post-commit/push status:** `completion candidate 92787e564258998aac8643c45a3b8346b03a9fcc remains local; R14 coherence remediation is at main@HEAD; origin/main remains at b73b0eb approval checkpoint`
+- **Disposition reason:** implementação aprovada, delivery R13 e completion estão verdes; `FINAL-R14-01`/`FINAL-R15-01` foram integrados localmente e somente a confirmação R16 mais o closeout permanecem pendentes.
+- **Post-commit/push status:** `R15 reviewed 4124b1f9a821cbdcdd56b9188edd96cb98980ce2; integral R14/R15 coherence remediation is at main@HEAD; origin/main remains at b73b0eb approval checkpoint`
 - **Next path/status action:** permanecer em `todos/active/process/` até implementação, evidência, reviews e closeout completos.
