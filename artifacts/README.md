@@ -1,5 +1,6 @@
-# LeadsHug Artifacts
+# Evidence Index
 
-Artifacts contain supporting evidence for discovery, TODOs, and delivery gates. They are not substitutes for the mandate, constitution, roadmap, policies, modules, decisions, or contract records.
+- [Product truth](analysis/monitor-de-notas-product-truth-20260924.md)
+- [Foundation cutover map](analysis/monitor-de-notas-foundation-cutover-map-20260924.md)
 
-Feature briefs preserve non-authoritative discovery framing. After handoff, they link to the live backlog, decision, roadmap, module, or TODO record and do not duplicate its operational state. Temporary evidence belongs under `artifacts/tmp/` and must be linked from the governing TODO.
+Artifacts support canonical owners and do not override them.

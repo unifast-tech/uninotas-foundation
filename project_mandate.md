@@ -1,21 +1,15 @@
-# LeadsHug — Project Mandate
-**Version:** 1.0
+# Monitor de Notas — Project Mandate
 
-## Purpose
-
-O LeadsHug é a central de relacionamento com o cliente da Unifast. Ele unifica atendimento, leads e CRM em
-um único sistema, usando o WhatsApp como principal canal de conversa.
+Monitor de Notas helps the financial team inspect invoice-emission failures from SmartNotas and record their treatment. Routerfy owns ingestion and writes the external `logs` table; this product reads it and never writes it.
 
 ## Target outcome
 
-Uma conversa deve permanecer uma conversa independentemente do canal de transporte. A equipe deve atender,
-acompanhar o lead e consultar o histórico sem alternar entre sistemas.
+Operators can find, classify, inspect, and treat relevant events with traceable authorship, without mutating the source event stream.
 
 ## Principles
 
-- O cliente e seu histórico são o centro do atendimento.
-- Permissões e isolamento por conta são invariantes de segurança.
-- Regras das plataformas WhatsApp devem ser aplicadas pelo produto.
-- O histórico deve ser auditável, legível e persistente.
-- Integrações externas usam contratos estáveis e erros determinísticos.
-- A arquitetura deve permitir CRM, campanhas e automação sem comprometer o núcleo.
+- `logs` is an external read-only boundary.
+- `monitor_tratamentos` is append-only history; its latest record determines effective status.
+- Authentication and active user profiles protect operations while deactivation preserves authorship.
+- Realtime is invalidation only: clients re-fetch authoritative API data.
+- Claims in this Foundation require product evidence and never include secrets or production payloads.

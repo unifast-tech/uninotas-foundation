@@ -1,27 +1,9 @@
-# LeadsHug Scope Governance
-**Version:** 1.0
+# Scope and Subscope Governance
 
-## Canonical hierarchy
+The following is the sole machine-readable scope contract. It does not establish business tenancy.
 
-`Mantenedora -> Setor -> Business Unit (número) -> Conversa/Contato`.
+```json
+{"core_scope":"monitor-de-notas","subscopes":["events-and-classification","identity-and-team","operational-monitoring","realtime-invalidation","runtime-and-deployment","treatments-and-history"],"environment_type":"landlord","landlord_role":"paced_technical_adapter","business_tenancy":false}
+```
 
-The Business Unit is the minimum authorization and data-isolation boundary. A user may hold grants for one or
-more BUs; no controller, service, repository or frontend adapter may infer access from UI state alone.
-
-## Runtime surfaces
-
-| Surface | Authentication | Responsibility |
-| --- | --- | --- |
-| `/api/bff` | session | authenticated web application |
-| `/api/v1` | partner API key | public integrations |
-| `/api/internal` | service credential | trusted internal calls |
-| `/webhooks` | provider verification | inbound channel events |
-
-Outbound provider adapters are integration boundaries, not public runtime surfaces.
-
-## Rules
-
-- New scope or surface requires a TODO and constitution update.
-- Every route documents tenant, account and BU resolution.
-- Cross-BU reads fail closed and are covered by tests.
-- Frontend routes do not define authorization; backend guards do.
+`EnvironmentType=landlord` is PACED technical adapter vocabulary for this single product surface. It creates no business landlord, tenant, organization, channel, or business-unit semantics.

@@ -1,49 +1,11 @@
-# LeadsHug Foundation Documentation
+# Monitor de Notas Foundation
 
-Este repositório é a autoridade documental do LeadsHug: mandato, entidades, constituição, lifecycle, backlog,
-módulos, roadmap, políticas, decisões, contratos e TODOs táticos.
+`uninotas-foundation` is the canonical product documentation for Monitor de Notas. It records verified product boundaries; it does not authorize runtime changes.
 
-## Autoridade
+Start with the [mandate](project_mandate.md), [constitution](project_constitution.md), [domain entities](domain_entities.md), [technology baseline](technology_baseline.md), lifecycle record, and [module index](modules/README.md).
 
-- `project_mandate.md`: propósito e princípios permanentes.
-- `domain_entities.md`: vocabulário e entidades do domínio.
-- `project_constitution.md`: regras sistêmicas e limites de arquitetura.
-- `evolution_lifecycle.md`: schemas, transições, papéis e owner único por campo.
-- `backlog/`: candidatos ainda não aprovados, sua disposição e próximo gate.
-- `system_roadmap.md`: temas/fases, horizontes relativos, resultados, dependências e exit gates.
-- `modules/`: verdade local por contexto.
-- `decisions/`: racional, proveniência e histórico de supersessão.
-- `contracts/`: índice e regra de verificação de contratos definidos por módulos.
-- `todos/active/`: contratos táticos vivos; execução exige `APROVADO` explícito e authority guard `go`.
+## Authority and setup
 
-O conteúdo deste repositório é específico do LeadsHug. As regras, workflows e guardas de engenharia ficam no repositório irmão `../leadshug-engineering`.
+This repository owns product-specific truth. The local `delphi-ai` distribution owns the PACED method, workflows, and deterministic guards. An approved active TODO plus authority guard `go` is required before implementation.
 
-## Engenharia
-
-O produto usa NestJS 11, React 18/Vite 5, PostgreSQL 16 com Prisma 6, Docker e Railway. A integração WhatsApp suporta canal oficial da Meta e o caminho não oficial Evolution/Baileys. O sistema é multi-tenant e o número de WhatsApp é a Business Unit operacional. A fonte de manutenção desta afirmação é [`technology_baseline.md`](technology_baseline.md), que separa arquitetura-alvo de estado de runtime.
-
-Todo desenvolvimento deve possuir um TODO ativo aprovado antes da implementação.
-
-## Divisão de autoridade
-
-`leadshug-engineering` é a autoridade de prática de engenharia: fornece regras, workflows e guardas reutilizáveis. Este repositório é a autoridade de produto e governança: mantém TODOs aprovados, contratos, decisões, critérios de aceite e o histórico de execução. A autoridade humana de decisão aprova escopo material; o strategic steward mantém a coerência sistêmica; o module owner mantém verdade local; o TODO owner/executor mantém execução/evidência; e o assurance reviewer revisa independentemente. Ferramentas e agentes concretos são adapters desses papéis. Nenhum fluxo deve contornar essas autoridades para implementar trabalho registrado aqui.
-
-## Navegação de estado atual
-
-- [`technology_baseline.md`](technology_baseline.md): stack e fontes verificáveis da arquitetura-alvo.
-- [`artifacts/analysis/leadshug-architecture-truth-and-legacy-boundaries-20260915.md`](artifacts/analysis/leadshug-architecture-truth-and-legacy-boundaries-20260915.md): fronteiras entre o núcleo ativo e os legados.
-- [`policies/central_whatsapp_independent_legacy_policy.md`](policies/central_whatsapp_independent_legacy_policy.md): uso permitido de Central-Whatsapp como referência independente.
-
-## Decisões e continuidade de execução
-
-Decisões de produto, escopo, contrato, arquitetura e trade-offs devem ser tomadas pelo usuário antes
-da aprovação do TODO. Depois de aprovado, o agente executa o TODO continuamente até finalizá-lo. A
-execução só pausa quando surgir uma decisão nova, material e necessária que não esteja coberta pelo
-TODO; nesse caso, o agente apresenta opções e impactos e aguarda a escolha do usuário.
-
-`leadshug-engineering` é usado em todo o ciclo para fornecer o método, as regras, os workflows e os guardrails. A execução segue o TODO aprovado e as validações registradas nele.
-
-Todo TODO que introduzir ou alterar uma ação, campo, rota, contrato, estado ou fluxo visível deve
-exigir testes proporcionais no próprio escopo: unitários para regras e contratos, integração/E2E para
-persistência e autorização, e Playwright quando houver comportamento web interativo. Um TODO não pode
-ser encerrado apenas com build ou testes genéricos quando a nova superfície não foi exercitada.
+The workspace alias `foundation_documentation -> uninotas-foundation` is local setup, not product content. On Windows use `cmd /c mklink /D foundation_documentation uninotas-foundation` only when the alias is absent. Validate it in Git Bash with `./delphi-ai/verify_context.sh`; the WSL wrapper has a documented CRLF limitation and is not the acceptance runner.

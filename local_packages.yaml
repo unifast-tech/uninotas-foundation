@@ -1,22 +1,2 @@
-# LeadsHug local package registry
-schema_version: 1
-project: leadshug
-
-packages:
-  api:
-    path: apps/api
-    stack: nestjs
-    persistence: postgresql-prisma
-    status: active
-  web:
-    path: apps/web
-    stack: react
-    status: active
-  api-oficial:
-    path: api-oficial
-    role: frozen-reference
-    status: read-only
-  hub-whatsapp:
-    path: hub-whatsapp
-    role: frozen-reference
-    status: read-only
+packages: []
+# No local reusable package is declared for the Foundation validator.

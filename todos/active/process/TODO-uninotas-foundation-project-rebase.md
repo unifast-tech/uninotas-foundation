@@ -49,23 +49,44 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 
 ## Delivery Status Canon
 
-- **Current delivery stage:** `Pending`
-- **Qualifiers:** `none`
-- **Next exact step:** o executor single-writer implementa `S-01..S-09` test-first e devolve o tree candidato para os gates delivery-side.
+- **Current delivery stage:** `Remediation / Re-review`
+- **Qualifiers:** `round-2 architecture and test-quality blockers are being remediated; DOD and VAL remain incomplete`.
+- **Next exact step:** entregar o pacote round-2 ao `Assurance / Tester-Quality` e ao re-review arquitetural, com as evidências determinísticas atualizadas.
 
 ## Active Work State
 
-- **Work state:** `implementation`
-- **Why this state now:** o usuário renovou `APROVADO`, a ingestão vinculante foi registrada e o authority guard normal retornou `Overall outcome: go`.
-- **Exit condition:** `S-01..S-09` implementados, suíte local verde e pacote candidato entregue aos gates delivery-side.
+- **Work state:** `remediation`
+- **Why this state now:** a autoridade aprovada permanece válida, mas findings round-2 exigem correção e nova revisão antes de qualquer alegação de entrega.
+- **Exit condition:** remediation validada e devolvida aos reviews pendentes; não autoriza closeout, movimento ou conclusão.
+
+## Routine-Executor Implementation Evidence — 2026-09-24
+
+- **State:** candidate tree prepared; this record does not mark the TODO completed or move it.
+- **Implemented surfaces:** the frozen disposition manifest was applied; canonical roots, six frozen modules, policies, indexes, decisions, product-truth/cutover artifacts, validator, exception ledger, and safe validator tests now exist only in `uninotas-foundation`.
+- **Local evidence:** `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s deterministic/tests -p 'test_*.py'` passed (3 tests); `PYTHONDONTWRITEBYTECODE=1 python3 deterministic/validate_foundation.py --root .` passed; `git diff --check` passed.
+- **Privacy evidence:** prohibited token material is assembled only inside `TemporaryDirectory` by the negative test; no persistently stored sample matches the validator pattern.
+- **Boundary evidence:** product and `delphi-ai` status were inspected read-only; their pre-existing changes were not edited by this executor.
+- **Remaining owner:** independent test-quality, final-review, cutover-integrity, completion, and closeout gates remain delivery-side responsibilities.
+- **Hardening evidence:** validator now checks the frozen file/module/index/manifest/ledger/link-anchor/privacy boundaries and mutation suite coverage; Git Bash `./delphi-ai/verify_context.sh` returned `Environment Verified: PACED-Ready.` on 2026-09-24. Delivery gates remain pending.
+- **Delivery-review RED→GREEN record:** independent delivery probes reported gaps TQ-01..TQ-04, CUTOVER, and ARCH in the initial validator draft; those findings are active remediation evidence, not clean audit results. The immutable run evidence for the first 9-test draft was not preserved and must not be used as delivery proof (TQ-05). This hardening round first reproduced privacy detection on previously excluded test source, then removed privacy exemptions and retained only runtime-built prohibited samples. GREEN evidence is the post-fix command output recorded below; review/closeout gates remain pending.
+
+## Validator Remediation — 2026-09-24
+
+- **Reviewer RED probes addressed:** lifecycle-path ambiguity, section-blind legacy permission, substring deletion checks, identity/scope under-specification, and excluded privacy surfaces.
+- **Post-fix GREEN target:** the validator now derives the single active/completed lifecycle, requires exact ledger rows by section, rejects every frozen `Delete` path independently, validates D-01/D-05 contracts, and scans every persisted file. Delivery, audit, and closeout gates remain pending; this entry does not mark them clean or complete.
+
+## Round-2 Remediation — 2026-09-24
+
+- **Reviewer RED findings:** `ARCH-ADH-R2-01..04` and `TQ-R2-01` identified missing canonical contract ownership, unanchored D-01/D-04 assertions, incomplete serialized-credential detection, stale delivery state, and destination-stripping in the legacy scan.
+- **GREEN evidence target:** module-owned observed contracts, anchored identity/data-ownership assertions, full persisted-surface mutation coverage for bounded credential forms, unstripped destination scanning, and synchronized remediation/re-review status. This is implementation evidence only; independent reviews remain pending and are not marked clean.
 
 ## Blocker Notes
 
-- **Blocker:** `n/a`; a aprovação foi renovada e resta o gate determinístico normal pós-aprovação.
-- **Why blocked now:** `n/a`; o trabalho está no gate de review, não em estado bloqueado.
-- **What unblocks it:** `n/a` para review; execução só começa pela sequência explícita em `Execution Plan`.
+- **Blocker:** `round-2 re-review pending`; this is a delivery gate, not a loss of approved implementation authority.
+- **Why blocked now:** remediation must be independently assessed before the pending delivery gates can advance.
+- **What unblocks it:** `Assurance / Tester-Quality` and architecture re-review of the corrected Foundation package.
 - **Owner / source:** owner do TODO; autoridade humana permanece responsável pelo novo approval.
-- **Last confirmed truth:** reviewers R4 independentes retornaram zero findings; hard cutover, module map, manifesto e validações estão convergidos; usuário respondeu `APROVADO` em 2026-09-24.
+- **Last confirmed truth:** D-01..D-05 approval remains valid; round-2 findings are active and no review, audit, or closeout gate is clean.
 
 ## Scope
 
@@ -191,9 +212,9 @@ Cada critério possui evidência planejada 1:1; nenhum resumo agregado substitui
 
 | Repository | Path | Baseline ref | Comparison mode |
 | --- | --- | --- | --- |
-| `uninotas-foundation` | `uninotas-foundation/` | `main@b62927be0b5c38ec3e6c529562e8707f1de28bfc` antes da integração dos findings | `commit + working_tree` |
-| `MonitorDeNotas` | `./` excluindo `uninotas-foundation/` | `HEAD 78bf271341dfccb2595389f0dbac0e01e8532a7b + fingerprints abaixo` | `immutable read-only snapshot` |
-| `delphi-ai` | `delphi-ai/` | `HEAD 9ba43e8bba3618d029320bf6d7b40415881a0287 + clean fingerprints` | `immutable read-only snapshot` |
+| `uninotas-foundation` | `uninotas-foundation` | `b73b0ebc79daeb74acd6c377b4b307438095c848` | `working_tree` |
+
+`MonitorDeNotas` e `delphi-ai` não são implementation repositories deste TODO e, por isso, não entram como baselines do diff guard. A imutabilidade read-only dessas superfícies é validada separadamente pelos fingerprints congelados abaixo em `VAL-07`.
 
 ### Read-Only Evidence Snapshot
 
@@ -216,25 +237,20 @@ Hashes individuais que sustentam as decisões de ownership ficam no `Pre-Executi
 | Repository | Path glob | Change types | Reason |
 | --- | --- | --- | --- |
 | `uninotas-foundation` | `*.md` | `M` | documentos canônicos raiz |
-| `uninotas-foundation` | `modules/**` | `A,M,D,R` | substituir módulos herdados pelos módulos do produto atual |
-| `uninotas-foundation` | `backlog/**` | `A,M,D,R` | reconciliar candidatos e próximos gates |
-| `uninotas-foundation` | `decisions/**` | `A,M,D,R` | registrar decisões e retirar autoridade ativa herdada |
-| `uninotas-foundation` | `contracts/**` | `A,M,D,R` | reconstruir índice de contratos verificáveis |
-| `uninotas-foundation` | `policies/**` | `A,M,D,R` | preservar apenas políticas aplicáveis ao produto |
-| `uninotas-foundation` | `artifacts/**` | `A,M,D,R` | evidência de descoberta/cutover conforme `D-02` |
-| `uninotas-foundation` | `todos/**` | `A,M,D,R` | governança, classificação do legado e evidência deste TODO |
-| `uninotas-foundation` | `deterministic/**` | `A,M,D,R` | validações específicas da Foundation, se aprovadas no refinamento |
+| `uninotas-foundation` | `modules/**` | `A,M,D,R,??` | substituir módulos herdados pelos módulos do produto atual |
+| `uninotas-foundation` | `backlog/**` | `A,M,D,R,??` | reconciliar candidatos e próximos gates |
+| `uninotas-foundation` | `decisions/**` | `A,M,D,R,??` | registrar decisões e retirar autoridade ativa herdada |
+| `uninotas-foundation` | `contracts/**` | `A,M,D,R,??` | reconstruir índice de contratos verificáveis |
+| `uninotas-foundation` | `policies/**` | `A,M,D,R,??` | preservar apenas políticas aplicáveis ao produto |
+| `uninotas-foundation` | `artifacts/**` | `A,M,D,R,??` | evidência de descoberta/cutover conforme `D-02` |
+| `uninotas-foundation` | `todos/**` | `A,M,D,R,??` | governança, classificação do legado e evidência deste TODO |
+| `uninotas-foundation` | `deterministic/**` | `A,M,D,R,??` | validações específicas da Foundation, se aprovadas no refinamento |
 | `uninotas-foundation` | `local_packages.yaml` | `M` | alinhar referências locais ao workspace atual |
 
 ### Not Expected Changed Paths
 
 | Repository | Path glob | Change types | Reason |
 | --- | --- | --- | --- |
-| `MonitorDeNotas` | `backend/**` | `any` | fonte de evidência somente leitura |
-| `MonitorDeNotas` | `frontend/**` | `any` | fonte de evidência somente leitura |
-| `MonitorDeNotas` | `Dockerfile|docker-compose.yml|railway.json` | `any` | infraestrutura fora do escopo |
-| `MonitorDeNotas` | `**/.env*` | `any` | segredos/configuração fora do escopo |
-| `delphi-ai` | `**` | `any` | engenharia compartilhada fora do escopo atual |
 | `uninotas-foundation` | `.git/**` | `any` | metadados Git nunca são conteúdo da migração |
 
 ## PACED Setup / Recalibration Status
@@ -260,9 +276,9 @@ Hashes individuais que sustentam as decisões de ownership ficam no `Pre-Executi
 
 | From Profile | To Profile | Why the Handoff Exists | Touched Surfaces | Status / Evidence |
 | --- | --- | --- | --- | --- |
-| `Strategic / CTO-Tech-Lead` | `routine-executor` | executar a substituição documental já decidida sem redefinir o contrato | `uninotas-foundation/**` | `planned after authority go` |
-| `routine-executor` | `Assurance / Tester-Quality` | desafiar evidência, links, referências e ausência de autoridade concorrente | diff e validações da Foundation | `planned` |
-| `Assurance / Tester-Quality` | `formal-reviewer` | revisar aderência arquitetural e integridade do cutover | pacote final consolidado | `planned` |
+| `Strategic / CTO-Tech-Lead` | `routine-executor` | executar a substituição documental já decidida sem redefinir o contrato | `uninotas-foundation/**` | `completed; remediation remains in scope` |
+| `routine-executor` | `Assurance / Tester-Quality` | desafiar evidência, links, referências e ausência de autoridade concorrente | diff e validações da Foundation | `pending round-2 re-review` |
+| `Assurance / Tester-Quality` | `formal-reviewer` | revisar aderência arquitetural e integridade do cutover | pacote final consolidado | `pending after tester-quality re-review` |
 
 ## Complexity
 
@@ -484,8 +500,8 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
 - **Adherence review package:** `bounded-file-set`
-- **Adherence review status:** `not_run`
-- **Adherence review evidence / resolution:** `pending implementation`
+- **Adherence review status:** `remediation/re-review pending`
+- **Adherence review evidence / resolution:** `ARCH-ADH-R2-01..04` are being remediated; no clean adherence result is claimed.
 - **No-go handling:** retornar ao diagnóstico/decisão ou ao loop de evidência; não alegar execução ou conclusão com divergência aberta.
 
 ## Assumptions Preview
@@ -831,7 +847,7 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Policy schema version:** `pcv-1`
 - **Global sensitivity level:** `none`
 - **Why this level:** não há mudança de query, frontend assíncrono, escrita concorrente ou runtime.
-- **Current delivery stage at review time:** `Pending`
+- **Current delivery stage at review time:** `Remediation / Re-review`
 
 | Lane ID | Lane | Trigger Result | Trigger Severity | Trigger Reason Code | Gate Deadline | Minimum Evidence Rule | State | Residual Risk | Uncertainty Reason Code |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -858,10 +874,11 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 - **Authority guard:** must return `go` only after explicit `APROVADO`, rule ingestion and resolved decisions.
 - **Completion and closeout guards:** required before `Local-Implemented` or movement to `completed/`.
 - **Cutover integrity audit:** required because the work retires one active documentary authority and establishes another.
+- **Round-2 architecture and test-quality re-review:** pending; no clean result is claimed in this TODO.
 
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
-- **Disposition reason:** planning reviews e preflight convergiram; execução continua pendente de novo `APROVADO`, rule ingestion e authority guard normal.
+- **Disposition reason:** approved implementation authority remains valid; round-2 remediation and independent re-review remain pending.
 - **Post-commit/push status:** `final synchronized baseline published; preflight-go`
 - **Next path/status action:** permanecer em `todos/active/process/` até implementação, evidência, reviews e closeout completos.

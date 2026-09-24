@@ -1,0 +1,15 @@
+# Monitor de Notas Product Truth — 2026-09-24
+
+Read-only frozen evidence. Hashes are SHA-256 snapshots, not runtime claims.
+
+| ID | Truth | Exact evidence / SHA-256 | Owner |
+|---|---|---|---|
+| PT-01 | Routerfy writes read-only `logs`; no PK/Prisma model. | `backend/docs/tabela-logs.md` `151fbc8540804ff73c8b3d8f8164c1d5d6f932dde8e9aecbcd9f731ff59dd3e6`; `backend/prisma/schema.prisma` `cb53048b181e179e0d0a74188a17279e36213a50508a058fd69bd3a110056963`; `backend/src/logs/logs.sql.ts` `142c26ab4bdda0d53e59934460b029e6463c05e6d30083c7b2e2a2c4fd441643` | events |
+| PT-02 | SmartNotas filter; `ref_id` is correlation, not identity. | SQL hash above; `backend/src/logs/logs.service.ts` `5015d24db62ccc93ee65bcac9ba6cb4cb24a6b06a5a21ac2f027326bddd95c6a`; table-doc hash above | events/treatments |
+| PT-03 | SQL/TS classification parity; latest treatment and `PENDENTE`. | `logs.classifier.ts` `ca0a4340189321e1924eec0fbda82c492aca4b19bc0476d54953eb8e0eafcfbe`; SQL hash above; `logs.mapper.ts` `4b2358bb136919adc00eaa3b8ff3d5265d3fad3db958e976106c258045d63ef4` | events |
+| PT-04 | Treatment history is append-only by `ref_id`. | Prisma and service hashes above | treatments |
+| PT-05 | User profiles, JWT, deactivation/authorship. | Prisma hash above; `auth.service.ts` `59d506febff80a402e5b01347c2fd3c212ab3408584428c794c8778f7d89814d`; `usuarios.service.ts` `08033dd301b931ba5a97afffd177393e2899046bc3ed4c65a02c16f989391f5e` | identity |
+| PT-06 | SSE invalidates; clients re-fetch; notification/polling. | `realtime.service.ts` `5b24b40d4bbe88fbc95e5fe920f3a71a6dae19a2cfc7d83845f8753565d27bed`; `useTempoReal.ts` `1e5f6bf8b4ce9af68902f2c22a7f85843f4deef05c9a62eb8e6fbba14880a411` | realtime |
+| PT-07 | Operational summary distinguishes unavailable DB from zero. | `monitoramento.service.ts` `454461a6678559c61fb409d1a54c5b794600fb185a1b46c63f48a6e5e1a2da32`; service hash above | monitoring |
+| PT-08 | React/Vite list/filter/summary/detail/treatment/team/realtime contracts. | `eventos.ts` `1cf0e9f33b6ecfaa9040a5cb8b4d04f9d18c1a5d7b289d53c5c5ba693af9a317`; `ListaEventos.tsx` `0eeb6881f23ded8feeafb0ab36fe7f9f8e78e7463e8706d3e88c9b0ab4f36e9b`; `DetalheEvento.tsx` `a4d2829c6b7b1269c8ecc3f0b58c3bc8fe956cae878c80eaad7126f4be90f643`; `Equipe.tsx` `2d9a1e8b8645189fefdd832a48209b3a28bf85e68d9216356051e52d19ce010b` | functional modules |
+| PT-09 | NestJS/React/Vite/PostgreSQL/Prisma Docker/Railway. | `Dockerfile` `9d0554370de58fd504282f0d8bf98c1bce841d9ef736da11be611dfa17cd9e32`; compose `5e5e9f39e191b477e9981ba9047ace1ee7082e73ca447d454d27dddcaec9a781`; Railway `f711055e59a2442c04299987a2bc30fe24cd02df86cd9e4e4cf57efec76a5697`; configuration `57f87a470fb953f53ace1511355b9092db6e9c9e12f4c98a1e6cc1fcf8699a4e` | runtime |
