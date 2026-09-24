@@ -20,7 +20,7 @@ REQUIRED_CONTRACT_TOKENS = {
     "identity-and-team.md": ("POST /auth/login", "PATCH /usuarios/minha-senha", "PATCH /usuarios/:id", "DELETE /usuarios/:id", "ADMIN|GESTOR", "8..72", "HTTP 201 `application/json`", "HTTP 200 `application/json`", "{accessToken,expiraEm,usuario}"),
     "realtime-invalidation.md": ("signature/expiry only", "Content-Type: text/event-stream", "event:` field", "data:` field", "evento.novo|evento.tratado|heartbeat", "api|banco|polling|sistema", "continuously active", "optional parallel", "EventSource reconnection", "standard error body"),
     "operational-monitoring.md": ("MONITORAMENTO_TOKEN", "x-monitor-token", "maximum 200 characters", "1..1440", "atencao|critico", "application/json", "{status,cor,erros,pendentes,sucessos,total,ultima_verificacao,janela,limites,detalhe}", "HTTP 503"),
-    "runtime-and-deployment.md": ("GET /api/v1/saude", "application/json", "{status,banco,em}", "degradado", "indisponivel", "HTTP 200"),
+    "runtime-and-deployment.md": ("GET /api/v1/saude", "application/json", "{status,banco,em}", "degradado", "indisponivel", "HTTP 200", "external production `logs`", "derived, disposable, and non-authoritative", "backend/prisma/espelhar.ts", "backend/prisma/sql/002_logs_dev.sql"),
 }
 REQUIRED_ROUTE_CONTRACTS = {
     "events-and-classification.md": {
@@ -52,11 +52,11 @@ EXPECTED_COMMON_FILES = frozenset({
     ".gitattributes", ".gitignore", "README.md", "artifacts/README.md", "artifacts/analysis/monitor-de-notas-foundation-cutover-map-20260924.md", "artifacts/analysis/monitor-de-notas-product-truth-20260924.md", "artifacts/publication-manifest.txt", "backlog/README.md", "contracts/README.md", "decisions/README.md", "decisions/monitor-de-notas-foundation-decisions.md", "deterministic/legacy_reference_exceptions.json", "deterministic/tests/fixtures/valid-tree/README.md", "deterministic/tests/test_validate_foundation.py", "deterministic/validate_foundation.py", "domain_entities.md", "evolution_lifecycle.md", "local_packages.yaml", "modules/README.md", "modules/events-and-classification.md", "modules/identity-and-team.md", "modules/operational-monitoring.md", "modules/realtime-invalidation.md", "modules/runtime-and-deployment.md", "modules/treatments-and-history.md", "policies/engineering_guardrails.md", "policies/query_path_guardrails.md", "policies/scope_subscope_governance.md", "policies/validation_evidence_policy.md", "project_constitution.md", "project_mandate.md", "system_roadmap.md", "technology_baseline.md", "todos/README.md", "todos/ephemeral/.gitignore", "todos/ephemeral/.gitkeep", "todos/promotion_lane/.gitkeep",
 })
 TERMS = ("lead" + "shug", "what" + "sapp", "type" + "bot", "evol" + "ution", "bai" + "leys", "bell" + "uga", "bó" + "ora")
-FROZEN_LEGACY_CONTENT_DIGEST = "fbd657feebb688f1005184aa8135670d19cfba97bebcc855fd4d7ab8f4067778"
-FROZEN_RAW_LEGACY_CONTENT_DIGEST = "87bd0bab09f659f96facc2a186d52708ddcd7b93a03c53623731417db5937204"
+FROZEN_LEGACY_CONTENT_DIGEST = "1e6c89d8c5d8366180447acca336103b5a3429793295bf83f3b04641f2d7f3b4"
+FROZEN_RAW_LEGACY_CONTENT_DIGEST = "36caf0bd79388f3b8f59db33402681cee3e8f575e0f0773af5c88e2db9fa68ca"
 IDENTITY = {"README.md": ("Monitor de Notas", "uninotas-foundation", "foundation_documentation"), "project_mandate.md": ("Monitor de Notas", "MonitorDeNotas", "uninotas-foundation"), "project_constitution.md": ("Monitor de Notas",), "decisions/monitor-de-notas-foundation-decisions.md": ("Monitor de Notas", "MonitorDeNotas", "uninotas-foundation"), ACTIVE_TODO: ("Monitor de Notas", "MonitorDeNotas", "uninotas-foundation", "foundation_documentation"), COMPLETED_TODO: ("Monitor de Notas", "MonitorDeNotas", "uninotas-foundation", "foundation_documentation")}
 IDENTITY_ANCHORS = {"README.md": "# Monitor de Notas Foundation", "decisions/monitor-de-notas-foundation-decisions.md": "| D-01 | Product name is Monitor de Notas; technical repository is MonitorDeNotas; documentation repository is uninotas-foundation. |"}
-CANONICAL_ASSERTIONS = {"project_constitution.md": "Routerfy owns and writes `logs`; Monitor de Notas reads it only and writes only `monitor_usuarios` and `monitor_tratamentos`."}
+CANONICAL_ASSERTIONS = {"project_constitution.md": "Routerfy owns and writes the authoritative production `logs`; Monitor de Notas reads that external table only and writes only `monitor_usuarios` and `monitor_tratamentos`."}
 JWT = re.compile("eyJ" + r"[A-Za-z0-9_-]{8,}" + r"\.[A-Za-z0-9_-]{8,}" + r"\.[A-Za-z0-9_-]{4,}")
 PRIVATE = re.compile("-----" + "BEGIN " + r"(?:RSA |EC |OPENSSH )?PRIVATE " + "KEY-----")
 CREDENTIAL_ASSIGNMENT = re.compile(r"(?im)^\s*(?:-\s*)?(?:\{\s*)?[\"']?[A-Za-z0-9_-]*(?:api[_-]?key|secret|password|token)[\"']?\s*[:=]\s*(?:[\"'][^\"'\r\n]{8,}[\"']|[A-Za-z0-9._~-]{8,})")
@@ -77,7 +77,8 @@ CONFLICTING_LOG_OWNERSHIP = re.compile(r"(?i)(?:monitor\s+de\s+notas\s+(?:(?:can
 CONFLICTING_IDENTITY = re.compile(r"(?i)(?:canonical\s+product|product\s+name)\s+(?:is|=)\s+(?!monitor\s+de\s+notas\b)[^\n]+")
 ACTIVE_AUTHORITY_PHRASES = re.compile(r"(?i)(?:is\s+(?:the\s+)?(?:current|active|canonical)\s+(?:authority|architecture|foundation|product)|(?:is|remains?)\s+(?:the\s+)?source\s+of\s+truth|remains?\s+(?:the\s+)?active\s+authority|(?:owns|governs)\s+(?:this|the)\s+(?:foundation|product|architecture)|é\s+(?:a\s+)?(?:autoridade\s+(?:atual|ativa|canônica)|fonte\s+da\s+verdade|produto\s+(?:atual|canônico))|permanece\s+(?:a\s+)?autoridade\s+ativa|(?:possui|governa)\s+(?:esta|o|a)\s+(?:foundation|produto|arquitetura))")
 
-def files(root): return {p.relative_to(root).as_posix(): p for p in Path(root).rglob("*") if p.is_file() and ".git" not in p.parts}
+def repository_entries(root): return [p for p in Path(root).rglob("*") if ".git" not in p.parts]
+def files(root): return {p.relative_to(root).as_posix(): p for p in repository_entries(root) if p.is_file() and not p.is_symlink()}
 def headings(text): return {line.lstrip("#").strip().lower() for line in text.splitlines() if line.startswith("#")}
 def normalized_line_hash(line): return hashlib.sha256(" ".join(line.split()).casefold().encode("utf-8")).hexdigest()
 def term_occurs(term, text):
@@ -159,7 +160,10 @@ def scope_policy(tree, errors):
     except (KeyError, AttributeError, ValueError, json.JSONDecodeError): errors.append("scope policy mismatch"); return None
 
 def validate(root):
-    root, tree, errors = Path(root), files(root), []
+    root, errors = Path(root), []
+    entries = repository_entries(root)
+    errors += [f"symlink forbidden in publication tree: {p.relative_to(root).as_posix()}" for p in entries if p.is_symlink()]
+    tree = files(root)
     todo_path, expected_lifecycle = lifecycle(tree, errors)
     required = ROOT_FILES | SUPPORT_FILES | {"modules/README.md", "deterministic/validate_foundation.py", "deterministic/legacy_reference_exceptions.json", "deterministic/tests/test_validate_foundation.py"}
     if todo_path: required.add(todo_path)
@@ -202,7 +206,7 @@ def validate(root):
     decisions = tree.get("decisions/monitor-de-notas-foundation-decisions.md")
     if decisions:
         rows = re.findall(r"^\|\s*(D-0[1-5])\s*\|\s*(.*?)\s*\|", decisions.read_text(encoding="utf-8"), re.M)
-        if [key for key, _ in rows] != ["D-01", "D-02", "D-03", "D-04", "D-05"] or "Routerfy owns and writes `logs`; Monitor de Notas reads it and writes only its application tables." not in dict(rows).get("D-04", ""): errors.append("canonical decision table mismatch")
+        if [key for key, _ in rows] != ["D-01", "D-02", "D-03", "D-04", "D-05"] or "Routerfy owns and writes the authoritative production `logs`; Monitor de Notas reads that external table only and writes only its application tables." not in dict(rows).get("D-04", ""): errors.append("canonical decision table mismatch")
     for relative, path in tree.items():
         text = path.read_text(encoding="utf-8", errors="replace")
         if JWT.search(text) or PRIVATE.search(text) or CREDENTIAL_ASSIGNMENT.search(text) or SERIALIZED_CREDENTIAL.search(text) or URL_CREDENTIAL.search(text) or BEARER.search(text) or URI_CREDENTIAL.search(text) or ACCESS_KEY.search(text) or GITHUB_PROVIDER_PATTERN.search(text) or OPENAI_PROVIDER_PATTERN.search(text) or GOOGLE_PROVIDER_PATTERN.search(text) or CPF_PATTERN.search(text) or has_valid_compact_cpf(text) or PHONE_PATTERN.search(text) or RAW_PERSON_PAYLOAD_PATTERN.search(text) or EMAIL.search(text): errors.append(f"privacy pattern in {relative}")

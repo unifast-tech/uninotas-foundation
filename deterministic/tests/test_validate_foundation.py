@@ -23,6 +23,12 @@ class ValidateFoundationTests(unittest.TestCase):
         root = self.tree(); mutate(root); return self.module.validate(root)
     def manifest(self, root): return root / "artifacts/publication-manifest.txt"
     def add_manifest(self, root, path): self.manifest(root).write_text(self.manifest(root).read_text() + "\n" + path + "\n")
+    def copy_manifest(self, source_root, destination_root):
+        manifest = [line for line in (source_root / "artifacts/publication-manifest.txt").read_text().splitlines() if line and not line.startswith("#")]
+        for relative in manifest:
+            source, destination = source_root / relative, destination_root / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, destination, follow_symlinks=False)
     def test_valid_active_tree(self): self.assertEqual([], self.module.validate(ROOT))
     def test_lifecycle_exactly_one_and_completed_simulation(self):
         self.assertTrue(any("exactly one" in x for x in self.errors(lambda r: ((r / self.module.COMPLETED_TODO).parent.mkdir(parents=True, exist_ok=True), shutil.copy2(r / self.module.ACTIVE_TODO, r / self.module.COMPLETED_TODO)))))
@@ -76,6 +82,19 @@ class ValidateFoundationTests(unittest.TestCase):
         for relative in (".gitattributes", "deterministic/tests/fixtures/valid-tree/README.md"):
             self.assertTrue(any("frozen lifecycle tree" in x for x in self.errors(lambda r, value=relative: remove_keep_with_row(r, value))), relative)
         self.assertTrue(any("uniquely" in x for x in self.errors(lambda r: self.manifest(r).write_text(self.manifest(r).read_text() + ".gitattributes\n"))))
+    def test_external_symlink_is_rejected_before_and_after_manifest_copy(self):
+        source = self.tree()
+        external = pathlib.Path(tempfile.mkdtemp()) / "README.md"
+        self.addCleanup(lambda: shutil.rmtree(external.parent, ignore_errors=True))
+        external.write_bytes((source / "README.md").read_bytes())
+        (source / "README.md").unlink()
+        (source / "README.md").symlink_to(external)
+        self.assertTrue(any("symlink forbidden" in error for error in self.module.validate(source)))
+        destination_temp = tempfile.TemporaryDirectory(); self.addCleanup(destination_temp.cleanup)
+        destination = pathlib.Path(destination_temp.name) / "archive"; destination.mkdir()
+        self.copy_manifest(source, destination)
+        self.assertTrue((destination / "README.md").is_symlink())
+        self.assertTrue(any("symlink forbidden" in error for error in self.module.validate(destination)))
     def test_identity_scope_and_module_contracts(self):
         root = self.tree()
         for owner, tokens in self.module.IDENTITY.items():
@@ -133,7 +152,7 @@ class ValidateFoundationTests(unittest.TestCase):
         self.assertTrue(any("decision table" in x for x in self.errors(lambda r: (r / decision).write_text((r / decision).read_text() + "\n| D-04 | conflicting | x |\n"))))
         self.assertTrue(any("decision table" in x for x in self.errors(lambda r: (r / decision).write_text((r / decision).read_text() + "\n|D-01|conflicting|x|\n"))))
         self.assertTrue(any("decision table" in x for x in self.errors(lambda r: (r / decision).write_text((r / decision).read_text() + "\n| D-04|Monitor de Notas owns logs.|x|\n"))))
-        self.assertTrue(any("decision table" in x for x in self.errors(lambda r: (r / decision).write_text((r / decision).read_text().replace("Routerfy owns and writes `logs`; Monitor de Notas reads it and writes only its application tables.", "Monitor de Notas owns `logs`.")))))
+        self.assertTrue(any("decision table" in x for x in self.errors(lambda r: (r / decision).write_text((r / decision).read_text().replace("Routerfy owns and writes the authoritative production `logs`; Monitor de Notas reads that external table only and writes only its application tables.", "Monitor de Notas owns `logs`.")))))
     def test_privacy_scans_every_persisted_surface(self):
         fragments=("eyJ"+"hbGciOiJIUzI1NiJ9"+".eyJzdWIiOiIxIn0"+".signature", "-----"+"BEGIN PRIVATE "+"KEY-----", "api"+"_key='abcdefghijk'", "API"+"_KEY=abcdefghijk", "api"+"-key: abcdefghijk", "- api"+"_key: abcdefghijk", "{\"api"+"_key\":\"abcdefghijk\"}", "{\"kind\":\"config\",\"api"+"_key\":\"abcdefghijk\"}", "[{\"api"+"_key\":\"abcdefghijk\"}]", "https://x.invalid/?to"+"ken=abcdefghijk", "Authorization: Bea"+"rer abcdefghijk", "DATABASE"+"_URL=postgres"+"ql://db_admin:"+"Sup3rValue@127.0.0.1/prod", "AK"+"IAIOSFODNN7EXAMPLE", "gh"+"p_"+("A"*36), "github"+"_pat_"+("A"*24), "sk"+"-proj-"+("A"*24), "AI"+"za"+("A"*35), "529"+".982.247-25", "111"+"444"+"777"+"35", "+55"+" 11 "+"99999"+"-9999", "+55"+" 11 "+"3333"+"-4444", "{\n  \"no"+"me\": \"Pessoa\",\n  \"documento\": \"redacted\",\n  \"telefone\": \"redacted\"\n}", "a"+"lice"+"@example.com")
         root = self.tree()
@@ -146,9 +165,7 @@ class ValidateFoundationTests(unittest.TestCase):
         self.assertTrue(any("legacy" in x for x in self.errors(lambda r: (r / "README.md").write_text((r / "README.md").read_text() + "\n" + markdown + "\n"))))
     def test_clean_copy_commands_leave_no_bytecode(self):
         temp = tempfile.TemporaryDirectory(); self.addCleanup(temp.cleanup); root = pathlib.Path(temp.name) / "archive"; root.mkdir()
-        manifest = [line for line in (ROOT / "artifacts/publication-manifest.txt").read_text().splitlines() if line and not line.startswith("#")]
-        for relative in manifest:
-            source, destination = ROOT / relative, root / relative; destination.parent.mkdir(parents=True, exist_ok=True); shutil.copy2(source, destination)
+        self.copy_manifest(ROOT, root)
         env = {**os.environ, "FOUNDATION_CLEAN_COPY_CHILD":"1"}
         child_tests = [f"deterministic.tests.test_validate_foundation.ValidateFoundationTests.{name}" for name in dir(type(self)) if name.startswith("test_") and name != "test_clean_copy_commands_leave_no_bytecode"]
         suite = ["python3", "-B", "-m", "unittest", "-v", *child_tests]

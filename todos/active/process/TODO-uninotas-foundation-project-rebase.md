@@ -57,7 +57,7 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 
 - **Work state:** `delivery-review`
 - **Why this state now:** arquitetura R7 retornou `GO`; test-quality e cutover R7 encontraram blockers dentro do escopo aprovado, remediados e congelados em `7231b43bc17f6594c3bb26e156fe9d82e06e1539` para confirmação R8.
-- **Exit condition:** delivery R8 sem release-blocker em todas as lanes, matrizes 1:1 adjudicadas e gates de completion/closeout prontos para execução.
+- **Exit condition:** delivery R9 sem release-blocker em todas as lanes, matrizes 1:1 adjudicadas e gates de completion/closeout prontos para execução.
 
 ## Routine-Executor Implementation Evidence — 2026-09-24
 
@@ -142,13 +142,22 @@ Architecture adherence returned `GO`. The seven test-quality/cutover findings be
 
 | Finding | Classification | Integrated remediation | Status |
 | --- | --- | --- | --- |
-| `TQ-R7-01` | release-blocker | detect compact CPF, Brazilian landline and multiline raw person payload with non-overlapping mutations | integrated; delivery R8 pending |
-| `TQ-R7-02` | release-blocker | parse Markdown table cells and bind request/auth, status/media and response tokens to exact columns | integrated; delivery R8 pending |
-| `TQ-R7-03` | release-blocker | restrict the current lifecycle exemption against hyphen, dot, slash and backup suffixes | integrated; delivery R8 pending |
-| `TQ-R7-ROUTING` | release-blocker | route test-quality and cutover reviews through `gpt-5.6-terra/xhigh`; retain architecture/final on `gpt-5.6-sol/xhigh` | integrated; delivery R8 pending |
-| `CUTOVER-R7-01` | release-blocker | consolidate every delivery finding R4..R7 into the canonical promotion-routing ledger | integrated; delivery R8 pending |
-| `CUTOVER-R7-02` | release-blocker | pin the exact lifecycle-aware 38-path tree plus unique ordered publication manifest; add removal/duplicate mutations | integrated; delivery R8 pending |
-| `CUTOVER-R7-03` | release-blocker | add six primary API/auth/public/enum authorities to PT-10 and reverify all Git-object hashes | integrated; delivery R8 pending |
+| `TQ-R7-01` | release-blocker | detect compact CPF, Brazilian landline and multiline raw person payload with non-overlapping mutations | confirmed at `de90987` |
+| `TQ-R7-02` | release-blocker | parse Markdown table cells and bind request/auth, status/media and response tokens to exact columns | confirmed at `de90987` |
+| `TQ-R7-03` | release-blocker | restrict the current lifecycle exemption against hyphen, dot, slash and backup suffixes | confirmed at `de90987` |
+| `TQ-R7-ROUTING` | release-blocker | route test-quality and cutover reviews through `gpt-5.6-terra/xhigh`; retain architecture/final on `gpt-5.6-sol/xhigh` | confirmed at `de90987` |
+| `CUTOVER-R7-01` | release-blocker | consolidate every delivery finding R4..R7 into the canonical promotion-routing ledger | confirmed at `de90987` |
+| `CUTOVER-R7-02` | release-blocker | pin the exact lifecycle-aware 38-path tree plus unique ordered publication manifest; add removal/duplicate mutations | confirmed at `de90987` |
+| `CUTOVER-R7-03` | release-blocker | add six primary API/auth/public/enum authorities to PT-10 and reverify all Git-object hashes | confirmed at `de90987` |
+
+## Delivery R8 Finding Classification — 2026-09-24
+
+Cutover integrity returned `GO`. Architecture adherence and test quality each returned one reproducible `release-blocker` inside D-01..D-05; both are integrated locally without product/runtime change and require immutable R9 confirmation.
+
+| Finding | Classification | Integrated remediation | Status |
+| --- | --- | --- | --- |
+| `ARCH-ADH-R8-01` | release-blocker | distinguish authoritative external production `logs` from the derived, disposable, non-authoritative local replica; bind the mirror tool and local DDL through `PT-11` hashes | integrated; delivery R9 pending |
+| `TQ-R8-01` | release-blocker | reject every publication-tree symlink and preserve symlinks during manifest-only copy; mutate an identical external README symlink before and after copy | integrated; delivery R9 pending |
 
 ## Post-Implementation Decision Adherence Validation
 
@@ -172,18 +181,18 @@ Architecture adherence returned `GO`. The seven test-quality/cutover findings be
 
 ## Blocker Notes
 
-- **Blocker:** `n/a`; delivery R8 is the next active gate, not an impasse.
-- **Why blocked now:** `n/a`; completion remains unavailable until delivery R8 converges.
-- **What unblocks it:** clean delivery R8 test-quality, architecture-adherence and cutover-integrity results on one immutable commit.
+- **Blocker:** `n/a`; delivery R9 is the next active gate, not an impasse.
+- **Why blocked now:** `n/a`; completion remains unavailable until the two R8 release-blockers receive clean independent confirmation.
+- **What unblocks it:** clean delivery R9 test-quality, architecture-adherence and cutover-integrity results on one immutable remediation commit.
 - **Owner / source:** owner do TODO; autoridade humana permanece responsável pelo novo approval.
-- **Last confirmed truth:** D-01..D-05 approval remains valid; R7 architecture is clean and R7 test-quality/cutover findings are integrated for immutable R8 review.
+- **Last confirmed truth:** D-01..D-05 approval remains valid; R8 cutover is clean, and the R8 architecture/test-quality blockers are integrated locally for immutable R9 review.
 
 ## Scope
 
 - [ ] `S-01` Inventariar a verdade atual do Monitor de Notas no código, banco documentado, infraestrutura, testes e READMEs, distinguindo comportamento comprovado de intenção futura.
 - [ ] `S-02` Definir e aplicar a identidade canônica do produto e da Foundation em títulos, links, namespaces e linguagem de domínio.
 - [ ] `S-03` Reescrever mandato, constituição, entidades, baseline tecnológico, lifecycle e roadmap para refletirem exclusivamente o projeto atual.
-- [ ] `S-04` Substituir os módulos herdados pelos seis módulos congelados do Monitor de Notas: fronteira externa e leitura de eventos/classificação, tratamentos/histórico, identidade/equipe, invalidação em tempo real, monitoramento operacional e runtime/deploy; ingestão/escrita de `logs` permanece exclusivamente Routerfy.
+- [ ] `S-04` Substituir os módulos herdados pelos seis módulos congelados do Monitor de Notas: fronteira externa e leitura de eventos/classificação, tratamentos/histórico, identidade/equipe, invalidação em tempo real, monitoramento operacional e runtime/deploy; escrita da tabela externa de produção `logs` permanece exclusivamente Routerfy, e a réplica local derivada somente pode ser populada pela ferramenta explícita de espelhamento.
 - [ ] `S-05` Reconciliar backlog, decisões, contratos e políticas com os owners canônicos novos, sem transportar decisões do LeadsHug como se fossem decisões do Monitor de Notas.
 - [ ] `S-06` Remover do tree atual TODOs, artefatos e documentos herdados do LeadsHug que não pertençam ao Monitor de Notas; o histórico Git será a única retenção do legado removido.
 - [ ] `S-07` Atualizar a governança para declarar o `delphi-ai` como distribuição local obrigatória do método PACED: todo trabalho do projeto passa por seus workflows e guards, com `APROVADO` e authority guard `go` antes de implementação.
@@ -208,7 +217,7 @@ Architecture adherence returned `GO`. The seven test-quality/cutover findings be
 - [x] `D-01` Usar **Monitor de Notas** como nome canônico do produto, `MonitorDeNotas` como nome técnico do repositório e `uninotas-foundation` como nome do repositório documental. Decisão confirmada pelo usuário em 2026-09-24; nomes de pastas não precisam ser alterados.
 - [x] `D-02` Excluir do tree atual o conteúdo herdado do LeadsHug que não pertença ao Monitor de Notas, sem criar arquivo legado interno. O histórico Git preserva a proveniência sem manter autoridade documental concorrente. Decisão confirmada pelo usuário em 2026-09-24.
 - [x] `D-03` O `delphi-ai` distribui o método **PACED** (*Progressively Accelerated Controlled Engineering through Determinism*) e é passagem obrigatória para todo trabalho do projeto. `uninotas-foundation` governa a verdade específica do produto; PACED governa método, workflows e guards. Alterar o núcleo compartilhado do `delphi-ai` continua exigindo TODO próprio. Decisão confirmada pelo usuário em 2026-09-24.
-- [x] `D-04` A tabela externa `logs` pertence ao Routerfy e é somente leitura para o Monitor de Notas; a aplicação escreve apenas em suas próprias tabelas de usuários e tratamentos. Decisão consolidada da evidência já incluída no contrato aprovado (`README.md`, `backend/README.md`, Prisma e SQL isolado).
+- [x] `D-04` A tabela externa de produção `logs` pertence ao Routerfy e é somente leitura para o Monitor de Notas; a aplicação escreve apenas em suas próprias tabelas de usuários e tratamentos. A réplica local de desenvolvimento é derivada, descartável, não autoritativa e somente a ferramenta explícita de espelhamento pode populá-la. Decisão consolidada da evidência já incluída no contrato aprovado (`README.md`, `backend/README.md`, Prisma, ferramenta de espelhamento e DDL local isolado).
 - [x] `D-05` O produto atual não possui tenancy comprovada. Para satisfazer o contrato PACED de scope/subscope sem inventar domínio, a política local será reescrita com um único scope `monitor-de-notas`, subscopes iguais aos seis módulos congelados e `EnvironmentType=landlord` somente como adapter técnico do vocabulário PACED para superfícies únicas do projeto; isso não cria landlord/tenant de negócio. Decisão proposta a partir do código e sujeita ao novo `APROVADO`.
 
 ## Decision Baseline — Frozen Before Implementation
@@ -216,7 +225,7 @@ Architecture adherence returned `GO`. The seven test-quality/cutover findings be
 - [x] `D-01` Identidade canônica aprovada: produto `Monitor de Notas`, repositório `MonitorDeNotas` e Foundation `uninotas-foundation`.
 - [x] `D-02` Política de legado aprovada: remoção do tree atual e retenção somente pelo histórico Git.
 - [x] `D-03` Fronteira aprovada: Foundation como autoridade do produto e `delphi-ai`/PACED como autoridade obrigatória do processo de engenharia.
-- [x] `D-04` Ownership de dados congelado: `logs` read-only; `monitor_usuarios` e `monitor_tratamentos` pertencem à aplicação.
+- [x] `D-04` Ownership de dados congelado: a tabela externa de produção `logs` pertence ao Routerfy e é read-only para a aplicação; a réplica local é derivada, descartável e não autoritativa; `monitor_usuarios` e `monitor_tratamentos` pertencem à aplicação.
 - [x] `D-05` Scope congelado para o próximo review: produto single-scope sem tenancy; seis subscopes canônicos; `landlord` apenas como classificação técnica PACED, não entidade de domínio.
 
 ## Bounded But Elastic Guardrails
@@ -367,8 +376,8 @@ Hashes individuais que sustentam as decisões de ownership ficam no `Pre-Executi
 | From Profile | To Profile | Why the Handoff Exists | Touched Surfaces | Status / Evidence |
 | --- | --- | --- | --- | --- |
 | `Strategic / CTO-Tech-Lead` | `routine-executor` | executar a substituição documental já decidida sem redefinir o contrato | `uninotas-foundation/**` | `completed; R3 remediation locally green` |
-| `routine-executor` | `Assurance / Tester-Quality` | desafiar evidência, links, referências e ausência de autoridade concorrente | diff e validações da Foundation | `delivery R7 no-go remediated at 7231b43; correctly routed delivery R8 pending` |
-| `Assurance / Tester-Quality` | `formal-reviewer` | revisar aderência arquitetural e integridade do cutover | pacote final consolidado | `architecture R7 go; cutover R7 no-go remediated at 7231b43; delivery R8 pending` |
+| `routine-executor` | `Assurance / Tester-Quality` | desafiar evidência, links, referências e ausência de autoridade concorrente | diff e validações da Foundation | `delivery R8 test-quality blocker integrated; delivery R9 pending` |
+| `Assurance / Tester-Quality` | `formal-reviewer` | revisar aderência arquitetural e integridade do cutover | pacote final consolidado | `delivery R8 cutover go; architecture blocker integrated; delivery R9 pending` |
 
 ## Complexity
 
@@ -391,7 +400,7 @@ Este inventário read-only fecha a descoberta que antes estava indevidamente del
 
 | Truth ID | Verified Product Truth / Boundary | Exact Evidence | SHA-256 / Stable Ref | Target Owner |
 | --- | --- | --- | --- | --- |
-| `PT-01` | Routerfy grava `logs`; Monitor de Notas somente lê por SQL cru; a tabela não possui chave primária e não entra no Prisma. | `backend/docs/tabela-logs.md`; `backend/prisma/schema.prisma`; `backend/src/logs/logs.sql.ts` | `151fbc8540804ff73c8b3d8f8164c1d5d6f932dde8e9aecbcd9f731ff59dd3e6`; `cb53048b181e179e0d0a74188a17279e36213a50508a058fd69bd3a110056963`; `142c26ab4bdda0d53e59934460b029e6463c05e6d30083c7b2e2a2c4fd441643` | `modules/events-and-classification.md` |
+| `PT-01` | Routerfy grava a tabela autoritativa de produção `logs`; Monitor de Notas somente a lê por SQL cru; a tabela não possui chave primária e não entra no Prisma. | `backend/docs/tabela-logs.md`; `backend/prisma/schema.prisma`; `backend/src/logs/logs.sql.ts` | `151fbc8540804ff73c8b3d8f8164c1d5d6f932dde8e9aecbcd9f731ff59dd3e6`; `cb53048b181e179e0d0a74188a17279e36213a50508a058fd69bd3a110056963`; `142c26ab4bdda0d53e59934460b029e6463c05e6d30083c7b2e2a2c4fd441643` | `modules/events-and-classification.md` |
 | `PT-02` | Somente eventos `org_path = 'SmartNotas'` alimentam o monitor; `ref_id` não é identidade única de uma tentativa e correlaciona tratamentos/histórico. | `backend/src/logs/logs.sql.ts`; `backend/src/logs/logs.service.ts`; `backend/docs/tabela-logs.md` | `142c26ab4bdda0d53e59934460b029e6463c05e6d30083c7b2e2a2c4fd441643`; `579fbb4312b516e7de70b12e434f9d19d8dbb84f309c892ab16d152563bb02cc`; `151fbc8540804ff73c8b3d8f8164c1d5d6f932dde8e9aecbcd9f731ff59dd3e6` | `modules/events-and-classification.md` + `modules/treatments-and-history.md` |
 | `PT-03` | Classificação possui projeção TypeScript e expressão SQL equivalentes; situação efetiva aplica o último tratamento, e `PENDENTE` reabre para a situação original. | `backend/src/logs/logs.classifier.ts`; `backend/src/logs/logs.sql.ts`; `backend/src/logs/logs.mapper.ts` | `ca0a4340189321e1924eec0fbda82c492aca4b19bc0476d54953eb8e0eafcfbe`; `142c26ab4bdda0d53e59934460b029e6463c05e6d30083c7b2e2a2c4fd441643`; `875ea83fa0982d64ac00e0b66ff6c8aa12a447d52d232f672daecb070367441f` | `modules/events-and-classification.md` |
 | `PT-04` | A aplicação escreve `monitor_tratamentos` como histórico append-only correlacionado por `ref_id`; o último registro define o tratamento corrente. | `backend/prisma/schema.prisma`; `backend/src/logs/logs.service.ts` | `cb53048b181e179e0d0a74188a17279e36213a50508a058fd69bd3a110056963`; `579fbb4312b516e7de70b12e434f9d19d8dbb84f309c892ab16d152563bb02cc` | `modules/treatments-and-history.md` |
@@ -401,6 +410,7 @@ Este inventário read-only fecha a descoberta que antes estava indevidamente del
 | `PT-08` | React/Vite consome listagem, filtros, resumo, detalhe, tratamentos, equipe e invalidação realtime por contratos explícitos da API. | `frontend/src/api/eventos.ts`; `frontend/src/paginas/ListaEventos.tsx`; `frontend/src/paginas/DetalheEvento.tsx`; `frontend/src/paginas/Equipe.tsx` | `212a47f7b1e3c85fed39e55e63a30d5d0b1dbe7926ac5e8b312bfb89e9d00fbc`; `63b3b9941b5825496e757e5d9de6f0fe1ccf18eb9f50366f8a40e0456cf1cad5`; `a4d2829c6b7b1269c8ecc3f0b58c3bc8fe956cae878c80eaad7126f4be90f643`; `2d9a1e8b8645189fefdd832a48209b3a28bf85e68d9216356051e52d19ce010b` | módulos funcionais correspondentes; sem módulo frontend paralelo |
 | `PT-09` | Execução e deploy são NestJS + React/Vite + PostgreSQL/Prisma em Docker/Railway, sem mudança de runtime neste TODO. | `Dockerfile`; `docker-compose.yml`; `railway.json`; `backend/src/config/configuration.ts` | `9d0554370de58fd504282f0d8bf98c1bce841d9ef736da11be611dfa17cd9e32`; `5e5e9f39e191b477e9981ba9047ace1ee7082e73ca447d454d27dddcaec9a781`; `f711055e59a2442c04299987a2bc30fe24cd02df86cd9e4e4cf57efec76a5697`; `5948aeb71df0b82690e131f689b9005043e9d8d610a750b8a026f8aa79af702e` | `modules/runtime-and-deployment.md` |
 | `PT-10` | Rotas `/api/v1`, limites de request/response, guards, wire SSE, health, monitoramento e erro padrão são contratos observados. | paths exatos e hashes em `artifacts/analysis/monitor-de-notas-product-truth-20260924.md` | commit congelado `78bf271341dfccb2595389f0dbac0e01e8532a7b`; comando `git show <commit>:<relative-path> \| sha256sum` sobre bytes do objeto Git | seis módulos canônicos |
+| `PT-11` | A réplica local de desenvolvimento de `logs` é derivada, descartável e não autoritativa; somente a ferramenta explícita de espelhamento a popula, sem transferir ownership da produção. | `backend/prisma/espelhar.ts`; `backend/prisma/sql/002_logs_dev.sql` | `a1a847f686e143583e42cb9d4ab983e0cd426fb3c30404ba67fcde081ce40869`; `34ff7fae8d6a31e329bc222e89ef369a4bc2ebff23444e39c863d23872b6a98e` | `modules/runtime-and-deployment.md` |
 
 Os hashes completos foram obtidos com `git show 78bf271341dfccb2595389f0dbac0e01e8532a7b:<relative-path> | sha256sum`, isto é, sobre os bytes normalizados do objeto Git congelado, e não sobre bytes CRLF/LF do working tree. O comando deve ser repetido antes do closeout; o artifact final de product truth preserva esta matriz Foundation → fonte.
 
@@ -515,7 +525,7 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 
 ## Module Decision Consistency Gate
 
-- **Status:** `delivery-R7-reviewed`; D-01..D-05 estão `Adherent`, as cinco decisões congeladas estão `Superseded (Approved)` e a entrega aguarda confirmação conjunta R8.
+- **Status:** `delivery-R8-reviewed`; D-01..D-05 permanecem aprovadas, o refinamento da fronteira de réplica local está integrado e a entrega aguarda confirmação conjunta R9.
 - **Finding:** todas as decisões de módulos herdadas pertencem ao LeadsHug; nenhuma deve ser preservada como verdade do Monitor de Notas.
 - **Resolution:** supersessão intencional integral, autorizada por `D-02`, com substituição pelos módulos listados em `S-04`.
 - **Evidence:** conteúdo atual de `modules/*.md`, estrutura do backend/frontend e READMEs do produto.
@@ -534,7 +544,7 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 | Pattern / Decision | Source / ID | Scope | Why It Must Hold After Cutover |
 | --- | --- | --- | --- |
 | autoridade específica do produto separada do método de engenharia | `D-03` | toda a Foundation | evita duplicar regras PACED e mantém decisões de negócio locais |
-| `logs` é fonte externa read-only; tratamentos pertencem à aplicação | `D-04` derivada de evidência e a consolidar | dados, eventos e tratamentos | preserva ownership e impede mutação acidental da tabela Routerfy |
+| `logs` de produção é fonte externa read-only para a aplicação; a réplica local é derivada e não autoritativa; tratamentos pertencem à aplicação | `D-04` consolidada com `PT-01` e `PT-11` | dados, eventos, tratamentos e runtime | preserva ownership e impede mutação acidental da tabela Routerfy |
 | um owner canônico por verdade viva | `evolution_lifecycle.md` | módulos, decisões, contratos, backlog e TODOs | elimina estado concorrente e documentação divergente |
 | afirmações somente com evidência atual | `S-01`, `OOS-06` | todo documento novo | impede transportar capacidades do LeadsHug ou inferências não comprovadas |
 
@@ -563,9 +573,9 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Governing migration TODO:** enquanto este arquivo estiver em `todos/active/process/`, cada termo legado permitido deve possuir linha exata no ledger com `path`, `term`, `context_kind=historical_migration_record`, `section`, `reason`, `owner` e `lifecycle=active_until_closeout_move`; isso registra proveniência, não autoriza o termo em owners canônicos.
 - **Historical surfaces:** após o closeout move, a entrada muda para o path em `todos/completed/process/` e `lifecycle=historical`; outros completed TODOs/artifacts só são permitidos quando listados sem wildcard em `deterministic/legacy_reference_exceptions.json`.
 - **Closeout sequence:** validar tree candidato com a exceção ativa estrita; executar reviews/guards; mover o TODO; atualizar somente o path/lifecycle da exceção; repetir a suíte inteira antes do commit/push final.
-- **Fail-closed checks:** arquivos obrigatórios incluindo `policies/scope_subscope_governance.md`, anchors do `module_template.md` nos seis módulos, consistência scope/subscope, links/anchors relativos, ausência dos paths `Delete`, owner único, nenhuma autoridade ativa LeadsHug, exception ledger sem wildcard amplo e nenhum arquivo não classificado pelo publication manifest.
+- **Fail-closed checks:** arquivos obrigatórios incluindo `policies/scope_subscope_governance.md`, anchors do `module_template.md` nos seis módulos, consistência scope/subscope, links/anchors relativos, ausência dos paths `Delete`, owner único, nenhuma autoridade ativa LeadsHug, exception ledger sem wildcard amplo, nenhum symlink no tree publicado e nenhum arquivo não classificado pelo publication manifest.
 - **Privacy checks:** rejeitar JWT-like tokens, private-key markers, atribuições de segredo e identificadores pessoais plausíveis em todo o tree, inclusive fontes/fixtures de teste; nomes de variáveis e fragmentos que isoladamente não formam o padrão proibido são permitidos.
-- **Mutation fixtures:** autoridade legada em owner ativo, menção histórica permitida no governing TODO, mesma menção como autoridade ativa proibida, exception sem owner/razão/lifecycle, link quebrado, módulo órfão, anchor obrigatório ausente, scope divergente e owner ausente podem usar trees persistidos inofensivos; JWT/PII/segredo proibido deve ser montado somente em `tempfile.TemporaryDirectory` durante o teste, concatenando fragmentos fonte que não acionam o scan do repositório.
+- **Mutation fixtures:** autoridade legada em owner ativo, menção histórica permitida no governing TODO, mesma menção como autoridade ativa proibida, exception sem owner/razão/lifecycle, link quebrado, módulo órfão, anchor obrigatório ausente, scope divergente, owner ausente e symlink externo antes/depois da cópia por manifesto podem usar trees temporários inofensivos; JWT/PII/segredo proibido deve ser montado somente em `tempfile.TemporaryDirectory` durante o teste, concatenando fragmentos fonte que não acionam o scan do repositório.
 - **Manual complement:** revisar semanticamente que nenhuma ocorrência permitida apresenta o legado como verdade atual e que nenhum exemplo deriva de payload real.
 
 ### PACED Workspace Alias Contract
@@ -591,16 +601,16 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
 - **Adherence review package:** `bounded-file-set`
-- **Adherence review status:** `running`
-- **Adherence review evidence / resolution:** architecture delivery R7 on `1374cae` returned zero findings and `GO`; the R8 rerun preserves joint-baseline confirmation with sibling lanes.
+- **Adherence review status:** `remediated_pending_r9`
+- **Adherence review evidence / resolution:** architecture delivery R8 on `de909878b014c708fa103dd2d3b9213f0abe1c33` returned `ARCH-ADH-R8-01`; the external-production/local-replica boundary and exact `PT-11` evidence are integrated for R9 confirmation.
 - **No-go handling:** retornar ao diagnóstico/decisão ou ao loop de evidência; não alegar execução ou conclusão com divergência aberta.
 
 ## Assumptions Preview
 
 | Assumption ID | Assumption | Evidence | If False | Confidence | Handling |
 | --- | --- | --- | --- | --- | --- |
-| `A-01` | O snapshot de código/configuração é a fonte técnica para reconstruir a verdade do produto; READMEs somente corroboram. | `backend/prisma/schema.prisma`; `backend/src/logs/logs.sql.ts`; `backend/src/logs/logs.service.ts`; `backend/src/realtime/realtime.service.ts`; `backend/src/monitoramento/monitoramento.service.ts`; `backend/src/auth/auth.service.ts`; `backend/src/usuarios/usuarios.service.ts`; controllers/guards/filter enumerados em `PT-10`; `frontend/src/api/eventos.ts`; `frontend/src/hooks/useTempoReal.ts`; `PT-01..PT-10` e SHA-256 exatos no snapshot `HEAD 78bf271341dfccb2595389f0dbac0e01e8532a7b` | qualquer hash divergente reabre inventário e scope review | `High` | `Keep as Assumption` |
-| `A-02` | A tabela `logs` permanece read-only e pertence ao Routerfy. | `backend/prisma/schema.prisma@cb53048b…`, `backend/src/logs/logs.sql.ts@142c26ab…`, `backend/docs/tabela-logs.md@151fbc85…` | muda invariantes, contratos e módulos | `High` | `Promoted to D-04` |
+| `A-01` | O snapshot de código/configuração é a fonte técnica para reconstruir a verdade do produto; READMEs somente corroboram. | `backend/prisma/schema.prisma`; `backend/src/logs/logs.sql.ts`; `backend/src/logs/logs.service.ts`; `backend/src/realtime/realtime.service.ts`; `backend/src/monitoramento/monitoramento.service.ts`; `backend/src/auth/auth.service.ts`; `backend/src/usuarios/usuarios.service.ts`; `backend/prisma/espelhar.ts`; `backend/prisma/sql/002_logs_dev.sql`; controllers/guards/filter enumerados em `PT-10`; `frontend/src/api/eventos.ts`; `frontend/src/hooks/useTempoReal.ts`; `PT-01..PT-11` e SHA-256 exatos no snapshot `HEAD 78bf271341dfccb2595389f0dbac0e01e8532a7b` | qualquer hash divergente reabre inventário e scope review | `High` | `Keep as Assumption` |
+| `A-02` | A tabela externa de produção `logs` permanece read-only para o Monitor de Notas e pertence ao Routerfy; a réplica local é derivada, descartável e não autoritativa. | `backend/prisma/schema.prisma@cb53048b…`, `backend/src/logs/logs.sql.ts@142c26ab…`, `backend/docs/tabela-logs.md@151fbc85…`, `backend/prisma/espelhar.ts@a1a847f6…`, `backend/prisma/sql/002_logs_dev.sql@34ff7fae…` | muda invariantes, contratos e módulos | `High` | `Promoted to D-04` |
 | `A-03` | `uninotas-foundation` é a autoridade específica do produto e `delphi-ai` distribui o PACED obrigatório para todo trabalho. | `D-03`; `delphi-ai/README.md` no commit `9ba43e8bba3618d029320bf6d7b40415881a0287`; alias contract local | muda links, responsabilidades e gates | `High` | `Promoted to D-03` |
 
 ## Gate: Assumption Code Coherence
@@ -816,13 +826,15 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 | `CUTOVER-R6-03` | `medium` | `release-blocker` | document JWT cache enforcement lag | contract fidelity is required by current cutover | `fixed at f7dde5d` | `Delivery R6 Finding Classification` |
 | `CUTOVER-R6-04` | `medium` | `release-blocker` | restore four-way finding taxonomy/promotion rule | governance owner belongs in current cutover | `fixed at f7dde5d` | `Delivery R6 Finding Classification` |
 | `CUTOVER-R6-05` | `medium` | `release-blocker` | synchronize delivery state | governing TODO state is part of this delivery | `fixed at f7dde5d` | `Delivery R6 Finding Classification` |
-| `TQ-R7-01` | `high` | `release-blocker` | detect compact/document/landline/multiline payload variants independently | privacy contract is in current DoD | `integrated; R8 pending` | `Delivery R7 Finding Classification` |
-| `TQ-R7-02` | `medium` | `release-blocker` | bind route tuple tokens to exact Markdown columns | validator is part of current cutover | `integrated; R8 pending` | `Delivery R7 Finding Classification` |
-| `TQ-R7-03` | `medium` | `release-blocker` | reject suffixed lifecycle-name lookalikes | validator is part of current cutover | `integrated; R8 pending` | `Delivery R7 Finding Classification` |
-| `TQ-R7-ROUTING` | `high` | `release-blocker` | route each review kind to its guarded model family | PACED routing is required by D-03 | `integrated; R8 pending` | `Agent Routing Preflight`; `Delivery R7 Finding Classification` |
-| `CUTOVER-R7-01` | `medium` | `release-blocker` | consolidate delivery findings into this canonical ledger | prevents carry-forward loss | `integrated; R8 pending` | `Delivery R7 Finding Classification` |
-| `CUTOVER-R7-02` | `medium` | `release-blocker` | freeze lifecycle-aware tree and unique ordered manifest | exact publication set is current cutover scope | `integrated; R8 pending` | `Delivery R7 Finding Classification` |
-| `CUTOVER-R7-03` | `medium` | `release-blocker` | add primary API/auth/public/enum evidence paths | PT-10 fidelity is current cutover evidence | `integrated; R8 pending` | `Delivery R7 Finding Classification` |
+| `TQ-R7-01` | `high` | `release-blocker` | detect compact/document/landline/multiline payload variants independently | privacy contract is in current DoD | `confirmed at de90987` | `Delivery R7 Finding Classification`; R8 test-quality |
+| `TQ-R7-02` | `medium` | `release-blocker` | bind route tuple tokens to exact Markdown columns | validator is part of current cutover | `confirmed at de90987` | `Delivery R7 Finding Classification`; R8 test-quality |
+| `TQ-R7-03` | `medium` | `release-blocker` | reject suffixed lifecycle-name lookalikes | validator is part of current cutover | `confirmed at de90987` | `Delivery R7 Finding Classification`; R8 test-quality |
+| `TQ-R7-ROUTING` | `high` | `release-blocker` | route each review kind to its guarded model family | PACED routing is required by D-03 | `confirmed at de90987` | `Agent Routing Preflight`; R8 routing |
+| `CUTOVER-R7-01` | `medium` | `release-blocker` | consolidate delivery findings into this canonical ledger | prevents carry-forward loss | `confirmed at de90987` | `Delivery R7 Finding Classification`; R8 cutover |
+| `CUTOVER-R7-02` | `medium` | `release-blocker` | freeze lifecycle-aware tree and unique ordered manifest | exact publication set is current cutover scope | `confirmed at de90987` | `Delivery R7 Finding Classification`; R8 cutover |
+| `CUTOVER-R7-03` | `medium` | `release-blocker` | add primary API/auth/public/enum evidence paths | PT-10 fidelity is current cutover evidence | `confirmed at de90987` | `Delivery R7 Finding Classification`; R8 cutover |
+| `ARCH-ADH-R8-01` | `medium` | `release-blocker` | distinguish production ownership from explicit local-replica population and add exact evidence | D-04/runtime fidelity is required by the current cutover | `integrated; R9 pending` | `Delivery R8 Finding Classification` |
+| `TQ-R8-01` | `high` | `release-blocker` | reject symlinks and preserve them in the clean-copy harness so external content cannot be laundered | publication-tree integrity is required by the current cutover | `integrated; R9 pending` | `Delivery R8 Finding Classification` |
 
 ## Independent Test Quality Audit Gate
 
@@ -834,9 +846,9 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Canonical method:** `wf-docker-independent-test-quality-audit-method`
 - **Audit isolation mode:** `fresh internal no-context reviewer`
 - **Internal reviewer mandate:** `required after implementation`
-- **Audit status:** `running`
-- **Findings summary:** supporting delivery R7 returned `TQ-R7-01..03` plus a routing blocker; all are integrated locally and the clean result must come from correctly routed delivery R8.
-- **Evidence / reference:** immutable delivery R7 baseline `1374caedafa63935fd390c273a346365ea88109e`; remediation evidence in `Delivery R7 Finding Classification`.
+- **Audit status:** `remediated_pending_r9`
+- **Findings summary:** delivery R8 returned `TQ-R8-01` because the clean-copy harness dereferenced an external symlink; validator rejection, symlink-preserving copy and before/after regression are integrated for R9.
+- **Evidence / reference:** immutable delivery R8 baseline `de909878b014c708fa103dd2d3b9213f0abe1c33`; remediation evidence in `Delivery R8 Finding Classification`.
 - **Waiver authority / reference:** `n/a`
 
 ## Independent No-Context Final Review Gate
@@ -860,9 +872,9 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Cutover signals in scope:** `canonical cutover|legacy-path retirement`
 - **Package mode:** `bounded-file-set`
 - **Canonical multi-lane audit protocol:** `n/a`
-- **Cutover audit status:** `running`
-- **Findings summary:** supporting delivery R7 returned `CUTOVER-R7-01..03`; all are integrated locally and correctly routed delivery R8 confirmation remains required.
-- **Evidence / reference:** delivery R7 immutable baseline `1374cae`; remediation evidence in `Delivery R7 Finding Classification`; delivery R8 pending.
+- **Cutover audit status:** `go_r8`
+- **Findings summary:** delivery R8 returned `GO`: 34 exact deletions, lifecycle-aware 38-path tree, R4-R7 ledger parity, all product-truth hashes and frozen fingerprints passed.
+- **Evidence / reference:** immutable delivery R8 baseline `de909878b014c708fa103dd2d3b9213f0abe1c33`; R9 will reconfirm the remediation commit jointly with sibling lanes.
 - **Waiver authority / reference:** `n/a`
 
 ## Execution Plan — Approved; Guard-Gated
@@ -880,7 +892,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 11. `Concluído com no-go`: delivery R5 executada sobre `1e7e73043e697f2e9bf536772cf3717d79f85cbf`; findings classificados dentro de D-01..D-05.
 12. `Concluído com no-go`: delivery R6 executada sobre `04b865ea35501d5f59f0e6a9e7d7b953d7d9598d`; findings classificados dentro de D-01..D-05.
 13. `Concluído com no-go parcial`: arquitetura R7 retornou `GO`; test-quality/cutover R7 sobre `1374caedafa63935fd390c273a346365ea88109e` encontraram findings e uma rota de modelo inválida, todos classificados no ledger canônico.
-14. `Em andamento`: remediação R7 congelada em `7231b43bc17f6594c3bb26e156fe9d82e06e1539`; executar delivery R8 corretamente roteada no HEAD imutável e, após resultado limpo, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
+14. `Concluído com no-go parcial`: delivery R8 sobre `de909878b014c708fa103dd2d3b9213f0abe1c33` retornou cutover `GO` e os blockers `ARCH-ADH-R8-01`/`TQ-R8-01`, classificados no ledger canônico.
+15. `Em andamento`: remediações R8 integradas localmente; executar delivery R9 corretamente roteada no HEAD imutável e, após resultado limpo, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
 
 ### Touched Surfaces
 
@@ -1015,11 +1028,11 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 - **Authority guard:** must return `go` only after explicit `APROVADO`, rule ingestion and resolved decisions.
 - **Completion and closeout guards:** required before `Local-Implemented` or movement to `completed/`.
 - **Cutover integrity audit:** required because the work retires one active documentary authority and establishes another.
-- **Delivery R7 architecture/test-quality/cutover review:** architecture `GO`; supporting test-quality/cutover `NO-GO` on `1374cae`, with routing corrected and findings integrated locally; delivery R8 is the fresh correctly routed immutable rerun.
+- **Delivery R8 architecture/test-quality/cutover review:** cutover `GO`; architecture/test-quality `NO-GO` on `de90987`; `ARCH-ADH-R8-01` and `TQ-R8-01` are integrated locally and delivery R9 is the required fresh immutable rerun.
 
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
-- **Disposition reason:** approved implementation and delivery R7 remediation remain local; delivery R8 and delivery/closeout gates remain pending.
-- **Post-commit/push status:** `delivery R7 remediation committed at 7231b43; origin/main remains at b73b0eb approval checkpoint`
+- **Disposition reason:** approved implementation and delivery R8 remediation remain local; delivery R9 and delivery/closeout gates remain pending.
+- **Post-commit/push status:** `delivery R8 remediation is local and uncommitted; origin/main remains at b73b0eb approval checkpoint`
 - **Next path/status action:** permanecer em `todos/active/process/` até implementação, evidência, reviews e closeout completos.

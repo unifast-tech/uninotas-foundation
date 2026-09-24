@@ -13,7 +13,8 @@ NestJS, React/Vite, PostgreSQL/Prisma, Docker, and Railway are observed product 
 
 ## Invariants
 
-- Routerfy owns and writes `logs`; Monitor de Notas reads it only and writes only `monitor_usuarios` and `monitor_tratamentos`.
+- Routerfy owns and writes the authoritative production `logs`; Monitor de Notas reads that external table only and writes only `monitor_usuarios` and `monitor_tratamentos`.
+- The local development `logs` replica is derived, disposable, and non-authoritative. Only the explicit mirror tooling may populate it; it never transfers ownership from Routerfy or authorizes application writes to production `logs`.
 - [Events](modules/events-and-classification.md) owns read projections, [treatments](modules/treatments-and-history.md) owns treatment writes, and [identity](modules/identity-and-team.md) owns user writes.
 - `ref_id` is correlation, never uniqueness proof.
 - The latest treatment supplies effective status; `PENDENTE` reopens original status.
