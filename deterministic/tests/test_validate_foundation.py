@@ -55,6 +55,8 @@ class ValidateFoundationTests(unittest.TestCase):
             self.assertTrue(any("active legacy authority" in x for x in errors), line)
         self.assertFalse(self.module.term_occurs("evol"+"ution", "evol"+"ution_lifecycle.md"))
         self.assertTrue(self.module.term_occurs("evol"+"ution", "historical Evol"+"ution integration"))
+        for suffix in ("-connector", ".backup", "/connector", "_connector"):
+            self.assertTrue(self.module.term_occurs("evol"+"ution", "evol"+"ution_lifecycle" + suffix), suffix)
         for compound in ("Lead"+"shugFoundation is the current product.", "Lead"+"shug_Foundation is the current authority.", "Lead"+"shugFundação é o produto atual."):
             self.assertTrue(any("legacy" in x for x in self.errors(lambda r, value=compound: (r / "README.md").write_text(value))), compound)
         self.assertTrue(any("ledger" in x for x in self.errors(lambda r: (r / self.module.ACTIVE_TODO).write_text((r / self.module.ACTIVE_TODO).read_text().replace("LeadsHug", "LEADSHUG", 1)))))
@@ -66,6 +68,14 @@ class ValidateFoundationTests(unittest.TestCase):
             target=root/relative; target.parent.mkdir(parents=True, exist_ok=True); target.write_text("safe"); self.add_manifest(root,relative)
             self.assertTrue(any("forbidden deleted path" in x for x in self.module.validate(root)), relative)
             target.unlink(); self.manifest(root).write_text(original_manifest)
+    def test_publication_manifest_freezes_lifecycle_tree_and_order(self):
+        def remove_keep_with_row(r, relative):
+            (r / relative).unlink()
+            lines = self.manifest(r).read_text().splitlines()
+            self.manifest(r).write_text("\n".join(line for line in lines if line != relative) + "\n")
+        for relative in (".gitattributes", "deterministic/tests/fixtures/valid-tree/README.md"):
+            self.assertTrue(any("frozen lifecycle tree" in x for x in self.errors(lambda r, value=relative: remove_keep_with_row(r, value))), relative)
+        self.assertTrue(any("uniquely" in x for x in self.errors(lambda r: self.manifest(r).write_text(self.manifest(r).read_text() + ".gitattributes\n"))))
     def test_identity_scope_and_module_contracts(self):
         root = self.tree()
         for owner, tokens in self.module.IDENTITY.items():
@@ -103,6 +113,14 @@ class ValidateFoundationTests(unittest.TestCase):
                 if line.startswith("| `POST /usuarios`"): lines[index] = line.replace("HTTP 201", "HTTP 200")
             path.write_text("\n".join(lines) + "\n")
         self.assertTrue(any("route contract mismatch" in x for x in self.errors(swap_route_statuses)))
+        def swap_route_columns(r):
+            path = r / "modules/identity-and-team.md"; lines = path.read_text().splitlines()
+            for index, line in enumerate(lines):
+                if line.startswith("| `POST /auth/login`"):
+                    cells = self.module.markdown_table_cells(line); cells[1], cells[2] = cells[2], cells[1]
+                    lines[index] = "| " + " | ".join(cells) + " |"
+            path.write_text("\n".join(lines) + "\n")
+        self.assertTrue(any("route contract mismatch" in x for x in self.errors(swap_route_columns)))
         self.assertTrue(any("identity anchor" in x for x in self.errors(lambda r: (r / "README.md").write_text((r / "README.md").read_text().replace("# Monitor de Notas Foundation", "# Other Foundation", 1)))))
         self.assertTrue(any("identity heading" in x for x in self.errors(lambda r: (r / "README.md").write_text((r / "README.md").read_text() + "\n# Other Product Foundation\n"))))
         self.assertTrue(any("canonical identity claim" in x for x in self.errors(lambda r: (r / "decisions/monitor-de-notas-foundation-decisions.md").write_text((r / "decisions/monitor-de-notas-foundation-decisions.md").read_text() + "\nThe canonical product is Other Product.\n"))))
@@ -117,7 +135,7 @@ class ValidateFoundationTests(unittest.TestCase):
         self.assertTrue(any("decision table" in x for x in self.errors(lambda r: (r / decision).write_text((r / decision).read_text() + "\n| D-04|Monitor de Notas owns logs.|x|\n"))))
         self.assertTrue(any("decision table" in x for x in self.errors(lambda r: (r / decision).write_text((r / decision).read_text().replace("Routerfy owns and writes `logs`; Monitor de Notas reads it and writes only its application tables.", "Monitor de Notas owns `logs`.")))))
     def test_privacy_scans_every_persisted_surface(self):
-        fragments=("eyJ"+"hbGciOiJIUzI1NiJ9"+".eyJzdWIiOiIxIn0"+".signature", "-----"+"BEGIN PRIVATE "+"KEY-----", "api"+"_key='abcdefghijk'", "API"+"_KEY=abcdefghijk", "api"+"-key: abcdefghijk", "- api"+"_key: abcdefghijk", "{\"api"+"_key\":\"abcdefghijk\"}", "{\"kind\":\"config\",\"api"+"_key\":\"abcdefghijk\"}", "[{\"api"+"_key\":\"abcdefghijk\"}]", "https://x.invalid/?to"+"ken=abcdefghijk", "Authorization: Bea"+"rer abcdefghijk", "DATABASE"+"_URL=postgres"+"ql://db_admin:"+"Sup3rValue@127.0.0.1/prod", "AK"+"IAIOSFODNN7EXAMPLE", "gh"+"p_"+("A"*36), "github"+"_pat_"+("A"*24), "sk"+"-proj-"+("A"*24), "AI"+"za"+("A"*35), "529"+".982.247-25", "+55"+" 11 "+"99999"+"-9999", "{\"no"+"me\":\"Pessoa\",\"documento\":\"529"+".982.247-25\",\"telefone\":\"+55"+" 11 "+"99999"+"-9999\"}", "a"+"lice"+"@example.com")
+        fragments=("eyJ"+"hbGciOiJIUzI1NiJ9"+".eyJzdWIiOiIxIn0"+".signature", "-----"+"BEGIN PRIVATE "+"KEY-----", "api"+"_key='abcdefghijk'", "API"+"_KEY=abcdefghijk", "api"+"-key: abcdefghijk", "- api"+"_key: abcdefghijk", "{\"api"+"_key\":\"abcdefghijk\"}", "{\"kind\":\"config\",\"api"+"_key\":\"abcdefghijk\"}", "[{\"api"+"_key\":\"abcdefghijk\"}]", "https://x.invalid/?to"+"ken=abcdefghijk", "Authorization: Bea"+"rer abcdefghijk", "DATABASE"+"_URL=postgres"+"ql://db_admin:"+"Sup3rValue@127.0.0.1/prod", "AK"+"IAIOSFODNN7EXAMPLE", "gh"+"p_"+("A"*36), "github"+"_pat_"+("A"*24), "sk"+"-proj-"+("A"*24), "AI"+"za"+("A"*35), "529"+".982.247-25", "111"+"444"+"777"+"35", "+55"+" 11 "+"99999"+"-9999", "+55"+" 11 "+"3333"+"-4444", "{\n  \"no"+"me\": \"Pessoa\",\n  \"documento\": \"redacted\",\n  \"telefone\": \"redacted\"\n}", "a"+"lice"+"@example.com")
         root = self.tree()
         for relative in ("README.md", "modules/events-and-classification.md", "policies/engineering_guardrails.md", "artifacts/README.md", self.module.ACTIVE_TODO, "local_packages.yaml", "artifacts/publication-manifest.txt", "deterministic/validate_foundation.py", "deterministic/legacy_reference_exceptions.json", "deterministic/tests/test_validate_foundation.py", "deterministic/tests/fixtures/valid-tree/README.md"):
             for content in fragments:

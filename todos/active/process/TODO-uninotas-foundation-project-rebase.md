@@ -51,13 +51,13 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `none`
-- **Next exact step:** gerar o pacote R7 no HEAD que contém a remediação `f7dde5d8ca31f50317c1a416daeee098d16cb30d` e executar reviewers independentes sobre o commit exato registrado pelo pacote.
+- **Next exact step:** concluir e congelar a remediação dos blockers R7, gerar o pacote R8 e executar reviewers independentes roteados por lane sobre o commit exato do pacote.
 
 ## Active Work State
 
 - **Work state:** `delivery-review`
-- **Why this state now:** delivery R6 encontrou blockers dentro do escopo aprovado; a remediação foi congelada em `f7dde5d8ca31f50317c1a416daeee098d16cb30d` e aguarda confirmação R7 independente.
-- **Exit condition:** delivery R7 sem release-blocker, matrizes 1:1 adjudicadas e gates de completion/closeout prontos para execução.
+- **Why this state now:** arquitetura R7 retornou `GO`; test-quality e cutover R7 encontraram blockers dentro do escopo aprovado, agora integrados localmente para confirmação R8.
+- **Exit condition:** delivery R8 sem release-blocker em todas as lanes, matrizes 1:1 adjudicadas e gates de completion/closeout prontos para execução.
 
 ## Routine-Executor Implementation Evidence — 2026-09-24
 
@@ -136,6 +136,20 @@ All R6 findings are deduplicated below as `release-blocker` items inside D-01..D
 | `CUTOVER-R6-04` | release-blocker | restore durable four-way review-finding taxonomy and promotion rules in TODO governance and constitution | integrated; delivery R7 pending |
 | `CUTOVER-R6-05` | release-blocker | synchronize immutable R6 commit/packet state and next R7 action | integrated; delivery R7 pending |
 
+## Delivery R7 Finding Classification — 2026-09-24
+
+Architecture adherence returned `GO`. The seven test-quality/cutover findings below are `release-blocker` items inside D-01..D-05; no scope expansion was accepted.
+
+| Finding | Classification | Integrated remediation | Status |
+| --- | --- | --- | --- |
+| `TQ-R7-01` | release-blocker | detect compact CPF, Brazilian landline and multiline raw person payload with non-overlapping mutations | integrated; delivery R8 pending |
+| `TQ-R7-02` | release-blocker | parse Markdown table cells and bind request/auth, status/media and response tokens to exact columns | integrated; delivery R8 pending |
+| `TQ-R7-03` | release-blocker | restrict the current lifecycle exemption against hyphen, dot, slash and backup suffixes | integrated; delivery R8 pending |
+| `TQ-R7-ROUTING` | release-blocker | route test-quality and cutover reviews through `gpt-5.6-terra/xhigh`; retain architecture/final on `gpt-5.6-sol/xhigh` | integrated; delivery R8 pending |
+| `CUTOVER-R7-01` | release-blocker | consolidate every delivery finding R4..R7 into the canonical promotion-routing ledger | integrated; delivery R8 pending |
+| `CUTOVER-R7-02` | release-blocker | pin the exact lifecycle-aware 38-path tree plus unique ordered publication manifest; add removal/duplicate mutations | integrated; delivery R8 pending |
+| `CUTOVER-R7-03` | release-blocker | add six primary API/auth/public/enum authorities to PT-10 and reverify all Git-object hashes | integrated; delivery R8 pending |
+
 ## Post-Implementation Decision Adherence Validation
 
 | Decision | Canonical evidence | Status |
@@ -158,11 +172,11 @@ All R6 findings are deduplicated below as `release-blocker` items inside D-01..D
 
 ## Blocker Notes
 
-- **Blocker:** `n/a`; delivery R7 is the next active gate, not an impasse.
-- **Why blocked now:** `n/a`; completion remains unavailable until delivery R7 converges.
-- **What unblocks it:** clean delivery R7 test-quality, architecture-adherence and cutover-integrity results on one immutable commit.
+- **Blocker:** `n/a`; delivery R8 is the next active gate, not an impasse.
+- **Why blocked now:** `n/a`; completion remains unavailable until delivery R8 converges.
+- **What unblocks it:** clean delivery R8 test-quality, architecture-adherence and cutover-integrity results on one immutable commit.
 - **Owner / source:** owner do TODO; autoridade humana permanece responsável pelo novo approval.
-- **Last confirmed truth:** D-01..D-05 approval remains valid; R6 reviewers returned no-go findings now integrated for immutable R7 review.
+- **Last confirmed truth:** D-01..D-05 approval remains valid; R7 architecture is clean and R7 test-quality/cutover findings are integrated for immutable R8 review.
 
 ## Scope
 
@@ -353,8 +367,8 @@ Hashes individuais que sustentam as decisões de ownership ficam no `Pre-Executi
 | From Profile | To Profile | Why the Handoff Exists | Touched Surfaces | Status / Evidence |
 | --- | --- | --- | --- | --- |
 | `Strategic / CTO-Tech-Lead` | `routine-executor` | executar a substituição documental já decidida sem redefinir o contrato | `uninotas-foundation/**` | `completed; R3 remediation locally green` |
-| `routine-executor` | `Assurance / Tester-Quality` | desafiar evidência, links, referências e ausência de autoridade concorrente | diff e validações da Foundation | `delivery R6 no-go remediated at f7dde5d; delivery R7 pending` |
-| `Assurance / Tester-Quality` | `formal-reviewer` | revisar aderência arquitetural e integridade do cutover | pacote final consolidado | `delivery R6 no-go remediated at f7dde5d; delivery R7 pending` |
+| `routine-executor` | `Assurance / Tester-Quality` | desafiar evidência, links, referências e ausência de autoridade concorrente | diff e validações da Foundation | `delivery R7 no-go integrated locally; correctly routed delivery R8 pending` |
+| `Assurance / Tester-Quality` | `formal-reviewer` | revisar aderência arquitetural e integridade do cutover | pacote final consolidado | `architecture R7 go; cutover R7 no-go integrated locally; delivery R8 pending` |
 
 ## Complexity
 
@@ -501,7 +515,7 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 
 ## Module Decision Consistency Gate
 
-- **Status:** `delivery-R6-reviewed`; as cinco decisões congeladas estão `Superseded (Approved)` e a cobertura entregue aguarda R7 após remediação.
+- **Status:** `delivery-R7-reviewed`; D-01..D-05 estão `Adherent`, as cinco decisões congeladas estão `Superseded (Approved)` e a entrega aguarda confirmação conjunta R8.
 - **Finding:** todas as decisões de módulos herdadas pertencem ao LeadsHug; nenhuma deve ser preservada como verdade do Monitor de Notas.
 - **Resolution:** supersessão intencional integral, autorizada por `D-02`, com substituição pelos módulos listados em `S-04`.
 - **Evidence:** conteúdo atual de `modules/*.md`, estrutura do backend/frontend e READMEs do produto.
@@ -578,7 +592,7 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Adherence review kind:** `architecture_adherence`
 - **Adherence review package:** `bounded-file-set`
 - **Adherence review status:** `running`
-- **Adherence review evidence / resolution:** delivery R6 on `04b865e` returned `ARCH-R6-01`; it is integrated locally and only fresh delivery R7 may mark adherence clean.
+- **Adherence review evidence / resolution:** architecture delivery R7 on `1374cae` returned zero findings and `GO`; the R8 rerun preserves joint-baseline confirmation with sibling lanes.
 - **No-go handling:** retornar ao diagnóstico/decisão ou ao loop de evidência; não alegar execução ou conclusão com divergência aberta.
 
 ## Assumptions Preview
@@ -773,6 +787,42 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 | `RF-14` (`CRIT-R2-02`) | `high` | `release-blocker` | usar ref real `origin/main` e manter SHA em campo separado | guard precisa resolver o ref com Git | `resolved; scope-drift guard go` | `Gate: Review Baseline Freeze`; guard 2026-09-24 |
 | `RF-15` (`ARCH-R3-01`,`CRIT-R3-01`) | `high` | `release-blocker` | sincronizar lifecycle, next step, work state, blockers, execution plan, questions e closeout | elimina instruções concorrentes antes do novo approval | `resolved; planning R4 clean` | seções canônicas de estado + `Execution Plan` |
 | `RF-16` (`CRIT-R3-02`) | `medium` | `release-blocker` | gerar padrões proibidos apenas em temp runtime a partir de fragmentos inofensivos | evita validator rejeitar o próprio corpus ou exigir allowlist ampla | `resolved; planning R4 clean` | `DOD-10`; `VAL-08`; validator/test contracts |
+| `ARCH-ADH-R4-01` | `high` | `release-blocker` | complete route/request/response/media/health contracts and PT-10 | contract fidelity is required by the approved cutover | `fixed at cacc054; superseded by later rounds` | `Delivery R4 Finding Classification` |
+| `ARCH-ADH-R4-02` | `high` | `release-blocker` | distinguish JWT/SSE, polling/reconnect, monitoring 503 and treatment failure | same approved architecture boundary | `fixed at cacc054; superseded by later rounds` | `Delivery R4 Finding Classification` |
+| `ARCH-ADH-R4-03` | `high` | `release-blocker` | restore singular mandate/data/route ownership | same approved architecture boundary | `fixed at cacc054` | `Delivery R4 Finding Classification` |
+| `ARCH-ADH-R4-04`,`TQ-R4-04` | `medium` | `release-blocker` | synchronize delivery state | governing TODO state is part of this delivery | `fixed at cacc054` | `Delivery R4 Finding Classification` |
+| `TQ-R4-01` | `high` | `release-blocker` | reject active-authority semantics before historical reconciliation | validator is part of current cutover | `fixed at cacc054; superseded by later rounds` | `Delivery R4 Finding Classification` |
+| `TQ-R4-02` | `high` | `release-blocker` | harden identity/decision/ownership parsing | validator is part of current cutover | `fixed at cacc054; superseded by later rounds` | `Delivery R4 Finding Classification` |
+| `TQ-R4-03` | `high` | `release-blocker` | independently pin deletion set and mutation coverage | validator is part of current cutover | `fixed at cacc054; superseded by later rounds` | `Delivery R4 Finding Classification` |
+| `COPILOT-R4-CREDENTIALS` | `high` | `release-blocker` | detect URI-userinfo and access-key credentials | privacy contract is in current DoD | `fixed at cacc054; superseded by later rounds` | `Delivery R4 Finding Classification` |
+| `TQ-R5-01`,`CUTOVER-R5-01` | `high` | `release-blocker` | freeze historical content and multilingual authority claims | validator is part of current cutover | `fixed at 04b865e; superseded by later rounds` | `Delivery R5 Finding Classification` |
+| `TQ-R5-02` | `high` | `release-blocker` | harden ownership/identity contradiction probes | validator is part of current cutover | `fixed at 04b865e` | `Delivery R5 Finding Classification` |
+| `ARCH-R5-01`,`CUTOVER-R5-03` | `high` | `release-blocker` | correct field/status/media/SSE contracts | contract fidelity is required by current cutover | `fixed at 04b865e` | `Delivery R5 Finding Classification` |
+| `ARCH-R5-02` | `high` | `release-blocker` | correct polling and optional notification semantics | contract fidelity is required by current cutover | `fixed at 04b865e` | `Delivery R5 Finding Classification` |
+| `ARCH-R5-03` | `medium` | `release-blocker` | record decision adherence and frozen module supersession 1:1 | closeout evidence belongs here | `fixed at 04b865e` | `Delivery R5 Finding Classification` |
+| `ARCH-R5-04` | `high` | `release-blocker` | use guarded formal-review routing | PACED routing is required by D-03 | `fixed at 04b865e; refined by R7` | `Delivery R5 Finding Classification` |
+| `CUTOVER-R5-02` | `high` | `release-blocker` | add provider credential patterns | privacy contract is in current DoD | `fixed at 04b865e` | `Delivery R5 Finding Classification` |
+| `CUTOVER-R5-04` | `medium` | `release-blocker` | document query-token bound precisely | contract fidelity is required by current cutover | `fixed at 04b865e` | `Delivery R5 Finding Classification` |
+| `CUTOVER-R5-05` | `high` | `release-blocker` | make PT-10 paths/hash method exact | frozen product truth is current evidence | `fixed at 04b865e; superseded by later rounds` | `Delivery R5 Finding Classification` |
+| `CUTOVER-R5-06` | `high` | `release-blocker` | remove lifecycle-name false collision without broad bypass | validator is part of current cutover | `fixed at 04b865e; superseded by later rounds` | `Delivery R5 Finding Classification` |
+| `CUTOVER-R5-07` | `medium` | `release-blocker` | restore project TODO routing taxonomy | governance owner belongs in current cutover | `fixed at 04b865e; superseded by later rounds` | `Delivery R5 Finding Classification` |
+| `TQ-R6-01` | `high` | `release-blocker` | block brand compounds and underscore variants | validator is part of current cutover | `fixed at f7dde5d` | `Delivery R6 Finding Classification` |
+| `TQ-R6-02` | `high` | `release-blocker` | bind routes to status/media semantics | validator is part of current cutover | `fixed at f7dde5d; refined by R7` | `Delivery R6 Finding Classification` |
+| `TQ-R6-03` | `medium` | `release-blocker` | expand PII/raw-payload coverage | privacy contract is in current DoD | `fixed at f7dde5d; refined by R7` | `Delivery R6 Finding Classification` |
+| `TQ-R6-04` | `medium` | `release-blocker` | freeze raw historical lines in addition to normalized semantics | validator is part of current cutover | `fixed at f7dde5d` | `Delivery R6 Finding Classification` |
+| `TQ-R6-05` | `medium` | `release-blocker` | remove ambient clean-copy skip | clean-copy proof is current evidence | `fixed at f7dde5d` | `Delivery R6 Finding Classification` |
+| `ARCH-R6-01`,`CUTOVER-R6-02` | `medium` | `release-blocker` | remove unsupported token normalization claim | contract fidelity is required by current cutover | `fixed at f7dde5d` | `Delivery R6 Finding Classification` |
+| `CUTOVER-R6-01` | `high` | `release-blocker` | replace working-tree hashes with Git-object evidence | frozen product truth is current evidence | `fixed at f7dde5d; refined by R7` | `Delivery R6 Finding Classification` |
+| `CUTOVER-R6-03` | `medium` | `release-blocker` | document JWT cache enforcement lag | contract fidelity is required by current cutover | `fixed at f7dde5d` | `Delivery R6 Finding Classification` |
+| `CUTOVER-R6-04` | `medium` | `release-blocker` | restore four-way finding taxonomy/promotion rule | governance owner belongs in current cutover | `fixed at f7dde5d` | `Delivery R6 Finding Classification` |
+| `CUTOVER-R6-05` | `medium` | `release-blocker` | synchronize delivery state | governing TODO state is part of this delivery | `fixed at f7dde5d` | `Delivery R6 Finding Classification` |
+| `TQ-R7-01` | `high` | `release-blocker` | detect compact/document/landline/multiline payload variants independently | privacy contract is in current DoD | `integrated; R8 pending` | `Delivery R7 Finding Classification` |
+| `TQ-R7-02` | `medium` | `release-blocker` | bind route tuple tokens to exact Markdown columns | validator is part of current cutover | `integrated; R8 pending` | `Delivery R7 Finding Classification` |
+| `TQ-R7-03` | `medium` | `release-blocker` | reject suffixed lifecycle-name lookalikes | validator is part of current cutover | `integrated; R8 pending` | `Delivery R7 Finding Classification` |
+| `TQ-R7-ROUTING` | `high` | `release-blocker` | route each review kind to its guarded model family | PACED routing is required by D-03 | `integrated; R8 pending` | `Agent Routing Preflight`; `Delivery R7 Finding Classification` |
+| `CUTOVER-R7-01` | `medium` | `release-blocker` | consolidate delivery findings into this canonical ledger | prevents carry-forward loss | `integrated; R8 pending` | `Delivery R7 Finding Classification` |
+| `CUTOVER-R7-02` | `medium` | `release-blocker` | freeze lifecycle-aware tree and unique ordered manifest | exact publication set is current cutover scope | `integrated; R8 pending` | `Delivery R7 Finding Classification` |
+| `CUTOVER-R7-03` | `medium` | `release-blocker` | add primary API/auth/public/enum evidence paths | PT-10 fidelity is current cutover evidence | `integrated; R8 pending` | `Delivery R7 Finding Classification` |
 
 ## Independent Test Quality Audit Gate
 
@@ -785,8 +835,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Audit isolation mode:** `fresh internal no-context reviewer`
 - **Internal reviewer mandate:** `required after implementation`
 - **Audit status:** `running`
-- **Findings summary:** delivery R6 returned `TQ-R6-01..05`; all are integrated locally and the clean result must come from fresh delivery R7.
-- **Evidence / reference:** immutable delivery R6 baseline `04b865ea35501d5f59f0e6a9e7d7b953d7d9598d`; remediation evidence in `Delivery R6 Finding Classification`.
+- **Findings summary:** supporting delivery R7 returned `TQ-R7-01..03` plus a routing blocker; all are integrated locally and the clean result must come from correctly routed delivery R8.
+- **Evidence / reference:** immutable delivery R7 baseline `1374caedafa63935fd390c273a346365ea88109e`; remediation evidence in `Delivery R7 Finding Classification`.
 - **Waiver authority / reference:** `n/a`
 
 ## Independent No-Context Final Review Gate
@@ -811,8 +861,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Package mode:** `bounded-file-set`
 - **Canonical multi-lane audit protocol:** `n/a`
 - **Cutover audit status:** `running`
-- **Findings summary:** delivery R6 returned five cutover blockers; all are integrated locally and delivery R7 confirmation remains required.
-- **Evidence / reference:** delivery R6 immutable baseline `04b865e`; remediation evidence in `Delivery R6 Finding Classification`; delivery R7 pending.
+- **Findings summary:** supporting delivery R7 returned `CUTOVER-R7-01..03`; all are integrated locally and correctly routed delivery R8 confirmation remains required.
+- **Evidence / reference:** delivery R7 immutable baseline `1374cae`; remediation evidence in `Delivery R7 Finding Classification`; delivery R8 pending.
 - **Waiver authority / reference:** `n/a`
 
 ## Execution Plan — Approved; Guard-Gated
@@ -829,7 +879,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 10. `Concluído localmente`: findings delivery R4 integrados e congelados no commit `cacc054`.
 11. `Concluído com no-go`: delivery R5 executada sobre `1e7e73043e697f2e9bf536772cf3717d79f85cbf`; findings classificados dentro de D-01..D-05.
 12. `Concluído com no-go`: delivery R6 executada sobre `04b865ea35501d5f59f0e6a9e7d7b953d7d9598d`; findings classificados dentro de D-01..D-05.
-13. `Em andamento`: remediação R6 congelada em `f7dde5d8ca31f50317c1a416daeee098d16cb30d`; executar delivery R7 no HEAD imutável e, após resultado limpo, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
+13. `Concluído com no-go parcial`: arquitetura R7 retornou `GO`; test-quality/cutover R7 sobre `1374caedafa63935fd390c273a346365ea88109e` encontraram findings e uma rota de modelo inválida, todos classificados no ledger canônico.
+14. `Em andamento`: congelar a remediação R7 e executar delivery R8 corretamente roteada no HEAD imutável; após resultado limpo, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
 
 ### Touched Surfaces
 
@@ -897,7 +948,14 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Worktree authorization evidence:** `n/a`
 - **Writer scheduling policy:** `single-writer-serialized`
 - **Guard outcome:** `go`
-- **Routing guard evidence:** `agent_role_routing_guard.py` accepted `delivery-review`, `formal-reviewer`, `gpt-5.6-sol`, `architecture_adherence`, and `xhigh` with no violations on 2026-09-24; delivery reviewers remain read-only.
+- **Routing guard evidence:** the canonical preflight fields above represent `architecture_adherence` and returned `go`; the supplemental sibling/final routing rows below also returned `go` with no violations on 2026-09-24. Delivery reviewers remain read-only.
+
+| Review kind | Model | Effort | Guard result |
+| --- | --- | --- | --- |
+| `architecture_adherence` | `gpt-5.6-sol` | `xhigh` | `go` |
+| `test_quality_audit` | `gpt-5.6-terra` | `xhigh` | `go` |
+| `cutover_integrity_audit` | `gpt-5.6-terra` | `xhigh` | `go` |
+| `final_review` | `gpt-5.6-sol` | `xhigh` | `go` |
 - **Authority preflight outcome:** `preflight-go`
 - **Authority preflight evidence:** `python3 delphi-ai/tools/todo_authority_guard.py uninotas-foundation/todos/active/process/TODO-uninotas-foundation-project-rebase.md --pre-approval` — zero violations em 2026-09-24.
 - **Post-approval authority outcome:** `go`
@@ -957,11 +1015,11 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 - **Authority guard:** must return `go` only after explicit `APROVADO`, rule ingestion and resolved decisions.
 - **Completion and closeout guards:** required before `Local-Implemented` or movement to `completed/`.
 - **Cutover integrity audit:** required because the work retires one active documentary authority and establishes another.
-- **Delivery R6 architecture/test-quality/cutover review:** no-go on `04b865e`; findings classified and integrated locally; delivery R7 is the fresh immutable rerun. Planning R4 remains the pre-approval clean review and is not delivery evidence.
+- **Delivery R7 architecture/test-quality/cutover review:** architecture `GO`; supporting test-quality/cutover `NO-GO` on `1374cae`, with routing corrected and findings integrated locally; delivery R8 is the fresh correctly routed immutable rerun.
 
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
-- **Disposition reason:** approved implementation and delivery R6 remediation remain local; delivery R7 and delivery/closeout gates remain pending.
-- **Post-commit/push status:** `delivery R6 remediation committed at f7dde5d; origin/main remains at b73b0eb approval checkpoint`
+- **Disposition reason:** approved implementation and delivery R7 remediation remain local; delivery R8 and delivery/closeout gates remain pending.
+- **Post-commit/push status:** `delivery R7 remediation pending local commit; origin/main remains at b73b0eb approval checkpoint`
 - **Next path/status action:** permanecer em `todos/active/process/` até implementação, evidência, reviews e closeout completos.
