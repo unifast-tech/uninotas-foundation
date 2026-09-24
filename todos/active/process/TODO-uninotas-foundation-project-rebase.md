@@ -51,13 +51,13 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `none`
-- **Next exact step:** gerar o pacote R8 no HEAD que contém a remediação `7231b43bc17f6594c3bb26e156fe9d82e06e1539` e executar reviewers independentes corretamente roteados sobre o commit exato do pacote.
+- **Next exact step:** congelar a sincronização de estado R9, gerar o pacote R10 no novo HEAD imutável e executar reviewers independentes corretamente roteados sobre esse commit exato.
 
 ## Active Work State
 
 - **Work state:** `delivery-review`
-- **Why this state now:** arquitetura R7 retornou `GO`; test-quality e cutover R7 encontraram blockers dentro do escopo aprovado, remediados e congelados em `7231b43bc17f6594c3bb26e156fe9d82e06e1539` para confirmação R8.
-- **Exit condition:** delivery R9 sem release-blocker em todas as lanes, matrizes 1:1 adjudicadas e gates de completion/closeout prontos para execução.
+- **Why this state now:** test-quality e cutover R9 retornaram `GO`; arquitetura R9 confirmou a remediação técnica e encontrou apenas `ARCH-ADH-R9-01`, a dessincronização do estado normativo, integrada localmente para confirmação R10.
+- **Exit condition:** delivery R10 sem release-blocker em todas as lanes, matrizes 1:1 adjudicadas e gates de completion/closeout prontos para execução.
 
 ## Routine-Executor Implementation Evidence — 2026-09-24
 
@@ -156,8 +156,16 @@ Cutover integrity returned `GO`. Architecture adherence and test quality each re
 
 | Finding | Classification | Integrated remediation | Status |
 | --- | --- | --- | --- |
-| `ARCH-ADH-R8-01` | release-blocker | distinguish authoritative external production `logs` from the derived, disposable, non-authoritative local replica; bind the mirror tool and local DDL through `PT-11` hashes | integrated; delivery R9 pending |
-| `TQ-R8-01` | release-blocker | reject every publication-tree symlink and preserve symlinks during manifest-only copy; mutate an identical external README symlink before and after copy | integrated; delivery R9 pending |
+| `ARCH-ADH-R8-01` | release-blocker | distinguish authoritative external production `logs` from the derived, disposable, non-authoritative local replica; bind the mirror tool and local DDL through `PT-11` hashes | confirmed at `222a8a9` |
+| `TQ-R8-01` | release-blocker | reject every publication-tree symlink and preserve symlinks during manifest-only copy; mutate an identical external README symlink before and after copy | confirmed at `222a8a9` |
+
+## Delivery R9 Finding Classification — 2026-09-24
+
+Test quality and cutover integrity returned `GO`; architecture confirmed `ARCH-ADH-R8-01` resolved and found one documentary state-coherence `release-blocker`. It remains inside the approved TODO governance scope and requires immutable R10 confirmation.
+
+| Finding | Classification | Integrated remediation | Status |
+| --- | --- | --- | --- |
+| `ARCH-ADH-R9-01` | release-blocker | synchronize `Next exact step`, active-state rationale, exit condition, gate summaries, execution plan and closeout disposition on R10 | integrated locally; delivery R10 pending |
 
 ## Post-Implementation Decision Adherence Validation
 
@@ -181,11 +189,11 @@ Cutover integrity returned `GO`. Architecture adherence and test quality each re
 
 ## Blocker Notes
 
-- **Blocker:** `n/a`; delivery R9 is the next active gate, not an impasse.
-- **Why blocked now:** `n/a`; completion remains unavailable until the two R8 release-blockers receive clean independent confirmation.
-- **What unblocks it:** clean delivery R9 test-quality, architecture-adherence and cutover-integrity results on one immutable remediation commit.
+- **Blocker:** `n/a`; delivery R10 is the next active gate, not an impasse.
+- **Why blocked now:** `n/a`; completion remains unavailable until `ARCH-ADH-R9-01` receives clean independent confirmation.
+- **What unblocks it:** clean delivery R10 test-quality, architecture-adherence and cutover-integrity results on one immutable state-synchronization commit.
 - **Owner / source:** owner do TODO; autoridade humana permanece responsável pelo novo approval.
-- **Last confirmed truth:** D-01..D-05 approval remains valid; R8 cutover is clean, and the R8 architecture/test-quality blockers are integrated locally for immutable R9 review.
+- **Last confirmed truth:** D-01..D-05 approval remains valid; R9 test-quality/cutover are clean, R8 technical blockers are resolved, and only the R9 state-synchronization fix awaits immutable R10 review.
 
 ## Scope
 
@@ -376,8 +384,8 @@ Hashes individuais que sustentam as decisões de ownership ficam no `Pre-Executi
 | From Profile | To Profile | Why the Handoff Exists | Touched Surfaces | Status / Evidence |
 | --- | --- | --- | --- | --- |
 | `Strategic / CTO-Tech-Lead` | `routine-executor` | executar a substituição documental já decidida sem redefinir o contrato | `uninotas-foundation/**` | `completed; R3 remediation locally green` |
-| `routine-executor` | `Assurance / Tester-Quality` | desafiar evidência, links, referências e ausência de autoridade concorrente | diff e validações da Foundation | `delivery R8 test-quality blocker integrated; delivery R9 pending` |
-| `Assurance / Tester-Quality` | `formal-reviewer` | revisar aderência arquitetural e integridade do cutover | pacote final consolidado | `delivery R8 cutover go; architecture blocker integrated; delivery R9 pending` |
+| `routine-executor` | `Assurance / Tester-Quality` | desafiar evidência, links, referências e ausência de autoridade concorrente | diff e validações da Foundation | `delivery R9 test-quality go; R10 joint confirmation pending` |
+| `Assurance / Tester-Quality` | `formal-reviewer` | revisar aderência arquitetural e integridade do cutover | pacote final consolidado | `delivery R9 cutover go; architecture state blocker integrated; R10 pending` |
 
 ## Complexity
 
@@ -525,7 +533,7 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 
 ## Module Decision Consistency Gate
 
-- **Status:** `delivery-R8-reviewed`; D-01..D-05 permanecem aprovadas, o refinamento da fronteira de réplica local está integrado e a entrega aguarda confirmação conjunta R9.
+- **Status:** `delivery-R9-reviewed`; D-01..D-05 estão `Adherent`, as cinco decisões permanecem `Superseded (Approved)` e a sincronização de estado aguarda confirmação conjunta R10.
 - **Finding:** todas as decisões de módulos herdadas pertencem ao LeadsHug; nenhuma deve ser preservada como verdade do Monitor de Notas.
 - **Resolution:** supersessão intencional integral, autorizada por `D-02`, com substituição pelos módulos listados em `S-04`.
 - **Evidence:** conteúdo atual de `modules/*.md`, estrutura do backend/frontend e READMEs do produto.
@@ -601,8 +609,8 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
 - **Adherence review package:** `bounded-file-set`
-- **Adherence review status:** `remediated_pending_r9`
-- **Adherence review evidence / resolution:** architecture delivery R8 on `de909878b014c708fa103dd2d3b9213f0abe1c33` returned `ARCH-ADH-R8-01`; the external-production/local-replica boundary and exact `PT-11` evidence are integrated for R9 confirmation.
+- **Adherence review status:** `remediated_pending_r10`
+- **Adherence review evidence / resolution:** architecture delivery R9 on `222a8a9b0d63c47f002b3b752f2a83bd548260e0` confirmed `ARCH-ADH-R8-01` resolved and returned only `ARCH-ADH-R9-01`; normative state is synchronized for R10 confirmation.
 - **No-go handling:** retornar ao diagnóstico/decisão ou ao loop de evidência; não alegar execução ou conclusão com divergência aberta.
 
 ## Assumptions Preview
@@ -833,8 +841,9 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 | `CUTOVER-R7-01` | `medium` | `release-blocker` | consolidate delivery findings into this canonical ledger | prevents carry-forward loss | `confirmed at de90987` | `Delivery R7 Finding Classification`; R8 cutover |
 | `CUTOVER-R7-02` | `medium` | `release-blocker` | freeze lifecycle-aware tree and unique ordered manifest | exact publication set is current cutover scope | `confirmed at de90987` | `Delivery R7 Finding Classification`; R8 cutover |
 | `CUTOVER-R7-03` | `medium` | `release-blocker` | add primary API/auth/public/enum evidence paths | PT-10 fidelity is current cutover evidence | `confirmed at de90987` | `Delivery R7 Finding Classification`; R8 cutover |
-| `ARCH-ADH-R8-01` | `medium` | `release-blocker` | distinguish production ownership from explicit local-replica population and add exact evidence | D-04/runtime fidelity is required by the current cutover | `integrated; R9 pending` | `Delivery R8 Finding Classification` |
-| `TQ-R8-01` | `high` | `release-blocker` | reject symlinks and preserve them in the clean-copy harness so external content cannot be laundered | publication-tree integrity is required by the current cutover | `integrated; R9 pending` | `Delivery R8 Finding Classification` |
+| `ARCH-ADH-R8-01` | `medium` | `release-blocker` | distinguish production ownership from explicit local-replica population and add exact evidence | D-04/runtime fidelity is required by the current cutover | `confirmed at 222a8a9` | `Delivery R8 Finding Classification`; R9 architecture |
+| `TQ-R8-01` | `high` | `release-blocker` | reject symlinks and preserve them in the clean-copy harness so external content cannot be laundered | publication-tree integrity is required by the current cutover | `confirmed at 222a8a9` | `Delivery R8 Finding Classification`; R9 test-quality |
+| `ARCH-ADH-R9-01` | `medium` | `release-blocker` | synchronize every normative state field on the R10 action | governing TODO coherence is required by D-03 | `integrated; R10 pending` | `Delivery R9 Finding Classification` |
 
 ## Independent Test Quality Audit Gate
 
@@ -846,9 +855,9 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Canonical method:** `wf-docker-independent-test-quality-audit-method`
 - **Audit isolation mode:** `fresh internal no-context reviewer`
 - **Internal reviewer mandate:** `required after implementation`
-- **Audit status:** `remediated_pending_r9`
-- **Findings summary:** delivery R8 returned `TQ-R8-01` because the clean-copy harness dereferenced an external symlink; validator rejection, symlink-preserving copy and before/after regression are integrated for R9.
-- **Evidence / reference:** immutable delivery R8 baseline `de909878b014c708fa103dd2d3b9213f0abe1c33`; remediation evidence in `Delivery R8 Finding Classification`.
+- **Audit status:** `go_r9`
+- **Findings summary:** delivery R9 returned `GO` with 10 tests; `TQ-R8-01` was reproduced as fixed before and after manifest copy and no release blocker remained in this lane.
+- **Evidence / reference:** immutable delivery R9 baseline `222a8a9b0d63c47f002b3b752f2a83bd548260e0`; fresh R9 test-quality review.
 - **Waiver authority / reference:** `n/a`
 
 ## Independent No-Context Final Review Gate
@@ -872,9 +881,9 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Cutover signals in scope:** `canonical cutover|legacy-path retirement`
 - **Package mode:** `bounded-file-set`
 - **Canonical multi-lane audit protocol:** `n/a`
-- **Cutover audit status:** `go_r8`
-- **Findings summary:** delivery R8 returned `GO`: 34 exact deletions, lifecycle-aware 38-path tree, R4-R7 ledger parity, all product-truth hashes and frozen fingerprints passed.
-- **Evidence / reference:** immutable delivery R8 baseline `de909878b014c708fa103dd2d3b9213f0abe1c33`; R9 will reconfirm the remediation commit jointly with sibling lanes.
+- **Cutover audit status:** `go_r9`
+- **Findings summary:** delivery R9 returned `GO`: 34 exact deletions, lifecycle-aware 38-path tree, ledger through R8, 53 pairs over 45 product paths, frozen fingerprints and Foundation-only scope all passed.
+- **Evidence / reference:** immutable delivery R9 baseline `222a8a9b0d63c47f002b3b752f2a83bd548260e0`; fresh R9 cutover review.
 - **Waiver authority / reference:** `n/a`
 
 ## Execution Plan — Approved; Guard-Gated
@@ -893,7 +902,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 12. `Concluído com no-go`: delivery R6 executada sobre `04b865ea35501d5f59f0e6a9e7d7b953d7d9598d`; findings classificados dentro de D-01..D-05.
 13. `Concluído com no-go parcial`: arquitetura R7 retornou `GO`; test-quality/cutover R7 sobre `1374caedafa63935fd390c273a346365ea88109e` encontraram findings e uma rota de modelo inválida, todos classificados no ledger canônico.
 14. `Concluído com no-go parcial`: delivery R8 sobre `de909878b014c708fa103dd2d3b9213f0abe1c33` retornou cutover `GO` e os blockers `ARCH-ADH-R8-01`/`TQ-R8-01`, classificados no ledger canônico.
-15. `Em andamento`: remediações R8 congeladas em `1dfdda8331026a2f4e5896f9b9bece3ea6d40ac3`; executar delivery R9 corretamente roteada no HEAD imutável e, após resultado limpo, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
+15. `Concluído com no-go parcial`: delivery R9 sobre `222a8a9b0d63c47f002b3b752f2a83bd548260e0` confirmou test-quality/cutover `GO`, confirmou os blockers R8 resolvidos e encontrou somente `ARCH-ADH-R9-01` na sincronização de estado.
+16. `Em andamento`: sincronização R9 integrada localmente; congelar o novo HEAD, executar delivery R10 corretamente roteada e, após resultado limpo, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
 
 ### Touched Surfaces
 
@@ -1028,11 +1038,11 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 - **Authority guard:** must return `go` only after explicit `APROVADO`, rule ingestion and resolved decisions.
 - **Completion and closeout guards:** required before `Local-Implemented` or movement to `completed/`.
 - **Cutover integrity audit:** required because the work retires one active documentary authority and establishes another.
-- **Delivery R8 architecture/test-quality/cutover review:** cutover `GO`; architecture/test-quality `NO-GO` on `de90987`; `ARCH-ADH-R8-01` and `TQ-R8-01` are integrated locally and delivery R9 is the required fresh immutable rerun.
+- **Delivery R9 architecture/test-quality/cutover review:** test-quality/cutover `GO` on `222a8a9`; architecture confirmed R8 fixed and found only the stale normative next-step fields, now synchronized for the required R10 rerun.
 
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
-- **Disposition reason:** approved implementation and delivery R8 remediation remain local; delivery R9 and delivery/closeout gates remain pending.
-- **Post-commit/push status:** `delivery R8 remediation committed at 1dfdda8331026a2f4e5896f9b9bece3ea6d40ac3; origin/main remains at b73b0eb approval checkpoint`
+- **Disposition reason:** approved implementation and delivery R9 state synchronization remain local; delivery R10 and delivery/closeout gates remain pending.
+- **Post-commit/push status:** `delivery R9 state synchronization is local and uncommitted; origin/main remains at b73b0eb approval checkpoint`
 - **Next path/status action:** permanecer em `todos/active/process/` até implementação, evidência, reviews e closeout completos.
