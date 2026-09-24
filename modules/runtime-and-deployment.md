@@ -13,14 +13,18 @@
 - **Remaining Migration Scope:** `none`
 
 ## Specification
-Owns topology documentation only. Changes to Docker, Railway, database configuration, or deployment require their own approved TODO and validation.
+Owns observed topology and the public health-read contract. Changes to Docker, Railway, database configuration, deployment, or health behavior require their own approved TODO and validation.
 
 ## Observed Runtime Contract
 
-The observed runtime boundary composes NestJS, React/Vite, PostgreSQL/Prisma, Docker, and Railway. It supplies deployment topology only; it owns no API request/response, authorization, secret value, health, or availability contract.
+The observed runtime boundary composes NestJS, React/Vite, PostgreSQL/Prisma, Docker, and Railway. It owns no secret value, availability target, or service-level objective.
+
+## Observed Health Contract
+
+`GET /api/v1/saude` is public and accepts no request body or query contract. It returns HTTP 200 with `{status,banco,em}`: `status` is `ok` when the database probe succeeds and `degradado` otherwise; `banco` is `ok` or `indisponivel`; `em` is an ISO-8601 timestamp. Database probe failure is represented in that body and is not converted to 503 by this controller.
 
 ## Purpose, Owned Entities, and Workflows
-**Purpose:** preserve verified runtime navigation without taking runtime ownership. **Owned/orchestrated entities:** documented topology and configuration boundary only. **Workflows/capabilities:** build and deploy topology is observed through Docker/Railway configuration. **Invariants/validation/auth:** no secrets, health claims, endpoint contracts, SLOs, or runtime change are inferred. **Observed contracts:** NestJS, React/Vite, PostgreSQL/Prisma, Docker, and Railway files are the evidence.
+**Purpose:** preserve verified runtime navigation and the bounded health-read contract. **Owned/orchestrated entities:** documented topology, configuration boundary, and health projection. **Workflows/capabilities:** build/deploy topology plus public API/database probe. **Invariants/validation/auth:** no secrets, availability claims, SLOs, or runtime change are inferred. **Observed contracts:** NestJS, React/Vite, PostgreSQL/Prisma, Docker, Railway, and the health controller are the evidence.
 
 ## Cross-Module Considerations and Failure Modes
 All modules depend on this topology as an observed boundary. Configuration/deployment failure requires runtime evidence and a separate approved TODO, not documentary substitution.

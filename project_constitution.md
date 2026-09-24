@@ -13,8 +13,8 @@ NestJS, React/Vite, PostgreSQL/Prisma, Docker, and Railway are observed product 
 
 ## Invariants
 
-- Routerfy alone writes `logs`; Monitor de Notas reads it only.
-- Application writes belong to its users and treatments tables.
+- Routerfy owns and writes `logs`; Monitor de Notas reads it only and writes only `monitor_usuarios` and `monitor_tratamentos`.
+- [Events](modules/events-and-classification.md) owns read projections, [treatments](modules/treatments-and-history.md) owns treatment writes, and [identity](modules/identity-and-team.md) owns user writes.
 - `ref_id` is correlation, never uniqueness proof.
 - The latest treatment supplies effective status; `PENDENTE` reopens original status.
 - JWT authentication, profiles, and last-admin protection are product behavior.

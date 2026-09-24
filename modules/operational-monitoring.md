@@ -17,14 +17,14 @@ Owns the documented operational summary contract. A database failure is distinct
 
 ## Observed Monitoring Contract
 
-`GET /monitoramento/erros` is open when no monitoring credential is configured; when configured, a missing or mismatched query/header credential is rejected. Database unavailability is an unavailable result, distinct from a successful summary with zero errors; `alertarEm` is an observed request condition for 503, not an alert threshold or service-level objective.
+`GET /api/v1/monitoramento/erros` is open when `MONITORAMENTO_TOKEN` is unset. When configured, the credential may be supplied as query `token` or header `x-monitor-token`; missing/mismatch returns 401 through `{statusCode,erro,mensagem,caminho,timestamp}`.
 
-```json
-{"base_path":"/api/v1","route":"GET /monitoramento/erros","authorization":"open when MONITORAMENTO_TOKEN unset; otherwise query token or x-monitor-token header; missing|mismatch=401","responses":"200 summary; 503 database unavailable or alertarEm reached","errors":"standard error body","cache":"no-store"}
-```
+Query fields are integer `minutos` default 60/range 1..1440, integer `atencao` default 1/minimum 1, integer `critico` default 6/minimum 1, and optional `alertarEm=atencao|critico`. The response is `{status,cor,erros,pendentes,sucessos,total,ultima_verificacao,janela,limites,detalhe}` where `status=ok|atencao|critico|indisponivel`, `cor=verde|amarelo|vermelho|cinza`, `janela={inicio,fim,minutos}`, and `limites={atencao,critico}`.
+
+The same monitoring body is returned with HTTP 200 normally or HTTP 503 when the database is unavailable or `alertarEm` is reached; those operational 503 responses are not the standard error body. Responses set `Cache-Control: no-store`. These are observed status semantics, not a service-level objective.
 
 ## Purpose, Owned Entities, and Workflows
-**Purpose:** provide an external operational check from observed event-summary semantics. **Owned/orchestrated entities:** monitoring summary projection. **Workflows/capabilities:** query rolling window and distinguish no errors from data-store unavailability. **Invariants/validation/auth:** reuse summary semantics; do not recast failure as zero. **Observed contracts:** monitoring and logs services are evidenced; alert endpoint, threshold, and SLO are unknown/not asserted.
+**Purpose:** provide an external operational check from observed event-summary semantics. **Owned/orchestrated entities:** monitoring summary projection. **Workflows/capabilities:** query rolling window and distinguish no errors from data-store unavailability. **Invariants/validation/auth:** reuse summary semantics; do not recast failure as zero. **Observed contracts:** the request bounds, response body, conditional credential, 200/503 behavior, and no-cache rule above are evidenced; no SLO is asserted.
 
 ## Cross-Module Considerations and Failure Modes
 Events/classification owns source semantics. Database unavailability produces an unavailable outcome, not a successful empty result.

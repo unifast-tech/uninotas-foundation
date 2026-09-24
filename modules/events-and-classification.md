@@ -17,18 +17,27 @@ Owns external event observation, filters, pagination, export, and original/effec
 
 ## Observed API Contract
 
-The protected events boundary observes `GET /eventos`, `GET /eventos/resumo`, `GET /eventos/produtos`, `GET /eventos/exportar`, `GET /eventos/:refId`, and `GET /eventos/:refId/payload`; batch treatment is routed to `POST /eventos/tratar-lote` and belongs jointly with the treatment owner below. List/filter, summary, detail, payload, and export responses are read projections. Invalid or absent authentication is rejected by the identity boundary; an unknown `refId` is a not-found result, not an empty event. The client preserves API error messages and treats transport failure as unavailable, not empty data.
+All routes below use base path `/api/v1`, require the normal bearer JWT guard, and accept active users of any profile. Common list filters are `pagina` integer default 1/minimum 1, `limite` integer default 25/range 1..200, `direcao=asc|desc` default `desc`, `situacao=TODOS|ERRO|PENDENTE|SUCESSO|TRATADOS` default `ERRO`, optional trimmed `busca` up to 120 characters, optional exact `produto` up to 200 characters, and optional ISO-8601 `dataInicio`/`dataFim`.
 
-```json
-{"base_path":"/api/v1","routes":["GET /eventos","GET /eventos/resumo","GET /eventos/produtos","GET /eventos/exportar","GET /eventos/:refId","GET /eventos/:refId/payload","PATCH /eventos/:refId/tratamento","POST /eventos/tratar-lote"],"authorization":"JWT; treatment routes require ADMIN|GESTOR|ANALISTA","responses":"list|summary|products|csv|detail|payload; unknown refId=404","errors":"standard error body: statusCode, erro, mensagem, caminho, timestamp"}
-```
+| Route | Request | Successful response |
+| --- | --- | --- |
+| `GET /eventos` | common filters | `{dados,meta}`; `meta={total,pagina,limite,totalPaginas,temProxima}` and each summary has `refId,eventAt,situacao,situacaoOriginal,mensagem,idSmartNotas,clienteNome,clienteDocumento,produto,valorVenda,meioPagamento,tentativas` |
+| `GET /eventos/resumo` | common filters | `{total,erro,pendente,sucesso,tratados}` |
+| `GET /eventos/produtos` | none | array of `{nome,eventos,erros}` |
+| `GET /eventos/exportar` | common filters; pagination is replaced by export cap | `text/csv; charset=utf-8`, attachment filename, semicolon-separated fixed columns `refId,idTransacao,eventAt,situacao,mensagem,idSmartNotas,clienteNome,clienteDocumento,clienteEmail,produto,codProduto,valorVenda,meioPagamento`, capped at 20,000 rows |
+| `GET /eventos/:refId` | correlation `refId` | summary fields plus `orientacao,origem,cliente,venda,produtor,historico,camposPendentes,payload,resposta` |
+| `GET /eventos/:refId/payload` | correlation `refId` | `{enviado,resposta}` |
+
+Within event detail, `cliente={nome,documento,email,telefone,endereco,numero,complemento,bairro,cidade,cep,pais}`, `venda={produto,codProduto,valorVenda,avista,meioPagamento,dataPagamento,idTransacao,garantia,split,tipoProduto}`, `produtor={razaoSocial,documento}`, each `historico` entry is `{em,mensagem,ok,autorNome}`, and each `camposPendentes` entry is `{caminho,rotulo,recusadoPeloSmartNotas}`. Nullable/optional source fields remain nullable/optional; the contract does not invent completeness.
+
+Validation/auth/not-found failures use the standard error body `{statusCode,erro,mensagem,caminho,timestamp}`; an unknown `refId` is 404, not an empty projection. Treatment commands are owned exclusively by [treatments and history](treatments-and-history.md#observed-treatment-contract).
 
 ## Ownership Invariant
 
-Routerfy alone writes `logs`; Monitor de Notas reads `logs` only. Application writes belong only to `monitor_usuarios` and `monitor_tratamentos` through their owning modules.
+The cross-module data-ownership invariant is owned by the [project constitution](../project_constitution.md#invariants). This module performs read-only projections over Routerfy-owned `logs` and owns no application write contract.
 
 ## Purpose, Owned Entities, and Workflows
-**Purpose:** provide the authoritative read model for emission-event investigation. **Owned/orchestrated entities:** `LogEvent` and classification projections; Routerfy remains owner of persisted source rows. **Workflows/capabilities:** list, filter, paginate, summarize, export, inspect detail, and register treatment through the observed API contract. **Invariants/validation/auth:** source remains read-only, SmartNotas filter applies, `ref_id` is correlation only, and protected API access is enforced by the identity boundary. **Observed contracts:** raw SQL, classifier, mapper, routes, and bounded errors above are evidenced; no SLO is asserted.
+**Purpose:** provide the authoritative read model for emission-event investigation. **Owned/orchestrated entities:** `LogEvent` and classification projections; Routerfy remains owner of persisted source rows. **Workflows/capabilities:** list, filter, paginate, summarize, export, and inspect detail. **Invariants/validation/auth:** source remains read-only, SmartNotas filter applies, `ref_id` is correlation only, and protected API access is enforced by the identity boundary. **Observed contracts:** raw SQL, classifier, mapper, routes, request bounds, response fields, media type, and errors above are evidenced; no SLO is asserted.
 
 ## Cross-Module Considerations
 Routerfy owns `logs`; [treatments and history](treatments-and-history.md) owns application treatment writes.

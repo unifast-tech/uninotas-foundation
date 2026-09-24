@@ -49,15 +49,15 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 
 ## Delivery Status Canon
 
-- **Current delivery stage:** `Implementation complete / R4 re-review`
-- **Qualifiers:** `R3 blockers remediated locally; DOD and VAL remain incomplete until independent R4 and delivery gates converge`.
-- **Next exact step:** congelar a remediação em commit local, gerar pacote imutável e executar R4 de test-quality, architecture-adherence e cutover-integrity.
+- **Current delivery stage:** `Pending`
+- **Qualifiers:** `none`
+- **Next exact step:** integrar os findings da delivery R4, congelar a nova remediação em commit local e executar delivery R5 independente.
 
 ## Active Work State
 
-- **Work state:** `delivery-review`
-- **Why this state now:** a implementação e a remediação R3 estão localmente verdes, mas os reviewers independentes ainda precisam confirmar aderência, qualidade e integridade antes do closeout.
-- **Exit condition:** R4 sem release-blocker, matrizes 1:1 adjudicadas e gates de completion/closeout prontos para execução.
+- **Work state:** `remediation`
+- **Why this state now:** delivery R4 encontrou contratos incompletos e falsos verdes determinísticos; os findings estão dentro do escopo aprovado e em integração.
+- **Exit condition:** delivery R5 sem release-blocker, matrizes 1:1 adjudicadas e gates de completion/closeout prontos para execução.
 
 ## Routine-Executor Implementation Evidence — 2026-09-24
 
@@ -84,16 +84,31 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 
 - **R3 finding ledger:** endpoint and SSE contract completeness, decision-table/ownership contradictions, nested serialization credential detection, clean-copy bytecode hygiene, and review-state synchronization were classified as release blockers within D-01..D-05 and remediated locally.
 - **GREEN evidence:** the tracked-file-only clean-copy regression and the canonical local suite pass 8 tests with `python3 -B`; the validator, diff hygiene, diff-expectation guard and Git Bash PACED verification pass.
-- **Chronology:** original test-first chronology is unverified; reproducible mutation RED→GREEN evidence is the relied-on implementation proof. Fresh R4 remains pending; no independent gate is clean yet.
+- **Chronology:** original test-first chronology is unverified; reproducible mutation RED→GREEN evidence is the relied-on implementation proof. Delivery R4 later returned no-go and is classified below; no independent delivery gate is clean yet.
+
+## Delivery R4 Finding Classification — 2026-09-24
+
+All material findings match D-01..D-05/DOD-01..DOD-10 and are `release-blocker` items in this TODO; no scope expansion or new product behavior was accepted.
+
+| Finding | Classification | Integrated remediation | Status |
+| --- | --- | --- | --- |
+| `ARCH-ADH-R4-01` | release-blocker | complete request/response/bounds/media contracts plus public health owner and PT-10 hashes | integrated; delivery R5 pending |
+| `ARCH-ADH-R4-02` | release-blocker | distinguish normal JWT from SSE query verification, backend polling from EventSource reconnect, monitoring body 503, and treatment query failure | integrated; delivery R5 pending |
+| `ARCH-ADH-R4-03` | release-blocker | mandate owns full D-01 identity; cutover map owns D-02; constitution owns cross-module D-04; treatment routes have one owner | integrated; delivery R5 pending |
+| `ARCH-ADH-R4-04` / `TQ-R4-04` | release-blocker | canonical `Pending` stage and explicit planning-R4 versus delivery-R4/R5 state | integrated; delivery R5 pending |
+| `TQ-R4-01` | release-blocker | active-authority semantics are rejected before exact historical-ledger reconciliation | integrated; delivery R5 pending |
+| `TQ-R4-02` | release-blocker | whitespace-tolerant exact decision parsing, unique README H1, and normalized D-04 contradiction checks | integrated; delivery R5 pending |
+| `TQ-R4-03` | release-blocker | independently pinned 34-path set, token-move contract mutations, and cross-surface privacy matrix | integrated; delivery R5 pending |
+| `COPILOT-R4-CREDENTIALS` | release-blocker | URI-userinfo and access-key-family credential detection with runtime-built mutations | integrated; delivery R5 pending |
 
 ## Post-Implementation Decision Adherence Validation
 
 | Decision | Canonical evidence | Status |
 | --- | --- | --- |
 | D-01 | `decisions/monitor-de-notas-foundation-decisions.md` — D-01 row | pending reviewer confirmation |
-| D-02 | `todos/active/process/TODO-uninotas-foundation-project-rebase.md` — disposition manifest | pending reviewer confirmation |
+| D-02 | `artifacts/analysis/monitor-de-notas-foundation-cutover-map-20260924.md` — durable removal/recovery map | pending reviewer confirmation |
 | D-03 | `project_constitution.md` — Authority | pending reviewer confirmation |
-| D-04 | `modules/events-and-classification.md` — Ownership Invariant | pending reviewer confirmation |
+| D-04 | `project_constitution.md` — Invariants, linked to the three application-data module owners | pending reviewer confirmation |
 | D-05 | `policies/scope_subscope_governance.md` — machine-readable scope contract | pending reviewer confirmation |
 
 ## Final Module Decision Consistency Validation
@@ -105,15 +120,15 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 | identity/team | `modules/identity-and-team.md` — Observed Authentication Contract | pending reviewer confirmation |
 | realtime invalidation | `modules/realtime-invalidation.md` — Observed Realtime Message Contract | pending reviewer confirmation |
 | operational monitoring | `modules/operational-monitoring.md` — Observed Monitoring Contract | pending reviewer confirmation |
-| runtime/deployment | `modules/runtime-and-deployment.md` — Observed Runtime Contract | pending reviewer confirmation |
+| runtime/deployment | `modules/runtime-and-deployment.md` — Observed Runtime Contract + Observed Health Contract | pending reviewer confirmation |
 
 ## Blocker Notes
 
-- **Blocker:** `R4 independent re-review pending`; this is a delivery gate, not a loss of approved implementation authority.
-- **Why blocked now:** the locally green R3 remediation must be independently assessed before completion or closeout.
-- **What unblocks it:** clean R4 test-quality, architecture-adherence and cutover-integrity results on one immutable commit.
+- **Blocker:** `n/a`; delivery R4 findings are actively being remediated under the approved boundary.
+- **Why blocked now:** `n/a`; completion remains unavailable until delivery R5 converges.
+- **What unblocks it:** clean delivery R5 test-quality, architecture-adherence and cutover-integrity results on one immutable commit.
 - **Owner / source:** owner do TODO; autoridade humana permanece responsável pelo novo approval.
-- **Last confirmed truth:** D-01..D-05 approval remains valid; R3 blockers are locally remediated and R4 remains pending.
+- **Last confirmed truth:** D-01..D-05 approval remains valid; delivery R4 was no-go and its findings are being integrated for delivery R5.
 
 ## Scope
 
@@ -528,7 +543,7 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Adherence review kind:** `architecture_adherence`
 - **Adherence review package:** `bounded-file-set`
 - **Adherence review status:** `running`
-- **Adherence review evidence / resolution:** `ARCH-ADH-R2-01..04` and `ARCH-ADH-R3-01..04` were remediated locally; only a fresh R4 may mark adherence clean.
+- **Adherence review evidence / resolution:** delivery R4 on `1aae0c8` returned `ARCH-ADH-R4-01..04`; all are integrated locally and only fresh delivery R5 may mark adherence clean.
 - **No-go handling:** retornar ao diagnóstico/decisão ou ao loop de evidência; não alegar execução ou conclusão com divergência aberta.
 
 ## Assumptions Preview
@@ -707,7 +722,7 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 
 | Finding ID | Severity | Classification | Routing Decision | Same TODO / Split Rationale | Status | Approval / Follow-up Reference |
 | --- | --- | --- | --- | --- | --- | --- |
-| `RF-01` (`ARCH-OP-02`,`CRIT-01`) | `high` | `release-blocker` | tratar aprovação anterior como intenção; exigir novo `APROVADO` pós-gates | ordem de autoridade é parte do contrato atual | `resolved in planning` | `Approval.Current authority`; novo approval pendente |
+| `RF-01` (`ARCH-OP-02`,`CRIT-01`) | `high` | `release-blocker` | tratar aprovação anterior como intenção; exigir novo `APROVADO` pós-gates | ordem de autoridade é parte do contrato atual | `resolved in planning` | `Approval.Current authority`; aprovação renovada recebida em 2026-09-24 |
 | `RF-02` (`ARCH-OP-03`,`CRIT-02`) | `high` | `release-blocker` | commit + TODO blob/hash no dispatch e freeze renovado | reproducibilidade do review atual | `resolved in planning` | `Gate: Review Baseline Freeze` |
 | `RF-03` (`ARCH-OP-01`,`CRIT-04`) | `high` | `release-blocker` | inventário read-only, seis módulos fechados e disposition 1:1 antes da execução | elimina discricionariedade destrutiva do executor | `resolved in planning` | `PT-01..PT-09`; module map; disposition manifest |
 | `RF-04` (`CRIT-03`) | `high` | `release-blocker` | HEAD/status/diff/content fingerprints para produto e Delphi | prova `VAL-07` e ancora assumptions em bytes | `resolved in planning` | `Read-Only Evidence Snapshot` |
@@ -721,8 +736,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 | `RF-12` (`ARCH-R2-04`) | `medium` | `release-blocker` | classificar termos históricos do governing TODO por seção/owner/lifecycle e repetir suite após move | evita ciclo impossível ou allowlist ampla | `resolved in planning; delivery evidence in DoD` | `Deterministic Validator Contract` |
 | `RF-13` (`CRIT-R2-01`) | `high` | `release-blocker` | incluir paths de código diretamente em `A-01` | guard não dereferencia `PT-01..PT-09` | `resolved; coherence guard go` | `Assumptions Preview.A-01`; guard 2026-09-24 |
 | `RF-14` (`CRIT-R2-02`) | `high` | `release-blocker` | usar ref real `origin/main` e manter SHA em campo separado | guard precisa resolver o ref com Git | `resolved; scope-drift guard go` | `Gate: Review Baseline Freeze`; guard 2026-09-24 |
-| `RF-15` (`ARCH-R3-01`,`CRIT-R3-01`) | `high` | `release-blocker` | sincronizar lifecycle, next step, work state, blockers, execution plan, questions e closeout | elimina instruções concorrentes antes do novo approval | `resolved; R4 clean` | seções canônicas de estado + `Execution Plan` |
-| `RF-16` (`CRIT-R3-02`) | `medium` | `release-blocker` | gerar padrões proibidos apenas em temp runtime a partir de fragmentos inofensivos | evita validator rejeitar o próprio corpus ou exigir allowlist ampla | `resolved; R4 clean` | `DOD-10`; `VAL-08`; validator/test contracts |
+| `RF-15` (`ARCH-R3-01`,`CRIT-R3-01`) | `high` | `release-blocker` | sincronizar lifecycle, next step, work state, blockers, execution plan, questions e closeout | elimina instruções concorrentes antes do novo approval | `resolved; planning R4 clean` | seções canônicas de estado + `Execution Plan` |
+| `RF-16` (`CRIT-R3-02`) | `medium` | `release-blocker` | gerar padrões proibidos apenas em temp runtime a partir de fragmentos inofensivos | evita validator rejeitar o próprio corpus ou exigir allowlist ampla | `resolved; planning R4 clean` | `DOD-10`; `VAL-08`; validator/test contracts |
 
 ## Independent Test Quality Audit Gate
 
@@ -735,8 +750,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Audit isolation mode:** `fresh internal no-context reviewer`
 - **Internal reviewer mandate:** `required after implementation`
 - **Audit status:** `running`
-- **Findings summary:** R2/R3 release blockers were reproduced and remediated; the clean result must come from a fresh R4 reviewer.
-- **Evidence / reference:** immutable R3 review baseline `1e4d1e0523da9d87d01b1fdcd380de3e667f3d38`; remediation evidence in `Round-3 Remediation`.
+- **Findings summary:** delivery R4 returned `TQ-R4-01..04`; all are integrated locally and the clean result must come from fresh delivery R5.
+- **Evidence / reference:** immutable delivery R4 baseline `1aae0c837fdd16c4675d544e3eb1324f4db55b90`; remediation evidence in `Delivery R4 Finding Classification`.
 - **Waiver authority / reference:** `n/a`
 
 ## Independent No-Context Final Review Gate
@@ -761,8 +776,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Package mode:** `bounded-file-set`
 - **Canonical multi-lane audit protocol:** `n/a`
 - **Cutover audit status:** `running`
-- **Findings summary:** exact deletion, lifecycle and publication coverage passed R2; subsequent contract/validator changes require a fresh bounded confirmation.
-- **Evidence / reference:** R2 reviewer `foundation_cutover_integrity_r2` returned zero findings; R4 pending.
+- **Findings summary:** exact deletion/lifecycle/publication coverage passed R2; delivery R4 found only credential/state blockers shared with test-quality, now integrated; delivery R5 confirmation remains required.
+- **Evidence / reference:** R2 zero findings; delivery R4 immutable baseline `1aae0c8`; delivery R5 pending.
 - **Waiver authority / reference:** `n/a`
 
 ## Execution Plan — Approved; Guard-Gated
@@ -775,8 +790,9 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 6. `Concluído`: camada canônica raiz, scope policy e divisão de autoridades reescritas conforme o manifesto.
 7. `Concluído`: seis módulos, contratos, decisões, backlog, políticas e governança reconstruídos nos targets aprovados.
 8. `Concluído localmente`: paths `Delete` removidos, suíte/validator/guards locais verdes e remediações R2/R3 integradas.
-9. `Em andamento`: congelar a remediação em commit local e executar R4 independente sobre o pacote imutável.
-10. Após R4 limpo, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
+9. `Concluído com no-go`: delivery R4 executada sobre `1aae0c837fdd16c4675d544e3eb1324f4db55b90`; findings classificados dentro de D-01..D-05.
+10. `Em andamento`: integrar os findings delivery R4, congelar o pacote e executar delivery R5.
+11. Após delivery R5 limpa, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
 
 ### Touched Surfaces
 
@@ -800,7 +816,7 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 
 ## Questions To Close
 
-- [x] Nenhuma questão material aberta para review; `D-01..D-05` formam a baseline proposta, e `D-05` exige confirmação no novo `APROVADO`.
+- [x] Nenhuma questão material aberta de escopo; `D-01..D-05` foram confirmadas pelo `APROVADO` renovado e delivery findings são remediações internas ao contrato.
 
 ## Rules Acknowledgement / Ingestion
 
@@ -832,8 +848,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 ## Agent Routing Preflight
 
 - **Client surface:** `codex`
-- **Current governed action:** `delivery-review`
-- **Selected role:** `formal-reviewer`
+- **Current governed action:** `delivery-remediation`
+- **Selected role:** `routine-executor`
 - **Selected model:** `gpt-5.6-terra`
 - **Selected effort:** `medium`
 - **Proof mode:** `declared`
@@ -903,11 +919,11 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 - **Authority guard:** must return `go` only after explicit `APROVADO`, rule ingestion and resolved decisions.
 - **Completion and closeout guards:** required before `Local-Implemented` or movement to `completed/`.
 - **Cutover integrity audit:** required because the work retires one active documentary authority and establishes another.
-- **R4 architecture, test-quality and cutover re-review:** pending on the immutable remediation commit; no clean result is claimed yet.
+- **Delivery R4 architecture/test-quality/cutover review:** no-go on `1aae0c8`; findings are being integrated and delivery R5 will be a fresh immutable rerun. Planning R4 remains the pre-approval clean review and is not delivery evidence.
 
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
-- **Disposition reason:** approved implementation and R3 remediation are locally complete; R4 and delivery/closeout gates remain pending.
-- **Post-commit/push status:** `candidate local implementation commit plus uncommitted R3 remediation; origin/main remains at the approval checkpoint`
+- **Disposition reason:** approved implementation remains local; delivery R4 findings are in remediation and delivery/closeout gates remain pending.
+- **Post-commit/push status:** `delivery R4 baseline committed at 1aae0c8; delivery R4 remediation is uncommitted; origin/main remains at b73b0eb approval checkpoint`
 - **Next path/status action:** permanecer em `todos/active/process/` até implementação, evidência, reviews e closeout completos.

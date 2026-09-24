@@ -2,6 +2,12 @@
 
 Monitor de Notas helps the financial team inspect invoice-emission failures from SmartNotas and record their treatment. Routerfy owns ingestion and writes the external `logs` table; this product reads it and never writes it.
 
+## Canonical identity
+
+- **Product:** Monitor de Notas
+- **Technical repository:** `MonitorDeNotas`
+- **Documentation repository:** `uninotas-foundation`
+
 ## Target outcome
 
 Operators can find, classify, inspect, and treat relevant events with traceable authorship, without mutating the source event stream.

@@ -17,11 +17,19 @@ Owns session authentication, profiles, and financial-team administration. Users 
 
 ## Observed Authentication Contract
 
-`POST /auth/login` accepts validated credentials and returns the authenticated session representation; `GET /auth/eu` returns the current authenticated user. `GET /usuarios`, `POST /usuarios`, `PATCH /usuarios/minha-senha`, `PATCH /usuarios/:id`, and `DELETE /usuarios/:id` are protected team operations. JWT authentication rejects missing, expired, inactive, or unknown users; role enforcement rejects an insufficient profile. Invalid credentials, self-deactivation, self-demotion, last-administrator removal, and missing users are rejected rather than silently changing ownership.
+All routes use base path `/api/v1`. Normal protected routes validate bearer signature/expiry and resolve an active, known user before role checks. The realtime query-token exception is owned separately and does not perform that user lookup.
 
-```json
-{"base_path":"/api/v1","routes":["POST /auth/login","GET /auth/eu","GET /usuarios","POST /usuarios","PATCH /usuarios/minha-senha","PATCH /usuarios/:id","DELETE /usuarios/:id"],"authorization":"login public; JWT otherwise; list ADMIN|GESTOR; create/update/delete ADMIN","responses":"auth-session|current-user|user|user-list","errors":"401|403|404|validation use standard error body"}
-```
+| Route | Authorization and request | Successful response |
+| --- | --- | --- |
+| `POST /auth/login` | public; body has valid `email` and string `senha` of at least 6 characters | HTTP 200 `{accessToken,expiraEm,usuario}`; `usuario={id,nome,email,perfil,senhaProvisoria}` |
+| `GET /auth/eu` | normal JWT | current user summary fields above |
+| `GET /usuarios` | `ADMIN|GESTOR` | array of users `{id,nome,email,perfil,ativo,senhaProvisoria,criadoEm}` |
+| `POST /usuarios` | `ADMIN`; `nome` 3..200, valid `email`, `senha` 8..72, optional `perfil=ADMIN|GESTOR|ANALISTA|LEITOR` | created user fields |
+| `PATCH /usuarios/minha-senha` | normal JWT; body `senhaAtual` string and `novaSenha` 8..72 | updated user fields |
+| `PATCH /usuarios/:id` | `ADMIN`; UUID path; partial create fields plus optional boolean `ativo` | updated user fields |
+| `DELETE /usuarios/:id` | `ADMIN`; UUID path | deactivated user fields; row/authorship remains |
+
+Invalid credentials, missing/expired bearer tokens, inactive/unknown users on normal JWT routes, insufficient roles, self-deactivation, self-demotion, last-administrator removal, duplicate identity, missing users, and validation failures reject through `{statusCode,erro,mensagem,caminho,timestamp}`.
 
 ## Purpose, Owned Entities, and Workflows
 **Purpose:** govern who may operate the monitor. **Owned/orchestrated entities:** `Usuario`, profile, and authenticated session. **Workflows/capabilities:** authenticate, manage team profiles, deactivate users, and preserve the last administrator. **Invariants/validation/auth:** JWT guards protected operations; active status is required; deletion does not erase authorship. **Observed contracts:** auth and user services are evidenced; credential values, endpoint examples, and SLO are intentionally undocumented.
