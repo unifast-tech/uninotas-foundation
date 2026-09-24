@@ -51,12 +51,12 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `none`
-- **Next exact step:** integrar os findings da delivery R4, congelar a nova remediação em commit local e executar delivery R5 independente.
+- **Next exact step:** gerar o pacote R5 após esta transição de gate, ancorado na remediação `cacc054`, e executar os reviewers independentes sobre o HEAD exato registrado pelo pacote.
 
 ## Active Work State
 
-- **Work state:** `remediation`
-- **Why this state now:** delivery R4 encontrou contratos incompletos e falsos verdes determinísticos; os findings estão dentro do escopo aprovado e em integração.
+- **Work state:** `delivery-review`
+- **Why this state now:** os findings da delivery R4 foram integrados e congelados em `cacc054`; esta transição de estado abre a delivery R5 independente.
 - **Exit condition:** delivery R5 sem release-blocker, matrizes 1:1 adjudicadas e gates de completion/closeout prontos para execução.
 
 ## Routine-Executor Implementation Evidence — 2026-09-24
@@ -124,11 +124,11 @@ All material findings match D-01..D-05/DOD-01..DOD-10 and are `release-blocker` 
 
 ## Blocker Notes
 
-- **Blocker:** `n/a`; delivery R4 findings are actively being remediated under the approved boundary.
+- **Blocker:** `n/a`; delivery R5 is an active gate, not an impasse.
 - **Why blocked now:** `n/a`; completion remains unavailable until delivery R5 converges.
 - **What unblocks it:** clean delivery R5 test-quality, architecture-adherence and cutover-integrity results on one immutable commit.
 - **Owner / source:** owner do TODO; autoridade humana permanece responsável pelo novo approval.
-- **Last confirmed truth:** D-01..D-05 approval remains valid; delivery R4 was no-go and its findings are being integrated for delivery R5.
+- **Last confirmed truth:** D-01..D-05 approval remains valid; delivery R4 findings are integrated in `cacc054` and the state-only R5 transition is being committed before dispatch.
 
 ## Scope
 
@@ -319,8 +319,8 @@ Hashes individuais que sustentam as decisões de ownership ficam no `Pre-Executi
 | From Profile | To Profile | Why the Handoff Exists | Touched Surfaces | Status / Evidence |
 | --- | --- | --- | --- | --- |
 | `Strategic / CTO-Tech-Lead` | `routine-executor` | executar a substituição documental já decidida sem redefinir o contrato | `uninotas-foundation/**` | `completed; R3 remediation locally green` |
-| `routine-executor` | `Assurance / Tester-Quality` | desafiar evidência, links, referências e ausência de autoridade concorrente | diff e validações da Foundation | `R3 no-go integrated; R4 pending` |
-| `Assurance / Tester-Quality` | `formal-reviewer` | revisar aderência arquitetural e integridade do cutover | pacote final consolidado | `R3 no-go integrated; R4 pending` |
+| `routine-executor` | `Assurance / Tester-Quality` | desafiar evidência, links, referências e ausência de autoridade concorrente | diff e validações da Foundation | `delivery R4 no-go integrated at cacc054; delivery R5 running` |
+| `Assurance / Tester-Quality` | `formal-reviewer` | revisar aderência arquitetural e integridade do cutover | pacote final consolidado | `delivery R4 no-go integrated at cacc054; delivery R5 running` |
 
 ## Complexity
 
@@ -791,8 +791,9 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 7. `Concluído`: seis módulos, contratos, decisões, backlog, políticas e governança reconstruídos nos targets aprovados.
 8. `Concluído localmente`: paths `Delete` removidos, suíte/validator/guards locais verdes e remediações R2/R3 integradas.
 9. `Concluído com no-go`: delivery R4 executada sobre `1aae0c837fdd16c4675d544e3eb1324f4db55b90`; findings classificados dentro de D-01..D-05.
-10. `Em andamento`: integrar os findings delivery R4, congelar o pacote e executar delivery R5.
-11. Após delivery R5 limpa, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
+10. `Concluído localmente`: findings delivery R4 integrados e congelados no commit `cacc054`.
+11. `Em andamento`: registrar esta transição de gate e executar delivery R5 sobre o HEAD imutável derivado de `cacc054`.
+12. Após delivery R5 limpa, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
 
 ### Touched Surfaces
 
@@ -848,8 +849,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 ## Agent Routing Preflight
 
 - **Client surface:** `codex`
-- **Current governed action:** `delivery-remediation`
-- **Selected role:** `routine-executor`
+- **Current governed action:** `delivery-review`
+- **Selected role:** `formal-reviewer`
 - **Selected model:** `gpt-5.6-terra`
 - **Selected effort:** `medium`
 - **Proof mode:** `declared`
@@ -919,11 +920,11 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 - **Authority guard:** must return `go` only after explicit `APROVADO`, rule ingestion and resolved decisions.
 - **Completion and closeout guards:** required before `Local-Implemented` or movement to `completed/`.
 - **Cutover integrity audit:** required because the work retires one active documentary authority and establishes another.
-- **Delivery R4 architecture/test-quality/cutover review:** no-go on `1aae0c8`; findings are being integrated and delivery R5 will be a fresh immutable rerun. Planning R4 remains the pre-approval clean review and is not delivery evidence.
+- **Delivery R4 architecture/test-quality/cutover review:** no-go on `1aae0c8`; findings integrated at `cacc054`; delivery R5 is the fresh immutable rerun. Planning R4 remains the pre-approval clean review and is not delivery evidence.
 
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
-- **Disposition reason:** approved implementation remains local; delivery R4 findings are in remediation and delivery/closeout gates remain pending.
-- **Post-commit/push status:** `delivery R4 baseline committed at 1aae0c8; delivery R4 remediation is uncommitted; origin/main remains at b73b0eb approval checkpoint`
+- **Disposition reason:** approved implementation and delivery R4 remediation remain local; delivery R5 and delivery/closeout gates remain pending.
+- **Post-commit/push status:** `delivery R4 remediation committed at cacc054; state-only R5 transition follows locally; origin/main remains at b73b0eb approval checkpoint`
 - **Next path/status action:** permanecer em `todos/active/process/` até implementação, evidência, reviews e closeout completos.
