@@ -3,7 +3,7 @@
 ## Artifact Identity
 
 - **Artifact type:** `tactical_execution_contract`
-- **Lifecycle state:** `Review — final PACED convergence before renewed approval`
+- **Lifecycle state:** `Awaiting renewed approval — PACED preflight-go`
 - **Created:** `2026-09-24`
 - **Owner:** `Delphi / Strategic CTO-Tech-Lead`, sob autoridade humana do usuário
 
@@ -51,13 +51,13 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `none`
-- **Next exact step:** publicar o baseline sincronizado após `RF-15..RF-16`, executar a checagem final de arquitetura/crítica e, se limpa, exigir `preflight-go` antes de solicitar novo `APROVADO`.
+- **Next exact step:** autoridade humana revisar o pacote convergido e responder `APROVADO`; isso ainda não substitui o authority guard normal pós-aprovação.
 
 ## Active Work State
 
 - **Work state:** `review`
-- **Why this state now:** `RF-01..RF-14` foram substantivamente encerrados; R3 pediu apenas sincronização do lifecycle e uma estratégia de fixtures não autorrejeitável, integradas em `RF-15..RF-16`.
-- **Exit condition:** review final sem achado material aberto, coerência e drift em `go`, authority preflight em `preflight-go` e novo `APROVADO` humano registrado.
+- **Why this state now:** R4 encerrou sem achados; audit floor, coerência e drift retornaram `go`; authority preflight retornou `preflight-go`.
+- **Exit condition:** novo `APROVADO` humano é registrado, regras são ingeridas no binding ativo e o authority guard normal retorna `go`.
 
 ## Blocker Notes
 
@@ -65,7 +65,7 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 - **Why blocked now:** `n/a`; o trabalho está no gate de review, não em estado bloqueado.
 - **What unblocks it:** `n/a` para review; execução só começa pela sequência explícita em `Execution Plan`.
 - **Owner / source:** owner do TODO; autoridade humana permanece responsável pelo novo approval.
-- **Last confirmed truth:** R3 manteve hard cutover e `RF-01..RF-14`; `ARCH-R3-01`/`CRIT-R3-01..02` foram integrados como `RF-15..RF-16` antes do último freeze.
+- **Last confirmed truth:** reviewers R4 independentes retornaram zero findings; hard cutover, módulo map, manifesto e validações estão convergidos.
 
 ## Scope
 
@@ -478,8 +478,8 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Decision review lifecycle:** `after diagnosis is closed and before execution authority`
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set`
-- **Decision review status:** `findings_integrated`
-- **Decision review evidence / resolution:** R1 gerou `RF-01..RF-08`; R2 gerou `RF-09..RF-14`; R3 confirmou a arquitetura e encontrou apenas estado canônico stale (`ARCH-R3-01`), integrado em `RF-15`; último rerun obrigatório após sincronização.
+- **Decision review status:** `no_material_findings`
+- **Decision review evidence / resolution:** R1-R3 geraram `RF-01..RF-16`; R4 reviewer `foundation-architecture-r4` retornou zero findings e posições `performance=acceptable`, `elegance/structural/operational=strong_positive` sobre o snapshot `7f28cd8`.
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -539,17 +539,17 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 
 ## Plan Review Gate
 
-- **Status:** `findings_integrated — final rerun required on synchronized baseline`
+- **Status:** `no_material_findings`
 
 ### Review Sections
 
-- [ ] Architecture
-- [ ] Code Quality
-- [ ] Tests
-- [ ] Performance
-- [ ] Security
-- [ ] Elegance
-- [ ] Structural Soundness
+- [x] Architecture
+- [x] Code Quality
+- [x] Tests
+- [x] Performance
+- [x] Security
+- [x] Elegance
+- [x] Structural Soundness
 
 ### Issue Cards
 
@@ -635,8 +635,8 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Canonical multi-lane audit protocol:** `n/a`
 - **Audit session / round evidence:** `n/a`
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
-- **Critique status:** `findings_integrated`
-- **Findings summary:** R1/R2 fecharam arquitetura, evidência e validação; R3 manteve o hard cutover e pediu apenas sincronização do estado e isolamento runtime das amostras de segurança, integrados em `RF-15..RF-16`.
+- **Critique status:** `no_material_findings`
+- **Findings summary:** R4 closure critique retornou zero findings; `RF-01..RF-16` permanecem resolvidos sem regressão.
 - **Resolution ledger:** achados originais da crítica, antes da deduplicação `RF-01..RF-08`.
 
 | Finding ID | Resolution (`Integrated|Challenged|Deferred`) | Usefulness (`useful|noise|mixed|unknown`) | Formalizable (`yes|partial|no|unknown`) | Candidate Rule Level (`paced|project|none|unknown`) | Candidate Rule ID | Rationale / Evidence |
@@ -655,7 +655,7 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 | `CRIT-R3-01` | `Integrated` | `useful` | `partial` | `paced` | `n/a` | lifecycle, next step, blocker notes, execution plan e `D-01..D-05` foram sincronizados em `RF-15` |
 | `CRIT-R3-02` | `Integrated` | `useful` | `partial` | `project` | `n/a` | amostras JWT/PII proibidas agora são montadas somente em temp runtime; tree persistido inteiro continua sob scan em `RF-16` |
 
-- **Evidence / reference:** R1/R2 integrados; R3 dispatch `/tmp/monitor-foundation-review.tJs1Sm/critique-r3-dispatch.json`; `CRIT-R3-01..02` integrados em `RF-15..RF-16`; último rerun pendente.
+- **Evidence / reference:** R4 dispatch `/tmp/monitor-foundation-review.tJs1Sm/critique-r4-dispatch.json`; reviewer `fresh-stateless-closure-critique-r4`; zero findings; posições `performance/operational=acceptable`, `elegance/structural=strong_positive`.
 - **Waiver authority / reference:** `n/a`
 
 ## Promotion Finding Routing Ledger
@@ -678,8 +678,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 | `RF-12` (`ARCH-R2-04`) | `medium` | `release-blocker` | classificar termos históricos do governing TODO por seção/owner/lifecycle e repetir suite após move | evita ciclo impossível ou allowlist ampla | `resolved in planning; delivery evidence in DoD` | `Deterministic Validator Contract` |
 | `RF-13` (`CRIT-R2-01`) | `high` | `release-blocker` | incluir paths de código diretamente em `A-01` | guard não dereferencia `PT-01..PT-09` | `resolved; coherence guard go` | `Assumptions Preview.A-01`; guard 2026-09-24 |
 | `RF-14` (`CRIT-R2-02`) | `high` | `release-blocker` | usar ref real `origin/main` e manter SHA em campo separado | guard precisa resolver o ref com Git | `resolved; scope-drift guard go` | `Gate: Review Baseline Freeze`; guard 2026-09-24 |
-| `RF-15` (`ARCH-R3-01`,`CRIT-R3-01`) | `high` | `release-blocker` | sincronizar lifecycle, next step, work state, blockers, execution plan, questions e closeout | elimina instruções concorrentes antes do novo approval | `integrated; final rerun pending` | seções canônicas de estado + `Execution Plan` |
-| `RF-16` (`CRIT-R3-02`) | `medium` | `release-blocker` | gerar padrões proibidos apenas em temp runtime a partir de fragmentos inofensivos | evita validator rejeitar o próprio corpus ou exigir allowlist ampla | `integrated; final rerun pending` | `DOD-10`; `VAL-08`; validator/test contracts |
+| `RF-15` (`ARCH-R3-01`,`CRIT-R3-01`) | `high` | `release-blocker` | sincronizar lifecycle, next step, work state, blockers, execution plan, questions e closeout | elimina instruções concorrentes antes do novo approval | `resolved; R4 clean` | seções canônicas de estado + `Execution Plan` |
+| `RF-16` (`CRIT-R3-02`) | `medium` | `release-blocker` | gerar padrões proibidos apenas em temp runtime a partir de fragmentos inofensivos | evita validator rejeitar o próprio corpus ou exigir allowlist ampla | `resolved; R4 clean` | `DOD-10`; `VAL-08`; validator/test contracts |
 
 ## Independent Test Quality Audit Gate
 
@@ -788,6 +788,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Worktree authorization evidence:** `n/a`
 - **Writer scheduling policy:** `single-writer-serialized`
 - **Guard outcome:** `go`
+- **Authority preflight outcome:** `preflight-go`
+- **Authority preflight evidence:** `python3 delphi-ai/tools/todo_authority_guard.py uninotas-foundation/todos/active/process/TODO-uninotas-foundation-project-rebase.md --pre-approval` — zero violations em 2026-09-24.
 - **Waiver / exception reference:** `n/a`
 
 ## Flow Evidence Planning Matrix
@@ -847,6 +849,6 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
-- **Disposition reason:** contrato está em convergência final de review; execução continua pendente de preflight e novo `APROVADO`.
-- **Post-commit/push status:** `final synchronized baseline pending`
+- **Disposition reason:** planning reviews e preflight convergiram; execução continua pendente de novo `APROVADO`, rule ingestion e authority guard normal.
+- **Post-commit/push status:** `final synchronized baseline published; preflight-go`
 - **Next path/status action:** permanecer em `todos/active/process/` até implementação, evidência, reviews e closeout completos.
