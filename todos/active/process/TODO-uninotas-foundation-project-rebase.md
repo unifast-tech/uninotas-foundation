@@ -514,13 +514,13 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Why this decision:** o pacote é `big`, altera toda a autoridade documental e precisa de baseline imutável antes das revisões independentes.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `main`
-- **Baseline commit:** `092b099fd7d49d1f1859586026dd6c70ce90f2e7`
+- **Baseline commit:** `700f585bcd3ffce74f3d9600f46f99da731186d0`
 - **Baseline push reference:** `origin/main`
-- **Baseline TODO blob:** `f393bb904b2aec6faa003ffff784f6e5f22103a6`
-- **Baseline snapshot SHA-256:** `2f89a72e2bac26f7428129accd69d5ee951fbd12cef4ae09141ffa316e6ba91c`
-- **Gate status:** `blocked`
-- **Findings summary:** R2 encontrou `RF-09..RF-14`; sua integração altera decisões, validação, módulos e manifests, portanto o snapshot `092b099` permanece apenas como baseline histórico da segunda rodada.
-- **Evidence / reference:** R2 foi corretamente ligado a `092b099`, blob `f393bb9…` e SHA-256 `2f89a72e…`; publicar novo freeze depois desta integração.
+- **Baseline TODO blob:** `24bd55ba4d210bd66edf39155c267f8a78f7aaa4`
+- **Baseline snapshot SHA-256:** `aed235f9ac6c0d39eddf24bd77b70676bf26bd2135b63d0e606d35830639cfa0`
+- **Gate status:** `no_material_findings`
+- **Findings summary:** `RF-09..RF-14` integrados; terceiro package ligado a commit, ref real, blob e SHA-256 antes do review.
+- **Evidence / reference:** git-write guards `go`; push `57a4111..700f585`; `ls-remote` confirmou o SHA integral; snapshot imutável `/tmp/monitor-foundation-review.tJs1Sm/review-package-700f585.md` possui o SHA-256 registrado.
 - **Waiver authority / reference:** `n/a`
 - **Pre-freeze packet-prep rule:** toda revisão abaixo permanece `prepared-pre-freeze`; nenhuma está marcada como aprovada antes do baseline publicado.
 
@@ -532,9 +532,9 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Baseline source:** `Review Baseline Freeze -> Baseline commit`
 - **Material sections compared:** `Context|Contract Boundary|Scope|Out of Scope|Definition of Done|Validation Steps|Execution Lane Tracking|Canonical Module Anchors|Decisions|Decision Baseline|Architecture Change Governance|Questions To Close|Assumptions Preview|Execution Plan|Flow Evidence Planning Matrix|Local CI-Equivalent Suite Matrix|Runtime / Rollout Notes|Security Risk Assessment|Performance & Concurrency Risk Assessment`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo uninotas-foundation/todos/active/process/TODO-uninotas-foundation-project-rebase.md`
-- **Gate status:** `blocked`
-- **Findings summary:** R2 comprovou que a push reference descritiva não era resolvível; `RF-14` corrige para `origin/main`, mas requer novo freeze e rerun.
-- **Evidence / reference:** findings históricos `RF-02`/`RF-14`; comando canônico permanece inalterado.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** zero seções materiais divergiram do baseline `700f585`; push ref `origin/main` resolveu corretamente.
+- **Evidence / reference:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo uninotas-foundation/todos/active/process/TODO-uninotas-foundation-project-rebase.md` — `Overall outcome: go`; `Changed material sections: 0` em 2026-09-24.
 - **Waiver authority / reference:** `n/a`
 
 ## Plan Review Gate
@@ -675,7 +675,7 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 | `RF-11` (`ARCH-R2-03`) | `medium` | `release-blocker` | remover “ingestão”, distribuir `PT-08` pelos módulos funcionais e exigir `module_template.md` | fecha ownership e blueprint dos seis módulos | `integrated; rerun pending` | `S-04`; Planned Additions; Rules Ingestion |
 | `RF-12` (`ARCH-R2-04`) | `medium` | `release-blocker` | classificar termos históricos do governing TODO por seção/owner/lifecycle e repetir suite após move | evita ciclo impossível ou allowlist ampla | `integrated; delivery evidence pending` | `Deterministic Validator Contract` |
 | `RF-13` (`CRIT-R2-01`) | `high` | `release-blocker` | incluir paths de código diretamente em `A-01` | guard não dereferencia `PT-01..PT-09` | `resolved; coherence guard go` | `Assumptions Preview.A-01`; guard 2026-09-24 |
-| `RF-14` (`CRIT-R2-02`) | `high` | `release-blocker` | usar ref real `origin/main` e manter SHA em campo separado | guard precisa resolver o ref com Git | `integrated; guard rerun pending` | `Gate: Review Baseline Freeze` |
+| `RF-14` (`CRIT-R2-02`) | `high` | `release-blocker` | usar ref real `origin/main` e manter SHA em campo separado | guard precisa resolver o ref com Git | `resolved; scope-drift guard go` | `Gate: Review Baseline Freeze`; guard 2026-09-24 |
 
 ## Independent Test Quality Audit Gate
 
@@ -827,7 +827,7 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 
 | Dependency | Why It Matters | Status | Last Verified | Verification Method | Adjustment / Workaround |
 | --- | --- | --- | --- | --- | --- |
-| `origin/main` de `uninotas-foundation` | baseline freeze e publicação final | `healthy` | `2026-09-24` | `ls-remote` confirmou `092b099fd7d49d1f1859586026dd6c70ce90f2e7`; blob/hash do package registrados | publicar somente novas evidências não materiais até o review convergir |
+| `origin/main` de `uninotas-foundation` | baseline freeze e publicação final | `healthy` | `2026-09-24` | `ls-remote` confirmou `700f585bcd3ffce74f3d9600f46f99da731186d0`; blob/hash do package registrados | publicar somente novas evidências não materiais até o review convergir |
 | `delphi-ai` local | workflows e guards PACED | `healthy with runner caveat` | `2026-09-24` | `verify_context.sh` via Git Bash passou | scripts CRLF rodam pelo Git Bash; Python guards rodam no WSL |
 | PostgreSQL/Railway | somente evidência read-only de arquitetura | `healthy` | `2026-09-24` | `/api/v1/saude` retornou banco `ok` | nenhuma mutação/seed/E2E neste TODO |
 
