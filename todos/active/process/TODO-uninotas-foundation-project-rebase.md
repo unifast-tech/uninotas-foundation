@@ -51,13 +51,13 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `none`
-- **Next exact step:** gerar o pacote R5 após esta transição de gate, ancorado na remediação `cacc054`, e executar os reviewers independentes sobre o HEAD exato registrado pelo pacote.
+- **Next exact step:** congelar a remediação R5 em commit imutável, gerar o pacote R6 e executar reviewers independentes sobre o HEAD exato registrado pelo pacote.
 
 ## Active Work State
 
 - **Work state:** `delivery-review`
-- **Why this state now:** os findings da delivery R4 foram integrados e congelados em `cacc054`; esta transição de estado abre a delivery R5 independente.
-- **Exit condition:** delivery R5 sem release-blocker, matrizes 1:1 adjudicadas e gates de completion/closeout prontos para execução.
+- **Why this state now:** delivery R5 encontrou blockers dentro do escopo aprovado; todos foram integrados localmente e aguardam confirmação R6 independente.
+- **Exit condition:** delivery R6 sem release-blocker, matrizes 1:1 adjudicadas e gates de completion/closeout prontos para execução.
 
 ## Routine-Executor Implementation Evidence — 2026-09-24
 
@@ -92,43 +92,60 @@ All material findings match D-01..D-05/DOD-01..DOD-10 and are `release-blocker` 
 
 | Finding | Classification | Integrated remediation | Status |
 | --- | --- | --- | --- |
-| `ARCH-ADH-R4-01` | release-blocker | complete request/response/bounds/media contracts plus public health owner and PT-10 hashes | integrated; delivery R5 pending |
-| `ARCH-ADH-R4-02` | release-blocker | distinguish normal JWT from SSE query verification, backend polling from EventSource reconnect, monitoring body 503, and treatment query failure | integrated; delivery R5 pending |
-| `ARCH-ADH-R4-03` | release-blocker | mandate owns full D-01 identity; cutover map owns D-02; constitution owns cross-module D-04; treatment routes have one owner | integrated; delivery R5 pending |
-| `ARCH-ADH-R4-04` / `TQ-R4-04` | release-blocker | canonical `Pending` stage and explicit planning-R4 versus delivery-R4/R5 state | integrated; delivery R5 pending |
-| `TQ-R4-01` | release-blocker | active-authority semantics are rejected before exact historical-ledger reconciliation | integrated; delivery R5 pending |
-| `TQ-R4-02` | release-blocker | whitespace-tolerant exact decision parsing, unique README H1, and normalized D-04 contradiction checks | integrated; delivery R5 pending |
-| `TQ-R4-03` | release-blocker | independently pinned 34-path set, token-move contract mutations, and cross-surface privacy matrix | integrated; delivery R5 pending |
-| `COPILOT-R4-CREDENTIALS` | release-blocker | URI-userinfo and access-key-family credential detection with runtime-built mutations | integrated; delivery R5 pending |
+| `ARCH-ADH-R4-01` | release-blocker | complete request/response/bounds/media contracts plus public health owner and PT-10 hashes | integrated; superseded by R5 findings and R6 confirmation |
+| `ARCH-ADH-R4-02` | release-blocker | distinguish normal JWT from SSE query verification, backend polling from EventSource reconnect, monitoring body 503, and treatment query failure | integrated; superseded by R5 findings and R6 confirmation |
+| `ARCH-ADH-R4-03` | release-blocker | mandate owns full D-01 identity; cutover map owns D-02; constitution owns cross-module D-04; treatment routes have one owner | integrated; superseded by R5 findings and R6 confirmation |
+| `ARCH-ADH-R4-04` / `TQ-R4-04` | release-blocker | canonical `Pending` stage and explicit planning-R4 versus delivery-R4/R5 state | integrated; superseded by R5 findings and R6 confirmation |
+| `TQ-R4-01` | release-blocker | active-authority semantics are rejected before exact historical-ledger reconciliation | integrated; superseded by R5 findings and R6 confirmation |
+| `TQ-R4-02` | release-blocker | whitespace-tolerant exact decision parsing, unique README H1, and normalized D-04 contradiction checks | integrated; superseded by R5 findings and R6 confirmation |
+| `TQ-R4-03` | release-blocker | independently pinned 34-path set, token-move contract mutations, and cross-surface privacy matrix | integrated; superseded by R5 findings and R6 confirmation |
+| `COPILOT-R4-CREDENTIALS` | release-blocker | URI-userinfo and access-key-family credential detection with runtime-built mutations | integrated; superseded by R5 findings and R6 confirmation |
+
+## Delivery R5 Finding Classification — 2026-09-24
+
+All R5 findings remain inside D-01..D-05 and are classified as `release-blocker`; overlapping observations are consolidated below. Remediation is integrated locally and requires an immutable R6 re-review before any completion claim.
+
+| Finding | Classification | Integrated remediation | Status |
+| --- | --- | --- | --- |
+| `TQ-R5-01` / `CUTOVER-R5-01` | release-blocker | freeze the exact historical legacy-content digest independently of ledger metadata; detect English and Portuguese active-authority claims | integrated; delivery R6 pending |
+| `TQ-R5-02` | release-blocker | whitespace/modal ownership and alternate-product identity mutations | integrated; delivery R6 pending |
+| `ARCH-R5-01` / `CUTOVER-R5-03` | release-blocker | correct `cliente.logradouro`, explicit status/media per route, and exact SSE wire representation | integrated; delivery R6 pending |
+| `ARCH-R5-02` | release-blocker | document polling as continuously active and LISTEN/NOTIFY as optional parallel source | integrated; delivery R6 pending |
+| `ARCH-R5-03` | release-blocker | record D-01..D-05 adherence and compare the five frozen module decisions 1:1 | integrated; delivery R6 pending |
+| `ARCH-R5-04` | release-blocker | route formal review through `gpt-5.6-sol` at `xhigh` with deterministic guard evidence | integrated; delivery R6 pending |
+| `CUTOVER-R5-02` | release-blocker | add GitHub, OpenAI and Google provider-token patterns and runtime-built mutations | integrated; delivery R6 pending |
+| `CUTOVER-R5-04` | release-blocker | document query-token maximum 200 separately from the unbounded observed header | integrated; delivery R6 pending |
+| `CUTOVER-R5-05` | release-blocker | label PT-10 with exact relative paths and Git-object-byte hash command | integrated; delivery R6 pending |
+| `CUTOVER-R5-06` | release-blocker | use boundary-aware legacy matching so current underscored lifecycle filenames are not false historical references | integrated; delivery R6 pending |
+| `CUTOVER-R5-07` | release-blocker | restore TODO lane/classification and project-routing taxonomy | integrated; delivery R6 pending |
 
 ## Post-Implementation Decision Adherence Validation
 
 | Decision | Canonical evidence | Status |
 | --- | --- | --- |
-| D-01 | `decisions/monitor-de-notas-foundation-decisions.md` — D-01 row | pending reviewer confirmation |
-| D-02 | `artifacts/analysis/monitor-de-notas-foundation-cutover-map-20260924.md` — durable removal/recovery map | pending reviewer confirmation |
-| D-03 | `project_constitution.md` — Authority | pending reviewer confirmation |
-| D-04 | `project_constitution.md` — Invariants, linked to the three application-data module owners | pending reviewer confirmation |
-| D-05 | `policies/scope_subscope_governance.md` — machine-readable scope contract | pending reviewer confirmation |
+| D-01 | `decisions/monitor-de-notas-foundation-decisions.md` — D-01 row | Adherent |
+| D-02 | `artifacts/analysis/monitor-de-notas-foundation-cutover-map-20260924.md` — durable removal/recovery map | Adherent |
+| D-03 | `project_constitution.md` — Authority | Adherent |
+| D-04 | `project_constitution.md` — Invariants, linked to the three application-data module owners | Adherent |
+| D-05 | `policies/scope_subscope_governance.md` — machine-readable scope contract | Adherent |
 
 ## Final Module Decision Consistency Validation
 
-| Module | Exact path / section | Status |
+| Frozen module decision | Exact replacement evidence | Status |
 | --- | --- | --- |
-| events/classification | `modules/events-and-classification.md` — Observed API Contract | pending reviewer confirmation |
-| treatments/history | `modules/treatments-and-history.md` — Observed Treatment Contract | pending reviewer confirmation |
-| identity/team | `modules/identity-and-team.md` — Observed Authentication Contract | pending reviewer confirmation |
-| realtime invalidation | `modules/realtime-invalidation.md` — Observed Realtime Message Contract | pending reviewer confirmation |
-| operational monitoring | `modules/operational-monitoring.md` — Observed Monitoring Contract | pending reviewer confirmation |
-| runtime/deployment | `modules/runtime-and-deployment.md` — Observed Runtime Contract + Observed Health Contract | pending reviewer confirmation |
+| `modules/identity-and-tenancy.md` | `modules/identity-and-team.md`; cutover-map deletion row | Superseded (Approved) |
+| `modules/inbox-and-conversations.md` | `modules/events-and-classification.md` + `modules/treatments-and-history.md`; cutover-map deletion row | Superseded (Approved) |
+| `modules/integrations-and-channels.md` | `modules/events-and-classification.md` + `modules/realtime-invalidation.md`; cutover-map deletion row | Superseded (Approved) |
+| `modules/audit-and-history.md` | `modules/treatments-and-history.md`; cutover-map deletion row | Superseded (Approved) |
+| `modules/README.md` | exact six-module canonical index | Superseded (Approved) |
 
 ## Blocker Notes
 
-- **Blocker:** `n/a`; delivery R5 is an active gate, not an impasse.
-- **Why blocked now:** `n/a`; completion remains unavailable until delivery R5 converges.
-- **What unblocks it:** clean delivery R5 test-quality, architecture-adherence and cutover-integrity results on one immutable commit.
+- **Blocker:** `n/a`; delivery R6 is the next active gate, not an impasse.
+- **Why blocked now:** `n/a`; completion remains unavailable until delivery R6 converges.
+- **What unblocks it:** clean delivery R6 test-quality, architecture-adherence and cutover-integrity results on one immutable commit.
 - **Owner / source:** owner do TODO; autoridade humana permanece responsável pelo novo approval.
-- **Last confirmed truth:** D-01..D-05 approval remains valid; delivery R4 findings are integrated in `cacc054` and the state-only R5 transition is being committed before dispatch.
+- **Last confirmed truth:** D-01..D-05 approval remains valid; R5 reviewers returned no-go findings now integrated for immutable R6 review.
 
 ## Scope
 
@@ -319,8 +336,8 @@ Hashes individuais que sustentam as decisões de ownership ficam no `Pre-Executi
 | From Profile | To Profile | Why the Handoff Exists | Touched Surfaces | Status / Evidence |
 | --- | --- | --- | --- | --- |
 | `Strategic / CTO-Tech-Lead` | `routine-executor` | executar a substituição documental já decidida sem redefinir o contrato | `uninotas-foundation/**` | `completed; R3 remediation locally green` |
-| `routine-executor` | `Assurance / Tester-Quality` | desafiar evidência, links, referências e ausência de autoridade concorrente | diff e validações da Foundation | `delivery R4 no-go integrated at cacc054; delivery R5 running` |
-| `Assurance / Tester-Quality` | `formal-reviewer` | revisar aderência arquitetural e integridade do cutover | pacote final consolidado | `delivery R4 no-go integrated at cacc054; delivery R5 running` |
+| `routine-executor` | `Assurance / Tester-Quality` | desafiar evidência, links, referências e ausência de autoridade concorrente | diff e validações da Foundation | `delivery R5 no-go integrated locally; delivery R6 pending` |
+| `Assurance / Tester-Quality` | `formal-reviewer` | revisar aderência arquitetural e integridade do cutover | pacote final consolidado | `delivery R5 no-go integrated locally; delivery R6 pending` |
 
 ## Complexity
 
@@ -352,8 +369,9 @@ Este inventário read-only fecha a descoberta que antes estava indevidamente del
 | `PT-07` | Monitoramento operacional externo reutiliza o resumo de eventos em janela móvel e deve distinguir banco indisponível de zero erros. | `backend/src/monitoramento/monitoramento.service.ts`; `backend/src/logs/logs.service.ts` | `454461a6678559c61fb409d1a54c5b794600fb185a1b46c63f48a6e5e1a2da32`; `5015d24db62ccc93ee65bcac9ba6cb4cb24a6b06a5a21ac2f027326bddd95c6a` | `modules/operational-monitoring.md` |
 | `PT-08` | React/Vite consome listagem, filtros, resumo, detalhe, tratamentos, equipe e invalidação realtime por contratos explícitos da API. | `frontend/src/api/eventos.ts`; `frontend/src/paginas/ListaEventos.tsx`; `frontend/src/paginas/DetalheEvento.tsx`; `frontend/src/paginas/Equipe.tsx` | `1cf0e9f33b6ecfaa9040a5cb8b4d04f9d18c1a5d7b289d53c5c5ba693af9a317`; `0eeb6881f23ded8feeafb0ab36fe7f9f8e78e7463e8706d3e88c9b0ab4f36e9b`; `a4d2829c6b7b1269c8ecc3f0b58c3bc8fe956cae878c80eaad7126f4be90f643`; `2d9a1e8b8645189fefdd832a48209b3a28bf85e68d9216356051e52d19ce010b` | módulos funcionais correspondentes; sem módulo frontend paralelo |
 | `PT-09` | Execução e deploy são NestJS + React/Vite + PostgreSQL/Prisma em Docker/Railway, sem mudança de runtime neste TODO. | `Dockerfile`; `docker-compose.yml`; `railway.json`; `backend/src/config/configuration.ts` | `9d0554370de58fd504282f0d8bf98c1bce841d9ef736da11be611dfa17cd9e32`; `5e5e9f39e191b477e9981ba9047ace1ee7082e73ca447d454d27dddcaec9a781`; `f711055e59a2442c04299987a2bc30fe24cd02df86cd9e4e4cf57efec76a5697`; `57f87a470fb953f53ace1511355b9092db6e9c9e12f4c98a1e6cc1fcf8699a4e` | `modules/runtime-and-deployment.md` |
+| `PT-10` | Rotas `/api/v1`, limites de request/response, guards, wire SSE, health, monitoramento e erro padrão são contratos observados. | paths exatos e hashes em `artifacts/analysis/monitor-de-notas-product-truth-20260924.md` | commit congelado `78bf271341dfccb2595389f0dbac0e01e8532a7b`; comando `git show <commit>:<relative-path> \| sha256sum` sobre bytes do objeto Git | seis módulos canônicos |
 
-Os hashes completos foram obtidos por `sha256sum` no snapshot de 2026-09-24 e devem ser repetidos antes do closeout; o artifact final de product truth preservará esta matriz Foundation → fonte.
+Os hashes completos foram obtidos com `git show 78bf271341dfccb2595389f0dbac0e01e8532a7b:<relative-path> | sha256sum`, isto é, sobre os bytes normalizados do objeto Git congelado, e não sobre bytes CRLF/LF do working tree. O comando deve ser repetido antes do closeout; o artifact final de product truth preserva esta matriz Foundation → fonte.
 
 ## Canonical Target Module Map
 
@@ -362,7 +380,7 @@ Os hashes completos foram obtidos por `sha256sum` no snapshot de 2026-09-24 e de
 | `modules/events-and-classification.md` | fronteira read-only Routerfy/SmartNotas, consulta, filtros, paginação, exportação e classificação original/efetiva | nunca escrever em `logs`; `ref_id` não é PK; SQL e classificador devem permanecer semanticamente alinhados | `integrations-and-channels.md`; parte de `inbox-and-conversations.md` |
 | `modules/treatments-and-history.md` | comandos de tratamento e histórico auditável | escreve somente `monitor_tratamentos`; correlação por `ref_id`; último tratamento governa situação efetiva; autoria preservada | `audit-and-history.md`; parte de `inbox-and-conversations.md` |
 | `modules/identity-and-team.md` | autenticação, perfis e administração da equipe financeira | JWT; usuário ativo; proteção do último admin; desativação preserva autoria | `identity-and-tenancy.md` |
-| `modules/realtime-invalidation.md` | sinalização SSE de mudança | evento não é fonte de verdade; consumidor sempre rebusca API; polling é fallback explícito | capacidade inexistente na Foundation herdada |
+| `modules/realtime-invalidation.md` | sinalização SSE de mudança | evento não é fonte de verdade; consumidor sempre rebusca API; polling permanece ativo e LISTEN/NOTIFY é fonte paralela opcional | capacidade inexistente na Foundation herdada |
 | `modules/operational-monitoring.md` | contrato para robô/alerta operacional | reutiliza semântica do resumo; indisponibilidade não equivale a zero; janela/limites explícitos | capacidade inexistente na Foundation herdada |
 | `modules/runtime-and-deployment.md` | topologia, configuração e deploy comprovados | documentar somente Docker/Railway/configuração observada; sem secret values e sem mudança de runtime | fragmentos transversais herdados, sem transportar domínio LeadsHug |
 
@@ -466,7 +484,7 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 
 ## Module Decision Consistency Gate
 
-- **Status:** `prepared-pre-freeze`.
+- **Status:** `delivery-R5-reviewed`; as cinco decisões congeladas estão `Superseded (Approved)` e a cobertura entregue aguarda R6 após remediação.
 - **Finding:** todas as decisões de módulos herdadas pertencem ao LeadsHug; nenhuma deve ser preservada como verdade do Monitor de Notas.
 - **Resolution:** supersessão intencional integral, autorizada por `D-02`, com substituição pelos módulos listados em `S-04`.
 - **Evidence:** conteúdo atual de `modules/*.md`, estrutura do backend/frontend e READMEs do produto.
@@ -543,7 +561,7 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Adherence review kind:** `architecture_adherence`
 - **Adherence review package:** `bounded-file-set`
 - **Adherence review status:** `running`
-- **Adherence review evidence / resolution:** delivery R4 on `1aae0c8` returned `ARCH-ADH-R4-01..04`; all are integrated locally and only fresh delivery R5 may mark adherence clean.
+- **Adherence review evidence / resolution:** delivery R5 on `1e7e730` returned `ARCH-R5-01..04`; all are integrated locally and only fresh delivery R6 may mark adherence clean.
 - **No-go handling:** retornar ao diagnóstico/decisão ou ao loop de evidência; não alegar execução ou conclusão com divergência aberta.
 
 ## Assumptions Preview
@@ -750,8 +768,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Audit isolation mode:** `fresh internal no-context reviewer`
 - **Internal reviewer mandate:** `required after implementation`
 - **Audit status:** `running`
-- **Findings summary:** delivery R4 returned `TQ-R4-01..04`; all are integrated locally and the clean result must come from fresh delivery R5.
-- **Evidence / reference:** immutable delivery R4 baseline `1aae0c837fdd16c4675d544e3eb1324f4db55b90`; remediation evidence in `Delivery R4 Finding Classification`.
+- **Findings summary:** delivery R5 returned `TQ-R5-01..02`; both are integrated locally and the clean result must come from fresh delivery R6.
+- **Evidence / reference:** immutable delivery R5 baseline `1e7e73043e697f2e9bf536772cf3717d79f85cbf`; remediation evidence in `Delivery R5 Finding Classification`.
 - **Waiver authority / reference:** `n/a`
 
 ## Independent No-Context Final Review Gate
@@ -776,8 +794,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Package mode:** `bounded-file-set`
 - **Canonical multi-lane audit protocol:** `n/a`
 - **Cutover audit status:** `running`
-- **Findings summary:** exact deletion/lifecycle/publication coverage passed R2; delivery R4 found only credential/state blockers shared with test-quality, now integrated; delivery R5 confirmation remains required.
-- **Evidence / reference:** R2 zero findings; delivery R4 immutable baseline `1aae0c8`; delivery R5 pending.
+- **Findings summary:** delivery R5 returned seven cutover blockers; all are integrated locally and delivery R6 confirmation remains required.
+- **Evidence / reference:** delivery R5 immutable baseline `1e7e730`; remediation evidence in `Delivery R5 Finding Classification`; delivery R6 pending.
 - **Waiver authority / reference:** `n/a`
 
 ## Execution Plan — Approved; Guard-Gated
@@ -792,8 +810,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 8. `Concluído localmente`: paths `Delete` removidos, suíte/validator/guards locais verdes e remediações R2/R3 integradas.
 9. `Concluído com no-go`: delivery R4 executada sobre `1aae0c837fdd16c4675d544e3eb1324f4db55b90`; findings classificados dentro de D-01..D-05.
 10. `Concluído localmente`: findings delivery R4 integrados e congelados no commit `cacc054`.
-11. `Em andamento`: registrar esta transição de gate e executar delivery R5 sobre o HEAD imutável derivado de `cacc054`.
-12. Após delivery R5 limpa, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
+11. `Concluído com no-go`: delivery R5 executada sobre `1e7e73043e697f2e9bf536772cf3717d79f85cbf`; findings classificados dentro de D-01..D-05.
+12. `Em andamento`: congelar a remediação R5 e executar delivery R6 no HEAD imutável; após resultado limpo, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
 
 ### Touched Surfaces
 
@@ -851,8 +869,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Client surface:** `codex`
 - **Current governed action:** `delivery-review`
 - **Selected role:** `formal-reviewer`
-- **Selected model:** `gpt-5.6-terra`
-- **Selected effort:** `medium`
+- **Selected model:** `gpt-5.6-sol`
+- **Selected effort:** `xhigh`
 - **Proof mode:** `declared`
 - **Exception reason:** `n/a`
 - **Subagent / delegation authorization:** `explicit human reference — D-03 + “APROVADO” em 2026-09-24 exige que todo trabalho passe pelo PACED`
@@ -860,7 +878,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Worktree / auxiliary-checkout authorization:** `not-authorized`
 - **Worktree authorization evidence:** `n/a`
 - **Writer scheduling policy:** `single-writer-serialized`
-- **Guard outcome:** `go for the completed implementation boundary; delivery reviewers remain read-only`
+- **Guard outcome:** `go`
+- **Routing guard evidence:** `agent_role_routing_guard.py` accepted `delivery-review`, `formal-reviewer`, `gpt-5.6-sol`, `architecture_adherence`, and `xhigh` with no violations on 2026-09-24; delivery reviewers remain read-only.
 - **Authority preflight outcome:** `preflight-go`
 - **Authority preflight evidence:** `python3 delphi-ai/tools/todo_authority_guard.py uninotas-foundation/todos/active/process/TODO-uninotas-foundation-project-rebase.md --pre-approval` — zero violations em 2026-09-24.
 - **Post-approval authority outcome:** `go`
@@ -920,11 +939,11 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 - **Authority guard:** must return `go` only after explicit `APROVADO`, rule ingestion and resolved decisions.
 - **Completion and closeout guards:** required before `Local-Implemented` or movement to `completed/`.
 - **Cutover integrity audit:** required because the work retires one active documentary authority and establishes another.
-- **Delivery R4 architecture/test-quality/cutover review:** no-go on `1aae0c8`; findings integrated at `cacc054`; delivery R5 is the fresh immutable rerun. Planning R4 remains the pre-approval clean review and is not delivery evidence.
+- **Delivery R5 architecture/test-quality/cutover review:** no-go on `1e7e730`; findings classified and integrated locally; delivery R6 is the fresh immutable rerun. Planning R4 remains the pre-approval clean review and is not delivery evidence.
 
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
-- **Disposition reason:** approved implementation and delivery R4 remediation remain local; delivery R5 and delivery/closeout gates remain pending.
-- **Post-commit/push status:** `delivery R4 remediation committed at cacc054; state-only R5 transition follows locally; origin/main remains at b73b0eb approval checkpoint`
+- **Disposition reason:** approved implementation and delivery R5 remediation remain local; delivery R6 and delivery/closeout gates remain pending.
+- **Post-commit/push status:** `delivery R5 remediation pending local commit; origin/main remains at b73b0eb approval checkpoint`
 - **Next path/status action:** permanecer em `todos/active/process/` até implementação, evidência, reviews e closeout completos.

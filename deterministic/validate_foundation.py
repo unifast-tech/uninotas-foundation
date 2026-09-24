@@ -15,17 +15,18 @@ MODULES = {"events-and-classification.md", "treatments-and-history.md", "identit
 REQUIRED_ANCHORS = ("Module Intent & Boundaries", "Core scope:", "Subscope:", "EnvironmentType:", "Out-of-scope guardrails:", "Dependency boundaries:", "Canonical Coverage Status:", "Purpose", "Owned", "Workflows", "Invariants", "Cross-Module")
 REQUIRED_CONTRACT_SECTIONS = {"events-and-classification.md": ("Observed API Contract", "Ownership Invariant"), "treatments-and-history.md": ("Observed Treatment Contract",), "identity-and-team.md": ("Observed Authentication Contract",), "realtime-invalidation.md": ("Observed Realtime Message Contract",), "operational-monitoring.md": ("Observed Monitoring Contract",), "runtime-and-deployment.md": ("Observed Runtime Contract", "Observed Health Contract")}
 REQUIRED_CONTRACT_TOKENS = {
-    "events-and-classification.md": ("GET /eventos/exportar", "pagina", "1..200", "TODOS|ERRO|PENDENTE|SUCESSO|TRATADOS", "20,000", "{dados,meta}", "{statusCode,erro,mensagem,caminho,timestamp}"),
-    "treatments-and-history.md": ("PATCH /eventos/:refId/tratamento", "POST /eventos/tratar-lote", "RESOLVIDO|IGNORADO|PENDENTE", "1,000", "500", "{solicitados,aplicados,ignorados}"),
-    "identity-and-team.md": ("POST /auth/login", "PATCH /usuarios/minha-senha", "PATCH /usuarios/:id", "DELETE /usuarios/:id", "ADMIN|GESTOR", "8..72", "{accessToken,expiraEm,usuario}"),
-    "realtime-invalidation.md": ("signature/expiry only", "evento.novo|evento.tratado|heartbeat", "api|banco|polling|sistema", "EventSource reconnection", "standard error body"),
-    "operational-monitoring.md": ("MONITORAMENTO_TOKEN", "x-monitor-token", "1..1440", "atencao|critico", "{status,cor,erros,pendentes,sucessos,total,ultima_verificacao,janela,limites,detalhe}", "HTTP 503"),
-    "runtime-and-deployment.md": ("GET /api/v1/saude", "{status,banco,em}", "degradado", "indisponivel", "HTTP 200"),
+    "events-and-classification.md": ("GET /eventos/exportar", "pagina", "1..200", "TODOS|ERRO|PENDENTE|SUCESSO|TRATADOS", "20,000", "{dados,meta}", "logradouro", "HTTP 200 `application/json`", "HTTP 200 `text/csv; charset=utf-8`", "{statusCode,erro,mensagem,caminho,timestamp}"),
+    "treatments-and-history.md": ("PATCH /eventos/:refId/tratamento", "POST /eventos/tratar-lote", "RESOLVIDO|IGNORADO|PENDENTE", "1,000", "500", "HTTP 200 `application/json`", "{solicitados,aplicados,ignorados}"),
+    "identity-and-team.md": ("POST /auth/login", "PATCH /usuarios/minha-senha", "PATCH /usuarios/:id", "DELETE /usuarios/:id", "ADMIN|GESTOR", "8..72", "HTTP 201 `application/json`", "HTTP 200 `application/json`", "{accessToken,expiraEm,usuario}"),
+    "realtime-invalidation.md": ("signature/expiry only", "Content-Type: text/event-stream", "event:` field", "data:` field", "evento.novo|evento.tratado|heartbeat", "api|banco|polling|sistema", "continuously active", "optional parallel", "EventSource reconnection", "standard error body"),
+    "operational-monitoring.md": ("MONITORAMENTO_TOKEN", "x-monitor-token", "maximum 200 characters", "1..1440", "atencao|critico", "application/json", "{status,cor,erros,pendentes,sucessos,total,ultima_verificacao,janela,limites,detalhe}", "HTTP 503"),
+    "runtime-and-deployment.md": ("GET /api/v1/saude", "application/json", "{status,banco,em}", "degradado", "indisponivel", "HTTP 200"),
 }
 DELETE_PATHS = frozenset({
     "artifacts/analysis/leadshug-architecture-truth-and-legacy-boundaries-20260915.md", "artifacts/analysis/leadshug-executive-system-dossier-20260915.md", "artifacts/analysis/leadshug-system-analysis-20260915.md", "artifacts/feature-briefs/leadshug-pre-code-evolution-program-20260918.md", "artifacts/migration/claude-legacy-reconciliation-review.json", "artifacts/migration/claude-legacy-reconciliation-review.prompt.txt", "artifacts/migration/legacy-reconciliation-20260915.md", "artifacts/workspace-link-stabilization-20260915.md", "decisions/ST-01-foundation-lifecycle-decisions.md", "deterministic/.gitkeep", "modules/audit-and-history.md", "modules/identity-and-tenancy.md", "modules/inbox-and-conversations.md", "modules/integrations-and-channels.md", "policies/central_whatsapp_independent_legacy_policy.md", "policies/web_to_app_promotion_policy.md", "todos/active/features/TODO-leadshug-mode-specific-primary-and-secondary-color.md", "todos/active/features/TODO-leadshug-typebot-automation-integration.md", "todos/active/process/TODO-foundation-lifecycle-structural-validator.md", "todos/completed/features/TODO-delphi-shell-line-endings-and-cross-platform-validation.md", "todos/completed/features/TODO-leadshug-foundation-and-delphi-migration.md", "todos/completed/features/TODO-leadshug-identity-visual-screen-tests.md", "todos/completed/features/TODO-leadshug-initial-branding-and-unofficial-connection.md", "todos/completed/features/TODO-leadshug-post-onboarding-brand-settings.md", "todos/completed/features/TODO-leadshug-secondary-color-background-contract.md", "todos/completed/process/TODO-central-whatsapp-independent-legacy-policy.md", "todos/completed/process/TODO-ci-contract-and-migration-test-gates.md", "todos/completed/process/TODO-leadshug-architecture-truth-and-legacy-boundaries.md", "todos/completed/process/TODO-leadshug-authority-and-technology-documentation-rebase.md", "todos/completed/process/TODO-leadshug-executive-system-dossier.md", "todos/completed/process/TODO-leadshug-foundation-evolution-lifecycle.md", "todos/completed/process/TODO-leadshug-legacy-authority-migration-and-retirement.md", "todos/completed/process/TODO-leadshug-system-analysis-and-modernization-plan.md", "todos/completed/process/TODO-leadshug-workspace-link-stabilization.md",
 })
 TERMS = ("lead" + "shug", "what" + "sapp", "type" + "bot", "evol" + "ution", "bai" + "leys", "bell" + "uga", "bó" + "ora")
+FROZEN_LEGACY_CONTENT_DIGEST = "3ddeb45642a2b0a812ff10889d4bd806a9dee4320a18fa96473e0e2fca071218"
 IDENTITY = {"README.md": ("Monitor de Notas", "uninotas-foundation", "foundation_documentation"), "project_mandate.md": ("Monitor de Notas", "MonitorDeNotas", "uninotas-foundation"), "project_constitution.md": ("Monitor de Notas",), "decisions/monitor-de-notas-foundation-decisions.md": ("Monitor de Notas", "MonitorDeNotas", "uninotas-foundation"), ACTIVE_TODO: ("Monitor de Notas", "MonitorDeNotas", "uninotas-foundation", "foundation_documentation"), COMPLETED_TODO: ("Monitor de Notas", "MonitorDeNotas", "uninotas-foundation", "foundation_documentation")}
 IDENTITY_ANCHORS = {"README.md": "# Monitor de Notas Foundation", "decisions/monitor-de-notas-foundation-decisions.md": "| D-01 | Product name is Monitor de Notas; technical repository is MonitorDeNotas; documentation repository is uninotas-foundation. |"}
 CANONICAL_ASSERTIONS = {"project_constitution.md": "Routerfy owns and writes `logs`; Monitor de Notas reads it only and writes only `monitor_usuarios` and `monitor_tratamentos`."}
@@ -38,18 +39,23 @@ URL_CREDENTIAL = re.compile(r"(?i)[?&](?:[A-Za-z0-9_-]*(?:api[_-]?key|secret|pas
 BEARER = re.compile(r"(?i)authorization\s*:\s*bearer\s+[A-Za-z0-9._~-]{8,}")
 URI_CREDENTIAL = re.compile(r"(?i)(?:postgres(?:ql)?|mysql|mongodb(?:\+srv)?|redis|amqps?|https?)://[^/\s:@]+:[^@\s/]{4,}@")
 ACCESS_KEY = re.compile("AK" + r"IA[0-9A-Z]{16}")
-CONFLICTING_LOG_OWNERSHIP = re.compile(r"(?i)(?:monitor de notas\s+(?:owns|writes|mutates|manages)\s+`?logs`?|`?logs`?\s+(?:is|are)\s+(?:owned|written|writable|mutable)[^\n]{0,60}monitor de notas)")
-ACTIVE_AUTHORITY_PHRASES = re.compile(r"(?i)(?:is\s+(?:the\s+)?(?:current|active|canonical)\s+authority|is\s+(?:the\s+)?source\s+of\s+truth|is\s+(?:the\s+)?(?:current|canonical)\s+product|remains?\s+(?:the\s+)?active\s+authority|(?:owns|governs)\s+(?:this|the)\s+(?:foundation|product|architecture))")
+GITHUB_PROVIDER_PATTERN = re.compile(r"(?:gh[pousr]_[A-Za-z0-9]{36,}|github_" + r"pat_[A-Za-z0-9_]{20,})")
+OPENAI_PROVIDER_PATTERN = re.compile("s" + r"k-(?:proj-)?[A-Za-z0-9_-]{20,}")
+GOOGLE_PROVIDER_PATTERN = re.compile("AI" + r"za[0-9A-Za-z_-]{35}")
+CONFLICTING_LOG_OWNERSHIP = re.compile(r"(?i)(?:monitor\s+de\s+notas\s+(?:(?:can|may)\s+)?(?:own|owns|write|writes|mutate|mutates|manage|manages)\s+`?logs`?|`?logs`?\s+(?:(?:can|may)\s+be\s+)?(?:is\s+|are\s+)?(?:owned|written|writable|mutable)[^\n]{0,60}monitor\s+de\s+notas)")
+CONFLICTING_IDENTITY = re.compile(r"(?i)(?:canonical\s+product|product\s+name)\s+(?:is|=)\s+(?!monitor\s+de\s+notas\b)[^\n]+")
+ACTIVE_AUTHORITY_PHRASES = re.compile(r"(?i)(?:is\s+(?:the\s+)?(?:current|active|canonical)\s+(?:authority|architecture|foundation|product)|(?:is|remains?)\s+(?:the\s+)?source\s+of\s+truth|remains?\s+(?:the\s+)?active\s+authority|(?:owns|governs)\s+(?:this|the)\s+(?:foundation|product|architecture)|é\s+(?:a\s+)?(?:autoridade\s+(?:atual|ativa|canônica)|fonte\s+da\s+verdade|produto\s+(?:atual|canônico))|permanece\s+(?:a\s+)?autoridade\s+ativa|(?:possui|governa)\s+(?:esta|o|a)\s+(?:foundation|produto|arquitetura))")
 
 def files(root): return {p.relative_to(root).as_posix(): p for p in Path(root).rglob("*") if p.is_file() and ".git" not in p.parts}
 def headings(text): return {line.lstrip("#").strip().lower() for line in text.splitlines() if line.startswith("#")}
 def normalized_line_hash(line): return hashlib.sha256(" ".join(line.split()).casefold().encode("utf-8")).hexdigest()
+def term_occurs(term, text): return re.search(rf"(?<![\w]){re.escape(term)}(?![\w])", text, re.I) is not None
 def section_occurrences(text):
     section, found = "Preamble", {}
     for line in text.splitlines():
         if line.startswith("## "): section = line[3:].strip()
         for term in TERMS:
-            if term.casefold() in line.casefold(): found.setdefault((term.casefold(), section), []).append(normalized_line_hash(line))
+            if term_occurs(term, line): found.setdefault((term.casefold(), section), []).append(normalized_line_hash(line))
     return {key: sorted(values) for key, values in found.items()}
 
 def lifecycle(tree, errors):
@@ -64,7 +70,7 @@ def ledger_entries(tree, todo_path, expected_lifecycle, errors):
         todo_text = tree[todo_path].read_text(encoding="utf-8")
         actual, rows = section_occurrences(todo_text), {}
         for line in todo_text.splitlines():
-            if any(term.casefold() in line.casefold() for term in TERMS) and ACTIVE_AUTHORITY_PHRASES.search(line):
+            if any(term_occurs(term, line) for term in TERMS) and ACTIVE_AUTHORITY_PHRASES.search(line):
                 errors.append("active legacy authority claim cannot be ledgered")
         if not isinstance(data, list) or not data: raise ValueError
         for row in data:
@@ -74,6 +80,9 @@ def ledger_entries(tree, todo_path, expected_lifecycle, errors):
             if "*" in row["path"] + row["term"] or row["path"] != todo_path or row["context_kind"] != "historical_migration_record" or row["lifecycle"] != expected_lifecycle or key in rows or not isinstance(hashes, list) or not hashes or hashes != sorted(hashes) or any(not re.fullmatch(r"[0-9a-f]{64}", value) for value in hashes): raise ValueError
             rows[key] = hashes
         if rows != actual: raise ValueError
+        frozen_payload = sorted((row["term"].casefold(), row["section"], tuple(row["line_hashes"])) for row in data)
+        frozen_digest = hashlib.sha256(json.dumps(frozen_payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")).hexdigest()
+        if frozen_digest != FROZEN_LEGACY_CONTENT_DIGEST: raise ValueError
     except (KeyError, ValueError, json.JSONDecodeError): errors.append("invalid legacy exception ledger")
 
 def scope_policy(tree, errors):
@@ -129,15 +138,16 @@ def validate(root):
         if [key for key, _ in rows] != ["D-01", "D-02", "D-03", "D-04", "D-05"] or "Routerfy owns and writes `logs`; Monitor de Notas reads it and writes only its application tables." not in dict(rows).get("D-04", ""): errors.append("canonical decision table mismatch")
     for relative, path in tree.items():
         text = path.read_text(encoding="utf-8", errors="replace")
-        if JWT.search(text) or PRIVATE.search(text) or CREDENTIAL_ASSIGNMENT.search(text) or SERIALIZED_CREDENTIAL.search(text) or URL_CREDENTIAL.search(text) or BEARER.search(text) or URI_CREDENTIAL.search(text) or ACCESS_KEY.search(text) or EMAIL.search(text): errors.append(f"privacy pattern in {relative}")
+        if JWT.search(text) or PRIVATE.search(text) or CREDENTIAL_ASSIGNMENT.search(text) or SERIALIZED_CREDENTIAL.search(text) or URL_CREDENTIAL.search(text) or BEARER.search(text) or URI_CREDENTIAL.search(text) or ACCESS_KEY.search(text) or GITHUB_PROVIDER_PATTERN.search(text) or OPENAI_PROVIDER_PATTERN.search(text) or GOOGLE_PROVIDER_PATTERN.search(text) or EMAIL.search(text): errors.append(f"privacy pattern in {relative}")
         if relative not in {todo_path, "deterministic/validate_foundation.py", "deterministic/legacy_reference_exceptions.json", "deterministic/tests/test_validate_foundation.py"} and CONFLICTING_LOG_OWNERSHIP.search(text): errors.append(f"contradictory external ownership claim in {relative}")
+        if relative not in {todo_path, "deterministic/validate_foundation.py", "deterministic/legacy_reference_exceptions.json", "deterministic/tests/test_validate_foundation.py"} and CONFLICTING_IDENTITY.search(text): errors.append(f"contradictory canonical identity claim in {relative}")
         for _, target in ([] if path.suffix == ".py" else re.findall(r"\[([^]]+)\]\(([^)]+)\)", text)):
             target, _, anchor = target.partition("#")
             if "://" in target or target.startswith("mailto:"): continue
             dest = (path.parent / target).resolve() if target else path
             if not dest.is_file(): errors.append(f"broken relative link in {relative}: {target}")
             elif anchor and anchor.lower().replace("-", " ") not in headings(dest.read_text(encoding="utf-8", errors="replace")): errors.append(f"broken anchor in {relative}: {anchor}")
-        if relative not in {todo_path, "artifacts/publication-manifest.txt", "deterministic/validate_foundation.py", "deterministic/legacy_reference_exceptions.json", "deterministic/tests/test_validate_foundation.py"} and any(term.casefold() in text.casefold() for term in TERMS): errors.append(f"legacy authority/reference in {relative}")
+        if relative not in {todo_path, "artifacts/publication-manifest.txt", "deterministic/validate_foundation.py", "deterministic/legacy_reference_exceptions.json", "deterministic/tests/test_validate_foundation.py"} and any(term_occurs(term, text) for term in TERMS): errors.append(f"legacy authority/reference in {relative}")
     manifest = tree.get("artifacts/publication-manifest.txt")
     if manifest:
         listed = {x.strip() for x in manifest.read_text(encoding="utf-8").splitlines() if x.strip() and not x.startswith("#")}

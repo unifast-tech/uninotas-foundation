@@ -19,15 +19,15 @@ Owns session authentication, profiles, and financial-team administration. Users 
 
 All routes use base path `/api/v1`. Normal protected routes validate bearer signature/expiry and resolve an active, known user before role checks. The realtime query-token exception is owned separately and does not perform that user lookup.
 
-| Route | Authorization and request | Successful response |
-| --- | --- | --- |
-| `POST /auth/login` | public; body has valid `email` and string `senha` of at least 6 characters | HTTP 200 `{accessToken,expiraEm,usuario}`; `usuario={id,nome,email,perfil,senhaProvisoria}` |
-| `GET /auth/eu` | normal JWT | current user summary fields above |
-| `GET /usuarios` | `ADMIN|GESTOR` | array of users `{id,nome,email,perfil,ativo,senhaProvisoria,criadoEm}` |
-| `POST /usuarios` | `ADMIN`; `nome` 3..200, valid `email`, `senha` 8..72, optional `perfil=ADMIN|GESTOR|ANALISTA|LEITOR` | created user fields |
-| `PATCH /usuarios/minha-senha` | normal JWT; body `senhaAtual` string and `novaSenha` 8..72 | updated user fields |
-| `PATCH /usuarios/:id` | `ADMIN`; UUID path; partial create fields plus optional boolean `ativo` | updated user fields |
-| `DELETE /usuarios/:id` | `ADMIN`; UUID path | deactivated user fields; row/authorship remains |
+| Route | Authorization and request | Status / media | Successful response |
+| --- | --- | --- | --- |
+| `POST /auth/login` | public; body has valid `email` and string `senha` of at least 6 characters | HTTP 200 `application/json` | `{accessToken,expiraEm,usuario}`; `usuario={id,nome,email,perfil,senhaProvisoria}` |
+| `GET /auth/eu` | normal JWT | HTTP 200 `application/json` | current user summary fields above |
+| `GET /usuarios` | `ADMIN|GESTOR` | HTTP 200 `application/json` | array of users `{id,nome,email,perfil,ativo,senhaProvisoria,criadoEm}` |
+| `POST /usuarios` | `ADMIN`; `nome` 3..200, valid `email`, `senha` 8..72, optional `perfil=ADMIN|GESTOR|ANALISTA|LEITOR` | HTTP 201 `application/json` | created user fields |
+| `PATCH /usuarios/minha-senha` | normal JWT; body `senhaAtual` string and `novaSenha` 8..72 | HTTP 200 `application/json` | updated user fields |
+| `PATCH /usuarios/:id` | `ADMIN`; UUID path; partial create fields plus optional boolean `ativo` | HTTP 200 `application/json` | updated user fields |
+| `DELETE /usuarios/:id` | `ADMIN`; UUID path | HTTP 200 `application/json` | deactivated user fields; row/authorship remains |
 
 Invalid credentials, missing/expired bearer tokens, inactive/unknown users on normal JWT routes, insufficient roles, self-deactivation, self-demotion, last-administrator removal, duplicate identity, missing users, and validation failures reject through `{statusCode,erro,mensagem,caminho,timestamp}`.
 

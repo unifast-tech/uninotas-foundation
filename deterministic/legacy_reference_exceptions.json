@@ -233,19 +233,6 @@
   },
   {
     "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
-    "term": "evolution",
-    "context_kind": "historical_migration_record",
-    "section": "Canonical Module Anchors (Required Before APROVADO)",
-    "reason": "Frozen historical cutover reference.",
-    "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
-    "line_hashes": [
-      "3c358d083f479bc39061c2c0c066108fa81e52d4f05adf0ca36a27ea3037a8c2",
-      "f7a55b28cc125b2461d253d0594217c8609ff5e6cd3200e3756a788bc9d733c0"
-    ]
-  },
-  {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "leadshug",
     "context_kind": "historical_migration_record",
     "section": "Canonical Target Module Map",
@@ -348,7 +335,6 @@
     "owner": "TODO owner",
     "lifecycle": "active_until_closeout_move",
     "line_hashes": [
-      "708de15ef4247a0891c579670abb2e9da7cdfdfebddace82dee0262ca69bfe1e",
       "71544e8fed447caf0cda579ebbd4b2a14e2304085a76e3735a3a7465d3260bb0",
       "fb68a6a4ee385509864934f0ec376cb7e9b247cf606d854f056b4984d6d8f6ec"
     ]
@@ -362,8 +348,7 @@
     "owner": "TODO owner",
     "lifecycle": "active_until_closeout_move",
     "line_hashes": [
-      "4af2356c5a0114206f168a5487ec0e830be2bf4219856464ff939c93f434b0ae",
-      "6b210a05c8cf24936d314b3c31d6735b54a6a14ca63a6fd337e00fbe46afbf34"
+      "4af2356c5a0114206f168a5487ec0e830be2bf4219856464ff939c93f434b0ae"
     ]
   },
   {
@@ -405,18 +390,6 @@
       "86546c4eba2c588fe558006635ad361327c58a01124ddcbb928d0442cfc58ba1",
       "aaff9938e44cdaa87ab7f49d2887b48546928b5107bbbfcd3024a8ade2c235bb",
       "f4462be9553507044db6b6d97683da0bac20d349d840be146dafe4695bcab242"
-    ]
-  },
-  {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
-    "term": "evolution",
-    "context_kind": "historical_migration_record",
-    "section": "Architecture Change Governance",
-    "reason": "Frozen historical cutover reference.",
-    "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
-    "line_hashes": [
-      "5ab03bc3f8ead3cb6adc3bd09c377a45a4dffd293f23b2c7f72e7c2ea3922e87"
     ]
   },
   {

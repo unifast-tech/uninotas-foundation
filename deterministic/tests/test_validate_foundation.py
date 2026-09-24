@@ -43,13 +43,18 @@ class ValidateFoundationTests(unittest.TestCase):
         self.assertTrue(any("legacy" in x for x in self.errors(lambda r: (r / "project_mandate.md").write_text("evol" + "ution"))))
         self.assertTrue(any("ledger" in x for x in self.errors(lambda r: (r / self.module.ACTIVE_TODO).write_text((r / self.module.ACTIVE_TODO).read_text() + "\n## Unlisted historical statement\nLead" + "sHug\n"))))
         self.assertTrue(any("ledger" in x for x in self.errors(lambda r: (r / self.module.ACTIVE_TODO).write_text((r / self.module.ACTIVE_TODO).read_text().replace("Baileys.\n", "Baileys.\nLead" + "sHug is the current authority.\n", 1)))))
-        def ledgered_active_claim(r):
-            todo = r / self.module.ACTIVE_TODO; line = "Lead" + "sHug is the current authority."
+        def ledgered_active_claim(r, line):
+            todo = r / self.module.ACTIVE_TODO
             todo.write_text(todo.read_text() + "\n## Active claim probe\n" + line + "\n")
             ledger = r / "deterministic/legacy_reference_exceptions.json"; rows = json.loads(ledger.read_text())
             rows.append({"path":self.module.ACTIVE_TODO,"term":"lead"+"shug","context_kind":"historical_migration_record","section":"Active claim probe","reason":"probe","owner":"test","lifecycle":"active_until_closeout_move","line_hashes":[self.module.normalized_line_hash(line)]})
             ledger.write_text(json.dumps(rows))
-        self.assertTrue(any("active legacy authority" in x for x in self.errors(ledgered_active_claim)))
+        probes = ("Lead"+"sHug is the current authority.", "Lead"+"sHug is the canonical architecture.", "Lead"+"sHug remains the source of truth.", "Lead"+"sHug é a autoridade atual.")
+        for line in probes:
+            errors = self.errors(lambda r, value=line: ledgered_active_claim(r, value))
+            self.assertTrue(any("active legacy authority" in x for x in errors), line)
+        self.assertFalse(self.module.term_occurs("evol"+"ution", "evol"+"ution_lifecycle.md"))
+        self.assertTrue(self.module.term_occurs("evol"+"ution", "historical Evol"+"ution integration"))
     def test_delete_paths_are_exact_and_independent_of_manifest(self):
         self.assertEqual(EXPECTED_DELETE_PATHS, self.module.DELETE_PATHS)
         root, original_manifest = self.tree(), None
@@ -86,9 +91,11 @@ class ValidateFoundationTests(unittest.TestCase):
                 self.assertTrue(any("contract semantic" in x for x in self.errors(move_outside_contract)), (name, token, "outside"))
         self.assertTrue(any("identity anchor" in x for x in self.errors(lambda r: (r / "README.md").write_text((r / "README.md").read_text().replace("# Monitor de Notas Foundation", "# Other Foundation", 1)))))
         self.assertTrue(any("identity heading" in x for x in self.errors(lambda r: (r / "README.md").write_text((r / "README.md").read_text() + "\n# Other Product Foundation\n"))))
+        self.assertTrue(any("canonical identity claim" in x for x in self.errors(lambda r: (r / "decisions/monitor-de-notas-foundation-decisions.md").write_text((r / "decisions/monitor-de-notas-foundation-decisions.md").read_text() + "\nThe canonical product is Other Product.\n"))))
         owner = "project_constitution.md"; assertion = self.module.CANONICAL_ASSERTIONS[owner]
         self.assertTrue(any("ownership" in x for x in self.errors(lambda r: (r / owner).write_text((r / owner).read_text().replace(assertion, "Monitor de Notas writes `logs`; Routerfy reads `logs` only.")))))
         self.assertTrue(any("contradictory" in x for x in self.errors(lambda r: (r / "modules/events-and-classification.md").write_text((r / "modules/events-and-classification.md").read_text() + "\nMonitor de Notas owns logs.\n"))))
+        self.assertTrue(any("contradictory" in x for x in self.errors(lambda r: (r / "modules/events-and-classification.md").write_text((r / "modules/events-and-classification.md").read_text() + "\nMonitor   de   Notas can write logs.\n"))))
         decision = "decisions/monitor-de-notas-foundation-decisions.md"
         self.assertTrue(any("decision table" in x for x in self.errors(lambda r: (r / decision).write_text((r / decision).read_text() + "\n| D-01 | conflicting | x |\n"))))
         self.assertTrue(any("decision table" in x for x in self.errors(lambda r: (r / decision).write_text((r / decision).read_text() + "\n| D-04 | conflicting | x |\n"))))
@@ -96,7 +103,7 @@ class ValidateFoundationTests(unittest.TestCase):
         self.assertTrue(any("decision table" in x for x in self.errors(lambda r: (r / decision).write_text((r / decision).read_text() + "\n| D-04|Monitor de Notas owns logs.|x|\n"))))
         self.assertTrue(any("decision table" in x for x in self.errors(lambda r: (r / decision).write_text((r / decision).read_text().replace("Routerfy owns and writes `logs`; Monitor de Notas reads it and writes only its application tables.", "Monitor de Notas owns `logs`.")))))
     def test_privacy_scans_every_persisted_surface(self):
-        fragments=("eyJ"+"hbGciOiJIUzI1NiJ9"+".eyJzdWIiOiIxIn0"+".signature", "-----"+"BEGIN PRIVATE "+"KEY-----", "api"+"_key='abcdefghijk'", "API"+"_KEY=abcdefghijk", "api"+"-key: abcdefghijk", "- api"+"_key: abcdefghijk", "{\"api"+"_key\":\"abcdefghijk\"}", "{\"kind\":\"config\",\"api"+"_key\":\"abcdefghijk\"}", "[{\"api"+"_key\":\"abcdefghijk\"}]", "https://x.invalid/?to"+"ken=abcdefghijk", "Authorization: Bea"+"rer abcdefghijk", "DATABASE"+"_URL=postgres"+"ql://db_admin:"+"Sup3rValue@127.0.0.1/prod", "AK"+"IAIOSFODNN7EXAMPLE", "a"+"lice"+"@example.com")
+        fragments=("eyJ"+"hbGciOiJIUzI1NiJ9"+".eyJzdWIiOiIxIn0"+".signature", "-----"+"BEGIN PRIVATE "+"KEY-----", "api"+"_key='abcdefghijk'", "API"+"_KEY=abcdefghijk", "api"+"-key: abcdefghijk", "- api"+"_key: abcdefghijk", "{\"api"+"_key\":\"abcdefghijk\"}", "{\"kind\":\"config\",\"api"+"_key\":\"abcdefghijk\"}", "[{\"api"+"_key\":\"abcdefghijk\"}]", "https://x.invalid/?to"+"ken=abcdefghijk", "Authorization: Bea"+"rer abcdefghijk", "DATABASE"+"_URL=postgres"+"ql://db_admin:"+"Sup3rValue@127.0.0.1/prod", "AK"+"IAIOSFODNN7EXAMPLE", "gh"+"p_"+("A"*36), "github"+"_pat_"+("A"*24), "sk"+"-proj-"+("A"*24), "AI"+"za"+("A"*35), "a"+"lice"+"@example.com")
         root = self.tree()
         for relative in ("README.md", "modules/events-and-classification.md", "policies/engineering_guardrails.md", "artifacts/README.md", self.module.ACTIVE_TODO, "local_packages.yaml", "artifacts/publication-manifest.txt", "deterministic/validate_foundation.py", "deterministic/legacy_reference_exceptions.json", "deterministic/tests/test_validate_foundation.py", "deterministic/tests/fixtures/valid-tree/README.md"):
             for content in fragments:

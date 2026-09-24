@@ -19,10 +19,10 @@ Owns treatment commands and append-only audit history correlated by `ref_id`. Th
 
 Both commands use base path `/api/v1`, require the normal bearer JWT guard, and allow only `ADMIN|GESTOR|ANALISTA`.
 
-| Route | Request | Successful response |
-| --- | --- | --- |
-| `PATCH /eventos/:refId/tratamento` | path correlation `refId`; body `situacao=RESOLVIDO|IGNORADO|PENDENTE`; optional string `observacao` up to 1,000 characters | complete event-detail projection after appending the treatment |
-| `POST /eventos/tratar-lote` | the same `situacao`/`observacao` plus non-empty string array `refIds` with at most 500 entries | HTTP 200 `{solicitados,aplicados,ignorados}` where `ignorados` lists references absent from `logs` |
+| Route | Request | Status / media | Successful response |
+| --- | --- | --- | --- |
+| `PATCH /eventos/:refId/tratamento` | path correlation `refId`; body `situacao=RESOLVIDO|IGNORADO|PENDENTE`; optional string `observacao` up to 1,000 characters | HTTP 200 `application/json` | complete event-detail projection after appending the treatment |
+| `POST /eventos/tratar-lote` | the same `situacao`/`observacao` plus non-empty string array `refIds` with at most 500 entries | HTTP 200 `application/json` | `{solicitados,aplicados,ignorados}` where `ignorados` lists references absent from `logs` |
 
 Validation, 401, 403, and single-event 404 failures use `{statusCode,erro,mensagem,caminho,timestamp}`. A database/history query failure rejects the request; it is not represented as a partial “unavailable” treatment state. Treatment reads appear inside the event detail projection rather than a competing history endpoint.
 

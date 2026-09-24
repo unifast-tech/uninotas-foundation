@@ -21,7 +21,7 @@ The observed runtime boundary composes NestJS, React/Vite, PostgreSQL/Prisma, Do
 
 ## Observed Health Contract
 
-`GET /api/v1/saude` is public and accepts no request body or query contract. It returns HTTP 200 with `{status,banco,em}`: `status` is `ok` when the database probe succeeds and `degradado` otherwise; `banco` is `ok` or `indisponivel`; `em` is an ISO-8601 timestamp. Database probe failure is represented in that body and is not converted to 503 by this controller.
+`GET /api/v1/saude` is public and accepts no request body or query contract. It returns HTTP 200 `application/json` with `{status,banco,em}`: `status` is `ok` when the database probe succeeds and `degradado` otherwise; `banco` is `ok` or `indisponivel`; `em` is an ISO-8601 timestamp. Database probe failure is represented in that body and is not converted to 503 by this controller.
 
 ## Purpose, Owned Entities, and Workflows
 **Purpose:** preserve verified runtime navigation and the bounded health-read contract. **Owned/orchestrated entities:** documented topology, configuration boundary, and health projection. **Workflows/capabilities:** build/deploy topology plus public API/database probe. **Invariants/validation/auth:** no secrets, availability claims, SLOs, or runtime change are inferred. **Observed contracts:** NestJS, React/Vite, PostgreSQL/Prisma, Docker, Railway, and the health controller are the evidence.

@@ -19,16 +19,16 @@ Owns external event observation, filters, pagination, export, and original/effec
 
 All routes below use base path `/api/v1`, require the normal bearer JWT guard, and accept active users of any profile. Common list filters are `pagina` integer default 1/minimum 1, `limite` integer default 25/range 1..200, `direcao=asc|desc` default `desc`, `situacao=TODOS|ERRO|PENDENTE|SUCESSO|TRATADOS` default `ERRO`, optional trimmed `busca` up to 120 characters, optional exact `produto` up to 200 characters, and optional ISO-8601 `dataInicio`/`dataFim`.
 
-| Route | Request | Successful response |
-| --- | --- | --- |
-| `GET /eventos` | common filters | `{dados,meta}`; `meta={total,pagina,limite,totalPaginas,temProxima}` and each summary has `refId,eventAt,situacao,situacaoOriginal,mensagem,idSmartNotas,clienteNome,clienteDocumento,produto,valorVenda,meioPagamento,tentativas` |
-| `GET /eventos/resumo` | common filters | `{total,erro,pendente,sucesso,tratados}` |
-| `GET /eventos/produtos` | none | array of `{nome,eventos,erros}` |
-| `GET /eventos/exportar` | common filters; pagination is replaced by export cap | `text/csv; charset=utf-8`, attachment filename, semicolon-separated fixed columns `refId,idTransacao,eventAt,situacao,mensagem,idSmartNotas,clienteNome,clienteDocumento,clienteEmail,produto,codProduto,valorVenda,meioPagamento`, capped at 20,000 rows |
-| `GET /eventos/:refId` | correlation `refId` | summary fields plus `orientacao,origem,cliente,venda,produtor,historico,camposPendentes,payload,resposta` |
-| `GET /eventos/:refId/payload` | correlation `refId` | `{enviado,resposta}` |
+| Route | Request | Status / media | Successful response |
+| --- | --- | --- | --- |
+| `GET /eventos` | common filters | HTTP 200 `application/json` | `{dados,meta}`; `meta={total,pagina,limite,totalPaginas,temProxima}` and each summary has `refId,eventAt,situacao,situacaoOriginal,mensagem,idSmartNotas,clienteNome,clienteDocumento,produto,valorVenda,meioPagamento,tentativas` |
+| `GET /eventos/resumo` | common filters | HTTP 200 `application/json` | `{total,erro,pendente,sucesso,tratados}` |
+| `GET /eventos/produtos` | none | HTTP 200 `application/json` | array of `{nome,eventos,erros}` |
+| `GET /eventos/exportar` | common filters; pagination is replaced by export cap | HTTP 200 `text/csv; charset=utf-8` | attachment filename, semicolon-separated fixed columns `refId,idTransacao,eventAt,situacao,mensagem,idSmartNotas,clienteNome,clienteDocumento,clienteEmail,produto,codProduto,valorVenda,meioPagamento`, capped at 20,000 rows |
+| `GET /eventos/:refId` | correlation `refId` | HTTP 200 `application/json` | summary fields plus `orientacao,origem,cliente,venda,produtor,historico,camposPendentes,payload,resposta` |
+| `GET /eventos/:refId/payload` | correlation `refId` | HTTP 200 `application/json` | `{enviado,resposta}` |
 
-Within event detail, `cliente={nome,documento,email,telefone,endereco,numero,complemento,bairro,cidade,cep,pais}`, `venda={produto,codProduto,valorVenda,avista,meioPagamento,dataPagamento,idTransacao,garantia,split,tipoProduto}`, `produtor={razaoSocial,documento}`, each `historico` entry is `{em,mensagem,ok,autorNome}`, and each `camposPendentes` entry is `{caminho,rotulo,recusadoPeloSmartNotas}`. Nullable/optional source fields remain nullable/optional; the contract does not invent completeness.
+Within event detail, `cliente={nome,documento,email,telefone,logradouro,numero,complemento,bairro,cidade,cep,pais}`, `venda={produto,codProduto,valorVenda,avista,meioPagamento,dataPagamento,idTransacao,garantia,split,tipoProduto}`, `produtor={razaoSocial,documento}`, each `historico` entry is `{em,mensagem,ok,autorNome}`, and each `camposPendentes` entry is `{caminho,rotulo,recusadoPeloSmartNotas}`. Nullable/optional source fields remain nullable/optional; the contract does not invent completeness.
 
 Validation/auth/not-found failures use the standard error body `{statusCode,erro,mensagem,caminho,timestamp}`; an unknown `refId` is 404, not an empty projection. Treatment commands are owned exclusively by [treatments and history](treatments-and-history.md#observed-treatment-contract).
 
