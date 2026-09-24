@@ -527,7 +527,7 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
 - **Adherence review package:** `bounded-file-set`
-- **Adherence review status:** `findings_integrated`
+- **Adherence review status:** `running`
 - **Adherence review evidence / resolution:** `ARCH-ADH-R2-01..04` and `ARCH-ADH-R3-01..04` were remediated locally; only a fresh R4 may mark adherence clean.
 - **No-go handling:** retornar ao diagnóstico/decisão ou ao loop de evidência; não alegar execução ou conclusão com divergência aberta.
 
@@ -734,7 +734,7 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Canonical method:** `wf-docker-independent-test-quality-audit-method`
 - **Audit isolation mode:** `fresh internal no-context reviewer`
 - **Internal reviewer mandate:** `required after implementation`
-- **Audit status:** `findings_integrated`
+- **Audit status:** `running`
 - **Findings summary:** R2/R3 release blockers were reproduced and remediated; the clean result must come from a fresh R4 reviewer.
 - **Evidence / reference:** immutable R3 review baseline `1e4d1e0523da9d87d01b1fdcd380de3e667f3d38`; remediation evidence in `Round-3 Remediation`.
 - **Waiver authority / reference:** `n/a`
