@@ -3,17 +3,17 @@
 ## Artifact Identity
 
 - **Artifact type:** `tactical_execution_contract`
-- **Lifecycle state:** `Awaiting renewed approval — PACED preflight-go`
+- **Lifecycle state:** `In-Progress — implementation authority granted`
 - **Created:** `2026-09-24`
 - **Owner:** `Delphi / Strategic CTO-Tech-Lead`, sob autoridade humana do usuário
 
 ## Approval
 
-- **Approved by:** `usuário — 2026-09-24 — “APROVADO”`
-- **Approval scope:** intenção para `S-01..S-09` conforme `D-01..D-03`, com mudanças persistentes limitadas à Foundation; aliases PACED locais já materializados são dependência read-only e não superfície de escrita deste TODO.
-- **Current authority of that approval:** `planning intent only`; a aprovação antecedeu os reviews obrigatórios e não autoriza execução até o pacote convergir, obter `preflight-go` e receber novo `APROVADO`.
+- **Approved by:** `usuário — 2026-09-24 — “APROVADO”` (aprovação renovada após convergência R4 e `preflight-go`).
+- **Approval scope:** execução integral de `S-01..S-09` conforme `D-01..D-05`, o mapa congelado de seis módulos, o disposition manifest, o validator e as validações 1:1, com mudanças persistentes limitadas à Foundation; aliases PACED locais já materializados são dependência read-only e não superfície de escrita deste TODO.
+- **Current authority of that approval:** `implementation scope approved`; a execução permanece condicionada à ingestão vinculante registrada abaixo e ao authority guard normal retornar `go`.
 - **Execution not authorized:** código/runtime do Monitor de Notas, banco, deploy, segredos e núcleo compartilhado do `delphi-ai`; worktrees e checkouts auxiliares também não foram autorizados.
-- **Renewed approval required when:** após a convergência destes reviews e sempre que houver mudança de escopo, identidade canônica, tratamento do legado, arquitetura-alvo, validações obrigatórias ou repositórios envolvidos.
+- **Renewed approval required when:** houver mudança de escopo, identidade canônica, tratamento do legado, arquitetura-alvo, validações obrigatórias, repositórios envolvidos ou conversa material de risco além de `D-01..D-05`/`S-01..S-09`.
 
 ## Context
 
@@ -51,21 +51,21 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `none`
-- **Next exact step:** autoridade humana revisar o pacote convergido e responder `APROVADO`; isso ainda não substitui o authority guard normal pós-aprovação.
+- **Next exact step:** o executor single-writer implementa `S-01..S-09` test-first e devolve o tree candidato para os gates delivery-side.
 
 ## Active Work State
 
-- **Work state:** `review`
-- **Why this state now:** R4 encerrou sem achados; audit floor, coerência e drift retornaram `go`; authority preflight retornou `preflight-go`.
-- **Exit condition:** novo `APROVADO` humano é registrado, regras são ingeridas no binding ativo e o authority guard normal retorna `go`.
+- **Work state:** `implementation`
+- **Why this state now:** o usuário renovou `APROVADO`, a ingestão vinculante foi registrada e o authority guard normal retornou `Overall outcome: go`.
+- **Exit condition:** `S-01..S-09` implementados, suíte local verde e pacote candidato entregue aos gates delivery-side.
 
 ## Blocker Notes
 
-- **Blocker:** `n/a` para continuidade do review; execução continua não autorizada por ausência do novo `APROVADO` e do authority guard pós-aprovação.
+- **Blocker:** `n/a`; a aprovação foi renovada e resta o gate determinístico normal pós-aprovação.
 - **Why blocked now:** `n/a`; o trabalho está no gate de review, não em estado bloqueado.
 - **What unblocks it:** `n/a` para review; execução só começa pela sequência explícita em `Execution Plan`.
 - **Owner / source:** owner do TODO; autoridade humana permanece responsável pelo novo approval.
-- **Last confirmed truth:** reviewers R4 independentes retornaram zero findings; hard cutover, módulo map, manifesto e validações estão convergidos.
+- **Last confirmed truth:** reviewers R4 independentes retornaram zero findings; hard cutover, module map, manifesto e validações estão convergidos; usuário respondeu `APROVADO` em 2026-09-24.
 
 ## Scope
 
@@ -722,12 +722,12 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Evidence / reference:** `pending`
 - **Waiver authority / reference:** `n/a`
 
-## Execution Plan — Draft, Not Authorized
+## Execution Plan — Approved; Guard-Gated
 
 1. Publicar o freeze sincronizado após `RF-15..RF-16` e executar a última arquitetura/crítica sobre commit/blob/hash exatos.
 2. Com review limpo, repetir coerência e scope drift, executar `todo_authority_guard.py --pre-approval` e exigir `preflight-go`.
-3. Solicitar novo `APROVADO` para `D-01..D-05`, `S-01..S-09`, mapa de seis módulos, disposition manifest e validações congeladas.
-4. Após registrar a aprovação, ingerir regras no binding ativo, executar o authority guard normal e exigir `go`; este é o primeiro ponto que autoriza execução.
+3. `Concluído em 2026-09-24`: novo `APROVADO` recebido para `D-01..D-05`, `S-01..S-09`, mapa de seis módulos, disposition manifest e validações congeladas.
+4. `Em andamento`: após registrar a aprovação, ingerir regras no binding ativo, executar o authority guard normal e exigir `go`; este é o primeiro ponto que autoriza execução.
 5. Implementar test-first o validator e seus trees/fixtures persistidos inofensivos; amostras de segurança proibidas existem somente em temp runtime.
 6. Reescrever a camada canônica raiz, a policy de scope/subscope e a divisão de autoridades conforme o manifesto congelado.
 7. Reconstruir os seis módulos, contratos, decisões, backlog, políticas e TODO governance exatamente nos targets aprovados.
@@ -759,6 +759,10 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 
 ## Rules Acknowledgement / Ingestion
 
+- **Binding ingestion timestamp:** `2026-09-24`, após o `APROVADO` renovado.
+- **Touched-surface confirmation:** somente documentação, testes e tooling determinístico local de `uninotas-foundation`; produto/runtime e `delphi-ai` permanecem read-only.
+- **Profile scope check:** `Strategic / CTO-Tech-Lead` para o cutover canônico, com handoff já declarado ao `Operational / Coder` somente para criar e validar o guard local; nenhum path `forbidden` ou `unknown` será escrito.
+
 | Source | Why It Applies Now | Must Preserve | Must Avoid | Execution Impact |
 | --- | --- | --- | --- | --- |
 | `delphi-ai/main_instructions.md` | autoridade PACED carregada pelo bootloader | separação core genérico vs. verdade local e TODO governado | transportar conteúdo de outro projeto ou executar fora dos gates | Foundation concentra produto; Delphi permanece genérico |
@@ -772,6 +776,13 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 | `delphi-ai/rules/core/delphi-project-setup-model-decision.md` | pedido explícito de adoção PACED | readiness + recalibração + TODO | feature work com drift material | este TODO é a normalização exigida |
 | `delphi-ai/templates/module_template.md` | seis módulos canônicos serão criados | anchors de intent/boundaries, coverage, rules, contracts e cross-module concerns | módulos livres ou espelhos de pastas runtime | validator exige anchors aplicáveis em cada módulo |
 | `uninotas-foundation/policies/scope_subscope_governance.md` | policy obrigatória para module ownership | `D-05`, scope único e seis subscopes comprovados | importar tenancy LeadsHug ou expandir scope implicitamente | reescrever antes de consolidar módulos e validar consistência |
+
+## Package-First Assessment
+
+- **Query executed:** `bash delphi-ai/tools/query_packages.sh --project-root /mnt/c/Unifast/MonitorDeNotas --search "validation"`
+- **Result:** `0 package(s) found` em 2026-09-24.
+- **Decision:** implementar o validator documental local previsto no TODO; não há pacote ecossistêmico ou local reutilizável que satisfaça o contrato congelado de identidade, links, owners, schema e privacy scan.
+- **Boundary:** a avaliação não autoriza publicar pacote novo nem alterar registros compartilhados; o helper permanece específico de `uninotas-foundation/deterministic/`.
 
 ## Agent Routing Preflight
 
@@ -790,6 +801,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Guard outcome:** `go`
 - **Authority preflight outcome:** `preflight-go`
 - **Authority preflight evidence:** `python3 delphi-ai/tools/todo_authority_guard.py uninotas-foundation/todos/active/process/TODO-uninotas-foundation-project-rebase.md --pre-approval` — zero violations em 2026-09-24.
+- **Post-approval authority outcome:** `go`
+- **Post-approval authority evidence:** `python3 delphi-ai/tools/todo_authority_guard.py uninotas-foundation/todos/active/process/TODO-uninotas-foundation-project-rebase.md` — zero violations em 2026-09-24 após aprovação renovada e ingestão vinculante.
 - **Waiver / exception reference:** `n/a`
 
 ## Flow Evidence Planning Matrix
