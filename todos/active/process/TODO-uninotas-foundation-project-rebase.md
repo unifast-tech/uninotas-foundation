@@ -527,7 +527,7 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
 - **Adherence review package:** `bounded-file-set`
-- **Adherence review status:** `R2/R3 findings integrated; R4 pending`
+- **Adherence review status:** `findings_integrated`
 - **Adherence review evidence / resolution:** `ARCH-ADH-R2-01..04` and `ARCH-ADH-R3-01..04` were remediated locally; only a fresh R4 may mark adherence clean.
 - **No-go handling:** retornar ao diagnóstico/decisão ou ao loop de evidência; não alegar execução ou conclusão com divergência aberta.
 
@@ -734,7 +734,7 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Canonical method:** `wf-docker-independent-test-quality-audit-method`
 - **Audit isolation mode:** `fresh internal no-context reviewer`
 - **Internal reviewer mandate:** `required after implementation`
-- **Audit status:** `findings_integrated; R4 pending`
+- **Audit status:** `findings_integrated`
 - **Findings summary:** R2/R3 release blockers were reproduced and remediated; the clean result must come from a fresh R4 reviewer.
 - **Evidence / reference:** immutable R3 review baseline `1e4d1e0523da9d87d01b1fdcd380de3e667f3d38`; remediation evidence in `Round-3 Remediation`.
 - **Waiver authority / reference:** `n/a`
@@ -748,7 +748,7 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Review isolation mode:** `fresh internal no-context reviewer`
 - **Internal reviewer mandate:** `required after implementation and test audit`
 - **Canonical multi-lane audit protocol:** `n/a`
-- **Final review status:** `not_run — blocked until R4 test-quality/adherence converge`
+- **Final review status:** `not_run`
 - **Findings summary:** `implementation complete; prerequisite delivery reviews pending`
 - **Evidence / reference:** `pending`
 - **Waiver authority / reference:** `n/a`
@@ -760,7 +760,7 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Cutover signals in scope:** `canonical cutover|legacy-path retirement`
 - **Package mode:** `bounded-file-set`
 - **Canonical multi-lane audit protocol:** `n/a`
-- **Cutover audit status:** `R2 clean; R4 confirmation pending after remediation`
+- **Cutover audit status:** `running`
 - **Findings summary:** exact deletion, lifecycle and publication coverage passed R2; subsequent contract/validator changes require a fresh bounded confirmation.
 - **Evidence / reference:** R2 reviewer `foundation_cutover_integrity_r2` returned zero findings; R4 pending.
 - **Waiver authority / reference:** `n/a`
