@@ -51,13 +51,13 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 
 - **Current delivery stage:** `Local-Implemented`
 - **Qualifiers:** `none`
-- **Next exact step:** executar revisão final R22 sobre o HEAD imutável atual e, se limpa, publicar `main` em `origin/main`.
+- **Next exact step:** executar revisão final R23 sobre o HEAD imutável atual e, se limpa, publicar `main` em `origin/main`.
 
 ## Active Work State
 
 - **Work state:** `review`
-- **Why this state now:** o TODO está em `completed/process/`; R21 confirmou o closeout técnico e encontrou somente `FINAL-R21-01` na semântica de promoção e em uma linha de status de intake, agora sincronizadas para R22.
-- **Exit condition:** R22 e guards finais verdes, seguidos pela publicação em `origin/main`.
+- **Why this state now:** o TODO está em `completed/process/`; R22 confirmou todo o closeout e encontrou somente `FINAL-R22-01` em três referências duráveis externas que ainda diziam `active`, agora corrigidas para R23.
+- **Exit condition:** R23 e guards finais verdes, seguidos pela publicação em `origin/main`.
 
 ## Routine-Executor Implementation Evidence — 2026-09-24
 
@@ -256,7 +256,15 @@ R21 reconfirmed `CLOSEOUT-TQ-01`, the refreshed legacy hashes and the technical 
 
 | Finding | Classification | Integrated remediation | Status |
 | --- | --- | --- | --- |
-| `FINAL-R21-01` | release-blocker | define `Completed` as local lifecycle closure, reserve `Lane-Promoted` for immutable origin publication and mark `needs-normalization` explicitly historical-at-intake/currently completed | integrated locally; R22 required |
+| `FINAL-R21-01` | release-blocker | define `Completed` as local lifecycle closure, reserve `Lane-Promoted` for immutable origin publication and mark `needs-normalization` explicitly historical-at-intake/currently completed | confirmed at `fa2bf56` by R22 |
+
+## Final Review R22 Finding Classification — 2026-09-24
+
+R22 confirmed every prior TODO-state finding and `CLOSEOUT-TQ-01` resolved. Its single P2 `release-blocker` was three durable owner references outside the TODO that still described the now-completed governing contract as active.
+
+| Finding | Classification | Integrated remediation | Status |
+| --- | --- | --- | --- |
+| `FINAL-R22-01` | release-blocker | update cutover map and TODO governance owner to retain this contract under `completed/process/` as historical evidence | integrated locally; R23 required |
 
 ## Post-Implementation Decision Adherence Validation
 
@@ -281,10 +289,10 @@ R21 reconfirmed `CLOSEOUT-TQ-01`, the refreshed legacy hashes and the technical 
 ## Blocker Notes
 
 - **Blocker:** `n/a`; R17 encontrou um release blocker temporal corrigível, não um impasse.
-- **Why blocked now:** `n/a`; `CLOSEOUT-TQ-01` está confirmado, `FINAL-R21-01` está integrado e somente R22 mais publicação permanecem.
-- **What unblocks it:** `n/a`; revisão R22 limpa, guards finais e publicação já autorizada.
+- **Why blocked now:** `n/a`; `CLOSEOUT-TQ-01` está confirmado, `FINAL-R22-01` está integrado e somente R23 mais publicação permanecem.
+- **What unblocks it:** `n/a`; revisão R23 limpa, guards finais e publicação já autorizada.
 - **Owner / source:** owner do TODO; D-01..D-05 continuam autorizados pelo `APROVADO` vigente e nenhuma nova aprovação está pendente.
-- **Last confirmed truth:** R21 revisou `6128d03f22e33b23d9a4d0b85a0b3dc40535cc03`, reconfirmou `CLOSEOUT-TQ-01` e encontrou somente `FINAL-R21-01`; a correção está em `main@HEAD` para R22.
+- **Last confirmed truth:** R22 revisou `fa2bf566b81ea557719404924dce8a7e56727370`, confirmou todos os findings anteriores e encontrou somente `FINAL-R22-01` em owners duráveis; a correção está em `main@HEAD` para R23.
 
 ## Scope
 
@@ -405,8 +413,8 @@ Cada critério possui evidência concluída 1:1; nenhum resumo agregado substitu
 
 | Scope Item | Local Branch/Commit | PR to lane threshold | PR to `stage` | PR to `main` | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| baseline do contrato | `main@HEAD` — R21 promotion-semantics remediation over `6128d03` | `n/a — autoridade Foundation single-branch` | `n/a` | `direct push guarded` | `local-implemented; R22 pending` |
-| cutover da Foundation | `main@HEAD` — R21 promotion-semantics remediation over `6128d03` | `n/a — autoridade Foundation single-branch` | `n/a` | `direct push after closeout gates` | `local-implemented; R22 pending` |
+| baseline do contrato | `main@HEAD` — R22 durable-owner remediation over `fa2bf56` | `n/a — autoridade Foundation single-branch` | `n/a` | `direct push guarded` | `local-implemented; R23 pending` |
+| cutover da Foundation | `main@HEAD` — R22 durable-owner remediation over `fa2bf56` | `n/a — autoridade Foundation single-branch` | `n/a` | `direct push after closeout gates` | `local-implemented; R23 pending` |
 
 ## Diff Expectation Contract
 
@@ -979,7 +987,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 | `FINAL-R19-01` | `medium` | `release-blocker` | convert old planning imperatives into explicitly completed historical steps | no completed preapproval work may remain a live instruction | `confirmed at 6cd7c09 by R20` | `Final Review R19 Finding Classification`; R19 reviewer |
 | `FINAL-R19-02` | `medium` | `release-blocker` | synchronize current promotion rows with `main@HEAD` and the active review gate | promotion evidence must not present historical R16 as current HEAD | `confirmed at 6cd7c09 by R20` | `Final Review R19 Finding Classification`; R19 reviewer |
 | `FINAL-R20-01` | `medium` | `release-blocker` | align Completed artifact lifecycle and resolved recalibration state | completed TODO cannot retain competing In-Progress/material-drift truth | `integrated at 6128d03; R21 found residual FINAL-R21-01` | `Final Review R20 Finding Classification`; R20 reviewer |
-| `FINAL-R21-01` | `medium` | `release-blocker` | separate local Completed lifecycle from Lane-Promoted publication and retire the remaining intake status | local closure and remote publication must have non-conflicting thresholds | `integrated locally; R22 pending` | `Final Review R21 Finding Classification`; R21 reviewer |
+| `FINAL-R21-01` | `medium` | `release-blocker` | separate local Completed lifecycle from Lane-Promoted publication and retire the remaining intake status | local closure and remote publication must have non-conflicting thresholds | `confirmed at fa2bf56 by R22` | `Final Review R21 Finding Classification`; R21 reviewer |
+| `FINAL-R22-01` | `medium` | `release-blocker` | retire external durable references to the completed contract as active | canonical owners must agree with completed lifecycle and publication manifest | `integrated locally; R23 pending` | `Final Review R22 Finding Classification`; R22 reviewer |
 
 ## Independent Test Quality Audit Gate
 
@@ -1006,8 +1015,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Internal reviewer mandate:** `required after implementation and test audit`
 - **Canonical multi-lane audit protocol:** `n/a`
 - **Final review status:** `findings_integrated`
-- **Findings summary:** R21 on immutable `6128d03f22e33b23d9a4d0b85a0b3dc40535cc03` reconfirmed `CLOSEOUT-TQ-01` and found only `FINAL-R21-01` in the Completed/Lane-Promoted threshold and one `needs-normalization` intake row; both are synchronized for R22.
-- **Evidence / reference:** reviewer `/root/foundation_final_review_r21`; packet `/tmp/monitor-foundation-final-r21/review-packet.md`; R22 required on the current immutable HEAD.
+- **Findings summary:** R22 on immutable `fa2bf566b81ea557719404924dce8a7e56727370` confirmed all prior TODO-state findings and `CLOSEOUT-TQ-01` resolved, finding only `FINAL-R22-01` in three durable external references to active lifecycle; all now name completed historical evidence.
+- **Evidence / reference:** reviewer `/root/foundation_final_review_r22`; packet `/tmp/monitor-foundation-final-r22/review-packet.md`; R23 required on the current immutable HEAD.
 - **Waiver authority / reference:** `n/a`
 
 ## Independent Cutover Integrity Audit Gate
@@ -1053,7 +1062,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 27. `Concluído com no-go`: R19 sobre `9190d32b7dbc9fbb19ad691323a4a4648b7b0abb` reconfirmou o closeout técnico e encontrou somente `FINAL-R19-01/02` nos passos históricos 1–2 e nas linhas atuais de promoção.
 28. `Concluído com no-go`: R20 sobre `6cd7c090f82da731a870be02cd430e36e56aeffd` confirmou `FINAL-R19-01/02` e o closeout técnico, encontrando somente `FINAL-R20-01` no lifecycle/recalibration state.
 29. `Concluído com no-go`: R21 sobre `6128d03f22e33b23d9a4d0b85a0b3dc40535cc03` reconfirmou o closeout técnico e encontrou somente `FINAL-R21-01` na semântica Completed/Lane-Promoted e em uma linha de intake.
-30. `Em andamento`: executar R22 sobre o HEAD imutável atual que contém `FINAL-R21-01` e, se limpa, publicar `main`.
+30. `Concluído com no-go`: R22 sobre `fa2bf566b81ea557719404924dce8a7e56727370` confirmou o TODO e closeout técnico, encontrando somente `FINAL-R22-01` em três referências duráveis externas a lifecycle ativo.
+31. `Em andamento`: executar R23 sobre o HEAD imutável atual que contém `FINAL-R22-01` e, se limpa, publicar `main`.
 
 ### Touched Surfaces
 
@@ -1191,12 +1201,12 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 - **Delivery R13 architecture/test-quality/cutover review:** all three fresh lanes returned `GO` on immutable `dc1d869`; no P1/P2, blocker or new finding remained.
 - **Independent final review R16:** `GO` on immutable `65ae750`; `FINAL-R14-01` and `FINAL-R15-01` confirmed resolved; no material finding/P1/P2/release blocker at that baseline.
 - **Post-move test correction:** R17 confirmed `CLOSEOUT-TQ-01` resolved at `5a1ff88`; 10/10, validator, 39 ledger rows and manifest move are exact.
-- **Final reviews R17–R21:** technical closeout `GO`; R21 reconfirmed all technical evidence and only `FINAL-R21-01` promotion/intake wording remains for R22 confirmation.
+- **Final reviews R17–R22:** technical closeout `GO`; R22 confirmed all TODO-state findings and only `FINAL-R22-01` durable-owner wording remains for R23 confirmation.
 - **Pre-move closeout guard:** `go` sobre cópia byte-idêntica (`cmp -s`) em path temporário real `foundation_documentation/todos/active/process/`, com `--repo` apontando ao Git real da Foundation; isso compensa o `Path.resolve()` do guard, que elimina o nome do alias e classificaria incorretamente o path direto como `other`.
 
 ## TODO Closeout Disposition
 
 - **Disposition:** `move-completed`
-- **Disposition reason:** implementação, delivery, completion e closeout técnico estão verdes; `FINAL-R21-01` está integrado e somente R22 precede a publicação.
-- **Post-commit/push status:** `technical closeout is committed at 5a1ff884ae883e5bd0e50b27d9a463aa5d53085e; promotion-semantics remediation through FINAL-R21-01 is at main@HEAD; origin/main remains at b73b0eb approval checkpoint`
-- **Next path/status action:** obter R22 limpa sobre o HEAD imutável atual e publicar `main` em `origin/main`.
+- **Disposition reason:** implementação, delivery, completion e closeout técnico estão verdes; `FINAL-R22-01` está integrado e somente R23 precede a publicação.
+- **Post-commit/push status:** `technical closeout is committed at 5a1ff884ae883e5bd0e50b27d9a463aa5d53085e; durable-owner remediation through FINAL-R22-01 is at main@HEAD; origin/main remains at b73b0eb approval checkpoint`
+- **Next path/status action:** obter R23 limpa sobre o HEAD imutável atual e publicar `main` em `origin/main`.
