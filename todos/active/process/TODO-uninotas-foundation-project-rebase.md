@@ -51,13 +51,13 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `none`
-- **Next exact step:** normalizar os enums PACED, gerar o pacote R11 para o HEAD imutável resultante, registrar seu SHA integral no pacote e executar reviewers independentes corretamente roteados sobre esse mesmo objeto Git.
+- **Next exact step:** executar e aguardar os três reviewers R12 sobre o mesmo HEAD imutável registrado no pacote R12; se todas as lanes retornarem `GO`, consolidar as evidências e iniciar os gates de completion/closeout.
 
 ## Active Work State
 
 - **Work state:** `review`
-- **Why this state now:** test-quality e cutover R10 retornaram `GO`; arquitetura R10 confirmou `ARCH-ADH-R9-01` resolvido e encontrou apenas `ARCH-ADH-R10-01`, quatro enums PACED não canônicos, agora normalizados para confirmação R11.
-- **Exit condition:** delivery R11 sem release-blocker em todas as lanes, matrizes 1:1 adjudicadas e gates de completion/closeout prontos para execução.
+- **Why this state now:** test-quality e cutover R11 retornaram `GO`; arquitetura R11 confirmou os enums canônicos e encontrou apenas `ARCH-ADH-R11-01`, o passo normativo ainda em preparação de R11, agora corrigido para a execução/espera R12.
+- **Exit condition:** delivery R12 sem release-blocker em todas as lanes, matrizes 1:1 adjudicadas e gates de completion/closeout prontos para execução.
 
 ## Routine-Executor Implementation Evidence — 2026-09-24
 
@@ -173,7 +173,17 @@ Test quality and cutover integrity returned `GO`; architecture confirmed `ARCH-A
 
 | Finding | Classification | Integrated remediation | Status |
 | --- | --- | --- | --- |
-| `ARCH-ADH-R10-01` | release-blocker | normalize active work state to `review`, architecture status to `findings_integrated`, and clean test/cutover gate statuses to `no_material_findings` | integrated locally; delivery R11 pending |
+| `ARCH-ADH-R10-01` | release-blocker | normalize active work state to `review`, architecture status to `findings_integrated`, and clean test/cutover gate statuses to `no_material_findings` | confirmed at `a72780d` |
+
+## Delivery R11 Finding Classification — 2026-09-24
+
+Test quality and cutover integrity returned `GO`; architecture confirmed `ARCH-ADH-R10-01` resolved and found one temporal next-step `release-blocker`. The test-quality observation is corrected in the same authoritative update, while the known WSL caveat remains explicitly outside this Foundation TODO.
+
+| Finding | Classification | Integrated remediation | Status |
+| --- | --- | --- | --- |
+| `ARCH-ADH-R11-01` | release-blocker | make the immediate action execute/await R12 and then consolidate, without describing already-completed preparation | integrated locally; delivery R12 pending |
+| `TQ-R11-OBS-01` | accepted-debt | update the current CI-equivalent matrix from stale 8-test candidate wording to the observed 10-test passed result | integrated locally; delivery R12 pending |
+| `ENV-R11-OBS-01` | out-of-scope | retain the documented Git Bash acceptance runner; WSL CRLF remediation belongs to a separate Delphi TODO | classified; existing alias/runner caveat remains authoritative |
 
 ## Post-Implementation Decision Adherence Validation
 
@@ -197,11 +207,11 @@ Test quality and cutover integrity returned `GO`; architecture confirmed `ARCH-A
 
 ## Blocker Notes
 
-- **Blocker:** `n/a`; delivery R11 is the next active gate, not an impasse.
-- **Why blocked now:** `n/a`; completion remains unavailable until `ARCH-ADH-R10-01` receives clean independent confirmation.
-- **What unblocks it:** clean delivery R11 test-quality, architecture-adherence and cutover-integrity results on one immutable enum-normalization commit.
+- **Blocker:** `n/a`; delivery R12 is the next active gate, not an impasse.
+- **Why blocked now:** `n/a`; completion remains unavailable until `ARCH-ADH-R11-01` receives clean independent confirmation.
+- **What unblocks it:** clean delivery R12 test-quality, architecture-adherence and cutover-integrity results on one immutable state-correction commit.
 - **Owner / source:** owner do TODO; autoridade humana permanece responsável pelo novo approval.
-- **Last confirmed truth:** D-01..D-05 approval remains valid; R10 test-quality/cutover are clean, R8/R9 findings are resolved, and only the R10 enum normalization awaits immutable R11 review.
+- **Last confirmed truth:** D-01..D-05 approval remains valid; R11 test-quality/cutover are clean, R8-R10 findings are resolved, and only the R11 immediate-action correction awaits immutable R12 review.
 
 ## Scope
 
@@ -392,8 +402,8 @@ Hashes individuais que sustentam as decisões de ownership ficam no `Pre-Executi
 | From Profile | To Profile | Why the Handoff Exists | Touched Surfaces | Status / Evidence |
 | --- | --- | --- | --- | --- |
 | `Strategic / CTO-Tech-Lead` | `routine-executor` | executar a substituição documental já decidida sem redefinir o contrato | `uninotas-foundation/**` | `completed; R3 remediation locally green` |
-| `routine-executor` | `Assurance / Tester-Quality` | desafiar evidência, links, referências e ausência de autoridade concorrente | diff e validações da Foundation | `delivery R10 test-quality go; R11 joint confirmation pending` |
-| `Assurance / Tester-Quality` | `formal-reviewer` | revisar aderência arquitetural e integridade do cutover | pacote final consolidado | `delivery R10 cutover go; architecture enum blocker integrated; R11 pending` |
+| `routine-executor` | `Assurance / Tester-Quality` | desafiar evidência, links, referências e ausência de autoridade concorrente | diff e validações da Foundation | `delivery R11 test-quality go; R12 joint confirmation pending` |
+| `Assurance / Tester-Quality` | `formal-reviewer` | revisar aderência arquitetural e integridade do cutover | pacote final consolidado | `delivery R11 cutover go; architecture temporal-state blocker integrated; R12 pending` |
 
 ## Complexity
 
@@ -541,7 +551,7 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 
 ## Module Decision Consistency Gate
 
-- **Status:** `delivery-R10-reviewed`; D-01..D-05 estão `Adherent`, as cinco decisões permanecem `Superseded (Approved)` e a normalização dos enums aguarda confirmação conjunta R11.
+- **Status:** `delivery-R11-reviewed`; D-01..D-05 estão `Adherent`, as cinco decisões permanecem `Superseded (Approved)` e a correção do passo imediato aguarda confirmação conjunta R12.
 - **Finding:** todas as decisões de módulos herdadas pertencem ao LeadsHug; nenhuma deve ser preservada como verdade do Monitor de Notas.
 - **Resolution:** supersessão intencional integral, autorizada por `D-02`, com substituição pelos módulos listados em `S-04`.
 - **Evidence:** conteúdo atual de `modules/*.md`, estrutura do backend/frontend e READMEs do produto.
@@ -618,7 +628,7 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Adherence review kind:** `architecture_adherence`
 - **Adherence review package:** `bounded-file-set`
 - **Adherence review status:** `findings_integrated`
-- **Adherence review evidence / resolution:** architecture delivery R10 on `d269bc269f761de68587abc83813480a23cfd200` confirmed `ARCH-ADH-R9-01` resolved and returned only `ARCH-ADH-R10-01`; all affected fields now use canonical PACED enum values for R11 confirmation.
+- **Adherence review evidence / resolution:** architecture delivery R11 on `a72780df68156eae85a88a6071989fa3730ded8a` confirmed `ARCH-ADH-R10-01` resolved and returned only `ARCH-ADH-R11-01`; the immediate action now describes execution/awaiting R12 rather than completed preparation.
 - **No-go handling:** retornar ao diagnóstico/decisão ou ao loop de evidência; não alegar execução ou conclusão com divergência aberta.
 
 ## Assumptions Preview
@@ -852,7 +862,10 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 | `ARCH-ADH-R8-01` | `medium` | `release-blocker` | distinguish production ownership from explicit local-replica population and add exact evidence | D-04/runtime fidelity is required by the current cutover | `confirmed at 222a8a9` | `Delivery R8 Finding Classification`; R9 architecture |
 | `TQ-R8-01` | `high` | `release-blocker` | reject symlinks and preserve them in the clean-copy harness so external content cannot be laundered | publication-tree integrity is required by the current cutover | `confirmed at 222a8a9` | `Delivery R8 Finding Classification`; R9 test-quality |
 | `ARCH-ADH-R9-01` | `medium` | `release-blocker` | synchronize every normative state field on the R10 action | governing TODO coherence is required by D-03 | `confirmed at d269bc2` | `Delivery R9 Finding Classification`; R10 architecture |
-| `ARCH-ADH-R10-01` | `medium` | `release-blocker` | normalize work-state and required review/audit statuses to PACED enums | deterministic schema and carry-forward are required by D-03 | `integrated; R11 pending` | `Delivery R10 Finding Classification` |
+| `ARCH-ADH-R10-01` | `medium` | `release-blocker` | normalize work-state and required review/audit statuses to PACED enums | deterministic schema and carry-forward are required by D-03 | `confirmed at a72780d` | `Delivery R10 Finding Classification`; R11 architecture |
+| `ARCH-ADH-R11-01` | `medium` | `release-blocker` | make the immediate action current at immutable review time | governing TODO temporal coherence is required by D-03 | `integrated; R12 pending` | `Delivery R11 Finding Classification` |
+| `TQ-R11-OBS-01` | `low` | `accepted-debt` | update current suite count/status to observed evidence | evidence accuracy is part of current closeout | `integrated; R12 pending` | `Delivery R11 Finding Classification` |
+| `ENV-R11-OBS-01` | `low` | `out-of-scope` | retain Git Bash runner; do not modify Delphi in this TODO | Delphi is read-only and its CRLF change requires separate authority | `classified; no current-scope mutation` | `PACED Workspace Alias Contract`; `Delivery R11 Finding Classification` |
 
 ## Independent Test Quality Audit Gate
 
@@ -865,8 +878,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Audit isolation mode:** `fresh internal no-context reviewer`
 - **Internal reviewer mandate:** `required after implementation`
 - **Audit status:** `no_material_findings`
-- **Findings summary:** delivery R10 returned `GO`; the state-only delta did not regress validator or symlink protection and no release blocker remained in this lane.
-- **Evidence / reference:** immutable delivery R10 baseline `d269bc269f761de68587abc83813480a23cfd200`; fresh R10 test-quality review.
+- **Findings summary:** delivery R11 returned `GO`; 10 tests passed, enums/carry-forward/symlink protection remained valid, and the stale suite-count observation was integrated in the current matrix.
+- **Evidence / reference:** immutable delivery R11 baseline `a72780df68156eae85a88a6071989fa3730ded8a`; fresh R11 test-quality review.
 - **Waiver authority / reference:** `n/a`
 
 ## Independent No-Context Final Review Gate
@@ -891,8 +904,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Package mode:** `bounded-file-set`
 - **Canonical multi-lane audit protocol:** `n/a`
 - **Cutover audit status:** `no_material_findings`
-- **Findings summary:** delivery R10 returned `GO`: 34 exact deletions, lifecycle-aware 38-path tree, ledger through R9, 53 pairs over 45 product paths, frozen fingerprints and Foundation-only scope all passed.
-- **Evidence / reference:** immutable delivery R10 baseline `d269bc269f761de68587abc83813480a23cfd200`; fresh R10 cutover review.
+- **Findings summary:** delivery R11 returned `GO`: canonical enums/carry-forward, 34 exact deletions, lifecycle-aware 38-path tree, ledger through R10, 53 pairs over 45 product paths, frozen fingerprints and Foundation-only scope all passed.
+- **Evidence / reference:** immutable delivery R11 baseline `a72780df68156eae85a88a6071989fa3730ded8a`; fresh R11 cutover review.
 - **Waiver authority / reference:** `n/a`
 
 ## Execution Plan — Approved; Guard-Gated
@@ -913,7 +926,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 14. `Concluído com no-go parcial`: delivery R8 sobre `de909878b014c708fa103dd2d3b9213f0abe1c33` retornou cutover `GO` e os blockers `ARCH-ADH-R8-01`/`TQ-R8-01`, classificados no ledger canônico.
 15. `Concluído com no-go parcial`: delivery R9 sobre `222a8a9b0d63c47f002b3b752f2a83bd548260e0` confirmou test-quality/cutover `GO`, confirmou os blockers R8 resolvidos e encontrou somente `ARCH-ADH-R9-01` na sincronização de estado.
 16. `Concluído com no-go parcial`: delivery R10 sobre `d269bc269f761de68587abc83813480a23cfd200` confirmou test-quality/cutover `GO`, confirmou `ARCH-ADH-R9-01` resolvido e encontrou somente `ARCH-ADH-R10-01` nos enums PACED.
-17. `Em andamento`: normalização de enums R10 congelada em `c2b7ffea0d6d030ef24213f8ad9702e3faf8e7c3`; congelar o HEAD de estado seguinte, executar delivery R11 corretamente roteada e, após resultado limpo, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
+17. `Concluído com no-go parcial`: delivery R11 sobre `a72780df68156eae85a88a6071989fa3730ded8a` confirmou test-quality/cutover `GO`, confirmou `ARCH-ADH-R10-01` resolvido e encontrou somente `ARCH-ADH-R11-01` no passo temporal; `TQ-R11-OBS-01` foi integrado e `ENV-R11-OBS-01` classificado fora do escopo.
+18. `Em andamento`: correção temporal R11 integrada localmente; executar e aguardar delivery R12 no mesmo HEAD imutável e, após resultado limpo, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
 
 ### Touched Surfaces
 
@@ -1005,7 +1019,7 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 
 | Repository / CI Surface | Why In Scope | Behavior / Scenario Covered | Preconditions | Local CI-Equivalent Command | Required Before | Status | Evidence | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `uninotas-foundation / structural validation` | documentos e checks foram alterados | identidade, links, owner único, privacy patterns e ausência de autoridade concorrente | authority `go` e candidate tree | `python3 -B -m unittest discover -s deterministic/tests -p 'test_*.py' && python3 -B deterministic/validate_foundation.py --root .` | `R4 re-review` | `candidate; 8 tests` | `Deterministic Validator Contract` | nenhuma suíte genérica substitui estes checks específicos |
+| `uninotas-foundation / structural validation` | documentos e checks foram alterados | identidade, links, owner único, privacy patterns e ausência de autoridade concorrente | authority `go` e candidate tree | `python3 -B -m unittest discover -s deterministic/tests -p 'test_*.py' && python3 -B deterministic/validate_foundation.py --root .` | `completion/closeout` | `passed; 10 tests` | R11 fresh audit: 10 tests `OK`; Foundation/TODO validators `PASS` | nenhuma suíte genérica substitui estes checks específicos |
 
 ## Security Risk Assessment
 
@@ -1048,11 +1062,11 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 - **Authority guard:** must return `go` only after explicit `APROVADO`, rule ingestion and resolved decisions.
 - **Completion and closeout guards:** required before `Local-Implemented` or movement to `completed/`.
 - **Cutover integrity audit:** required because the work retires one active documentary authority and establishes another.
-- **Delivery R10 architecture/test-quality/cutover review:** test-quality/cutover `GO` on `d269bc2`; architecture confirmed R9 fixed and found only noncanonical PACED enum values, now normalized for the required R11 rerun.
+- **Delivery R11 architecture/test-quality/cutover review:** test-quality/cutover `GO` on `a72780d`; architecture confirmed R10 fixed and found only the stale immediate-action wording, now current for the required R12 rerun.
 
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
-- **Disposition reason:** approved implementation and delivery R10 enum normalization remain local; delivery R11 and delivery/closeout gates remain pending.
-- **Post-commit/push status:** `delivery R10 enum normalization committed at c2b7ffea0d6d030ef24213f8ad9702e3faf8e7c3; origin/main remains at b73b0eb approval checkpoint`
+- **Disposition reason:** approved implementation and delivery R11 temporal-state correction remain local; delivery R12 and delivery/closeout gates remain pending.
+- **Post-commit/push status:** `delivery R11 temporal-state correction is local and uncommitted; origin/main remains at b73b0eb approval checkpoint`
 - **Next path/status action:** permanecer em `todos/active/process/` até implementação, evidência, reviews e closeout completos.
