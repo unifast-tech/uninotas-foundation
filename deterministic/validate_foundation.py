@@ -14,6 +14,7 @@ SUPPORT_FILES = {"artifacts/README.md", "artifacts/publication-manifest.txt", "b
 MODULES = {"events-and-classification.md", "treatments-and-history.md", "identity-and-team.md", "realtime-invalidation.md", "operational-monitoring.md", "runtime-and-deployment.md"}
 REQUIRED_ANCHORS = ("Module Intent & Boundaries", "Core scope:", "Subscope:", "EnvironmentType:", "Out-of-scope guardrails:", "Dependency boundaries:", "Canonical Coverage Status:", "Purpose", "Owned", "Workflows", "Invariants", "Cross-Module")
 REQUIRED_CONTRACT_SECTIONS = {"events-and-classification.md": ("Observed API Contract", "Ownership Invariant"), "treatments-and-history.md": ("Observed Treatment Contract",), "identity-and-team.md": ("Observed Authentication Contract",), "realtime-invalidation.md": ("Observed Realtime Message Contract",), "operational-monitoring.md": ("Observed Monitoring Contract",), "runtime-and-deployment.md": ("Observed Runtime Contract",)}
+REQUIRED_CONTRACT_TOKENS = {"events-and-classification.md": ("/api/v1", "PATCH /eventos/:refId/tratamento", "POST /eventos/tratar-lote", "standard error body"), "treatments-and-history.md": ("PATCH /eventos/:refId/tratamento", "POST /eventos/tratar-lote"), "identity-and-team.md": ("PATCH /usuarios/minha-senha", "PATCH /usuarios/:id", "DELETE /usuarios/:id", "POST /auth/login"), "realtime-invalidation.md": ("\"type\":\"evento.tipo\"", "\"data\"", "\"refId\":\"optional string\"", "\"situacao\":\"optional string\""), "operational-monitoring.md": ("MONITORAMENTO_TOKEN unset", "x-monitor-token", "missing|mismatch=401", "503 database unavailable")}
 DELETE_PATHS = frozenset({
     "artifacts/analysis/leadshug-architecture-truth-and-legacy-boundaries-20260915.md", "artifacts/analysis/leadshug-executive-system-dossier-20260915.md", "artifacts/analysis/leadshug-system-analysis-20260915.md", "artifacts/feature-briefs/leadshug-pre-code-evolution-program-20260918.md", "artifacts/migration/claude-legacy-reconciliation-review.json", "artifacts/migration/claude-legacy-reconciliation-review.prompt.txt", "artifacts/migration/legacy-reconciliation-20260915.md", "artifacts/workspace-link-stabilization-20260915.md", "decisions/ST-01-foundation-lifecycle-decisions.md", "deterministic/.gitkeep", "modules/audit-and-history.md", "modules/identity-and-tenancy.md", "modules/inbox-and-conversations.md", "modules/integrations-and-channels.md", "policies/central_whatsapp_independent_legacy_policy.md", "policies/web_to_app_promotion_policy.md", "todos/active/features/TODO-leadshug-mode-specific-primary-and-secondary-color.md", "todos/active/features/TODO-leadshug-typebot-automation-integration.md", "todos/active/process/TODO-foundation-lifecycle-structural-validator.md", "todos/completed/features/TODO-delphi-shell-line-endings-and-cross-platform-validation.md", "todos/completed/features/TODO-leadshug-foundation-and-delphi-migration.md", "todos/completed/features/TODO-leadshug-identity-visual-screen-tests.md", "todos/completed/features/TODO-leadshug-initial-branding-and-unofficial-connection.md", "todos/completed/features/TODO-leadshug-post-onboarding-brand-settings.md", "todos/completed/features/TODO-leadshug-secondary-color-background-contract.md", "todos/completed/process/TODO-central-whatsapp-independent-legacy-policy.md", "todos/completed/process/TODO-ci-contract-and-migration-test-gates.md", "todos/completed/process/TODO-leadshug-architecture-truth-and-legacy-boundaries.md", "todos/completed/process/TODO-leadshug-authority-and-technology-documentation-rebase.md", "todos/completed/process/TODO-leadshug-executive-system-dossier.md", "todos/completed/process/TODO-leadshug-foundation-evolution-lifecycle.md", "todos/completed/process/TODO-leadshug-legacy-authority-migration-and-retirement.md", "todos/completed/process/TODO-leadshug-system-analysis-and-modernization-plan.md", "todos/completed/process/TODO-leadshug-workspace-link-stabilization.md",
 })
@@ -23,8 +24,11 @@ IDENTITY_ANCHORS = {"README.md": "# Monitor de Notas Foundation", "decisions/mon
 CANONICAL_ASSERTIONS = {"modules/events-and-classification.md": "Routerfy alone writes `logs`; Monitor de Notas reads `logs` only. Application writes belong only to `monitor_usuarios` and `monitor_tratamentos` through their owning modules."}
 JWT = re.compile("eyJ" + r"[A-Za-z0-9_-]{8,}" + r"\.[A-Za-z0-9_-]{8,}" + r"\.[A-Za-z0-9_-]{4,}")
 PRIVATE = re.compile("-----" + "BEGIN " + r"(?:RSA |EC |OPENSSH )?PRIVATE " + "KEY-----")
-CREDENTIAL_ASSIGNMENT = re.compile(r"(?im)^\s*(?:\{\s*)?[\"']?[A-Za-z0-9_-]*(?:api[_-]?key|secret|password|token)[A-Za-z0-9_-]*[\"']?\s*[:=]\s*(?:[\"'][^\"'\r\n]{8,}[\"']|[^\s#,\r\n]{8,})")
+CREDENTIAL_ASSIGNMENT = re.compile(r"(?im)^\s*(?:-\s*)?(?:\{\s*)?[\"']?[A-Za-z0-9_-]*(?:api[_-]?key|secret|password|token)[\"']?\s*[:=]\s*(?:[\"'][^\"'\r\n]{8,}[\"']|[A-Za-z0-9._~-]{8,})")
+SERIALIZED_CREDENTIAL = re.compile(r"(?i)[\"'](?:[A-Za-z0-9_-]*(?:api[_-]?key|secret|password|token))[\"']\s*:\s*[\"'][^\"'\r\n]{8,}[\"']")
 EMAIL = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")
+URL_CREDENTIAL = re.compile(r"(?i)[?&](?:[A-Za-z0-9_-]*(?:api[_-]?key|secret|password|token))=[A-Za-z0-9._~-]{8,}")
+BEARER = re.compile(r"(?i)authorization\s*:\s*bearer\s+[A-Za-z0-9._~-]{8,}")
 
 def files(root): return {p.relative_to(root).as_posix(): p for p in Path(root).rglob("*") if p.is_file() and ".git" not in p.parts}
 def headings(text): return {line.lstrip("#").strip().lower() for line in text.splitlines() if line.startswith("#")}
@@ -83,10 +87,16 @@ def validate(root):
         path = tree.get("modules/" + name)
         if not path: continue
         text = path.read_text(encoding="utf-8")
+        contract_bodies = []
         for anchor in REQUIRED_ANCHORS:
             if anchor not in text: errors.append(f"missing module anchor {anchor}: {name}")
         for section in REQUIRED_CONTRACT_SECTIONS[name]:
-            if f"## {section}" not in text: errors.append(f"missing module contract section {section}: {name}")
+            body = re.search(rf"^## {re.escape(section)}\s*\n(.*?)(?=^## |\Z)", text, re.M | re.S)
+            if not body or not body.group(1).strip(): errors.append(f"missing module contract section {section}: {name}")
+            else: contract_bodies.append(body.group(1))
+        contract_text = "\n".join(contract_bodies)
+        for token in REQUIRED_CONTRACT_TOKENS.get(name, ()):
+            if token not in contract_text: errors.append(f"missing module contract semantic {token}: {name}")
         if not policy or re.search(r"\*\*Core scope:\*\* `monitor-de-notas`", text) is None or re.search(rf"\*\*Subscope:\*\* `{re.escape(name[:-3])}`", text) is None or "`landlord`" not in text: errors.append(f"scope/subscope mismatch: {name}")
     if todo_path: ledger_entries(tree, todo_path, expected_lifecycle, errors)
     for owner, tokens in IDENTITY.items():
@@ -95,10 +105,15 @@ def validate(root):
         if owner in tree and anchor not in tree[owner].read_text(encoding="utf-8"): errors.append(f"canonical identity anchor mismatch: {owner}")
     for owner, assertion in CANONICAL_ASSERTIONS.items():
         if owner in tree and assertion not in tree[owner].read_text(encoding="utf-8"): errors.append(f"canonical ownership mismatch: {owner}")
+    if "modules/events-and-classification.md" in tree and re.search(r"(?i)monitor de notas writes `?logs`?", tree["modules/events-and-classification.md"].read_text(encoding="utf-8")): errors.append("contradictory external ownership claim")
+    decisions = tree.get("decisions/monitor-de-notas-foundation-decisions.md")
+    if decisions:
+        rows = re.findall(r"^\| (D-0[1-5]) \| (.*?) \|", decisions.read_text(encoding="utf-8"), re.M)
+        if [key for key, _ in rows] != ["D-01", "D-02", "D-03", "D-04", "D-05"] or "Routerfy owns and writes `logs`; Monitor de Notas reads it and writes only its application tables." not in dict(rows).get("D-04", ""): errors.append("canonical decision table mismatch")
     for relative, path in tree.items():
         text = path.read_text(encoding="utf-8", errors="replace")
-        if JWT.search(text) or PRIVATE.search(text) or CREDENTIAL_ASSIGNMENT.search(text) or EMAIL.search(text): errors.append(f"privacy pattern in {relative}")
-        for _, target in re.findall(r"\[([^]]+)\]\(([^)]+)\)", text):
+        if JWT.search(text) or PRIVATE.search(text) or CREDENTIAL_ASSIGNMENT.search(text) or SERIALIZED_CREDENTIAL.search(text) or URL_CREDENTIAL.search(text) or BEARER.search(text) or EMAIL.search(text): errors.append(f"privacy pattern in {relative}")
+        for _, target in ([] if path.suffix == ".py" else re.findall(r"\[([^]]+)\]\(([^)]+)\)", text)):
             target, _, anchor = target.partition("#")
             if "://" in target or target.startswith("mailto:"): continue
             dest = (path.parent / target).resolve() if target else path

@@ -49,21 +49,21 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 
 ## Delivery Status Canon
 
-- **Current delivery stage:** `Remediation / Re-review`
-- **Qualifiers:** `round-2 architecture and test-quality blockers are being remediated; DOD and VAL remain incomplete`.
-- **Next exact step:** entregar o pacote round-2 ao `Assurance / Tester-Quality` e ao re-review arquitetural, com as evidências determinísticas atualizadas.
+- **Current delivery stage:** `Implementation complete / R4 re-review`
+- **Qualifiers:** `R3 blockers remediated locally; DOD and VAL remain incomplete until independent R4 and delivery gates converge`.
+- **Next exact step:** congelar a remediação em commit local, gerar pacote imutável e executar R4 de test-quality, architecture-adherence e cutover-integrity.
 
 ## Active Work State
 
-- **Work state:** `remediation`
-- **Why this state now:** a autoridade aprovada permanece válida, mas findings round-2 exigem correção e nova revisão antes de qualquer alegação de entrega.
-- **Exit condition:** remediation validada e devolvida aos reviews pendentes; não autoriza closeout, movimento ou conclusão.
+- **Work state:** `delivery-review`
+- **Why this state now:** a implementação e a remediação R3 estão localmente verdes, mas os reviewers independentes ainda precisam confirmar aderência, qualidade e integridade antes do closeout.
+- **Exit condition:** R4 sem release-blocker, matrizes 1:1 adjudicadas e gates de completion/closeout prontos para execução.
 
 ## Routine-Executor Implementation Evidence — 2026-09-24
 
 - **State:** candidate tree prepared; this record does not mark the TODO completed or move it.
 - **Implemented surfaces:** the frozen disposition manifest was applied; canonical roots, six frozen modules, policies, indexes, decisions, product-truth/cutover artifacts, validator, exception ledger, and safe validator tests now exist only in `uninotas-foundation`.
-- **Local evidence:** `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s deterministic/tests -p 'test_*.py'` passed (3 tests); `PYTHONDONTWRITEBYTECODE=1 python3 deterministic/validate_foundation.py --root .` passed; `git diff --check` passed.
+- **Local evidence:** historical draft evidence is superseded by the reproducible R3 `python3 -B` suite and validator; original chronology remains unverified.
 - **Privacy evidence:** prohibited token material is assembled only inside `TemporaryDirectory` by the negative test; no persistently stored sample matches the validator pattern.
 - **Boundary evidence:** product and `delphi-ai` status were inspected read-only; their pre-existing changes were not edited by this executor.
 - **Remaining owner:** independent test-quality, final-review, cutover-integrity, completion, and closeout gates remain delivery-side responsibilities.
@@ -78,15 +78,42 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 ## Round-2 Remediation — 2026-09-24
 
 - **Reviewer RED findings:** `ARCH-ADH-R2-01..04` and `TQ-R2-01` identified missing canonical contract ownership, unanchored D-01/D-04 assertions, incomplete serialized-credential detection, stale delivery state, and destination-stripping in the legacy scan.
-- **GREEN evidence target:** module-owned observed contracts, anchored identity/data-ownership assertions, full persisted-surface mutation coverage for bounded credential forms, unstripped destination scanning, and synchronized remediation/re-review status. This is implementation evidence only; independent reviews remain pending and are not marked clean.
+- **Outcome:** the first remediation closed the destination, lifecycle and exact-delete gaps; R3 re-review reopened incomplete API contracts, serialized credential forms and phase-state synchronization. Those R3 blockers are remediated below; no review is marked clean by this implementation record.
+
+## Round-3 Remediation — 2026-09-24
+
+- **R3 finding ledger:** endpoint and SSE contract completeness, decision-table/ownership contradictions, nested serialization credential detection, clean-copy bytecode hygiene, and review-state synchronization were classified as release blockers within D-01..D-05 and remediated locally.
+- **GREEN evidence:** the tracked-file-only clean-copy regression and the canonical local suite pass 8 tests with `python3 -B`; the validator, diff hygiene, diff-expectation guard and Git Bash PACED verification pass.
+- **Chronology:** original test-first chronology is unverified; reproducible mutation RED→GREEN evidence is the relied-on implementation proof. Fresh R4 remains pending; no independent gate is clean yet.
+
+## Post-Implementation Decision Adherence Validation
+
+| Decision | Canonical evidence | Status |
+| --- | --- | --- |
+| D-01 | `decisions/monitor-de-notas-foundation-decisions.md` — D-01 row | pending reviewer confirmation |
+| D-02 | `todos/active/process/TODO-uninotas-foundation-project-rebase.md` — disposition manifest | pending reviewer confirmation |
+| D-03 | `project_constitution.md` — Authority | pending reviewer confirmation |
+| D-04 | `modules/events-and-classification.md` — Ownership Invariant | pending reviewer confirmation |
+| D-05 | `policies/scope_subscope_governance.md` — machine-readable scope contract | pending reviewer confirmation |
+
+## Final Module Decision Consistency Validation
+
+| Module | Exact path / section | Status |
+| --- | --- | --- |
+| events/classification | `modules/events-and-classification.md` — Observed API Contract | pending reviewer confirmation |
+| treatments/history | `modules/treatments-and-history.md` — Observed Treatment Contract | pending reviewer confirmation |
+| identity/team | `modules/identity-and-team.md` — Observed Authentication Contract | pending reviewer confirmation |
+| realtime invalidation | `modules/realtime-invalidation.md` — Observed Realtime Message Contract | pending reviewer confirmation |
+| operational monitoring | `modules/operational-monitoring.md` — Observed Monitoring Contract | pending reviewer confirmation |
+| runtime/deployment | `modules/runtime-and-deployment.md` — Observed Runtime Contract | pending reviewer confirmation |
 
 ## Blocker Notes
 
-- **Blocker:** `round-2 re-review pending`; this is a delivery gate, not a loss of approved implementation authority.
-- **Why blocked now:** remediation must be independently assessed before the pending delivery gates can advance.
-- **What unblocks it:** `Assurance / Tester-Quality` and architecture re-review of the corrected Foundation package.
+- **Blocker:** `R4 independent re-review pending`; this is a delivery gate, not a loss of approved implementation authority.
+- **Why blocked now:** the locally green R3 remediation must be independently assessed before completion or closeout.
+- **What unblocks it:** clean R4 test-quality, architecture-adherence and cutover-integrity results on one immutable commit.
 - **Owner / source:** owner do TODO; autoridade humana permanece responsável pelo novo approval.
-- **Last confirmed truth:** D-01..D-05 approval remains valid; round-2 findings are active and no review, audit, or closeout gate is clean.
+- **Last confirmed truth:** D-01..D-05 approval remains valid; R3 blockers are locally remediated and R4 remains pending.
 
 ## Scope
 
@@ -166,18 +193,18 @@ Cada critério possui evidência planejada 1:1; nenhum resumo agregado substitui
 
 | Criterion ID | Source Section | Criterion | Evidence Type | Evidence Artifact / Command | Runtime Target | Status | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `DOD-01` | `Definition of Done` | nenhuma autoridade LeadsHug ativa | `test+review` | `python3 deterministic/validate_foundation.py --root .` + manifesto de exceções históricas | `local` | `planned` | superfície ativa e história possuem regras distintas |
+| `DOD-01` | `Definition of Done` | nenhuma autoridade LeadsHug ativa | `test+review` | `python3 -B deterministic/validate_foundation.py --root .` + manifesto de exceções históricas | `local` | `planned` | superfície ativa e história possuem regras distintas |
 | `DOD-02` | `Definition of Done` | owners raiz descrevem o produto atual | `doc+traceability` | `artifacts/analysis/monitor-de-notas-product-truth-20260924.md` | `local` | `planned` | cada afirmação material aponta a código/configuração |
 | `DOD-03` | `Definition of Done` | módulos correspondem aos limites reais | `doc+review` | module map + anchors de `module_template.md` + scope policy + architecture adherence | `local` | `planned` | seis owners coesos e fechados antes da execução |
 | `DOD-04` | `Definition of Done` | owners auxiliares reconciliados | `manifest+review` | `Tracked Foundation File Disposition Manifest` | `local` | `planned` | uma disposição por arquivo de entrada |
 | `DOD-05` | `Definition of Done` | legado removido do tree | `git+test` | `git ls-files` + validator de paths/autoridade | `local` | `planned` | histórico Git é a única retenção não explicitamente permitida |
 | `DOD-06` | `Definition of Done` | fronteiras Foundation/PACED/produto sem links quebrados | `test` | validator de links + setup contract | `local` | `planned` | não duplica regras PACED |
-| `DOD-07` | `Definition of Done` | checks determinísticos passam | `test` | `python3 -m unittest discover -s deterministic/tests -p 'test_*.py'` | `local` | `planned` | inclui fixtures positivas e negativas |
+| `DOD-07` | `Definition of Done` | checks determinísticos passam | `test` | `python3 -B -m unittest discover -s deterministic/tests -p 'test_*.py'` | `local` | `planned` | inclui fixtures positivas e negativas |
 | `DOD-08` | `Definition of Done` | diff restrito à Foundation | `git+guard` | `todo_diff_expectation_guard.py` + fingerprints dos repositórios read-only | `local` | `planned` | mudanças preexistentes não são atribuídas ao TODO |
 | `DOD-09` | `Definition of Done` | decisões promovidas aos owners | `review` | matriz de owners + closeout guard | `local` | `planned` | TODO deixa de ser owner de verdade estável |
 | `DOD-10` | `Definition of Done` | ausência de PII/payload/segredo persistido | `scan+review` | validator high-risk patterns + checklist manual de privacidade | `local` | `planned` | até amostras sintéticas proibidas existem apenas em temp runtime |
 | `DOD-11` | `Definition of Done` | alias PACED reproduzível | `setup test` | comando Git Bash documentado + `delphi-ai/verify_context.sh` | `clean Windows workspace` | `planned` | WSL não é evidência aceita enquanto houver caveat CRLF |
-| `VAL-01` | `Validation Steps` | links e anchors válidos | `test` | `python3 deterministic/validate_foundation.py --root .` | `local` | `planned` | fail-closed |
+| `VAL-01` | `Validation Steps` | links e anchors válidos | `test` | `python3 -B deterministic/validate_foundation.py --root .` | `local` | `planned` | fail-closed |
 | `VAL-02` | `Validation Steps` | legado classificado por superfície | `test` | validator + `deterministic/legacy_reference_exceptions.json` | `local` | `planned` | exceção exige path, razão e owner |
 | `VAL-03` | `Validation Steps` | documentação coerente com produto | `traceability review` | product-truth artifact + hashes da evidence snapshot | `read-only product tree` | `planned` | sem consulta mutante ao banco |
 | `VAL-04` | `Validation Steps` | guards PACED aplicáveis passam | `guard` | comandos listados em Rules/Gates | `local` | `planned` | registrar saída específica por gate |
@@ -276,9 +303,9 @@ Hashes individuais que sustentam as decisões de ownership ficam no `Pre-Executi
 
 | From Profile | To Profile | Why the Handoff Exists | Touched Surfaces | Status / Evidence |
 | --- | --- | --- | --- | --- |
-| `Strategic / CTO-Tech-Lead` | `routine-executor` | executar a substituição documental já decidida sem redefinir o contrato | `uninotas-foundation/**` | `completed; remediation remains in scope` |
-| `routine-executor` | `Assurance / Tester-Quality` | desafiar evidência, links, referências e ausência de autoridade concorrente | diff e validações da Foundation | `pending round-2 re-review` |
-| `Assurance / Tester-Quality` | `formal-reviewer` | revisar aderência arquitetural e integridade do cutover | pacote final consolidado | `pending after tester-quality re-review` |
+| `Strategic / CTO-Tech-Lead` | `routine-executor` | executar a substituição documental já decidida sem redefinir o contrato | `uninotas-foundation/**` | `completed; R3 remediation locally green` |
+| `routine-executor` | `Assurance / Tester-Quality` | desafiar evidência, links, referências e ausência de autoridade concorrente | diff e validações da Foundation | `R3 no-go integrated; R4 pending` |
+| `Assurance / Tester-Quality` | `formal-reviewer` | revisar aderência arquitetural e integridade do cutover | pacote final consolidado | `R3 no-go integrated; R4 pending` |
 
 ## Complexity
 
@@ -467,7 +494,7 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 
 ### Deterministic Validator Contract
 
-- **Canonical commands:** `python3 -m unittest discover -s deterministic/tests -p 'test_*.py'` e `python3 deterministic/validate_foundation.py --root .`.
+- **Canonical commands:** `python3 -B -m unittest discover -s deterministic/tests -p 'test_*.py'` e `python3 -B deterministic/validate_foundation.py --root .`.
 - **Active-authority surfaces:** documentos raiz, `modules/`, `backlog/`, `contracts/`, `decisions/`, `policies/`, `todos/README.md` e TODOs ativos diferentes do contrato de migração governante.
 - **Governing migration TODO:** enquanto este arquivo estiver em `todos/active/process/`, cada termo legado permitido deve possuir linha exata no ledger com `path`, `term`, `context_kind=historical_migration_record`, `section`, `reason`, `owner` e `lifecycle=active_until_closeout_move`; isso registra proveniência, não autoriza o termo em owners canônicos.
 - **Historical surfaces:** após o closeout move, a entrada muda para o path em `todos/completed/process/` e `lifecycle=historical`; outros completed TODOs/artifacts só são permitidos quando listados sem wildcard em `deterministic/legacy_reference_exceptions.json`.
@@ -500,15 +527,15 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
 - **Adherence review package:** `bounded-file-set`
-- **Adherence review status:** `remediation/re-review pending`
-- **Adherence review evidence / resolution:** `ARCH-ADH-R2-01..04` are being remediated; no clean adherence result is claimed.
+- **Adherence review status:** `R2/R3 findings integrated; R4 pending`
+- **Adherence review evidence / resolution:** `ARCH-ADH-R2-01..04` and `ARCH-ADH-R3-01..04` were remediated locally; only a fresh R4 may mark adherence clean.
 - **No-go handling:** retornar ao diagnóstico/decisão ou ao loop de evidência; não alegar execução ou conclusão com divergência aberta.
 
 ## Assumptions Preview
 
 | Assumption ID | Assumption | Evidence | If False | Confidence | Handling |
 | --- | --- | --- | --- | --- | --- |
-| `A-01` | O snapshot de código/configuração é a fonte técnica para reconstruir a verdade do produto; READMEs somente corroboram. | `backend/prisma/schema.prisma`; `backend/src/logs/logs.sql.ts`; `backend/src/logs/logs.service.ts`; `backend/src/realtime/realtime.service.ts`; `backend/src/monitoramento/monitoramento.service.ts`; `backend/src/auth/auth.service.ts`; `backend/src/usuarios/usuarios.service.ts`; `frontend/src/api/eventos.ts`; `frontend/src/hooks/useTempoReal.ts`; `PT-01..PT-09` e SHA-256 exatos no snapshot `HEAD 78bf271341dfccb2595389f0dbac0e01e8532a7b` | qualquer hash divergente reabre inventário e scope review | `High` | `Keep as Assumption` |
+| `A-01` | O snapshot de código/configuração é a fonte técnica para reconstruir a verdade do produto; READMEs somente corroboram. | `backend/prisma/schema.prisma`; `backend/src/logs/logs.sql.ts`; `backend/src/logs/logs.service.ts`; `backend/src/realtime/realtime.service.ts`; `backend/src/monitoramento/monitoramento.service.ts`; `backend/src/auth/auth.service.ts`; `backend/src/usuarios/usuarios.service.ts`; controllers/guards/filter enumerados em `PT-10`; `frontend/src/api/eventos.ts`; `frontend/src/hooks/useTempoReal.ts`; `PT-01..PT-10` e SHA-256 exatos no snapshot `HEAD 78bf271341dfccb2595389f0dbac0e01e8532a7b` | qualquer hash divergente reabre inventário e scope review | `High` | `Keep as Assumption` |
 | `A-02` | A tabela `logs` permanece read-only e pertence ao Routerfy. | `backend/prisma/schema.prisma@cb53048b…`, `backend/src/logs/logs.sql.ts@142c26ab…`, `backend/docs/tabela-logs.md@151fbc85…` | muda invariantes, contratos e módulos | `High` | `Promoted to D-04` |
 | `A-03` | `uninotas-foundation` é a autoridade específica do produto e `delphi-ai` distribui o PACED obrigatório para todo trabalho. | `D-03`; `delphi-ai/README.md` no commit `9ba43e8bba3618d029320bf6d7b40415881a0287`; alias contract local | muda links, responsabilidades e gates | `High` | `Promoted to D-03` |
 
@@ -707,9 +734,9 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Canonical method:** `wf-docker-independent-test-quality-audit-method`
 - **Audit isolation mode:** `fresh internal no-context reviewer`
 - **Internal reviewer mandate:** `required after implementation`
-- **Audit status:** `not_run`
-- **Findings summary:** `pending implementation`
-- **Evidence / reference:** `pending`
+- **Audit status:** `findings_integrated; R4 pending`
+- **Findings summary:** R2/R3 release blockers were reproduced and remediated; the clean result must come from a fresh R4 reviewer.
+- **Evidence / reference:** immutable R3 review baseline `1e4d1e0523da9d87d01b1fdcd380de3e667f3d38`; remediation evidence in `Round-3 Remediation`.
 - **Waiver authority / reference:** `n/a`
 
 ## Independent No-Context Final Review Gate
@@ -721,8 +748,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Review isolation mode:** `fresh internal no-context reviewer`
 - **Internal reviewer mandate:** `required after implementation and test audit`
 - **Canonical multi-lane audit protocol:** `n/a`
-- **Final review status:** `not_run`
-- **Findings summary:** `pending implementation`
+- **Final review status:** `not_run — blocked until R4 test-quality/adherence converge`
+- **Findings summary:** `implementation complete; prerequisite delivery reviews pending`
 - **Evidence / reference:** `pending`
 - **Waiver authority / reference:** `n/a`
 
@@ -733,9 +760,9 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Cutover signals in scope:** `canonical cutover|legacy-path retirement`
 - **Package mode:** `bounded-file-set`
 - **Canonical multi-lane audit protocol:** `n/a`
-- **Cutover audit status:** `not_run`
-- **Findings summary:** `pending implementation`
-- **Evidence / reference:** `pending`
+- **Cutover audit status:** `R2 clean; R4 confirmation pending after remediation`
+- **Findings summary:** exact deletion, lifecycle and publication coverage passed R2; subsequent contract/validator changes require a fresh bounded confirmation.
+- **Evidence / reference:** R2 reviewer `foundation_cutover_integrity_r2` returned zero findings; R4 pending.
 - **Waiver authority / reference:** `n/a`
 
 ## Execution Plan — Approved; Guard-Gated
@@ -743,11 +770,13 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 1. Publicar o freeze sincronizado após `RF-15..RF-16` e executar a última arquitetura/crítica sobre commit/blob/hash exatos.
 2. Com review limpo, repetir coerência e scope drift, executar `todo_authority_guard.py --pre-approval` e exigir `preflight-go`.
 3. `Concluído em 2026-09-24`: novo `APROVADO` recebido para `D-01..D-05`, `S-01..S-09`, mapa de seis módulos, disposition manifest e validações congeladas.
-4. `Em andamento`: após registrar a aprovação, ingerir regras no binding ativo, executar o authority guard normal e exigir `go`; este é o primeiro ponto que autoriza execução.
-5. Implementar test-first o validator e seus trees/fixtures persistidos inofensivos; amostras de segurança proibidas existem somente em temp runtime.
-6. Reescrever a camada canônica raiz, a policy de scope/subscope e a divisão de autoridades conforme o manifesto congelado.
-7. Reconstruir os seis módulos, contratos, decisões, backlog, políticas e TODO governance exatamente nos targets aprovados.
-8. Remover do tree atual os paths `Delete`, validar, executar reviews delivery-side, consolidar owners, mover o TODO e repetir a suíte antes do closeout/push final.
+4. `Concluído`: regras ingeridas, authority guard normal `go` e execução limitada à Foundation.
+5. `Concluído com ressalva cronológica`: mutation RED→GREEN reproduzível entregue; o RED inicial imutável não foi preservado e test-first original não é alegado.
+6. `Concluído`: camada canônica raiz, scope policy e divisão de autoridades reescritas conforme o manifesto.
+7. `Concluído`: seis módulos, contratos, decisões, backlog, políticas e governança reconstruídos nos targets aprovados.
+8. `Concluído localmente`: paths `Delete` removidos, suíte/validator/guards locais verdes e remediações R2/R3 integradas.
+9. `Em andamento`: congelar a remediação em commit local e executar R4 independente sobre o pacote imutável.
+10. Após R4 limpo, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
 
 ### Touched Surfaces
 
@@ -758,10 +787,10 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 
 ### Test Strategy
 
-- **Strategy:** `test-first` para o validator local; `review-after` para documentos canônicos.
+- **Strategy:** `retrofit reproducible mutation RED→GREEN`; original test-first chronology is unverified.
 - **Why:** fixtures negativas precisam provar que o guard falha para identidade legada, links inválidos e autoridade concorrente antes da implementação final.
 - **Fail-first targets:** trees temporários do validator para ocorrência proibida em superfície ativa, link quebrado, owner canônico ausente e padrões JWT/PII montados em runtime; o corpus persistido permanece elegível ao scan normal.
-- **Exact local suite:** `python3 -m unittest discover -s deterministic/tests -p 'test_*.py' && python3 deterministic/validate_foundation.py --root .`.
+- **Exact local suite:** `python3 -B -m unittest discover -s deterministic/tests -p 'test_*.py' && python3 -B deterministic/validate_foundation.py --root .`.
 
 ### Runtime / Rollout Notes
 
@@ -803,8 +832,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 ## Agent Routing Preflight
 
 - **Client surface:** `codex`
-- **Current governed action:** `implementation`
-- **Selected role:** `routine-executor`
+- **Current governed action:** `delivery-review`
+- **Selected role:** `formal-reviewer`
 - **Selected model:** `gpt-5.6-terra`
 - **Selected effort:** `medium`
 - **Proof mode:** `declared`
@@ -814,7 +843,7 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Worktree / auxiliary-checkout authorization:** `not-authorized`
 - **Worktree authorization evidence:** `n/a`
 - **Writer scheduling policy:** `single-writer-serialized`
-- **Guard outcome:** `go`
+- **Guard outcome:** `go for the completed implementation boundary; delivery reviewers remain read-only`
 - **Authority preflight outcome:** `preflight-go`
 - **Authority preflight evidence:** `python3 delphi-ai/tools/todo_authority_guard.py uninotas-foundation/todos/active/process/TODO-uninotas-foundation-project-rebase.md --pre-approval` — zero violations em 2026-09-24.
 - **Post-approval authority outcome:** `go`
@@ -831,7 +860,7 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 
 | Repository / CI Surface | Why In Scope | Behavior / Scenario Covered | Preconditions | Local CI-Equivalent Command | Required Before | Status | Evidence | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `uninotas-foundation / structural validation` | documentos e checks serão alterados | identidade, links, owner único, privacy patterns e ausência de autoridade concorrente | novo `APROVADO`, authority `go` e tree candidato | `python3 -m unittest discover -s deterministic/tests -p 'test_*.py' && python3 deterministic/validate_foundation.py --root .` | `Local-Implemented` | `planned` | `Deterministic Validator Contract` | nenhuma suíte genérica substitui estes checks específicos |
+| `uninotas-foundation / structural validation` | documentos e checks foram alterados | identidade, links, owner único, privacy patterns e ausência de autoridade concorrente | authority `go` e candidate tree | `python3 -B -m unittest discover -s deterministic/tests -p 'test_*.py' && python3 -B deterministic/validate_foundation.py --root .` | `R4 re-review` | `candidate; 8 tests` | `Deterministic Validator Contract` | nenhuma suíte genérica substitui estes checks específicos |
 
 ## Security Risk Assessment
 
@@ -847,7 +876,7 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Policy schema version:** `pcv-1`
 - **Global sensitivity level:** `none`
 - **Why this level:** não há mudança de query, frontend assíncrono, escrita concorrente ou runtime.
-- **Current delivery stage at review time:** `Remediation / Re-review`
+- **Current delivery stage at planning review time:** `Pending`
 
 | Lane ID | Lane | Trigger Result | Trigger Severity | Trigger Reason Code | Gate Deadline | Minimum Evidence Rule | State | Residual Risk | Uncertainty Reason Code |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -862,7 +891,7 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 
 | Dependency | Why It Matters | Status | Last Verified | Verification Method | Adjustment / Workaround |
 | --- | --- | --- | --- | --- | --- |
-| `origin/main` de `uninotas-foundation` | baseline freeze e publicação final | `healthy` | `2026-09-24` | `ls-remote` confirmou `7f28cd8a506f8c36b4cdd5cd40192748bc4efb7f`; blob/hash do package registrados | publicar somente novas evidências não materiais até o review convergir |
+| `origin/main` de `uninotas-foundation` | baseline freeze e publicação final | `healthy; candidate unpublished` | `2026-09-24` | `origin/main` confirmado em `b73b0ebc79daeb74acd6c377b4b307438095c848`; implementação/remediação permanece somente local até os gates finais | publicar apenas após completion/closeout verdes |
 | `delphi-ai` local | workflows e guards PACED | `healthy with runner caveat` | `2026-09-24` | `verify_context.sh` via Git Bash passou | scripts CRLF rodam pelo Git Bash; Python guards rodam no WSL |
 | PostgreSQL/Railway | somente evidência read-only de arquitetura | `healthy` | `2026-09-24` | `/api/v1/saude` retornou banco `ok` | nenhuma mutação/seed/E2E neste TODO |
 
@@ -874,11 +903,11 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 - **Authority guard:** must return `go` only after explicit `APROVADO`, rule ingestion and resolved decisions.
 - **Completion and closeout guards:** required before `Local-Implemented` or movement to `completed/`.
 - **Cutover integrity audit:** required because the work retires one active documentary authority and establishes another.
-- **Round-2 architecture and test-quality re-review:** pending; no clean result is claimed in this TODO.
+- **R4 architecture, test-quality and cutover re-review:** pending on the immutable remediation commit; no clean result is claimed yet.
 
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
-- **Disposition reason:** approved implementation authority remains valid; round-2 remediation and independent re-review remain pending.
-- **Post-commit/push status:** `final synchronized baseline published; preflight-go`
+- **Disposition reason:** approved implementation and R3 remediation are locally complete; R4 and delivery/closeout gates remain pending.
+- **Post-commit/push status:** `candidate local implementation commit plus uncommitted R3 remediation; origin/main remains at the approval checkpoint`
 - **Next path/status action:** permanecer em `todos/active/process/` até implementação, evidência, reviews e closeout completos.

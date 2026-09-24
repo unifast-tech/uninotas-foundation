@@ -19,12 +19,16 @@ Owns external event observation, filters, pagination, export, and original/effec
 
 The protected events boundary observes `GET /eventos`, `GET /eventos/resumo`, `GET /eventos/produtos`, `GET /eventos/exportar`, `GET /eventos/:refId`, and `GET /eventos/:refId/payload`; batch treatment is routed to `POST /eventos/tratar-lote` and belongs jointly with the treatment owner below. List/filter, summary, detail, payload, and export responses are read projections. Invalid or absent authentication is rejected by the identity boundary; an unknown `refId` is a not-found result, not an empty event. The client preserves API error messages and treats transport failure as unavailable, not empty data.
 
+```json
+{"base_path":"/api/v1","routes":["GET /eventos","GET /eventos/resumo","GET /eventos/produtos","GET /eventos/exportar","GET /eventos/:refId","GET /eventos/:refId/payload","PATCH /eventos/:refId/tratamento","POST /eventos/tratar-lote"],"authorization":"JWT; treatment routes require ADMIN|GESTOR|ANALISTA","responses":"list|summary|products|csv|detail|payload; unknown refId=404","errors":"standard error body: statusCode, erro, mensagem, caminho, timestamp"}
+```
+
 ## Ownership Invariant
 
 Routerfy alone writes `logs`; Monitor de Notas reads `logs` only. Application writes belong only to `monitor_usuarios` and `monitor_tratamentos` through their owning modules.
 
 ## Purpose, Owned Entities, and Workflows
-**Purpose:** provide the authoritative read model for emission-event investigation. **Owned/orchestrated entities:** `LogEvent` and classification projections; Routerfy remains owner of persisted source rows. **Workflows/capabilities:** list, filter, paginate, summarize, export, and inspect detail through the observed events API consumer contract. **Invariants/validation/auth:** source remains read-only, SmartNotas filter applies, `ref_id` is correlation only, and protected API access is enforced by the identity boundary. **Observed contracts:** raw SQL, TypeScript classifier, and response mapper are evidenced; no public endpoint shape or SLO is asserted here.
+**Purpose:** provide the authoritative read model for emission-event investigation. **Owned/orchestrated entities:** `LogEvent` and classification projections; Routerfy remains owner of persisted source rows. **Workflows/capabilities:** list, filter, paginate, summarize, export, inspect detail, and register treatment through the observed API contract. **Invariants/validation/auth:** source remains read-only, SmartNotas filter applies, `ref_id` is correlation only, and protected API access is enforced by the identity boundary. **Observed contracts:** raw SQL, classifier, mapper, routes, and bounded errors above are evidenced; no SLO is asserted.
 
 ## Cross-Module Considerations
 Routerfy owns `logs`; [treatments and history](treatments-and-history.md) owns application treatment writes.
