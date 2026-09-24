@@ -32,7 +32,7 @@ project_mandate.md
 system_roadmap.md
 technology_baseline.md
 todos/README.md
-todos/active/process/TODO-uninotas-foundation-project-rebase.md
+todos/completed/process/TODO-uninotas-foundation-project-rebase.md
 todos/ephemeral/.gitignore
 todos/ephemeral/.gitkeep
 todos/promotion_lane/.gitkeep

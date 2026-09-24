@@ -21,6 +21,12 @@ class ValidateFoundationTests(unittest.TestCase):
         shutil.copytree(ROOT, root, ignore=shutil.ignore_patterns(".git", "__pycache__")); self.addCleanup(temp.cleanup); return root
     def errors(self, mutate):
         root = self.tree(); mutate(root); return self.module.validate(root)
+    def current_todo(self, root):
+        present = [relative for relative in self.module.LIFECYCLES if (root / relative).is_file()]
+        self.assertEqual(1, len(present), present)
+        return present[0]
+    def alternate_todo(self, current):
+        return self.module.COMPLETED_TODO if current == self.module.ACTIVE_TODO else self.module.ACTIVE_TODO
     def manifest(self, root): return root / "artifacts/publication-manifest.txt"
     def add_manifest(self, root, path): self.manifest(root).write_text(self.manifest(root).read_text() + "\n" + path + "\n")
     def copy_manifest(self, source_root, destination_root):
@@ -31,14 +37,22 @@ class ValidateFoundationTests(unittest.TestCase):
             shutil.copy2(source, destination, follow_symlinks=False)
     def test_valid_active_tree(self): self.assertEqual([], self.module.validate(ROOT))
     def test_lifecycle_exactly_one_and_completed_simulation(self):
-        self.assertTrue(any("exactly one" in x for x in self.errors(lambda r: ((r / self.module.COMPLETED_TODO).parent.mkdir(parents=True, exist_ok=True), shutil.copy2(r / self.module.ACTIVE_TODO, r / self.module.COMPLETED_TODO)))))
-        self.assertTrue(any("exactly one" in x for x in self.errors(lambda r: ((r / self.module.ACTIVE_TODO).unlink(), self.manifest(r).write_text(self.manifest(r).read_text().replace(self.module.ACTIVE_TODO, ""))))))
-        root = self.tree(); completed = root / self.module.COMPLETED_TODO; completed.parent.mkdir(parents=True, exist_ok=True); shutil.move(root / self.module.ACTIVE_TODO, completed)
+        def duplicate_lifecycle(r):
+            current = self.current_todo(r); alternate = self.alternate_todo(current)
+            (r / alternate).parent.mkdir(parents=True, exist_ok=True); shutil.copy2(r / current, r / alternate)
+        self.assertTrue(any("exactly one" in x for x in self.errors(duplicate_lifecycle)))
+        def remove_lifecycle(r):
+            current = self.current_todo(r); (r / current).unlink()
+            self.manifest(r).write_text(self.manifest(r).read_text().replace(current, ""))
+        self.assertTrue(any("exactly one" in x for x in self.errors(remove_lifecycle)))
+        root = self.tree(); current = self.current_todo(root); alternate = self.alternate_todo(current)
+        (root / alternate).parent.mkdir(parents=True, exist_ok=True); shutil.move(root / current, root / alternate)
         ledger = root / "deterministic/legacy_reference_exceptions.json"; data = json.loads(ledger.read_text())
-        for row in data: row["path"], row["lifecycle"] = self.module.COMPLETED_TODO, "historical"
-        ledger.write_text(json.dumps(data)); self.manifest(root).write_text(self.manifest(root).read_text().replace(self.module.ACTIVE_TODO, self.module.COMPLETED_TODO)); self.assertEqual([], self.module.validate(root))
+        for row in data: row["path"], row["lifecycle"] = alternate, self.module.LIFECYCLES[alternate]
+        ledger.write_text(json.dumps(data)); self.manifest(root).write_text(self.manifest(root).read_text().replace(current, alternate)); self.assertEqual([], self.module.validate(root))
     def test_ledger_section_lifecycle_and_required_fields(self):
-        for key, value in (("section", "wrong"), ("lifecycle", "historical"), ("owner", ""), ("reason", "")):
+        wrong_lifecycle = "historical" if self.current_todo(ROOT) == self.module.ACTIVE_TODO else "active_until_closeout_move"
+        for key, value in (("section", "wrong"), ("lifecycle", wrong_lifecycle), ("owner", ""), ("reason", "")):
             def mutate(r, k=key, v=value):
                 p=r/"deterministic/legacy_reference_exceptions.json"; data=json.loads(p.read_text()); data[0][k]=v; p.write_text(json.dumps(data))
             self.assertTrue(any("ledger" in x for x in self.errors(mutate)))
@@ -47,13 +61,13 @@ class ValidateFoundationTests(unittest.TestCase):
         self.assertTrue(any("ledger" in x for x in self.errors(unused)))
         self.assertTrue(any("legacy" in x for x in self.errors(lambda r: (r / "README.md").write_text("lead" + "shug"))))
         self.assertTrue(any("legacy" in x for x in self.errors(lambda r: (r / "project_mandate.md").write_text("evol" + "ution"))))
-        self.assertTrue(any("ledger" in x for x in self.errors(lambda r: (r / self.module.ACTIVE_TODO).write_text((r / self.module.ACTIVE_TODO).read_text() + "\n## Unlisted historical statement\nLead" + "sHug\n"))))
-        self.assertTrue(any("ledger" in x for x in self.errors(lambda r: (r / self.module.ACTIVE_TODO).write_text((r / self.module.ACTIVE_TODO).read_text().replace("Baileys.\n", "Baileys.\nLead" + "sHug is the current authority.\n", 1)))))
+        self.assertTrue(any("ledger" in x for x in self.errors(lambda r: (r / self.current_todo(r)).write_text((r / self.current_todo(r)).read_text() + "\n## Unlisted historical statement\nLead" + "sHug\n"))))
+        self.assertTrue(any("ledger" in x for x in self.errors(lambda r: (r / self.current_todo(r)).write_text((r / self.current_todo(r)).read_text().replace("Baileys.\n", "Baileys.\nLead" + "sHug is the current authority.\n", 1)))))
         def ledgered_active_claim(r, line):
-            todo = r / self.module.ACTIVE_TODO
+            relative = self.current_todo(r); todo = r / relative
             todo.write_text(todo.read_text() + "\n## Active claim probe\n" + line + "\n")
             ledger = r / "deterministic/legacy_reference_exceptions.json"; rows = json.loads(ledger.read_text())
-            rows.append({"path":self.module.ACTIVE_TODO,"term":"lead"+"shug","context_kind":"historical_migration_record","section":"Active claim probe","reason":"probe","owner":"test","lifecycle":"active_until_closeout_move","line_hashes":[self.module.normalized_line_hash(line)]})
+            rows.append({"path":relative,"term":"lead"+"shug","context_kind":"historical_migration_record","section":"Active claim probe","reason":"probe","owner":"test","lifecycle":self.module.LIFECYCLES[relative],"line_hashes":[self.module.normalized_line_hash(line)]})
             ledger.write_text(json.dumps(rows))
         probes = ("Lead"+"sHug is the current authority.", "Lead"+"sHug is the canonical architecture.", "Lead"+"sHug remains the source of truth.", "Lead"+"sHug é a autoridade atual.")
         for line in probes:
@@ -65,7 +79,7 @@ class ValidateFoundationTests(unittest.TestCase):
             self.assertTrue(self.module.term_occurs("evol"+"ution", "evol"+"ution_lifecycle" + suffix), suffix)
         for compound in ("Lead"+"shugFoundation is the current product.", "Lead"+"shug_Foundation is the current authority.", "Lead"+"shugFundação é o produto atual."):
             self.assertTrue(any("legacy" in x for x in self.errors(lambda r, value=compound: (r / "README.md").write_text(value))), compound)
-        self.assertTrue(any("ledger" in x for x in self.errors(lambda r: (r / self.module.ACTIVE_TODO).write_text((r / self.module.ACTIVE_TODO).read_text().replace("LeadsHug", "LEADSHUG", 1)))))
+        self.assertTrue(any("ledger" in x for x in self.errors(lambda r: (r / self.current_todo(r)).write_text((r / self.current_todo(r)).read_text().replace("LeadsHug", "LEADSHUG", 1)))))
     def test_delete_paths_are_exact_and_independent_of_manifest(self):
         self.assertEqual(EXPECTED_DELETE_PATHS, self.module.DELETE_PATHS)
         root, original_manifest = self.tree(), None
@@ -156,7 +170,7 @@ class ValidateFoundationTests(unittest.TestCase):
     def test_privacy_scans_every_persisted_surface(self):
         fragments=("eyJ"+"hbGciOiJIUzI1NiJ9"+".eyJzdWIiOiIxIn0"+".signature", "-----"+"BEGIN PRIVATE "+"KEY-----", "api"+"_key='abcdefghijk'", "API"+"_KEY=abcdefghijk", "api"+"-key: abcdefghijk", "- api"+"_key: abcdefghijk", "{\"api"+"_key\":\"abcdefghijk\"}", "{\"kind\":\"config\",\"api"+"_key\":\"abcdefghijk\"}", "[{\"api"+"_key\":\"abcdefghijk\"}]", "https://x.invalid/?to"+"ken=abcdefghijk", "Authorization: Bea"+"rer abcdefghijk", "DATABASE"+"_URL=postgres"+"ql://db_admin:"+"Sup3rValue@127.0.0.1/prod", "AK"+"IAIOSFODNN7EXAMPLE", "gh"+"p_"+("A"*36), "github"+"_pat_"+("A"*24), "sk"+"-proj-"+("A"*24), "AI"+"za"+("A"*35), "529"+".982.247-25", "111"+"444"+"777"+"35", "+55"+" 11 "+"99999"+"-9999", "+55"+" 11 "+"3333"+"-4444", "{\n  \"no"+"me\": \"Pessoa\",\n  \"documento\": \"redacted\",\n  \"telefone\": \"redacted\"\n}", "a"+"lice"+"@example.com")
         root = self.tree()
-        for relative in ("README.md", "modules/events-and-classification.md", "policies/engineering_guardrails.md", "artifacts/README.md", self.module.ACTIVE_TODO, "local_packages.yaml", "artifacts/publication-manifest.txt", "deterministic/validate_foundation.py", "deterministic/legacy_reference_exceptions.json", "deterministic/tests/test_validate_foundation.py", "deterministic/tests/fixtures/valid-tree/README.md"):
+        for relative in ("README.md", "modules/events-and-classification.md", "policies/engineering_guardrails.md", "artifacts/README.md", self.current_todo(root), "local_packages.yaml", "artifacts/publication-manifest.txt", "deterministic/validate_foundation.py", "deterministic/legacy_reference_exceptions.json", "deterministic/tests/test_validate_foundation.py", "deterministic/tests/fixtures/valid-tree/README.md"):
             for content in fragments:
                 path=root/relative; original=path.read_text(); path.write_text(original+"\n"+content); self.assertTrue(any("privacy" in x for x in self.module.validate(root)), (relative, content)); path.write_text(original)
     def test_legacy_destination_is_not_stripped(self):

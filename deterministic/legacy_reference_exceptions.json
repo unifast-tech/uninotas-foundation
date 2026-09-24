@@ -1,96 +1,96 @@
 [
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "leadshug",
     "context_kind": "historical_migration_record",
     "section": "Context",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "ed410a8f436e5b5d58e1a7b68bb03d4bb74de9cc0bf9f3148f2e68e000258a7e"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "whatsapp",
     "context_kind": "historical_migration_record",
     "section": "Context",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "ed410a8f436e5b5d58e1a7b68bb03d4bb74de9cc0bf9f3148f2e68e000258a7e"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "typebot",
     "context_kind": "historical_migration_record",
     "section": "Context",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "ed410a8f436e5b5d58e1a7b68bb03d4bb74de9cc0bf9f3148f2e68e000258a7e"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "evolution",
     "context_kind": "historical_migration_record",
     "section": "Context",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "ed410a8f436e5b5d58e1a7b68bb03d4bb74de9cc0bf9f3148f2e68e000258a7e"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "baileys",
     "context_kind": "historical_migration_record",
     "section": "Context",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "ed410a8f436e5b5d58e1a7b68bb03d4bb74de9cc0bf9f3148f2e68e000258a7e"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "leadshug",
     "context_kind": "historical_migration_record",
     "section": "Objective",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "85723f5f473239b9dc8fc186fd61f69d4d74dedbcebf35aeba8c017a9c436861"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "leadshug",
     "context_kind": "historical_migration_record",
     "section": "Implementation Intent",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "aefba0e5cb0f11b9857382812ac3e8620fcb4e2a946035c023559f22fd7a701e"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "leadshug",
     "context_kind": "historical_migration_record",
     "section": "Scope",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "1e9d6fa3664aedf332077abfa9a443341ac672d3c189db73e9e2009c4c4bb1a8",
       "62c67918ef64604370bd298aa2e945fb84ba6f8fc431bc619b8ba976fdc9e02c",
@@ -98,122 +98,122 @@
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "leadshug",
     "context_kind": "historical_migration_record",
     "section": "Decisions — Resolved Before Freeze",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "238f122de18cc09d0f75f3593d0aef5eaf8b5bc071e417a9e240c7b7acb2c085"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "leadshug",
     "context_kind": "historical_migration_record",
     "section": "Definition of Done",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "313fab44a4331c3aa6002eb20dca0a255aa6d24968e50740d485bcced27c9904",
       "ddb1fac2fd2dadee0286f7400ca642dd765cd1ce0870e66ca8fd72db3f0170f8"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "leadshug",
     "context_kind": "historical_migration_record",
     "section": "Validation Steps",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "a6dc9efe640c7bcdc79d8d41b41b23fb2b3648ba5d5bc663781ee107a9ae7fa3"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "whatsapp",
     "context_kind": "historical_migration_record",
     "section": "Validation Steps",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "a6dc9efe640c7bcdc79d8d41b41b23fb2b3648ba5d5bc663781ee107a9ae7fa3"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "typebot",
     "context_kind": "historical_migration_record",
     "section": "Validation Steps",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "a6dc9efe640c7bcdc79d8d41b41b23fb2b3648ba5d5bc663781ee107a9ae7fa3"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "evolution",
     "context_kind": "historical_migration_record",
     "section": "Validation Steps",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "a6dc9efe640c7bcdc79d8d41b41b23fb2b3648ba5d5bc663781ee107a9ae7fa3"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "baileys",
     "context_kind": "historical_migration_record",
     "section": "Validation Steps",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "a6dc9efe640c7bcdc79d8d41b41b23fb2b3648ba5d5bc663781ee107a9ae7fa3"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "belluga",
     "context_kind": "historical_migration_record",
     "section": "Validation Steps",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "a6dc9efe640c7bcdc79d8d41b41b23fb2b3648ba5d5bc663781ee107a9ae7fa3"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "bóora",
     "context_kind": "historical_migration_record",
     "section": "Validation Steps",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "a6dc9efe640c7bcdc79d8d41b41b23fb2b3648ba5d5bc663781ee107a9ae7fa3"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "leadshug",
     "context_kind": "historical_migration_record",
     "section": "Completion Evidence Matrix",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "0696916876ccdccd949f50780e43cbc547afbf2cd43ebdfcbcab0983a9e59f3f",
       "3e9a75dbd9e2dc82f5cd440e56ed7d0d56dcf2654d8d0947bf2be260a9b2b304",
@@ -224,110 +224,110 @@
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "whatsapp",
     "context_kind": "historical_migration_record",
     "section": "Completion Evidence Matrix",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "c0e72dbbb581fb8f7ca54f10ca7be9d5d6126e66eb5e6ace0ab3ac0ea46b565c"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "typebot",
     "context_kind": "historical_migration_record",
     "section": "Completion Evidence Matrix",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "c0e72dbbb581fb8f7ca54f10ca7be9d5d6126e66eb5e6ace0ab3ac0ea46b565c"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "evolution",
     "context_kind": "historical_migration_record",
     "section": "Completion Evidence Matrix",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "c0e72dbbb581fb8f7ca54f10ca7be9d5d6126e66eb5e6ace0ab3ac0ea46b565c"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "baileys",
     "context_kind": "historical_migration_record",
     "section": "Completion Evidence Matrix",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "c0e72dbbb581fb8f7ca54f10ca7be9d5d6126e66eb5e6ace0ab3ac0ea46b565c"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "belluga",
     "context_kind": "historical_migration_record",
     "section": "Completion Evidence Matrix",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "c0e72dbbb581fb8f7ca54f10ca7be9d5d6126e66eb5e6ace0ab3ac0ea46b565c"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "bóora",
     "context_kind": "historical_migration_record",
     "section": "Completion Evidence Matrix",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "c0e72dbbb581fb8f7ca54f10ca7be9d5d6126e66eb5e6ace0ab3ac0ea46b565c"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "leadshug",
     "context_kind": "historical_migration_record",
     "section": "PACED Setup / Recalibration Status",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "746bdb638f5f2e5abceebff2ecdbabee993dabcdcc568e75cd045941477e442c",
       "ce018ea69a0d567df11b3c5bc12519d379cac44ae79cb86d77a6e5209fe75826"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "leadshug",
     "context_kind": "historical_migration_record",
     "section": "Canonical Target Module Map",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "bc36b1fda570f10c9d7432b2ac6381dd1393d423095d4ff71256b373c2e754a9"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "leadshug",
     "context_kind": "historical_migration_record",
     "section": "Module Decision Baseline Snapshot",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "94c141e8e63f8cd0738f02ccb17e18c252e2531375fb1615df923acd0259086c",
       "eed66715cdb1ee849d2e544f03e48acf2196d9e841d2618161168a8cb177d57b",
@@ -335,50 +335,50 @@
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "whatsapp",
     "context_kind": "historical_migration_record",
     "section": "Module Decision Baseline Snapshot",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "94c141e8e63f8cd0738f02ccb17e18c252e2531375fb1615df923acd0259086c",
       "be3f7fcd819db84504822c47115444e2abac7e2650abb33c575e1d96d1d1fae1"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "typebot",
     "context_kind": "historical_migration_record",
     "section": "Module Decision Baseline Snapshot",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "d868d66a81e112954d2b2a0c40ebb0c27d373e70737aeddb644393b6432dd13f"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "evolution",
     "context_kind": "historical_migration_record",
     "section": "Module Decision Baseline Snapshot",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "d868d66a81e112954d2b2a0c40ebb0c27d373e70737aeddb644393b6432dd13f"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "leadshug",
     "context_kind": "historical_migration_record",
     "section": "Tracked Foundation File Disposition Manifest",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "120aab57e80870cfbf0c4408802acc0f6154916f76168cbd38eabea2c1c9bbcc",
       "267de349bfea4585e86c3961dcf909ebca32d9d1e543044c2276b883b8c7f4e9",
@@ -404,63 +404,63 @@
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "evolution",
     "context_kind": "historical_migration_record",
     "section": "Tracked Foundation File Disposition Manifest",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "71544e8fed447caf0cda579ebbd4b2a14e2304085a76e3735a3a7465d3260bb0",
       "fb68a6a4ee385509864934f0ec376cb7e9b247cf606d854f056b4984d6d8f6ec"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "whatsapp",
     "context_kind": "historical_migration_record",
     "section": "Tracked Foundation File Disposition Manifest",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "4af2356c5a0114206f168a5487ec0e830be2bf4219856464ff939c93f434b0ae",
       "6b210a05c8cf24936d314b3c31d6735b54a6a14ca63a6fd337e00fbe46afbf34"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "typebot",
     "context_kind": "historical_migration_record",
     "section": "Tracked Foundation File Disposition Manifest",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "d72bd2f67bfe9813d21509dd411e30aabc1fa619fbc1b1e2303843bf857917b3"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "leadshug",
     "context_kind": "historical_migration_record",
     "section": "Module Decision Consistency Gate",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "90e1bdb7896be23c830050f15ced0e564f628914ce1ecef718619e25de99bb0b"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "leadshug",
     "context_kind": "historical_migration_record",
     "section": "Architecture Change Governance",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "0bf8e16f826fdd8124c19de3fde6a509365b3f00c2a122479787f50c2274b123",
       "1e565ed830edb7e135f1d81f6fec3c003327fea0df6460a4d395ab6951a41717",
@@ -471,13 +471,13 @@
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "leadshug",
     "context_kind": "historical_migration_record",
     "section": "Plan Review Gate",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "7bde08cb4dc689f429bb0d509cf0952f17dc00f4d22287146db38538ce855a76",
       "7d5a90e9b4ee5203279fd077b14a1632454bad5f71b23e137e4f11541aca20d1",
@@ -486,25 +486,25 @@
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "leadshug",
     "context_kind": "historical_migration_record",
     "section": "Independent Cutover Integrity Audit Gate",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "e317a572661d0ecd0986e23d4cfee2c03c5a6e665678cbd7c8f61d89ad2ca284"
     ]
   },
   {
-    "path": "todos/active/process/TODO-uninotas-foundation-project-rebase.md",
+    "path": "todos/completed/process/TODO-uninotas-foundation-project-rebase.md",
     "term": "leadshug",
     "context_kind": "historical_migration_record",
     "section": "Rules Acknowledgement / Ingestion",
     "reason": "Frozen historical cutover reference.",
     "owner": "TODO owner",
-    "lifecycle": "active_until_closeout_move",
+    "lifecycle": "historical",
     "line_hashes": [
       "c958eb73a2df1ed2ec81415e087ce4a7a885dde7e45b167ce54c85586b1fd96e"
     ]
