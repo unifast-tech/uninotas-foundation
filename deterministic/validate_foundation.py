@@ -22,11 +22,35 @@ REQUIRED_CONTRACT_TOKENS = {
     "operational-monitoring.md": ("MONITORAMENTO_TOKEN", "x-monitor-token", "maximum 200 characters", "1..1440", "atencao|critico", "application/json", "{status,cor,erros,pendentes,sucessos,total,ultima_verificacao,janela,limites,detalhe}", "HTTP 503"),
     "runtime-and-deployment.md": ("GET /api/v1/saude", "application/json", "{status,banco,em}", "degradado", "indisponivel", "HTTP 200"),
 }
+REQUIRED_ROUTE_CONTRACTS = {
+    "events-and-classification.md": {
+        "GET /eventos": ("common filters", "HTTP 200 `application/json`", "`{dados,meta}`"),
+        "GET /eventos/resumo": ("common filters", "HTTP 200 `application/json`", "`{total,erro,pendente,sucesso,tratados}`"),
+        "GET /eventos/produtos": ("none", "HTTP 200 `application/json`", "array of `{nome,eventos,erros}`"),
+        "GET /eventos/exportar": ("common filters", "HTTP 200 `text/csv; charset=utf-8`", "20,000 rows"),
+        "GET /eventos/:refId": ("correlation `refId`", "HTTP 200 `application/json`", "`orientacao,origem,cliente,venda,produtor,historico,camposPendentes,payload,resposta`"),
+        "GET /eventos/:refId/payload": ("correlation `refId`", "HTTP 200 `application/json`", "`{enviado,resposta}`"),
+    },
+    "treatments-and-history.md": {
+        "PATCH /eventos/:refId/tratamento": ("`situacao=RESOLVIDO|IGNORADO|PENDENTE`", "HTTP 200 `application/json`", "complete event-detail projection"),
+        "POST /eventos/tratar-lote": ("`refIds`", "at most 500 entries", "HTTP 200 `application/json`", "`{solicitados,aplicados,ignorados}`"),
+    },
+    "identity-and-team.md": {
+        "POST /auth/login": ("public", "HTTP 200 `application/json`", "`{accessToken,expiraEm,usuario}`"),
+        "GET /auth/eu": ("normal JWT", "HTTP 200 `application/json`", "current user summary"),
+        "GET /usuarios": ("`ADMIN|GESTOR`", "HTTP 200 `application/json`", "array of users"),
+        "POST /usuarios": ("`ADMIN`", "HTTP 201 `application/json`", "created user fields"),
+        "PATCH /usuarios/minha-senha": ("normal JWT", "HTTP 200 `application/json`", "updated user fields"),
+        "PATCH /usuarios/:id": ("`ADMIN`", "HTTP 200 `application/json`", "updated user fields"),
+        "DELETE /usuarios/:id": ("`ADMIN`", "HTTP 200 `application/json`", "deactivated user fields"),
+    },
+}
 DELETE_PATHS = frozenset({
     "artifacts/analysis/leadshug-architecture-truth-and-legacy-boundaries-20260915.md", "artifacts/analysis/leadshug-executive-system-dossier-20260915.md", "artifacts/analysis/leadshug-system-analysis-20260915.md", "artifacts/feature-briefs/leadshug-pre-code-evolution-program-20260918.md", "artifacts/migration/claude-legacy-reconciliation-review.json", "artifacts/migration/claude-legacy-reconciliation-review.prompt.txt", "artifacts/migration/legacy-reconciliation-20260915.md", "artifacts/workspace-link-stabilization-20260915.md", "decisions/ST-01-foundation-lifecycle-decisions.md", "deterministic/.gitkeep", "modules/audit-and-history.md", "modules/identity-and-tenancy.md", "modules/inbox-and-conversations.md", "modules/integrations-and-channels.md", "policies/central_whatsapp_independent_legacy_policy.md", "policies/web_to_app_promotion_policy.md", "todos/active/features/TODO-leadshug-mode-specific-primary-and-secondary-color.md", "todos/active/features/TODO-leadshug-typebot-automation-integration.md", "todos/active/process/TODO-foundation-lifecycle-structural-validator.md", "todos/completed/features/TODO-delphi-shell-line-endings-and-cross-platform-validation.md", "todos/completed/features/TODO-leadshug-foundation-and-delphi-migration.md", "todos/completed/features/TODO-leadshug-identity-visual-screen-tests.md", "todos/completed/features/TODO-leadshug-initial-branding-and-unofficial-connection.md", "todos/completed/features/TODO-leadshug-post-onboarding-brand-settings.md", "todos/completed/features/TODO-leadshug-secondary-color-background-contract.md", "todos/completed/process/TODO-central-whatsapp-independent-legacy-policy.md", "todos/completed/process/TODO-ci-contract-and-migration-test-gates.md", "todos/completed/process/TODO-leadshug-architecture-truth-and-legacy-boundaries.md", "todos/completed/process/TODO-leadshug-authority-and-technology-documentation-rebase.md", "todos/completed/process/TODO-leadshug-executive-system-dossier.md", "todos/completed/process/TODO-leadshug-foundation-evolution-lifecycle.md", "todos/completed/process/TODO-leadshug-legacy-authority-migration-and-retirement.md", "todos/completed/process/TODO-leadshug-system-analysis-and-modernization-plan.md", "todos/completed/process/TODO-leadshug-workspace-link-stabilization.md",
 })
 TERMS = ("lead" + "shug", "what" + "sapp", "type" + "bot", "evol" + "ution", "bai" + "leys", "bell" + "uga", "bó" + "ora")
-FROZEN_LEGACY_CONTENT_DIGEST = "3ddeb45642a2b0a812ff10889d4bd806a9dee4320a18fa96473e0e2fca071218"
+FROZEN_LEGACY_CONTENT_DIGEST = "fbd657feebb688f1005184aa8135670d19cfba97bebcc855fd4d7ab8f4067778"
+FROZEN_RAW_LEGACY_CONTENT_DIGEST = "87bd0bab09f659f96facc2a186d52708ddcd7b93a03c53623731417db5937204"
 IDENTITY = {"README.md": ("Monitor de Notas", "uninotas-foundation", "foundation_documentation"), "project_mandate.md": ("Monitor de Notas", "MonitorDeNotas", "uninotas-foundation"), "project_constitution.md": ("Monitor de Notas",), "decisions/monitor-de-notas-foundation-decisions.md": ("Monitor de Notas", "MonitorDeNotas", "uninotas-foundation"), ACTIVE_TODO: ("Monitor de Notas", "MonitorDeNotas", "uninotas-foundation", "foundation_documentation"), COMPLETED_TODO: ("Monitor de Notas", "MonitorDeNotas", "uninotas-foundation", "foundation_documentation")}
 IDENTITY_ANCHORS = {"README.md": "# Monitor de Notas Foundation", "decisions/monitor-de-notas-foundation-decisions.md": "| D-01 | Product name is Monitor de Notas; technical repository is MonitorDeNotas; documentation repository is uninotas-foundation. |"}
 CANONICAL_ASSERTIONS = {"project_constitution.md": "Routerfy owns and writes `logs`; Monitor de Notas reads it only and writes only `monitor_usuarios` and `monitor_tratamentos`."}
@@ -42,6 +66,9 @@ ACCESS_KEY = re.compile("AK" + r"IA[0-9A-Z]{16}")
 GITHUB_PROVIDER_PATTERN = re.compile(r"(?:gh[pousr]_[A-Za-z0-9]{36,}|github_" + r"pat_[A-Za-z0-9_]{20,})")
 OPENAI_PROVIDER_PATTERN = re.compile("s" + r"k-(?:proj-)?[A-Za-z0-9_-]{20,}")
 GOOGLE_PROVIDER_PATTERN = re.compile("AI" + r"za[0-9A-Za-z_-]{35}")
+CPF_PATTERN = re.compile(r"(?<!\d)\d{3}\.\d{3}\.\d{3}-\d{2}(?!\d)")
+PHONE_PATTERN = re.compile(r"(?<!\d)(?:\+?55\s*)?(?:\(?\d{2}\)?[\s.-]*)9\d{4}[\s.-]?\d{4}(?!\d)")
+RAW_PERSON_PAYLOAD_PATTERN = re.compile(r"(?i)\{(?=[^{}\r\n]{0,500}\"no" + r"me\"\s*:)(?=[^{}\r\n]{0,500}\"(?:documento|cpf)\"\s*:)(?=[^{}\r\n]{0,500}\"telefone\"\s*:)[^{}\r\n]{1,500}\}")
 CONFLICTING_LOG_OWNERSHIP = re.compile(r"(?i)(?:monitor\s+de\s+notas\s+(?:(?:can|may)\s+)?(?:own|owns|write|writes|mutate|mutates|manage|manages)\s+`?logs`?|`?logs`?\s+(?:(?:can|may)\s+be\s+)?(?:is\s+|are\s+)?(?:owned|written|writable|mutable)[^\n]{0,60}monitor\s+de\s+notas)")
 CONFLICTING_IDENTITY = re.compile(r"(?i)(?:canonical\s+product|product\s+name)\s+(?:is|=)\s+(?!monitor\s+de\s+notas\b)[^\n]+")
 ACTIVE_AUTHORITY_PHRASES = re.compile(r"(?i)(?:is\s+(?:the\s+)?(?:current|active|canonical)\s+(?:authority|architecture|foundation|product)|(?:is|remains?)\s+(?:the\s+)?source\s+of\s+truth|remains?\s+(?:the\s+)?active\s+authority|(?:owns|governs)\s+(?:this|the)\s+(?:foundation|product|architecture)|é\s+(?:a\s+)?(?:autoridade\s+(?:atual|ativa|canônica)|fonte\s+da\s+verdade|produto\s+(?:atual|canônico))|permanece\s+(?:a\s+)?autoridade\s+ativa|(?:possui|governa)\s+(?:esta|o|a)\s+(?:foundation|produto|arquitetura))")
@@ -49,7 +76,11 @@ ACTIVE_AUTHORITY_PHRASES = re.compile(r"(?i)(?:is\s+(?:the\s+)?(?:current|active
 def files(root): return {p.relative_to(root).as_posix(): p for p in Path(root).rglob("*") if p.is_file() and ".git" not in p.parts}
 def headings(text): return {line.lstrip("#").strip().lower() for line in text.splitlines() if line.startswith("#")}
 def normalized_line_hash(line): return hashlib.sha256(" ".join(line.split()).casefold().encode("utf-8")).hexdigest()
-def term_occurs(term, text): return re.search(rf"(?<![\w]){re.escape(term)}(?![\w])", text, re.I) is not None
+def term_occurs(term, text):
+    folded = text.casefold()
+    if term.casefold() == "evolution":
+        folded = re.sub(r"(?<![\w])evolution_lifecycle(?:\.md)?(?![\w])", "", folded)
+    return term.casefold() in folded
 def section_occurrences(text):
     section, found = "Preamble", {}
     for line in text.splitlines():
@@ -57,6 +88,14 @@ def section_occurrences(text):
         for term in TERMS:
             if term_occurs(term, line): found.setdefault((term.casefold(), section), []).append(normalized_line_hash(line))
     return {key: sorted(values) for key, values in found.items()}
+
+def raw_legacy_content_digest(text):
+    section, payload = "Preamble", []
+    for line in text.splitlines():
+        if line.startswith("## "): section = line[3:].strip()
+        for term in TERMS:
+            if term_occurs(term, line): payload.append((term.casefold(), section, line))
+    return hashlib.sha256(json.dumps(sorted(payload), ensure_ascii=False, separators=(",", ":")).encode("utf-8")).hexdigest()
 
 def lifecycle(tree, errors):
     present = [path for path in LIFECYCLES if path in tree]
@@ -83,6 +122,7 @@ def ledger_entries(tree, todo_path, expected_lifecycle, errors):
         frozen_payload = sorted((row["term"].casefold(), row["section"], tuple(row["line_hashes"])) for row in data)
         frozen_digest = hashlib.sha256(json.dumps(frozen_payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")).hexdigest()
         if frozen_digest != FROZEN_LEGACY_CONTENT_DIGEST: raise ValueError
+        if raw_legacy_content_digest(todo_text) != FROZEN_RAW_LEGACY_CONTENT_DIGEST: raise ValueError
     except (KeyError, ValueError, json.JSONDecodeError): errors.append("invalid legacy exception ledger")
 
 def scope_policy(tree, errors):
@@ -121,6 +161,9 @@ def validate(root):
         contract_text = "\n".join(contract_bodies)
         for token in REQUIRED_CONTRACT_TOKENS.get(name, ()):
             if token not in contract_text: errors.append(f"missing module contract semantic {token}: {name}")
+        for route, tokens in REQUIRED_ROUTE_CONTRACTS.get(name, {}).items():
+            route_rows = re.findall(rf"^\|\s*`{re.escape(route)}`\s*\|(.*)$", contract_text, re.M)
+            if len(route_rows) != 1 or any(token not in route_rows[0] for token in tokens): errors.append(f"route contract mismatch {route}: {name}")
         if not policy or re.search(r"\*\*Core scope:\*\* `monitor-de-notas`", text) is None or re.search(rf"\*\*Subscope:\*\* `{re.escape(name[:-3])}`", text) is None or "`landlord`" not in text: errors.append(f"scope/subscope mismatch: {name}")
     if todo_path: ledger_entries(tree, todo_path, expected_lifecycle, errors)
     for owner, tokens in IDENTITY.items():
@@ -138,7 +181,7 @@ def validate(root):
         if [key for key, _ in rows] != ["D-01", "D-02", "D-03", "D-04", "D-05"] or "Routerfy owns and writes `logs`; Monitor de Notas reads it and writes only its application tables." not in dict(rows).get("D-04", ""): errors.append("canonical decision table mismatch")
     for relative, path in tree.items():
         text = path.read_text(encoding="utf-8", errors="replace")
-        if JWT.search(text) or PRIVATE.search(text) or CREDENTIAL_ASSIGNMENT.search(text) or SERIALIZED_CREDENTIAL.search(text) or URL_CREDENTIAL.search(text) or BEARER.search(text) or URI_CREDENTIAL.search(text) or ACCESS_KEY.search(text) or GITHUB_PROVIDER_PATTERN.search(text) or OPENAI_PROVIDER_PATTERN.search(text) or GOOGLE_PROVIDER_PATTERN.search(text) or EMAIL.search(text): errors.append(f"privacy pattern in {relative}")
+        if JWT.search(text) or PRIVATE.search(text) or CREDENTIAL_ASSIGNMENT.search(text) or SERIALIZED_CREDENTIAL.search(text) or URL_CREDENTIAL.search(text) or BEARER.search(text) or URI_CREDENTIAL.search(text) or ACCESS_KEY.search(text) or GITHUB_PROVIDER_PATTERN.search(text) or OPENAI_PROVIDER_PATTERN.search(text) or GOOGLE_PROVIDER_PATTERN.search(text) or CPF_PATTERN.search(text) or PHONE_PATTERN.search(text) or RAW_PERSON_PAYLOAD_PATTERN.search(text) or EMAIL.search(text): errors.append(f"privacy pattern in {relative}")
         if relative not in {todo_path, "deterministic/validate_foundation.py", "deterministic/legacy_reference_exceptions.json", "deterministic/tests/test_validate_foundation.py"} and CONFLICTING_LOG_OWNERSHIP.search(text): errors.append(f"contradictory external ownership claim in {relative}")
         if relative not in {todo_path, "deterministic/validate_foundation.py", "deterministic/legacy_reference_exceptions.json", "deterministic/tests/test_validate_foundation.py"} and CONFLICTING_IDENTITY.search(text): errors.append(f"contradictory canonical identity claim in {relative}")
         for _, target in ([] if path.suffix == ".py" else re.findall(r"\[([^]]+)\]\(([^)]+)\)", text)):

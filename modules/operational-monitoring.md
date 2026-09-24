@@ -17,7 +17,7 @@ Owns the documented operational summary contract. A database failure is distinct
 
 ## Observed Monitoring Contract
 
-`GET /api/v1/monitoramento/erros` is open when `MONITORAMENTO_TOKEN` is unset. When configured, the credential may be supplied as query `token` (trimmed string, maximum 200 characters) or header `x-monitor-token` (no DTO length bound observed); missing/mismatch returns 401 through `{statusCode,erro,mensagem,caminho,timestamp}`.
+`GET /api/v1/monitoramento/erros` is open when `MONITORAMENTO_TOKEN` is unset. When configured, the credential may be supplied as query `token` (string, maximum 200 characters; no trim transform is observed) or header `x-monitor-token` (no DTO length bound observed); missing/mismatch returns 401 through `{statusCode,erro,mensagem,caminho,timestamp}`.
 
 Query fields are integer `minutos` default 60/range 1..1440, integer `atencao` default 1/minimum 1, integer `critico` default 6/minimum 1, and optional `alertarEm=atencao|critico`. The response is `{status,cor,erros,pendentes,sucessos,total,ultima_verificacao,janela,limites,detalhe}` where `status=ok|atencao|critico|indisponivel`, `cor=verde|amarelo|vermelho|cinza`, `janela={inicio,fim,minutos}`, and `limites={atencao,critico}`.
 

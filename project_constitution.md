@@ -22,4 +22,4 @@ NestJS, React/Vite, PostgreSQL/Prisma, Docker, and Railway are observed product 
 
 ## Delivery governance
 
-Every implementation has an active approved TODO, evidence, and an authority guard `go`. Backlog is not execution authority. Completed TODOs retain history but do not override canonical owners.
+Every implementation has an active approved TODO, evidence, and an authority guard `go`. Every review finding is classified through the project taxonomy in [TODO governance](todos/README.md#review-finding-classification); promotion requires no open `release-blocker` and an explicit TODO owner for every real non-blocking follow-up. Backlog is not execution authority. Completed TODOs retain history but do not override canonical owners.

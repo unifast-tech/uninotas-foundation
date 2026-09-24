@@ -17,7 +17,7 @@ Owns session authentication, profiles, and financial-team administration. Users 
 
 ## Observed Authentication Contract
 
-All routes use base path `/api/v1`. Normal protected routes validate bearer signature/expiry and resolve an active, known user before role checks. The realtime query-token exception is owned separately and does not perform that user lookup.
+All routes use base path `/api/v1`. Normal protected routes validate bearer signature/expiry. On a cache miss they resolve an active, known user before role checks; a cached identity/profile may be reused for up to 30 seconds, so deactivation or profile-change enforcement may lag by that observed cache window. The realtime query-token exception is owned separately and does not perform that user lookup.
 
 | Route | Authorization and request | Status / media | Successful response |
 | --- | --- | --- | --- |
@@ -29,7 +29,7 @@ All routes use base path `/api/v1`. Normal protected routes validate bearer sign
 | `PATCH /usuarios/:id` | `ADMIN`; UUID path; partial create fields plus optional boolean `ativo` | HTTP 200 `application/json` | updated user fields |
 | `DELETE /usuarios/:id` | `ADMIN`; UUID path | HTTP 200 `application/json` | deactivated user fields; row/authorship remains |
 
-Invalid credentials, missing/expired bearer tokens, inactive/unknown users on normal JWT routes, insufficient roles, self-deactivation, self-demotion, last-administrator removal, duplicate identity, missing users, and validation failures reject through `{statusCode,erro,mensagem,caminho,timestamp}`.
+Invalid credentials, missing/expired bearer tokens, inactive/unknown users after cache revalidation on normal JWT routes, insufficient roles, self-deactivation, self-demotion, last-administrator removal, duplicate identity, missing users, and validation failures reject through `{statusCode,erro,mensagem,caminho,timestamp}`. The cache-window qualification above applies to deactivation and profile changes.
 
 ## Purpose, Owned Entities, and Workflows
 **Purpose:** govern who may operate the monitor. **Owned/orchestrated entities:** `Usuario`, profile, and authenticated session. **Workflows/capabilities:** authenticate, manage team profiles, deactivate users, and preserve the last administrator. **Invariants/validation/auth:** JWT guards protected operations; active status is required; deletion does not erase authorship. **Observed contracts:** auth and user services are evidenced; credential values, endpoint examples, and SLO are intentionally undocumented.

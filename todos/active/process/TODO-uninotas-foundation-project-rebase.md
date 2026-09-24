@@ -51,13 +51,13 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `none`
-- **Next exact step:** congelar a remediação R5 em commit imutável, gerar o pacote R6 e executar reviewers independentes sobre o HEAD exato registrado pelo pacote.
+- **Next exact step:** concluir a remediação dos blockers R6, congelá-la em commit imutável e executar reviewers R7 independentes sobre esse HEAD.
 
 ## Active Work State
 
 - **Work state:** `delivery-review`
-- **Why this state now:** delivery R5 encontrou blockers dentro do escopo aprovado; todos foram integrados localmente e aguardam confirmação R6 independente.
-- **Exit condition:** delivery R6 sem release-blocker, matrizes 1:1 adjudicadas e gates de completion/closeout prontos para execução.
+- **Why this state now:** delivery R6 encontrou blockers dentro do escopo aprovado; a remediação está integrada localmente e aguarda confirmação R7 independente.
+- **Exit condition:** delivery R7 sem release-blocker, matrizes 1:1 adjudicadas e gates de completion/closeout prontos para execução.
 
 ## Routine-Executor Implementation Evidence — 2026-09-24
 
@@ -119,6 +119,23 @@ All R5 findings remain inside D-01..D-05 and are classified as `release-blocker`
 | `CUTOVER-R5-06` | release-blocker | use boundary-aware legacy matching so current underscored lifecycle filenames are not false historical references | integrated; delivery R6 pending |
 | `CUTOVER-R5-07` | release-blocker | restore TODO lane/classification and project-routing taxonomy | integrated; delivery R6 pending |
 
+## Delivery R6 Finding Classification — 2026-09-24
+
+All R6 findings are deduplicated below as `release-blocker` items inside D-01..D-05. No product/runtime change or scope expansion was accepted.
+
+| Finding | Classification | Integrated remediation | Status |
+| --- | --- | --- | --- |
+| `TQ-R6-01` | release-blocker | replace broad word-boundary exemptions with a term-specific current lifecycle exemption; add compound/underscore English and Portuguese mutations | integrated; delivery R7 pending |
+| `TQ-R6-02` | release-blocker | validate every documented table route as a route-bound request/auth/status/media/response tuple; mutate row removal and cross-route status swaps | integrated; delivery R7 pending |
+| `TQ-R6-03` | release-blocker | add CPF, Brazilian phone and raw person-payload detection with cross-surface runtime-built mutations | integrated; delivery R7 pending |
+| `TQ-R6-04` | release-blocker | pin an additional raw legacy-bearing-line digest so case/whitespace mutations fail | integrated; delivery R7 pending |
+| `TQ-R6-05` | release-blocker | remove the ambient clean-copy skip and execute an explicit non-recursive child test list | integrated; delivery R7 pending |
+| `ARCH-R6-01` / `CUTOVER-R6-02` | release-blocker | remove unsupported query-token trimming claim while retaining the observed 200-character bound | integrated; delivery R7 pending |
+| `CUTOVER-R6-01` | release-blocker | replace six CRLF working-tree hashes with Git-object hashes and verify all 37 product-evidence paths | integrated; delivery R7 pending |
+| `CUTOVER-R6-03` | release-blocker | document the observed JWT identity/profile cache and up-to-30-second deactivation/profile-change lag | integrated; delivery R7 pending |
+| `CUTOVER-R6-04` | release-blocker | restore durable four-way review-finding taxonomy and promotion rules in TODO governance and constitution | integrated; delivery R7 pending |
+| `CUTOVER-R6-05` | release-blocker | synchronize immutable R6 commit/packet state and next R7 action | integrated; delivery R7 pending |
+
 ## Post-Implementation Decision Adherence Validation
 
 | Decision | Canonical evidence | Status |
@@ -141,11 +158,11 @@ All R5 findings remain inside D-01..D-05 and are classified as `release-blocker`
 
 ## Blocker Notes
 
-- **Blocker:** `n/a`; delivery R6 is the next active gate, not an impasse.
-- **Why blocked now:** `n/a`; completion remains unavailable until delivery R6 converges.
-- **What unblocks it:** clean delivery R6 test-quality, architecture-adherence and cutover-integrity results on one immutable commit.
+- **Blocker:** `n/a`; delivery R7 is the next active gate, not an impasse.
+- **Why blocked now:** `n/a`; completion remains unavailable until delivery R7 converges.
+- **What unblocks it:** clean delivery R7 test-quality, architecture-adherence and cutover-integrity results on one immutable commit.
 - **Owner / source:** owner do TODO; autoridade humana permanece responsável pelo novo approval.
-- **Last confirmed truth:** D-01..D-05 approval remains valid; R5 reviewers returned no-go findings now integrated for immutable R6 review.
+- **Last confirmed truth:** D-01..D-05 approval remains valid; R6 reviewers returned no-go findings now integrated for immutable R7 review.
 
 ## Scope
 
@@ -336,8 +353,8 @@ Hashes individuais que sustentam as decisões de ownership ficam no `Pre-Executi
 | From Profile | To Profile | Why the Handoff Exists | Touched Surfaces | Status / Evidence |
 | --- | --- | --- | --- | --- |
 | `Strategic / CTO-Tech-Lead` | `routine-executor` | executar a substituição documental já decidida sem redefinir o contrato | `uninotas-foundation/**` | `completed; R3 remediation locally green` |
-| `routine-executor` | `Assurance / Tester-Quality` | desafiar evidência, links, referências e ausência de autoridade concorrente | diff e validações da Foundation | `delivery R5 no-go integrated locally; delivery R6 pending` |
-| `Assurance / Tester-Quality` | `formal-reviewer` | revisar aderência arquitetural e integridade do cutover | pacote final consolidado | `delivery R5 no-go integrated locally; delivery R6 pending` |
+| `routine-executor` | `Assurance / Tester-Quality` | desafiar evidência, links, referências e ausência de autoridade concorrente | diff e validações da Foundation | `delivery R6 no-go integrated locally; delivery R7 pending` |
+| `Assurance / Tester-Quality` | `formal-reviewer` | revisar aderência arquitetural e integridade do cutover | pacote final consolidado | `delivery R6 no-go integrated locally; delivery R7 pending` |
 
 ## Complexity
 
@@ -361,14 +378,14 @@ Este inventário read-only fecha a descoberta que antes estava indevidamente del
 | Truth ID | Verified Product Truth / Boundary | Exact Evidence | SHA-256 / Stable Ref | Target Owner |
 | --- | --- | --- | --- | --- |
 | `PT-01` | Routerfy grava `logs`; Monitor de Notas somente lê por SQL cru; a tabela não possui chave primária e não entra no Prisma. | `backend/docs/tabela-logs.md`; `backend/prisma/schema.prisma`; `backend/src/logs/logs.sql.ts` | `151fbc8540804ff73c8b3d8f8164c1d5d6f932dde8e9aecbcd9f731ff59dd3e6`; `cb53048b181e179e0d0a74188a17279e36213a50508a058fd69bd3a110056963`; `142c26ab4bdda0d53e59934460b029e6463c05e6d30083c7b2e2a2c4fd441643` | `modules/events-and-classification.md` |
-| `PT-02` | Somente eventos `org_path = 'SmartNotas'` alimentam o monitor; `ref_id` não é identidade única de uma tentativa e correlaciona tratamentos/histórico. | `backend/src/logs/logs.sql.ts`; `backend/src/logs/logs.service.ts`; `backend/docs/tabela-logs.md` | `142c26ab4bdda0d53e59934460b029e6463c05e6d30083c7b2e2a2c4fd441643`; `5015d24db62ccc93ee65bcac9ba6cb4cb24a6b06a5a21ac2f027326bddd95c6a`; `151fbc8540804ff73c8b3d8f8164c1d5d6f932dde8e9aecbcd9f731ff59dd3e6` | `modules/events-and-classification.md` + `modules/treatments-and-history.md` |
-| `PT-03` | Classificação possui projeção TypeScript e expressão SQL equivalentes; situação efetiva aplica o último tratamento, e `PENDENTE` reabre para a situação original. | `backend/src/logs/logs.classifier.ts`; `backend/src/logs/logs.sql.ts`; `backend/src/logs/logs.mapper.ts` | `ca0a4340189321e1924eec0fbda82c492aca4b19bc0476d54953eb8e0eafcfbe`; `142c26ab4bdda0d53e59934460b029e6463c05e6d30083c7b2e2a2c4fd441643`; `4b2358bb136919adc00eaa3b8ff3d5265d3fad3db958e976106c258045d63ef4` | `modules/events-and-classification.md` |
-| `PT-04` | A aplicação escreve `monitor_tratamentos` como histórico append-only correlacionado por `ref_id`; o último registro define o tratamento corrente. | `backend/prisma/schema.prisma`; `backend/src/logs/logs.service.ts` | `cb53048b181e179e0d0a74188a17279e36213a50508a058fd69bd3a110056963`; `5015d24db62ccc93ee65bcac9ba6cb4cb24a6b06a5a21ac2f027326bddd95c6a` | `modules/treatments-and-history.md` |
+| `PT-02` | Somente eventos `org_path = 'SmartNotas'` alimentam o monitor; `ref_id` não é identidade única de uma tentativa e correlaciona tratamentos/histórico. | `backend/src/logs/logs.sql.ts`; `backend/src/logs/logs.service.ts`; `backend/docs/tabela-logs.md` | `142c26ab4bdda0d53e59934460b029e6463c05e6d30083c7b2e2a2c4fd441643`; `579fbb4312b516e7de70b12e434f9d19d8dbb84f309c892ab16d152563bb02cc`; `151fbc8540804ff73c8b3d8f8164c1d5d6f932dde8e9aecbcd9f731ff59dd3e6` | `modules/events-and-classification.md` + `modules/treatments-and-history.md` |
+| `PT-03` | Classificação possui projeção TypeScript e expressão SQL equivalentes; situação efetiva aplica o último tratamento, e `PENDENTE` reabre para a situação original. | `backend/src/logs/logs.classifier.ts`; `backend/src/logs/logs.sql.ts`; `backend/src/logs/logs.mapper.ts` | `ca0a4340189321e1924eec0fbda82c492aca4b19bc0476d54953eb8e0eafcfbe`; `142c26ab4bdda0d53e59934460b029e6463c05e6d30083c7b2e2a2c4fd441643`; `875ea83fa0982d64ac00e0b66ff6c8aa12a447d52d232f672daecb070367441f` | `modules/events-and-classification.md` |
+| `PT-04` | A aplicação escreve `monitor_tratamentos` como histórico append-only correlacionado por `ref_id`; o último registro define o tratamento corrente. | `backend/prisma/schema.prisma`; `backend/src/logs/logs.service.ts` | `cb53048b181e179e0d0a74188a17279e36213a50508a058fd69bd3a110056963`; `579fbb4312b516e7de70b12e434f9d19d8dbb84f309c892ab16d152563bb02cc` | `modules/treatments-and-history.md` |
 | `PT-05` | A aplicação possui `monitor_usuarios`, autenticação JWT e perfis; usuários são desativados, não apagados, para preservar autoria. | `backend/prisma/schema.prisma`; `backend/src/auth/auth.service.ts`; `backend/src/usuarios/usuarios.service.ts` | `cb53048b181e179e0d0a74188a17279e36213a50508a058fd69bd3a110056963`; `59d506febff80a402e5b01347c2fd3c212ab3408584428c794c8778f7d89814d`; `08033dd301b931ba5a97afffd177393e2899046bc3ed4c65a02c16f989391f5e` | `modules/identity-and-team.md` |
 | `PT-06` | SSE envia somente sinal de invalidação; o cliente rebusca a API. Eventos podem vir da API, LISTEN/NOTIFY opcional ou polling, com heartbeat/dedupe. | `backend/src/realtime/realtime.service.ts`; `frontend/src/hooks/useTempoReal.ts` | `5b24b40d4bbe88fbc95e5fe920f3a71a6dae19a2cfc7d83845f8753565d27bed`; `1e5f6bf8b4ce9af68902f2c22a7f85843f4deef05c9a62eb8e6fbba14880a411` | `modules/realtime-invalidation.md` |
-| `PT-07` | Monitoramento operacional externo reutiliza o resumo de eventos em janela móvel e deve distinguir banco indisponível de zero erros. | `backend/src/monitoramento/monitoramento.service.ts`; `backend/src/logs/logs.service.ts` | `454461a6678559c61fb409d1a54c5b794600fb185a1b46c63f48a6e5e1a2da32`; `5015d24db62ccc93ee65bcac9ba6cb4cb24a6b06a5a21ac2f027326bddd95c6a` | `modules/operational-monitoring.md` |
-| `PT-08` | React/Vite consome listagem, filtros, resumo, detalhe, tratamentos, equipe e invalidação realtime por contratos explícitos da API. | `frontend/src/api/eventos.ts`; `frontend/src/paginas/ListaEventos.tsx`; `frontend/src/paginas/DetalheEvento.tsx`; `frontend/src/paginas/Equipe.tsx` | `1cf0e9f33b6ecfaa9040a5cb8b4d04f9d18c1a5d7b289d53c5c5ba693af9a317`; `0eeb6881f23ded8feeafb0ab36fe7f9f8e78e7463e8706d3e88c9b0ab4f36e9b`; `a4d2829c6b7b1269c8ecc3f0b58c3bc8fe956cae878c80eaad7126f4be90f643`; `2d9a1e8b8645189fefdd832a48209b3a28bf85e68d9216356051e52d19ce010b` | módulos funcionais correspondentes; sem módulo frontend paralelo |
-| `PT-09` | Execução e deploy são NestJS + React/Vite + PostgreSQL/Prisma em Docker/Railway, sem mudança de runtime neste TODO. | `Dockerfile`; `docker-compose.yml`; `railway.json`; `backend/src/config/configuration.ts` | `9d0554370de58fd504282f0d8bf98c1bce841d9ef736da11be611dfa17cd9e32`; `5e5e9f39e191b477e9981ba9047ace1ee7082e73ca447d454d27dddcaec9a781`; `f711055e59a2442c04299987a2bc30fe24cd02df86cd9e4e4cf57efec76a5697`; `57f87a470fb953f53ace1511355b9092db6e9c9e12f4c98a1e6cc1fcf8699a4e` | `modules/runtime-and-deployment.md` |
+| `PT-07` | Monitoramento operacional externo reutiliza o resumo de eventos em janela móvel e deve distinguir banco indisponível de zero erros. | `backend/src/monitoramento/monitoramento.service.ts`; `backend/src/logs/logs.service.ts` | `bea861ead5853965a8b6918f179b04e8305a993940c4f16ae8e72af1ca29ddcf`; `579fbb4312b516e7de70b12e434f9d19d8dbb84f309c892ab16d152563bb02cc` | `modules/operational-monitoring.md` |
+| `PT-08` | React/Vite consome listagem, filtros, resumo, detalhe, tratamentos, equipe e invalidação realtime por contratos explícitos da API. | `frontend/src/api/eventos.ts`; `frontend/src/paginas/ListaEventos.tsx`; `frontend/src/paginas/DetalheEvento.tsx`; `frontend/src/paginas/Equipe.tsx` | `212a47f7b1e3c85fed39e55e63a30d5d0b1dbe7926ac5e8b312bfb89e9d00fbc`; `63b3b9941b5825496e757e5d9de6f0fe1ccf18eb9f50366f8a40e0456cf1cad5`; `a4d2829c6b7b1269c8ecc3f0b58c3bc8fe956cae878c80eaad7126f4be90f643`; `2d9a1e8b8645189fefdd832a48209b3a28bf85e68d9216356051e52d19ce010b` | módulos funcionais correspondentes; sem módulo frontend paralelo |
+| `PT-09` | Execução e deploy são NestJS + React/Vite + PostgreSQL/Prisma em Docker/Railway, sem mudança de runtime neste TODO. | `Dockerfile`; `docker-compose.yml`; `railway.json`; `backend/src/config/configuration.ts` | `9d0554370de58fd504282f0d8bf98c1bce841d9ef736da11be611dfa17cd9e32`; `5e5e9f39e191b477e9981ba9047ace1ee7082e73ca447d454d27dddcaec9a781`; `f711055e59a2442c04299987a2bc30fe24cd02df86cd9e4e4cf57efec76a5697`; `5948aeb71df0b82690e131f689b9005043e9d8d610a750b8a026f8aa79af702e` | `modules/runtime-and-deployment.md` |
 | `PT-10` | Rotas `/api/v1`, limites de request/response, guards, wire SSE, health, monitoramento e erro padrão são contratos observados. | paths exatos e hashes em `artifacts/analysis/monitor-de-notas-product-truth-20260924.md` | commit congelado `78bf271341dfccb2595389f0dbac0e01e8532a7b`; comando `git show <commit>:<relative-path> \| sha256sum` sobre bytes do objeto Git | seis módulos canônicos |
 
 Os hashes completos foram obtidos com `git show 78bf271341dfccb2595389f0dbac0e01e8532a7b:<relative-path> | sha256sum`, isto é, sobre os bytes normalizados do objeto Git congelado, e não sobre bytes CRLF/LF do working tree. O comando deve ser repetido antes do closeout; o artifact final de product truth preserva esta matriz Foundation → fonte.
@@ -484,7 +501,7 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 
 ## Module Decision Consistency Gate
 
-- **Status:** `delivery-R5-reviewed`; as cinco decisões congeladas estão `Superseded (Approved)` e a cobertura entregue aguarda R6 após remediação.
+- **Status:** `delivery-R6-reviewed`; as cinco decisões congeladas estão `Superseded (Approved)` e a cobertura entregue aguarda R7 após remediação.
 - **Finding:** todas as decisões de módulos herdadas pertencem ao LeadsHug; nenhuma deve ser preservada como verdade do Monitor de Notas.
 - **Resolution:** supersessão intencional integral, autorizada por `D-02`, com substituição pelos módulos listados em `S-04`.
 - **Evidence:** conteúdo atual de `modules/*.md`, estrutura do backend/frontend e READMEs do produto.
@@ -561,7 +578,7 @@ Manifesto 1:1 dos 59 arquivos rastreados no baseline. `Rewrite` preserva o path 
 - **Adherence review kind:** `architecture_adherence`
 - **Adherence review package:** `bounded-file-set`
 - **Adherence review status:** `running`
-- **Adherence review evidence / resolution:** delivery R5 on `1e7e730` returned `ARCH-R5-01..04`; all are integrated locally and only fresh delivery R6 may mark adherence clean.
+- **Adherence review evidence / resolution:** delivery R6 on `04b865e` returned `ARCH-R6-01`; it is integrated locally and only fresh delivery R7 may mark adherence clean.
 - **No-go handling:** retornar ao diagnóstico/decisão ou ao loop de evidência; não alegar execução ou conclusão com divergência aberta.
 
 ## Assumptions Preview
@@ -768,8 +785,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Audit isolation mode:** `fresh internal no-context reviewer`
 - **Internal reviewer mandate:** `required after implementation`
 - **Audit status:** `running`
-- **Findings summary:** delivery R5 returned `TQ-R5-01..02`; both are integrated locally and the clean result must come from fresh delivery R6.
-- **Evidence / reference:** immutable delivery R5 baseline `1e7e73043e697f2e9bf536772cf3717d79f85cbf`; remediation evidence in `Delivery R5 Finding Classification`.
+- **Findings summary:** delivery R6 returned `TQ-R6-01..05`; all are integrated locally and the clean result must come from fresh delivery R7.
+- **Evidence / reference:** immutable delivery R6 baseline `04b865ea35501d5f59f0e6a9e7d7b953d7d9598d`; remediation evidence in `Delivery R6 Finding Classification`.
 - **Waiver authority / reference:** `n/a`
 
 ## Independent No-Context Final Review Gate
@@ -794,8 +811,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Package mode:** `bounded-file-set`
 - **Canonical multi-lane audit protocol:** `n/a`
 - **Cutover audit status:** `running`
-- **Findings summary:** delivery R5 returned seven cutover blockers; all are integrated locally and delivery R6 confirmation remains required.
-- **Evidence / reference:** delivery R5 immutable baseline `1e7e730`; remediation evidence in `Delivery R5 Finding Classification`; delivery R6 pending.
+- **Findings summary:** delivery R6 returned five cutover blockers; all are integrated locally and delivery R7 confirmation remains required.
+- **Evidence / reference:** delivery R6 immutable baseline `04b865e`; remediation evidence in `Delivery R6 Finding Classification`; delivery R7 pending.
 - **Waiver authority / reference:** `n/a`
 
 ## Execution Plan — Approved; Guard-Gated
@@ -811,7 +828,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 9. `Concluído com no-go`: delivery R4 executada sobre `1aae0c837fdd16c4675d544e3eb1324f4db55b90`; findings classificados dentro de D-01..D-05.
 10. `Concluído localmente`: findings delivery R4 integrados e congelados no commit `cacc054`.
 11. `Concluído com no-go`: delivery R5 executada sobre `1e7e73043e697f2e9bf536772cf3717d79f85cbf`; findings classificados dentro de D-01..D-05.
-12. `Em andamento`: congelar a remediação R5 e executar delivery R6 no HEAD imutável; após resultado limpo, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
+12. `Concluído com no-go`: delivery R6 executada sobre `04b865ea35501d5f59f0e6a9e7d7b953d7d9598d`; findings classificados dentro de D-01..D-05.
+13. `Em andamento`: congelar a remediação R6 e executar delivery R7 no HEAD imutável; após resultado limpo, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
 
 ### Touched Surfaces
 
@@ -939,11 +957,11 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 - **Authority guard:** must return `go` only after explicit `APROVADO`, rule ingestion and resolved decisions.
 - **Completion and closeout guards:** required before `Local-Implemented` or movement to `completed/`.
 - **Cutover integrity audit:** required because the work retires one active documentary authority and establishes another.
-- **Delivery R5 architecture/test-quality/cutover review:** no-go on `1e7e730`; findings classified and integrated locally; delivery R6 is the fresh immutable rerun. Planning R4 remains the pre-approval clean review and is not delivery evidence.
+- **Delivery R6 architecture/test-quality/cutover review:** no-go on `04b865e`; findings classified and integrated locally; delivery R7 is the fresh immutable rerun. Planning R4 remains the pre-approval clean review and is not delivery evidence.
 
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
-- **Disposition reason:** approved implementation and delivery R5 remediation remain local; delivery R6 and delivery/closeout gates remain pending.
-- **Post-commit/push status:** `delivery R5 remediation pending local commit; origin/main remains at b73b0eb approval checkpoint`
+- **Disposition reason:** approved implementation and delivery R6 remediation remain local; delivery R7 and delivery/closeout gates remain pending.
+- **Post-commit/push status:** `delivery R5 remediation committed at 04b865e; delivery R6 remediation pending local commit; origin/main remains at b73b0eb approval checkpoint`
 - **Next path/status action:** permanecer em `todos/active/process/` até implementação, evidência, reviews e closeout completos.
