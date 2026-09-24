@@ -51,7 +51,7 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `none`
-- **Next exact step:** congelar a sincronização de estado R9, gerar o pacote R10 no novo HEAD imutável e executar reviewers independentes corretamente roteados sobre esse commit exato.
+- **Next exact step:** gerar o pacote R10 para o HEAD imutável produzido por esta sincronização, registrar seu SHA integral no pacote e executar reviewers independentes corretamente roteados sobre esse mesmo objeto Git.
 
 ## Active Work State
 
@@ -903,7 +903,7 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 13. `Concluído com no-go parcial`: arquitetura R7 retornou `GO`; test-quality/cutover R7 sobre `1374caedafa63935fd390c273a346365ea88109e` encontraram findings e uma rota de modelo inválida, todos classificados no ledger canônico.
 14. `Concluído com no-go parcial`: delivery R8 sobre `de909878b014c708fa103dd2d3b9213f0abe1c33` retornou cutover `GO` e os blockers `ARCH-ADH-R8-01`/`TQ-R8-01`, classificados no ledger canônico.
 15. `Concluído com no-go parcial`: delivery R9 sobre `222a8a9b0d63c47f002b3b752f2a83bd548260e0` confirmou test-quality/cutover `GO`, confirmou os blockers R8 resolvidos e encontrou somente `ARCH-ADH-R9-01` na sincronização de estado.
-16. `Em andamento`: sincronização R9 integrada localmente; congelar o novo HEAD, executar delivery R10 corretamente roteada e, após resultado limpo, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
+16. `Em andamento`: sincronização R9 congelada em `11a6f455d52bef75c216242968c33b367e20100f`; congelar o HEAD de estado seguinte, executar delivery R10 corretamente roteada e, após resultado limpo, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
 
 ### Touched Surfaces
 
@@ -1044,5 +1044,5 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 
 - **Disposition:** `keep-active`
 - **Disposition reason:** approved implementation and delivery R9 state synchronization remain local; delivery R10 and delivery/closeout gates remain pending.
-- **Post-commit/push status:** `delivery R9 state synchronization is local and uncommitted; origin/main remains at b73b0eb approval checkpoint`
+- **Post-commit/push status:** `delivery R9 state synchronization committed at 11a6f455d52bef75c216242968c33b367e20100f; origin/main remains at b73b0eb approval checkpoint`
 - **Next path/status action:** permanecer em `todos/active/process/` até implementação, evidência, reviews e closeout completos.
