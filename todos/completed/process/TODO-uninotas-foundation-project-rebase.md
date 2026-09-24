@@ -51,17 +51,17 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 
 - **Current delivery stage:** `Local-Implemented`
 - **Qualifiers:** `none`
-- **Next exact step:** congelar o candidato pós-move com a correção lifecycle-aware do harness, executar revisão final R17 e, se limpa, publicar `main` em `origin/main`.
+- **Next exact step:** congelar a remediação temporal `FINAL-R17-01`, executar revisão final R18 sobre o novo HEAD imutável e, se limpa, publicar `main` em `origin/main`.
 
 ## Active Work State
 
 - **Work state:** `review`
-- **Why this state now:** o TODO está em `completed/process/`; a suíte pós-move encontrou e corrigiu `CLOSEOUT-TQ-01`, voltou a 10/10 e aguarda revisão R17 antes da publicação.
-- **Exit condition:** R17 e guards pós-move verdes, seguidos pelo closeout commit publicado em `origin/main`.
+- **Why this state now:** o TODO está em `completed/process/`; R17 confirmou `CLOSEOUT-TQ-01` tecnicamente resolvido e encontrou somente `FINAL-R17-01` nos campos temporais, agora integrados para R18.
+- **Exit condition:** R18 e guards finais verdes, seguidos pela publicação em `origin/main`.
 
 ## Routine-Executor Implementation Evidence — 2026-09-24
 
-- **State:** candidate tree prepared; this record does not mark the TODO completed or move it.
+- **State at this historical implementation checkpoint:** candidate tree prepared; a conclusão e o movimento posteriores estão registrados nas seções de closeout abaixo.
 - **Implemented surfaces:** the frozen disposition manifest was applied; canonical roots, six frozen modules, policies, indexes, decisions, product-truth/cutover artifacts, validator, exception ledger, and safe validator tests now exist only in `uninotas-foundation`.
 - **Local evidence:** historical draft evidence is superseded by the reproducible R3 `python3 -B` suite and validator; original chronology remains unverified.
 - **Privacy evidence:** prohibited token material is assembled only inside `TemporaryDirectory` by the negative test; no persistently stored sample matches the validator pattern.
@@ -215,7 +215,15 @@ The first full suite after the lifecycle move exposed a test-harness assumption,
 
 | Finding | Classification | Integrated remediation | Status |
 | --- | --- | --- | --- |
-| `CLOSEOUT-TQ-01` | release-blocker | make lifecycle, ledger, privacy and clean-copy tests symmetric across active/completed trees; rerun all 10 tests after the move | integrated locally; 10/10 post-move passed; R17 required |
+| `CLOSEOUT-TQ-01` | release-blocker | make lifecycle, ledger, privacy and clean-copy tests symmetric across active/completed trees; rerun all 10 tests after the move | confirmed technically at `5a1ff88` by R17 |
+
+## Final Review R17 Finding Classification — 2026-09-24
+
+R17 confirmed the symmetric harness, 10/10 post-move suite, exact 39-row ledger and manifest move. Its only P2 `release-blocker` concerned live temporal wording after commit `5a1ff88`, not the closeout implementation.
+
+| Finding | Classification | Integrated remediation | Status |
+| --- | --- | --- | --- |
+| `FINAL-R17-01` | release-blocker | synchronize next action, work-state rationale, blocker notes, review gate, execution plan and closeout status with the committed post-move candidate | integrated locally; R18 required |
 
 ## Post-Implementation Decision Adherence Validation
 
@@ -239,11 +247,11 @@ The first full suite after the lifecycle move exposed a test-harness assumption,
 
 ## Blocker Notes
 
-- **Blocker:** `n/a`; R16 retornou `GO` e não há impasse.
-- **Why blocked now:** `n/a`; todos os gates de conteúdo/revisão estão verdes e resta somente o closeout operacional.
-- **What unblocks it:** `n/a`; executar os guards finais, o movimento lifecycle-aware, a suíte pós-move e a publicação já autorizada.
+- **Blocker:** `n/a`; R17 encontrou um release blocker temporal corrigível, não um impasse.
+- **Why blocked now:** `n/a`; `CLOSEOUT-TQ-01` está tecnicamente confirmado, `FINAL-R17-01` está integrado e somente R18 mais publicação permanecem.
+- **What unblocks it:** `n/a`; revisão R18 limpa, guards finais e publicação já autorizada.
 - **Owner / source:** owner do TODO; D-01..D-05 continuam autorizados pelo `APROVADO` vigente e nenhuma nova aprovação está pendente.
-- **Last confirmed truth:** R16 retornou `GO` sobre `65ae75054a06e5e9ebbe2104b78d924bd2fdbc72`, confirmou `FINAL-R14-01`/`FINAL-R15-01` resolvidos e encontrou zero finding material, P1/P2 ou release blocker; completion permanece `go`.
+- **Last confirmed truth:** R17 revisou `5a1ff884ae883e5bd0e50b27d9a463aa5d53085e`, confirmou `CLOSEOUT-TQ-01` resolvido e encontrou somente `FINAL-R17-01` na linguagem temporal; a correção está em `main@HEAD` para R18.
 
 ## Scope
 
@@ -931,7 +939,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 | `ARCH-ADH-R12-01` | `medium` | `release-blocker` | remap generic observation labels to the exact project taxonomy | finding classification is canonical governance | `confirmed at dc1d869` | `Delivery R12 Finding Classification`; R13 architecture |
 | `FINAL-R14-01` | `medium` | `release-blocker` | synchronize all live lifecycle fields after completion and first final review | governing TODO must expose one truthful current state before closeout | `confirmed at 65ae750` | `Final Review R14 Finding Classification`; R16 |
 | `FINAL-R15-01` | `medium` | `release-blocker` | synchronize the undated live Blocker Notes with the actual completion/final-review state | no competing lifecycle truth may remain before closeout | `confirmed at 65ae750` | `Final Review R15 Finding Classification`; R16 |
-| `CLOSEOUT-TQ-01` | `high` | `release-blocker` | remove active-path assumptions from the persisted closeout test harness | completed lifecycle must pass the same clean-copy/mutation suite before publication | `integrated locally; 10/10 post-move; R17 pending` | `Closeout Post-Move Finding Classification`; post-move suite |
+| `CLOSEOUT-TQ-01` | `high` | `release-blocker` | remove active-path assumptions from the persisted closeout test harness | completed lifecycle must pass the same clean-copy/mutation suite before publication | `confirmed technically at 5a1ff88 by R17` | `Closeout Post-Move Finding Classification`; post-move suite |
+| `FINAL-R17-01` | `medium` | `release-blocker` | synchronize all live post-move fields with committed candidate and R18/publication as the only remaining actions | completed governing record must not canonize false lifecycle/publication state | `integrated locally; R18 pending` | `Final Review R17 Finding Classification`; R17 reviewer |
 
 ## Independent Test Quality Audit Gate
 
@@ -958,8 +967,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 - **Internal reviewer mandate:** `required after implementation and test audit`
 - **Canonical multi-lane audit protocol:** `n/a`
 - **Final review status:** `findings_integrated`
-- **Findings summary:** R16 returned `GO` on `65ae750`; the later lifecycle move exposed `CLOSEOUT-TQ-01` solely in the test harness. Its lifecycle-aware correction and 10/10 post-move result require fresh R17 confirmation before publication.
-- **Evidence / reference:** R16 reviewer `/root/foundation_final_review_r16`; post-move suite 10/10 in 134.909s; R17 pending on the immutable closeout candidate.
+- **Findings summary:** R17 on immutable `5a1ff884ae883e5bd0e50b27d9a463aa5d53085e` confirmed `CLOSEOUT-TQ-01` technically resolved and found only P2 `FINAL-R17-01` in stale live temporal wording; that wording is integrated for R18 confirmation.
+- **Evidence / reference:** reviewer `/root/foundation_final_review_r17`; packet `/tmp/monitor-foundation-final-r17/review-packet.md`; R18 required on the temporal-remediation commit.
 - **Waiver authority / reference:** `n/a`
 
 ## Independent Cutover Integrity Audit Gate
@@ -1000,7 +1009,8 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 22. `Concluído com no-go`: a remediação R14 foi congelada em `4124b1f9a821cbdcdd56b9188edd96cb98980ce2`; R15 encontrou somente `FINAL-R15-01` no `Blocker Notes`, sem defeito de conteúdo/runtime.
 23. `Concluído`: remediação integral R14/R15 congelada em `65ae75054a06e5e9ebbe2104b78d924bd2fdbc72`; R16 retornou `GO`, confirmou ambos os blockers resolvidos e encontrou zero finding material/P1/P2/release blocker.
 24. `Concluído com finding integrado`: guards finais e movimento para `completed/process/` concluídos; ledger/manifest atualizados; a primeira suíte pós-move encontrou `CLOSEOUT-TQ-01`, o harness foi tornado lifecycle-aware e a repetição passou 10/10 em 134.909s.
-25. `Em andamento`: congelar o candidato pós-move, executar R17 sobre a correção de teste e, se limpa, publicar `main`.
+25. `Concluído com no-go`: candidato pós-move congelado em `5a1ff884ae883e5bd0e50b27d9a463aa5d53085e`; R17 confirmou a correção técnica e encontrou somente `FINAL-R17-01` nos campos temporais.
+26. `Em andamento`: validar e congelar `FINAL-R17-01`, executar R18 no novo HEAD e, se limpa, publicar `main`.
 
 ### Touched Surfaces
 
@@ -1137,12 +1147,13 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 - **Cutover integrity audit:** required because the work retires one active documentary authority and establishes another.
 - **Delivery R13 architecture/test-quality/cutover review:** all three fresh lanes returned `GO` on immutable `dc1d869`; no P1/P2, blocker or new finding remained.
 - **Independent final review R16:** `GO` on immutable `65ae750`; `FINAL-R14-01` and `FINAL-R15-01` confirmed resolved; no material finding/P1/P2/release blocker at that baseline.
-- **Post-move test correction:** `CLOSEOUT-TQ-01` integrated and 10/10 green; R17 is required because the persisted test harness changed after R16.
+- **Post-move test correction:** R17 confirmed `CLOSEOUT-TQ-01` resolved at `5a1ff88`; 10/10, validator, 39 ledger rows and manifest move are exact.
+- **Final review R17:** technical closeout `GO`; only `FINAL-R17-01` temporal wording integrated for required R18.
 - **Pre-move closeout guard:** `go` sobre cópia byte-idêntica (`cmp -s`) em path temporário real `foundation_documentation/todos/active/process/`, com `--repo` apontando ao Git real da Foundation; isso compensa o `Path.resolve()` do guard, que elimina o nome do alias e classificaria incorretamente o path direto como `other`.
 
 ## TODO Closeout Disposition
 
 - **Disposition:** `move-completed`
-- **Disposition reason:** implementação, delivery reviews, completion e final review R16 estão verdes; não há finding ou follow-up aberto neste TODO.
-- **Post-commit/push status:** `completed lifecycle, historical ledger/manifest and CLOSEOUT-TQ-01 remediation are local and uncommitted; origin/main remains at b73b0eb approval checkpoint`
-- **Next path/status action:** congelar o candidato pós-move, obter R17 limpa e publicar o closeout commit em `origin/main`.
+- **Disposition reason:** implementação, delivery, completion e closeout técnico estão verdes; `FINAL-R17-01` está integrado e somente sua confirmação R18 precede a publicação.
+- **Post-commit/push status:** `post-move lifecycle and CLOSEOUT-TQ-01 are committed locally at 5a1ff884ae883e5bd0e50b27d9a463aa5d53085e; FINAL-R17-01 remediation is at main@HEAD; origin/main remains at b73b0eb approval checkpoint`
+- **Next path/status action:** obter R18 limpa sobre o novo commit imutável e publicar `main` em `origin/main`.
