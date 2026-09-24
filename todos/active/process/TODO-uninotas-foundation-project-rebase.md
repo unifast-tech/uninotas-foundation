@@ -51,12 +51,12 @@ Transformar `uninotas-foundation` em uma Foundation específica, coerente e veri
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `none`
-- **Next exact step:** concluir e congelar a remediação dos blockers R7, gerar o pacote R8 e executar reviewers independentes roteados por lane sobre o commit exato do pacote.
+- **Next exact step:** gerar o pacote R8 no HEAD que contém a remediação `7231b43bc17f6594c3bb26e156fe9d82e06e1539` e executar reviewers independentes corretamente roteados sobre o commit exato do pacote.
 
 ## Active Work State
 
 - **Work state:** `delivery-review`
-- **Why this state now:** arquitetura R7 retornou `GO`; test-quality e cutover R7 encontraram blockers dentro do escopo aprovado, agora integrados localmente para confirmação R8.
+- **Why this state now:** arquitetura R7 retornou `GO`; test-quality e cutover R7 encontraram blockers dentro do escopo aprovado, remediados e congelados em `7231b43bc17f6594c3bb26e156fe9d82e06e1539` para confirmação R8.
 - **Exit condition:** delivery R8 sem release-blocker em todas as lanes, matrizes 1:1 adjudicadas e gates de completion/closeout prontos para execução.
 
 ## Routine-Executor Implementation Evidence — 2026-09-24
@@ -367,8 +367,8 @@ Hashes individuais que sustentam as decisões de ownership ficam no `Pre-Executi
 | From Profile | To Profile | Why the Handoff Exists | Touched Surfaces | Status / Evidence |
 | --- | --- | --- | --- | --- |
 | `Strategic / CTO-Tech-Lead` | `routine-executor` | executar a substituição documental já decidida sem redefinir o contrato | `uninotas-foundation/**` | `completed; R3 remediation locally green` |
-| `routine-executor` | `Assurance / Tester-Quality` | desafiar evidência, links, referências e ausência de autoridade concorrente | diff e validações da Foundation | `delivery R7 no-go integrated locally; correctly routed delivery R8 pending` |
-| `Assurance / Tester-Quality` | `formal-reviewer` | revisar aderência arquitetural e integridade do cutover | pacote final consolidado | `architecture R7 go; cutover R7 no-go integrated locally; delivery R8 pending` |
+| `routine-executor` | `Assurance / Tester-Quality` | desafiar evidência, links, referências e ausência de autoridade concorrente | diff e validações da Foundation | `delivery R7 no-go remediated at 7231b43; correctly routed delivery R8 pending` |
+| `Assurance / Tester-Quality` | `formal-reviewer` | revisar aderência arquitetural e integridade do cutover | pacote final consolidado | `architecture R7 go; cutover R7 no-go remediated at 7231b43; delivery R8 pending` |
 
 ## Complexity
 
@@ -880,7 +880,7 @@ Os achados de arquitetura e crítica foram congelados, deduplicados e classifica
 11. `Concluído com no-go`: delivery R5 executada sobre `1e7e73043e697f2e9bf536772cf3717d79f85cbf`; findings classificados dentro de D-01..D-05.
 12. `Concluído com no-go`: delivery R6 executada sobre `04b865ea35501d5f59f0e6a9e7d7b953d7d9598d`; findings classificados dentro de D-01..D-05.
 13. `Concluído com no-go parcial`: arquitetura R7 retornou `GO`; test-quality/cutover R7 sobre `1374caedafa63935fd390c273a346365ea88109e` encontraram findings e uma rota de modelo inválida, todos classificados no ledger canônico.
-14. `Em andamento`: congelar a remediação R7 e executar delivery R8 corretamente roteada no HEAD imutável; após resultado limpo, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
+14. `Em andamento`: remediação R7 congelada em `7231b43bc17f6594c3bb26e156fe9d82e06e1539`; executar delivery R8 corretamente roteada no HEAD imutável e, após resultado limpo, consolidar evidência 1:1, executar completion/closeout, mover o TODO, repetir a suíte e publicar `main`.
 
 ### Touched Surfaces
 
@@ -1021,5 +1021,5 @@ Cada lane é `not_needed` porque o TODO não altera endpoints, efeitos assíncro
 
 - **Disposition:** `keep-active`
 - **Disposition reason:** approved implementation and delivery R7 remediation remain local; delivery R8 and delivery/closeout gates remain pending.
-- **Post-commit/push status:** `delivery R7 remediation pending local commit; origin/main remains at b73b0eb approval checkpoint`
+- **Post-commit/push status:** `delivery R7 remediation committed at 7231b43; origin/main remains at b73b0eb approval checkpoint`
 - **Next path/status action:** permanecer em `todos/active/process/` até implementação, evidência, reviews e closeout completos.
