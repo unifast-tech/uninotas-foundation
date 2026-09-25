@@ -42,7 +42,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `none`
-- **Next exact step:** integrar os achados diagnósticos, congelar novo baseline em `main`, repetir as revisões formais e executar os guards pré-aprovação.
+- **Next exact step:** congelar em `main` a remediação R3 de capability/core scope/estado, repetir arquitetura e crítica, e então executar os guards pré-aprovação.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -52,7 +52,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 ## Scope
 
-- [ ] Canonicalizar `UniNotas` como nome do produto, preservando `MonitorDeNotas` como nome técnico do repositório nesta entrega.
+- [ ] Canonicalizar `UniNotas` como nome do produto e `uninotas` como `core_scope`, preservando `MonitorDeNotas` como nome técnico do repositório nesta entrega.
 - [ ] Registrar a topologia externa confirmada e a propriedade de dados: Smart Notas para notas/documentos, PostgreSQL `logs` somente para falhas de integração.
 - [ ] Registrar Unifast e Prosperar como `FiscalIssuerContext`, sem tenancy e sem agregação inicial de notas.
 - [ ] Separar explicitamente comportamento atual e arquitetura-alvo nas raízes, decisões, roadmap e módulos afetados.
@@ -89,7 +89,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 | Scope Item | Local Branch/Commit | PR to lane threshold | PR to `stage` | PR to `main` | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Foundation UniNotas cutover | `main@6b4dcd6` | `n/a — main-only authority` | `n/a` | `origin/main@6b4dcd6` | review baseline published |
+| Foundation UniNotas cutover | `main@pending-R3-baseline` | `n/a — main-only authority` | `n/a` | `origin/main pending R3` | findings integrated; freeze pending |
 
 ## Diff Expectation Contract
 
@@ -158,12 +158,12 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 ## Definition of Done
 
-- [ ] `DOD-01` Identidade e mandato canônicos usam UniNotas sem renomear o repositório técnico.
+- [ ] `DOD-01` Identidade/mandato usam UniNotas e todos os anchors usam `core_scope=uninotas`, sem renomear o repositório técnico.
 - [ ] `DOD-02` Constituição e decisões registram a topologia externa e a separação de fontes aprovada.
 - [ ] `DOD-03` Unifast/Prosperar são contextos fiscais explícitos e não tenants.
 - [ ] `DOD-04` Registry e módulos distinguem `current_runtime` de `target_planned`, com precedência, predecessor/sucessor e condição de promoção/retirada, sem declarar código futuro como implementado.
 - [ ] `DOD-05` Notas/documentos, falhas de integração e casos operacionais têm owners canônicos distintos.
-- [ ] `DOD-06` Validator e suíte rejeitam regressões de identidade, ownership, tenancy, privacidade, symlink, legado e publicação, além de módulo ausente/duplicado, successor inválido/cíclico, target com capability ativa e dupla autoridade runtime.
+- [ ] `DOD-06` Validator e suíte rejeitam regressões de identidade, ownership, tenancy, privacidade, symlink, legado e publicação, além de módulo ausente/duplicado, successor inválido/cíclico, target com `owned_capabilities`, capability ativa sem owner e dupla autoridade runtime para o mesmo ID estável.
 - [ ] `DOD-07` Os artefatos atuais pertencem ao manifesto e a validação Foundation passa sem `frozen lifecycle tree mismatch`.
 - [ ] `DOD-08` Nenhum segredo, valor real de CNPJ/identificador do provedor, payload/resposta privada ou URL capturada de documento foi persistido; CNPJ válido é coberto deterministicamente e identificador/URL contextual por regra precisa mais revisão de diff.
 - [ ] `DOD-09` O roadmap aponta para o TODO NestJS de leitura como próximo slice, sem lhe conceder autoridade antecipada.
@@ -190,7 +190,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 | Dependency | Why It Matters | Status | Last Verified | Verification Method | Adjustment / Workaround |
 | --- | --- | --- | --- | --- | --- |
 | Smart Notas OpenAPI | fundamenta a arquitetura-alvo | healthy | 2026-09-25 | fingerprint e probes redigidos no ledger | nenhuma chamada nesta entrega |
-| Git remote Foundation | necessário para baseline de revisão | healthy | 2026-09-25 | `main`/`origin/main@6b4dcd6`; guard main-only instalado e Git for Windows é o writer válido | nenhum ajuste |
+| Git remote Foundation | necessário para baseline de revisão | healthy | 2026-09-25 | `main` publicado; guard main-only instalado e Git for Windows é o writer válido | publicar baseline R3 |
 
 ## Profile Scope & Handoffs (Required Before `APROVADO`)
 
@@ -226,28 +226,28 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 ## Planned Module Registry Contract
 
-O JSON machine-readable de `policies/scope_subscope_governance.md` terá uma coleção `modules`; cada entrada declara `subscope`, `path`, `runtime_authority_state`, `owned_capabilities`, `predecessors` e `successors`. `runtime_authority_state=current_runtime|target_planned` é um eixo distinto do lifecycle PACED de `evolution_lifecycle.md`; ele responde somente qual módulo possui autoridade sobre comportamento executável observado. Um `target_planned` nunca pode possuir capability runtime ativa.
+O JSON machine-readable de `policies/scope_subscope_governance.md` terá `core_scope=uninotas` e uma coleção `modules`; cada entrada declara `subscope`, `path`, `runtime_authority_state`, `owned_capabilities`, `planned_capabilities`, `predecessors` e `successors`. `runtime_authority_state=current_runtime|target_planned` é um eixo distinto do lifecycle PACED de `evolution_lifecycle.md`; ele responde somente qual módulo possui autoridade sobre comportamento executável observado. Um `target_planned` sempre tem `owned_capabilities=[]`; sua intenção aparece somente em `planned_capabilities`.
 
-Promoção é atômica por capability, não necessariamente por módulo: o TODO que implementa um successor move cada capability nomeada para o successor e a remove do predecessor no mesmo diff. Nenhuma capability pode ter dois owners `current_runtime`. Um predecessor com capabilities restantes continua `current_runtime` apenas para elas; quando perde a última, sai do registry/index ativo e permanece somente no histórico Git. Assim, promover leitura fiscal primeiro estreita `events-and-classification` à observação de falhas; o módulo só sai após o futuro cutover de `integration-error-occurrences`.
+Os IDs de capability são estáveis entre predecessor e successor: `note_read_model`, `integration_error_read_model` e `operational_workflow` não mudam durante a transferência. `fiscal_document_read` é capability nova, sem predecessor. Promoção é atômica por capability: o TODO implementador remove o ID de `owned_capabilities` do predecessor e o adiciona ao successor no mesmo diff; capabilities novas passam de `planned_capabilities` para `owned_capabilities` somente quando entregues. Nenhuma capability pode ter dois owners `current_runtime`, e toda capability ativa tem exatamente um. Um predecessor com capabilities restantes continua `current_runtime` apenas para elas; sem nenhuma, sai do registry/index ativo e permanece no histórico Git.
 
-| Subscope / path | Runtime authority state | Owned capabilities in this stage | Predecessor/successor handling |
+| Subscope / path | Runtime authority state | Owned / planned capability IDs | Predecessor/successor handling |
 | --- | --- | --- | --- |
-| `events-and-classification` / `modules/events-and-classification.md` | `current_runtime` | `legacy_note_observation`, `integration_error_observation` | successors fiscais/erros; capabilities saem separadamente |
-| `treatments-and-history` / `modules/treatments-and-history.md` | `current_runtime` | `legacy_treatment_workflow` | successor `operational-cases` após migração aprovada |
+| `events-and-classification` / `modules/events-and-classification.md` | `current_runtime` | owned: `note_read_model`, `integration_error_read_model`; planned: none | successors fiscais/erros; IDs saem separadamente |
+| `treatments-and-history` / `modules/treatments-and-history.md` | `current_runtime` | owned: `operational_workflow`; planned: none | successor `operational-cases` após migração aprovada |
 | `identity-and-team` / `modules/identity-and-team.md` | `current_runtime` | `authentication`, `team_profiles` | preservar; futuras permissões por contexto exigem TODO |
 | `realtime-invalidation` / `modules/realtime-invalidation.md` | `current_runtime` | `legacy_log_invalidation` | preservar; adaptar fontes em TODO futuro |
 | `operational-monitoring` / `modules/operational-monitoring.md` | `current_runtime` | `legacy_log_monitoring` | preservar; separar métricas em TODO futuro |
 | `runtime-and-deployment` / `modules/runtime-and-deployment.md` | `current_runtime` | `runtime_topology`, `health_read` | preservar fatos observados; registrar alvo sem inventar writer |
-| `fiscal-notes-and-documents` / `modules/fiscal-notes-and-documents.md` | `target_planned` | `none until promotion` | predecessor capability `legacy_note_observation`; target `fiscal_note_read`, `fiscal_document_read` |
-| `integration-error-occurrences` / `modules/integration-error-occurrences.md` | `target_planned` | `none until promotion` | predecessor capability `integration_error_observation`; writer/filter desconhecido |
-| `operational-cases` / `modules/operational-cases.md` | `target_planned` | `none until promotion` | predecessor capability `legacy_treatment_workflow`; target workflow/case ownership |
+| `fiscal-notes-and-documents` / `modules/fiscal-notes-and-documents.md` | `target_planned` | owned: none; planned: `note_read_model`, `fiscal_document_read` | predecessor `events-and-classification` para `note_read_model`; document read é novo |
+| `integration-error-occurrences` / `modules/integration-error-occurrences.md` | `target_planned` | owned: none; planned: `integration_error_read_model` | predecessor `events-and-classification`; writer/filter desconhecido |
+| `operational-cases` / `modules/operational-cases.md` | `target_planned` | owned: none; planned: `operational_workflow` | predecessor `treatments-and-history` |
 
 ## Decisions (Resolved Before Freeze)
 
-- [x] `D-01` O nome canônico do produto será UniNotas; o repositório técnico permanece `MonitorDeNotas` nesta entrega.
+- [x] `D-01` O nome canônico do produto e o `core_scope` serão `UniNotas`/`uninotas`; o repositório técnico permanece `MonitorDeNotas` nesta entrega.
 - [x] `D-02` Smart Notas é a fonte completa das notas e documentos; PostgreSQL `logs` é somente evidência de falhas de integração.
 - [x] `D-03` Unifast e Prosperar são `FiscalIssuerContext` independentes, nunca tenants, organizações ou agregação implícita.
-- [x] `D-04` O registry usará `runtime_authority_state=current_runtime|target_planned`, distinto do lifecycle PACED. Transferências são atômicas por capability; cada capability tem no máximo um owner current, e predecessor só sai após perder a última capability.
+- [x] `D-04` O registry usará `runtime_authority_state=current_runtime|target_planned`, distinto do lifecycle PACED. IDs estáveis transferem atomicamente entre `owned_capabilities`; planned nunca concede autoridade; cada capability ativa tem exatamente um owner current.
 - [x] `D-05` Os owners alvo exatos são: `fiscal-notes-and-documents` para fatos/documentos do provedor; `integration-error-occurrences` para evidência externa, normalização e correlação determinística; `operational-cases` para workflow, membership, tratamento e autoria da aplicação.
 - [x] `D-06` `artifacts/publication-manifest.txt` será o único inventário exato da árvore; o validator manterá singletons/famílias/status permitidos, derivará o registry de módulos do scope policy + metadata dos módulos e isolará o ledger histórico do inventário geral de TODOs, sem duplicar a árvore completa em Python.
 - [x] `D-07` O writer/filter externo de falhas permanece desconhecido nesta entrega; a Foundation pode afirmar somente o alvo PostgreSQL read-only/error-evidence e não pode nomear n8n ou outro writer sem evidência posterior.
@@ -256,7 +256,7 @@ Promoção é atômica por capability, não necessariamente por módulo: o TODO 
 
 | Decision | Prior decision / module reference | Handling | Evidence / intended consolidation |
 | --- | --- | --- | --- |
-| `D-01` | foundation decision `D-01` | Supersede (Intentional) | identity roots + technology/lifecycle titles |
+| `D-01` | foundation decision `D-01`; scope policy `monitor-de-notas` | Supersede (Intentional) | identity roots + `core_scope=uninotas` + todos os module anchors |
 | `D-02` | foundation decisions `D-04`; events ownership | Supersede (Intentional) | constitution + current/target source matrix |
 | `D-03` | foundation decision `D-05`; identity no-tenancy | Preserve | scope policy + identity module |
 | `D-04` | `evolution_lifecycle.md` capability lifecycle | Preserve | declare separate runtime-authority axis and relationship |
@@ -280,10 +280,10 @@ Promoção é atômica por capability, não necessariamente por módulo: o TODO 
 
 ## Decision Baseline (Frozen Before Implementation)
 
-- [x] `D-01` UniNotas é a identidade canônica do produto; o nome técnico do repositório não muda.
+- [x] `D-01` UniNotas/`uninotas` são identidade e core scope canônicos; o nome técnico do repositório não muda.
 - [x] `D-02` Toda nota/documento vem da Smart Notas; `logs` nunca é fallback ou espelho de notas bem-sucedidas.
 - [x] `D-03` O contexto fiscal faz parte de identidade, resolução de credencial e isolamento, sem criar tenancy.
-- [x] `D-04` O lifecycle/precedência `current_runtime|target_planned` e as condições de promoção/retirada impedem dois owners ativos da mesma capacidade.
+- [x] `D-04` O eixo de autoridade runtime, IDs estáveis e condições de promoção/retirada impedem overlap ou gap de ownership sem competir com o lifecycle PACED.
 - [x] `D-05` Os três paths/owners alvo e seus limites exclusivos são os definidos acima; `OperationalCase` não altera fatos das fontes.
 - [x] `D-06` Manifesto é a única enumeração exata; código valida famílias/singletons/semântica/privacidade e não mantém uma segunda cópia da árvore.
 - [x] `D-07` O writer/filter de falhas não é pré-condição do cutover Current/Target enquanto permanecer explicitamente desconhecido e bloquear apenas o futuro error-adapter.
@@ -301,7 +301,7 @@ Promoção é atômica por capability, não necessariamente por módulo: o TODO 
 
 | Pattern / Decision | Source / ID | Scope | Why It Must Hold After Cutover |
 | --- | --- | --- | --- |
-| current-versus-target lifecycle | D-04 | Foundation | evita declarar capacidade não implementada ou dois owners runtime ativos |
+| current-versus-target runtime-authority axis | D-04 | Foundation | evita declarar capacidade não implementada ou dois owners runtime ativos sem redefinir lifecycle PACED |
 | source ownership split | D-02 | modules/domain | impede fallback silencioso em logs de sucesso |
 | context is not tenancy | D-03 | scope/domain | impede vazamento conceitual e técnico |
 | manifest + semantic guards | D-06 | deterministic | permite evolução sem perder fail-closed |
@@ -330,8 +330,8 @@ Promoção é atômica por capability, não necessariamente por módulo: o TODO 
 - **Decision review lifecycle:** `after diagnosis is closed and before APROVADO`
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-summary`
-- **Decision review status:** `not_run`
-- **Decision review evidence / resolution:** `round formal anterior retornou no-go e foi integrada; nova revisão aguarda baseline R2`
+- **Decision review status:** `findings_integrated`
+- **Decision review evidence / resolution:** `R3 retornou no-go por capability IDs/core scope/terminologia; achados integrados e nova revisão aguardará baseline R3`
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -346,11 +346,11 @@ Promoção é atômica por capability, não necessariamente por módulo: o TODO 
 - **Why this decision:** a revisão altera decisões canônicas e precisa de pacote imutável.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `main`
-- **Baseline commit:** `6b4dcd68beed9c3c8a354e7e40e057c8db152cab`
-- **Baseline push reference:** `origin/main`
-- **Gate status:** `no_material_findings`
-- **Findings summary:** remediação R2 congelada em `main`; o push ref é machine-resolvable e o guard de diff retornou `go` antes do freeze.
-- **Evidence / reference:** `origin/main@6b4dcd6`; main-only checkout e hook confirmados.
+- **Baseline commit:** `pending fresh R3 main baseline`
+- **Baseline push reference:** `pending origin/main`
+- **Gate status:** `not_run`
+- **Findings summary:** R3 encontrou capability aliases, core scope e estado temporal ainda incompletos; integrados, exigindo novo freeze.
+- **Evidence / reference:** `origin/main` permanece único ref; próximo commit congelará R3.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
@@ -389,7 +389,7 @@ Promoção é atômica por capability, não necessariamente por módulo: o TODO 
 
 ### Ordered Steps
 
-1. Escrever testes de mutação fail-first para D-01..D-07, lifecycle/precedência e o novo contrato de publicação.
+1. Escrever testes de mutação fail-first para D-01..D-07, eixo de autoridade runtime/IDs estáveis e o novo contrato de publicação.
 2. Atualizar identidade, mandato, constituição, entidades, decisões e roadmap com separação Current/Target.
 3. Criar os três owners alvo e atualizar módulos existentes, index e scope policy.
 4. Tornar o manifesto a única enumeração exata; extrair validadores puros para registry/privacidade/ownership e manter poucos testes full-tree, sem enfraquecer symlink, legado ou ownership.
@@ -400,7 +400,7 @@ Promoção é atômica por capability, não necessariamente por módulo: o TODO 
 
 - **Strategy:** `test-first`
 - **Why:** o validator é o harness arquitetural; cada semântica precisa de mutação negativa antes do cutover.
-- **Fail-first target(s):** identidade UniNotas, source split, context-not-tenant, runtime-authority/lifecycle separation, módulo ausente/duplicado, successor inválido/cíclico, target com capability ativa, dupla autoridade, manifesto único, CNPJ válido e URL/identificador privado contextual.
+- **Fail-first target(s):** identidade/core scope UniNotas, source split, context-not-tenant, runtime-authority/lifecycle separation, módulo ausente/duplicado, successor inválido/cíclico, target com owned capability, capability ativa sem owner, dupla autoridade pelo mesmo ID, manifesto único, CNPJ válido e URL/identificador privado contextual.
 
 ### Pre-APROVADO RED Evidence Capture
 
@@ -528,7 +528,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 | --- | --- | --- | --- |
 | `CRIT-01` | plan critique | Integrated | autoridade restaurada em `main`; branch remota/local removida; guard main-only instalado |
 | `CRIT-02` | plan critique | Integrated | SHA incorreta descartada; novo baseline main pendente |
-| `ARCH-01` | both | Integrated | D-04 congela lifecycle, precedência, sucessão e promoção/retirada |
+| `ARCH-01` | both | Integrated | D-04 congela eixo de autoridade runtime, precedência, sucessão e promoção/retirada |
 | `ARCH-02` | both | Integrated | D-06 congela manifesto como inventário exato único e registry derivado |
 | `DISC-01` | both | Integrated | AMB-11/G-23/ST-02 revisados; writer permanece desconhecido e bloqueia apenas error-adapter |
 | `COHERENCE-01` | plan critique | Integrated | Frozen Decision Coherence Matrix cobre D-01..D-07; module baseline cobre os seis owners atuais |
@@ -543,19 +543,24 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 | `DISC-R2-01` | formal critique | Integrated | n8n possui apenas orchestration; writer PostgreSQL permanece desconhecido |
 | `STATE-R2-01` | formal critique | Integrated | work state e próximos passos sincronizados para review/fresh baseline |
 | `TEMPLATE-R2-01` | formal critique | Integrated | module template adicionado à ingestão obrigatória |
+| `ARCH-R3-01` | both formal reviews | Integrated | capability IDs estáveis + planned/owned tornam transferências e overlaps verificáveis |
+| `ARCH-R3-02` | formal architecture review | Integrated | toda terminologia congelada reserva lifecycle ao PACED e usa eixo/estado para runtime authority |
+| `SCOPE-R3-01` | formal architecture review | Integrated | D-01 fixa `core_scope=uninotas` e atualiza todos os anchors/validator |
+| `STATE-R3-01` | formal critique | Integrated | status, next step, gate evidence e baseline preparados para freeze R3 |
 
 ## Additional Architectural Opinions
 
 - **Needed:** `yes`
 - **Why ambiguity remains:** o validator pode ser evoluído por manifesto único ou por inventário gerado; revisão independente deve desafiar a opção recomendada.
-- **Opinion count:** `1`
+- **Opinion count:** `2`
 - **Package mode:** `bounded-summary`
 - **Internal reviewer mandate:** `required — fresh internal no-context reviewer after baseline freeze`
 - **Required lenses:** `correctness|performance|elegance|structural-soundness|operational-fit`
 
 | Reviewer | Recommendation | Performance view | Elegance view | Structural soundness view | Resolution | Evidence |
 | --- | --- | --- | --- | --- | --- | --- |
-| `uninotas_architecture_opinion` | manifesto único + registry lifecycle/precedência | runtime neutral; harness precisa ser otimizado | melhora ao remover autoridades duplicadas | aceitável após D-04/D-06/D-07 explícitas | Integrated | parecer diagnóstico pré-main; revisão formal será repetida no novo baseline |
+| `uninotas_architecture_opinion_main` | manifesto único + transferências por capability + matrix 1:1 | runtime neutral; harness precisa ser otimizado | melhora ao remover autoridades duplicadas | exigiu promoção parcial explícita | Integrated | formal R2 |
+| `uninotas_architecture_opinion_r3` | IDs estáveis e core scope explícito | runtime neutral | remove aliases ambíguos | exige ownership verificável pelo mesmo ID | Integrated | formal R3; nova revisão clean pendente |
 
 ## Audit Trigger Matrix
 
@@ -589,9 +594,9 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Canonical multi-lane audit protocol:** `n/a for planning critique; audit-protocol-triple-review required additively before Completed`
 - **Audit session / round evidence:** `n/a until run`
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
-- **Critique status:** `not_run`
-- **Findings summary:** `pending`
-- **Evidence / reference:** `pending`
+- **Critique status:** `findings_integrated`
+- **Findings summary:** `R3 confirmou diff/main/lifecycle separation e apontou capability map + estado temporal; ambos integrados`.
+- **Evidence / reference:** `uninotas_plan_critique_r3; nova crítica será executada sobre baseline R3`.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Assumption Code Coherence
@@ -646,7 +651,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 
 | Decision ID | Status | Evidence | Notes |
 | --- | --- | --- | --- |
-| `D-01` | pending | pending implementation | identidade UniNotas |
+| `D-01` | pending | pending implementation | identidade UniNotas + `core_scope=uninotas` |
 | `D-02` | pending | pending implementation | source ownership split |
 | `D-03` | pending | pending implementation | fiscal context sem tenancy |
 | `D-04` | pending | pending implementation | runtime-authority state e transferências por capability |
@@ -658,12 +663,15 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 
 | Module Decision Ref | Planned Handling | Delivery Status | Evidence | Notes |
 | --- | --- | --- | --- | --- |
-| `events-and-classification` | Supersede (Intentional) | pending | pending | current capabilities e successors |
-| `treatments-and-history` | Supersede (Intentional) | pending | pending | successor operational-cases |
-| `identity-and-team` | Preserve | pending | pending | no-tenancy |
-| `realtime-invalidation` | Preserve | pending | pending | current invalidation |
-| `operational-monitoring` | Preserve | pending | pending | current monitoring |
-| `runtime-and-deployment` | Preserve | pending | pending | facts observed; writer unknown |
+| `decisions#D-01` | Supersede (Intentional) | pending | pending | identity/core scope |
+| `decisions#D-04` | Supersede (Intentional) | pending | pending | source ownership target split |
+| `decisions#D-05` | Preserve | pending | pending | no business tenancy |
+| `events#ownership` | Supersede (Intentional) | pending | pending | current capabilities e successors |
+| `treatments#ownership` | Supersede (Intentional) | pending | pending | successor operational-cases |
+| `runtime#logs` | Preserve | pending | pending | facts observed; writer unknown |
+| `identity#no-tenancy` | Preserve | pending | pending | context is not tenancy |
+| `realtime#logs-invalidation` | Preserve | pending | pending | current invalidation |
+| `monitoring#logs-summary` | Preserve | pending | pending | current monitoring |
 
 ## Pipeline/Copilot P1/P2 Preflight
 
@@ -751,7 +759,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Disposition:** `keep-active`
 - **Disposition reason:** planejamento e aprovação ainda não concluídos.
 - **Post-commit/push status:** `pending`
-- **Next path/status action:** congelar baseline R2 em `main`, repetir arquitetura/crítica e executar guards pré-aprovação.
+- **Next path/status action:** congelar baseline R3 em `main`, repetir arquitetura/crítica e executar guards pré-aprovação.
 
 ## Module Consolidation Gate
 
