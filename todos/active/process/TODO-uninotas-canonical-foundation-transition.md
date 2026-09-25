@@ -299,11 +299,11 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 - **Why this decision:** a revisão altera decisões canônicas e precisa de pacote imutável.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `feature/uninotas-canonical-foundation-transition`
-- **Baseline commit:** `pending`
-- **Baseline push reference:** `pending`
-- **Gate status:** `not_run`
-- **Findings summary:** `TODO ainda em preparação`.
-- **Evidence / reference:** `pending git write authority guards`.
+- **Baseline commit:** `999d8493d36d38146fb2dd113f7863b5a6841279`
+- **Baseline push reference:** `origin/feature/uninotas-canonical-foundation-transition@999d8493d36d38146fb2dd113f7863b5a6841279`
+- **Gate status:** `no_material_findings`
+- **Findings summary:** os três artefatos de framing/descoberta/execução foram congelados juntos; o push WSL sem credencial falhou, mas o Git for Windows autenticado publicou a mesma SHA.
+- **Evidence / reference:** `git commit 999d849` e push confirmado em `origin/feature/uninotas-canonical-foundation-transition`.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
@@ -528,12 +528,12 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 - **Client surface:** `codex`
 - **Current governed action:** `implementation`
-- **Selected role:** `primary-chat`
-- **Selected model:** `gpt-6-astra`
-- **Selected effort:** `xhigh`
+- **Selected role:** `routine-executor`
+- **Selected model:** `gpt-5.6-terra`
+- **Selected effort:** `medium`
 - **Proof mode:** `declared`
 - **Exception reason:** `n/a`
-- **Subagent / delegation authorization:** `not-requested for implementation; required review agents are gate-specific`
+- **Subagent / delegation authorization:** `governed routine-executor lane required by the applicable routing workflow; no parallel code writers`
 - **Execution topology:** `primary-checkout-single-writer`
 - **Worktree / auxiliary-checkout authorization:** `not-authorized`
 - **Worktree authorization evidence:** `n/a`
