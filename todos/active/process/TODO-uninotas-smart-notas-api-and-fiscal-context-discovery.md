@@ -157,7 +157,7 @@ The sources describe different responsibilities in the confirmed pipeline. FastP
 Therefore, the target has one note source plus one failure-evidence source:
 
 - **FastPay (Routerfy) owns:** originating sale/order data supplied to the automation flow.
-- **n8n owns:** orchestration of the Smart Notas request and the still-to-be-confirmed write of failed integration evidence to PostgreSQL.
+- **n8n owns:** orchestration of the Smart Notas request. The component that writes failed integration evidence to PostgreSQL remains unknown until separately evidenced.
 - **Smart Notas API owns for UniNotas:** the complete fiscal-note read source, including list, detail, status, issuer-scoped data, PDF/DANFE, XML, and approved reports.
 - **PostgreSQL `logs` owns for UniNotas:** durable evidence only for failed integration attempts, including sanitized request/response context needed for diagnosis.
 - **UniNotas owns:** fiscal-context resolution, normalized API contracts, safe association of notes with integration errors, `OperationalCase`, workflow/treatments, audit authorship, and product-facing identifiers.

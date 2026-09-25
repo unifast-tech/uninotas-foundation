@@ -46,8 +46,8 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
-- **Work state:** `implementation`
-- **Why this state now:** o TODO está sendo refinado; nenhuma implementação de Foundation fora deste próprio arquivo foi iniciada.
+- **Work state:** `review`
+- **Why this state now:** o contrato está em refinamento/revisão pré-aprovação; nenhuma implementação canônica ou determinística foi iniciada.
 - **Exit condition:** baseline aprovado, implementação validada e gates de entrega concluídos.
 
 ## Scope
@@ -91,7 +91,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 | --- | --- | --- | --- | --- | --- |
 | Foundation UniNotas cutover | `main@pending-remediation-baseline` | `n/a — main-only authority` | `n/a` | `origin/main pending` | planning |
 
-## Diff Expectation Contract (Required Before Delivery)
+## Diff Expectation Contract
 
 - **Contract status:** `required`
 - **Policy:** `strict; unclassified or forbidden paths block delivery`
@@ -113,6 +113,9 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 | `uninotas-foundation` | `project_constitution.md` | `M` | topologia e invariantes |
 | `uninotas-foundation` | `domain_entities.md` | `M` | vocabulário do domínio |
 | `uninotas-foundation` | `system_roadmap.md` | `M` | sequência de entrega |
+| `uninotas-foundation` | `technology_baseline.md` | `M` | identidade no baseline observado sem alterar fatos técnicos |
+| `uninotas-foundation` | `evolution_lifecycle.md` | `M` | relacionar lifecycle PACED ao estado separado de autoridade runtime |
+| `uninotas-foundation` | `contracts/README.md` | `M` | índice deixa de presumir exatamente seis owners |
 | `uninotas-foundation` | `decisions/monitor-de-notas-foundation-decisions.md` | `M` | decisões promovidas e arquivo renomeado somente se o diff contract for renovado |
 | `uninotas-foundation` | `modules/README.md` | `M` | índice/lifecycle dos owners |
 | `uninotas-foundation` | `modules/events-and-classification.md` | `M` | owner current e sucessores target |
@@ -125,22 +128,20 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 | `uninotas-foundation` | `modules/integration-error-occurrences.md` | `A` | target external failure-evidence owner |
 | `uninotas-foundation` | `modules/operational-cases.md` | `A` | target application workflow owner |
 | `uninotas-foundation` | `policies/scope_subscope_governance.md` | `M` | novos subscopes explícitos |
+| `uninotas-foundation` | `policies/query_path_guardrails.md` | `M` | separar current logs queries do target note source |
+| `uninotas-foundation` | `policies/validation_evidence_policy.md` | `M` | promover boundary de CNPJ/identifier/document URL |
 | `uninotas-foundation` | `artifacts/README.md` | `M` | indexação dos artefatos |
-| `uninotas-foundation` | `artifacts/feature-briefs/uninotas-smart-notas-central.md` | `A|M` | framing já produzido e reconciliação ST-02 |
+| `uninotas-foundation` | `artifacts/feature-briefs/uninotas-smart-notas-central.md` | `A, M` | framing já produzido e reconciliação ST-02 |
 | `uninotas-foundation` | `artifacts/publication-manifest.txt` | `M` | contrato de publicação |
-| `uninotas-foundation` | `todos/active/process/TODO-uninotas-smart-notas-api-and-fiscal-context-discovery.md` | `A|M` | ledger de descoberta e sequência corrigida |
-| `uninotas-foundation` | `todos/active/process/TODO-uninotas-canonical-foundation-transition.md` | `A|M` | autoridade tática e evidência |
+| `uninotas-foundation` | `todos/active/process/TODO-uninotas-smart-notas-api-and-fiscal-context-discovery.md` | `A, M` | ledger de descoberta e sequência corrigida |
+| `uninotas-foundation` | `todos/active/process/TODO-uninotas-canonical-foundation-transition.md` | `A, M` | autoridade tática e evidência |
 | `uninotas-foundation` | `deterministic/validate_foundation.py` | `M` | validador evolutivo fail-closed |
-| `uninotas-foundation` | `deterministic/tests/**` | `M|A` | mutações e regressões do validator |
+| `uninotas-foundation` | `deterministic/tests/**` | `A, M` | mutações e regressões do validator |
 
 ### Not Expected Changed Paths
 
 | Repository | Path glob | Change types (`A|M|D|R|any`) | Reason |
 | --- | --- | --- | --- |
-| root/backend/frontend | `backend/**` | `any` | código de produto fora do escopo |
-| root/backend/frontend | `frontend/**` | `any` | UI fora do escopo |
-| root/backend/frontend | `Dockerfile` | `any` | runtime fora do escopo |
-| root/backend/frontend | `.env*` | `any` | segredos/configuração fora do escopo |
 | `uninotas-foundation` | `todos/completed/**` | `any` | história fechada é imutável nesta entrega |
 | `uninotas-foundation` | `deterministic/legacy_reference_exceptions.json` | `any` | ledger histórico congelado não é reescrito |
 
@@ -162,7 +163,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 - [ ] `DOD-03` Unifast/Prosperar são contextos fiscais explícitos e não tenants.
 - [ ] `DOD-04` Registry e módulos distinguem `current_runtime` de `target_planned`, com precedência, predecessor/sucessor e condição de promoção/retirada, sem declarar código futuro como implementado.
 - [ ] `DOD-05` Notas/documentos, falhas de integração e casos operacionais têm owners canônicos distintos.
-- [ ] `DOD-06` Validator e suíte rejeitam regressões de identidade, ownership, tenancy, privacidade, symlink, legado e publicação.
+- [ ] `DOD-06` Validator e suíte rejeitam regressões de identidade, ownership, tenancy, privacidade, symlink, legado e publicação, além de módulo ausente/duplicado, successor inválido/cíclico, target com capability ativa e dupla autoridade runtime.
 - [ ] `DOD-07` Os artefatos atuais pertencem ao manifesto e a validação Foundation passa sem `frozen lifecycle tree mismatch`.
 - [ ] `DOD-08` Nenhum segredo, valor real de CNPJ/identificador do provedor, payload/resposta privada ou URL capturada de documento foi persistido; CNPJ válido é coberto deterministicamente e identificador/URL contextual por regra precisa mais revisão de diff.
 - [ ] `DOD-09` O roadmap aponta para o TODO NestJS de leitura como próximo slice, sem lhe conceder autoridade antecipada.
@@ -189,7 +190,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 | Dependency | Why It Matters | Status | Last Verified | Verification Method | Adjustment / Workaround |
 | --- | --- | --- | --- | --- | --- |
 | Smart Notas OpenAPI | fundamenta a arquitetura-alvo | healthy | 2026-09-25 | fingerprint e probes redigidos no ledger | nenhuma chamada nesta entrega |
-| Git remote Foundation | necessário para baseline de revisão | healthy | 2026-09-25 | `main` e `origin/main` em `de52240`; guard main-only instalado | publicar novo baseline após remediação |
+| Git remote Foundation | necessário para baseline de revisão | healthy | 2026-09-25 | `main` publicado; guard main-only instalado e Git for Windows é o writer válido | publicar novo baseline após remediação R2 |
 
 ## Profile Scope & Handoffs (Required Before `APROVADO`)
 
@@ -225,29 +226,43 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 ## Planned Module Registry Contract
 
-O JSON machine-readable de `policies/scope_subscope_governance.md` terá uma coleção `modules`; cada entrada declara `subscope`, `path`, `lifecycle`, `successors` e `runtime_authority`. Valores de lifecycle permitidos nesta entrega são apenas `current_runtime|target_planned`. Um `target_planned` nunca tem `runtime_authority=true`. A aposentadoria futura remove o predecessor do registry/módulo ativo após o TODO de implementação promover o successor; Git mantém a história, sem criar `retired` como owner concorrente.
+O JSON machine-readable de `policies/scope_subscope_governance.md` terá uma coleção `modules`; cada entrada declara `subscope`, `path`, `runtime_authority_state`, `owned_capabilities`, `predecessors` e `successors`. `runtime_authority_state=current_runtime|target_planned` é um eixo distinto do lifecycle PACED de `evolution_lifecycle.md`; ele responde somente qual módulo possui autoridade sobre comportamento executável observado. Um `target_planned` nunca pode possuir capability runtime ativa.
 
-| Subscope / path | Lifecycle | Runtime authority | Successor(s) / handling |
+Promoção é atômica por capability, não necessariamente por módulo: o TODO que implementa um successor move cada capability nomeada para o successor e a remove do predecessor no mesmo diff. Nenhuma capability pode ter dois owners `current_runtime`. Um predecessor com capabilities restantes continua `current_runtime` apenas para elas; quando perde a última, sai do registry/index ativo e permanece somente no histórico Git. Assim, promover leitura fiscal primeiro estreita `events-and-classification` à observação de falhas; o módulo só sai após o futuro cutover de `integration-error-occurrences`.
+
+| Subscope / path | Runtime authority state | Owned capabilities in this stage | Predecessor/successor handling |
 | --- | --- | --- | --- |
-| `events-and-classification` / `modules/events-and-classification.md` | `current_runtime` | `true` | `fiscal-notes-and-documents`, `integration-error-occurrences`; retirar após ambos os cutovers aplicáveis |
-| `treatments-and-history` / `modules/treatments-and-history.md` | `current_runtime` | `true` | `operational-cases`; retirar após migração aprovada |
-| `identity-and-team` / `modules/identity-and-team.md` | `current_runtime` | `true` | preservar; futuras permissões por contexto exigem TODO |
-| `realtime-invalidation` / `modules/realtime-invalidation.md` | `current_runtime` | `true` | preservar contrato atual; adaptar fontes em TODO futuro |
-| `operational-monitoring` / `modules/operational-monitoring.md` | `current_runtime` | `true` | preservar contrato atual; separar métricas em TODO futuro |
-| `runtime-and-deployment` / `modules/runtime-and-deployment.md` | `current_runtime` | `true` | preservar runtime observado; registrar alvo externo sem inventar writer |
-| `fiscal-notes-and-documents` / `modules/fiscal-notes-and-documents.md` | `target_planned` | `false` | successor fiscal do read model atual |
-| `integration-error-occurrences` / `modules/integration-error-occurrences.md` | `target_planned` | `false` | successor de evidência de falha; writer/filter desconhecido |
-| `operational-cases` / `modules/operational-cases.md` | `target_planned` | `false` | successor do workflow/tratamento atual |
+| `events-and-classification` / `modules/events-and-classification.md` | `current_runtime` | `legacy_note_observation`, `integration_error_observation` | successors fiscais/erros; capabilities saem separadamente |
+| `treatments-and-history` / `modules/treatments-and-history.md` | `current_runtime` | `legacy_treatment_workflow` | successor `operational-cases` após migração aprovada |
+| `identity-and-team` / `modules/identity-and-team.md` | `current_runtime` | `authentication`, `team_profiles` | preservar; futuras permissões por contexto exigem TODO |
+| `realtime-invalidation` / `modules/realtime-invalidation.md` | `current_runtime` | `legacy_log_invalidation` | preservar; adaptar fontes em TODO futuro |
+| `operational-monitoring` / `modules/operational-monitoring.md` | `current_runtime` | `legacy_log_monitoring` | preservar; separar métricas em TODO futuro |
+| `runtime-and-deployment` / `modules/runtime-and-deployment.md` | `current_runtime` | `runtime_topology`, `health_read` | preservar fatos observados; registrar alvo sem inventar writer |
+| `fiscal-notes-and-documents` / `modules/fiscal-notes-and-documents.md` | `target_planned` | `none until promotion` | predecessor capability `legacy_note_observation`; target `fiscal_note_read`, `fiscal_document_read` |
+| `integration-error-occurrences` / `modules/integration-error-occurrences.md` | `target_planned` | `none until promotion` | predecessor capability `integration_error_observation`; writer/filter desconhecido |
+| `operational-cases` / `modules/operational-cases.md` | `target_planned` | `none until promotion` | predecessor capability `legacy_treatment_workflow`; target workflow/case ownership |
 
 ## Decisions (Resolved Before Freeze)
 
 - [x] `D-01` O nome canônico do produto será UniNotas; o repositório técnico permanece `MonitorDeNotas` nesta entrega.
 - [x] `D-02` Smart Notas é a fonte completa das notas e documentos; PostgreSQL `logs` é somente evidência de falhas de integração.
 - [x] `D-03` Unifast e Prosperar são `FiscalIssuerContext` independentes, nunca tenants, organizações ou agregação implícita.
-- [x] `D-04` O registry machine-readable usará `current_runtime|target_planned`; runtime observado tem precedência sobre claims de implementação, target governa apenas direção futura, e promoção exige TODO implementado/aprovado que converta o successor para `current_runtime` e retire o predecessor da autoridade ativa.
+- [x] `D-04` O registry usará `runtime_authority_state=current_runtime|target_planned`, distinto do lifecycle PACED. Transferências são atômicas por capability; cada capability tem no máximo um owner current, e predecessor só sai após perder a última capability.
 - [x] `D-05` Os owners alvo exatos são: `fiscal-notes-and-documents` para fatos/documentos do provedor; `integration-error-occurrences` para evidência externa, normalização e correlação determinística; `operational-cases` para workflow, membership, tratamento e autoria da aplicação.
 - [x] `D-06` `artifacts/publication-manifest.txt` será o único inventário exato da árvore; o validator manterá singletons/famílias/status permitidos, derivará o registry de módulos do scope policy + metadata dos módulos e isolará o ledger histórico do inventário geral de TODOs, sem duplicar a árvore completa em Python.
 - [x] `D-07` O writer/filter externo de falhas permanece desconhecido nesta entrega; a Foundation pode afirmar somente o alvo PostgreSQL read-only/error-evidence e não pode nomear n8n ou outro writer sem evidência posterior.
+
+## Frozen Decision Coherence Matrix (1:1)
+
+| Decision | Prior decision / module reference | Handling | Evidence / intended consolidation |
+| --- | --- | --- | --- |
+| `D-01` | foundation decision `D-01` | Supersede (Intentional) | identity roots + technology/lifecycle titles |
+| `D-02` | foundation decisions `D-04`; events ownership | Supersede (Intentional) | constitution + current/target source matrix |
+| `D-03` | foundation decision `D-05`; identity no-tenancy | Preserve | scope policy + identity module |
+| `D-04` | `evolution_lifecycle.md` capability lifecycle | Preserve | declare separate runtime-authority axis and relationship |
+| `D-05` | events/treatments current ownership | Supersede (Intentional) | three exact target module paths/boundaries |
+| `D-06` | foundation decision `D-02`; frozen validator tree | Supersede (Intentional) | preserve Git-history recovery while making manifest sole active inventory |
+| `D-07` | No Prior Decision | Preserve | explicit unknown in feature brief, discovery ledger, runtime/target docs |
 
 ## Module Decision Baseline Snapshot (Required Before APROVADO)
 
@@ -316,7 +331,7 @@ O JSON machine-readable de `policies/scope_subscope_governance.md` terá uma col
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-summary`
 - **Decision review status:** `not_run`
-- **Decision review evidence / resolution:** `pending review baseline freeze`
+- **Decision review evidence / resolution:** `round formal anterior retornou no-go e foi integrada; nova revisão aguarda baseline R2`
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -331,11 +346,11 @@ O JSON machine-readable de `policies/scope_subscope_governance.md` terá uma col
 - **Why this decision:** a revisão altera decisões canônicas e precisa de pacote imutável.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `main`
-- **Baseline commit:** `58234a9b2eb3076a58daed72d4b853cba256a0ce`
-- **Baseline push reference:** `origin/main@58234a9b2eb3076a58daed72d4b853cba256a0ce`
-- **Gate status:** `no_material_findings`
-- **Findings summary:** o baseline anterior em branch proibida/SHA incorreta foi descartado; achados diagnósticos foram integrados e o pacote remediado foi congelado na autoridade single-branch `main`.
-- **Evidence / reference:** commit/push `58234a9`; guard main-only instalado no checkout canônico resolvido pelo Git for Windows.
+- **Baseline commit:** `pending fresh R2 main baseline`
+- **Baseline push reference:** `pending origin/main`
+- **Gate status:** `not_run`
+- **Findings summary:** a primeira revisão formal encontrou promoção parcial, matriz 1:1, diff contract, lifecycle-owner e push-ref incompletos; todos foram integrados e exigem novo freeze.
+- **Evidence / reference:** `origin/main` é o único ref remoto e o próximo commit congelará o pacote R2.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
@@ -385,7 +400,7 @@ O JSON machine-readable de `policies/scope_subscope_governance.md` terá uma col
 
 - **Strategy:** `test-first`
 - **Why:** o validator é o harness arquitetural; cada semântica precisa de mutação negativa antes do cutover.
-- **Fail-first target(s):** identidade UniNotas, source split, context-not-tenant, lifecycle/precedência, module registry, manifesto único, CNPJ válido e URL/identificador privado contextual.
+- **Fail-first target(s):** identidade UniNotas, source split, context-not-tenant, runtime-authority/lifecycle separation, módulo ausente/duplicado, successor inválido/cíclico, target com capability ativa, dupla autoridade, manifesto único, CNPJ válido e URL/identificador privado contextual.
 
 ### Pre-APROVADO RED Evidence Capture
 
@@ -516,11 +531,18 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 | `ARCH-01` | both | Integrated | D-04 congela lifecycle, precedência, sucessão e promoção/retirada |
 | `ARCH-02` | both | Integrated | D-06 congela manifesto como inventário exato único e registry derivado |
 | `DISC-01` | both | Integrated | AMB-11/G-23/ST-02 revisados; writer permanece desconhecido e bloqueia apenas error-adapter |
-| `COHERENCE-01` | plan critique | Integrated | baseline module matrix agora cobre seis módulos e usa somente enums canônicos |
+| `COHERENCE-01` | plan critique | Integrated | Frozen Decision Coherence Matrix cobre D-01..D-07; module baseline cobre os seis owners atuais |
 | `SEC-01` | both | Integrated | DOD/harness distinguem CNPJ determinístico de ID/URL contextual |
 | `DIFF-01` | plan critique | Integrated | globs de decisions/modules/feature-brief/TODOs foram substituídos por paths exatos |
 | `ASSUME-01` | plan critique | Integrated | hipóteses redundantes removidas; decisões/fatos/constraints assumem seus owners corretos |
 | `TEST-01` | both | Integrated | fixtures mínimas, validadores puros e duração viram obrigação de entrega |
+| `ARCH-R2-01` | formal architecture review | Integrated | transferências atômicas por capability permitem promoção fiscal antes do error-adapter |
+| `ARCH-R2-02` | formal architecture review | Integrated | matriz congelada agora é 1:1 por D-01..D-07 |
+| `DIFF-R2-01` | both formal reviews | Integrated | heading canônico, único repo declarado e roots/policies/contracts omitidos classificados |
+| `LIFECYCLE-R2-01` | formal critique | Integrated | `runtime_authority_state` é eixo separado e explicitamente relacionado ao lifecycle PACED |
+| `DISC-R2-01` | formal critique | Integrated | n8n possui apenas orchestration; writer PostgreSQL permanece desconhecido |
+| `STATE-R2-01` | formal critique | Integrated | work state e próximos passos sincronizados para review/fresh baseline |
+| `TEMPLATE-R2-01` | formal critique | Integrated | module template adicionado à ingestão obrigatória |
 
 ## Additional Architectural Opinions
 
@@ -575,7 +597,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 ## Gate: Assumption Code Coherence
 
 - **Gate decision:** `required`
-- **Why this decision:** A-01/A-02 dependem da árvore e validator reais.
+- **Why this decision:** embora não haja hipótese viva, o guard confirma que fatos e decisões citam código/docs reais antes da aprovação.
 - **Trigger stage:** `after critique convergence and before APROVADO`
 - **Guard scope:** `none — fatos/decisões substituíram as hipóteses vivas; o guard ainda confirma coerência dos anchors`
 - **Guard command:** `python3 delphi-ai/tools/assumption_code_coherence_guard.py --todo uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md`
@@ -600,6 +622,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 | `delphi-ai/workflows/docker/todo-driven-execution-method.md` | ciclo completo | gates e evidência | atalhos de lifecycle | roteia execução |
 | `delphi-ai/workflows/docker/todo-approval-gates-method.md` | revisão prévia | baseline publicado e reviews | aprovação sem preflight | exige freeze |
 | `delphi-ai/workflows/docker/deterministic-todo-validation-method.md` | TODO tático | markdown canônico | editar bundle derivado | valida estrutura |
+| `delphi-ai/templates/module_template.md` | três módulos serão criados | anchors canônicos e coverage status | inventar formato paralelo ou sobrecarregar lifecycle PACED | blueprint obrigatório dos novos módulos |
 | `uninotas-foundation/policies/scope_subscope_governance.md` | novos owners | sem business tenancy | contexto como tenant | atualização explícita |
 
 ## Agent Routing Preflight
@@ -623,13 +646,24 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 
 | Decision ID | Status | Evidence | Notes |
 | --- | --- | --- | --- |
-| `D-01..D-07` | pending | pending implementation | preencher antes da entrega |
+| `D-01` | pending | pending implementation | identidade UniNotas |
+| `D-02` | pending | pending implementation | source ownership split |
+| `D-03` | pending | pending implementation | fiscal context sem tenancy |
+| `D-04` | pending | pending implementation | runtime-authority state e transferências por capability |
+| `D-05` | pending | pending implementation | três owners target exclusivos |
+| `D-06` | pending | pending implementation | manifesto único + semantic registry |
+| `D-07` | pending | pending implementation | writer/filter explicitamente desconhecido |
 
 ## Module Decision Consistency Validation
 
 | Module Decision Ref | Planned Handling | Delivery Status | Evidence | Notes |
 | --- | --- | --- | --- | --- |
-| `baseline rows above` | mixed preserve/supersede | pending | pending | preencher 1:1 |
+| `events-and-classification` | Supersede (Intentional) | pending | pending | current capabilities e successors |
+| `treatments-and-history` | Supersede (Intentional) | pending | pending | successor operational-cases |
+| `identity-and-team` | Preserve | pending | pending | no-tenancy |
+| `realtime-invalidation` | Preserve | pending | pending | current invalidation |
+| `operational-monitoring` | Preserve | pending | pending | current monitoring |
+| `runtime-and-deployment` | Preserve | pending | pending | facts observed; writer unknown |
 
 ## Pipeline/Copilot P1/P2 Preflight
 
@@ -717,7 +751,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Disposition:** `keep-active`
 - **Disposition reason:** planejamento e aprovação ainda não concluídos.
 - **Post-commit/push status:** `pending`
-- **Next path/status action:** congelar baseline e executar gates de aprovação.
+- **Next path/status action:** congelar baseline R2 em `main`, repetir arquitetura/crítica e executar guards pré-aprovação.
 
 ## Module Consolidation Gate
 
