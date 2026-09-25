@@ -461,7 +461,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 - **Canonical method:** `wf-docker-audit-escalation-method`
 - **Guard command:** `python3 delphi-ai/tools/audit_escalation_guard.py --todo uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md`
-- **Latest TEACH evidence / artifact:** `pending review baseline freeze`
+- **Latest TEACH evidence / artifact:** `audit_escalation_guard.py: Overall outcome go; fingerprint bdde6668065b; critique, architecture decision/adherence, security, test-quality, final review, verification debt and delivery triple-review required; performance/concurrency recommended`.
 
 | Trigger | Value | Notes |
 | --- | --- | --- |
@@ -486,7 +486,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 - **Package minimum contents:** `frozen baseline|scope|assumptions|plan|issue cards|residual risks`
 - **Critique isolation mode:** `fresh internal no-context reviewer`
 - **Internal reviewer mandate:** `required after baseline freeze`
-- **Canonical multi-lane audit protocol:** `pending audit floor`
+- **Canonical multi-lane audit protocol:** `n/a for planning critique; audit-protocol-triple-review required additively before Completed`
 - **Audit session / round evidence:** `n/a until run`
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
 - **Critique status:** `not_run`
@@ -538,7 +538,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 - **Worktree / auxiliary-checkout authorization:** `not-authorized`
 - **Worktree authorization evidence:** `n/a`
 - **Writer scheduling policy:** `single-writer-serialized`
-- **Guard outcome:** `pending`
+- **Guard outcome:** `go — agent_role_routing_guard.py`
 - **Waiver / exception reference:** `n/a`
 
 ## Decision Adherence Validation
@@ -570,15 +570,15 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 - **Risk level:** `medium`
 - **Why this risk level:** o validator e os documentos processam conteúdo que pode conter segredo/PII, embora nenhuma chamada runtime seja feita.
 - **Attack surface in scope:** `documentation privacy scanner; credential/PII persistence prevention`.
-- **Attack simulation decision:** `recommended`
-- **Review evidence:** `planned mutation tests + security review decision from audit floor`.
+- **Attack simulation decision:** `required`
+- **Review evidence:** `audit floor SEC-AUTH-OR-TENANT; security-adversarial-review required before Completed`.
 - **Residual security risk:** `pending review`.
 
 ## Performance & Concurrency Risk Assessment
 
 - **Policy schema version:** `pcv-1`
-- **Global sensitivity level:** `none`
-- **Why this level:** sem endpoint, async UI, banco ou runtime.
+- **Global sensitivity level:** `low`
+- **Why this level:** nenhuma superfície runtime muda, mas o piso recomenda classificação independente por ser release-sensitive.
 - **Current delivery stage at review time:** `Pending`
 
 | Lane ID | Lane | Trigger Result | Trigger Severity | Trigger Reason Code | Gate Deadline | Minimum Evidence Rule | State | Residual Risk | Uncertainty Reason Code |
@@ -590,7 +590,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 ## Verification Debt Assessment
 
-- **Audit outcome:** `pending`
+- **Audit outcome:** `required before Completed`
 - **Why this outcome:** big architectural cutover requires audit before completion.
 - **Inline code TODO debt:** `none expected`
 - **Evidence / audit artifact:** `pending`
@@ -605,7 +605,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 - **Package mode:** `bounded-file-set`
 - **Canonical method:** `wf-docker-independent-test-quality-audit-method`
 - **Audit isolation mode:** `fresh internal no-context reviewer`
-- **Internal reviewer mandate:** `pending audit floor`
+- **Internal reviewer mandate:** `required — fresh internal no-context reviewer before Completed`
 - **Audit status:** `not_run`
 - **Findings summary:** `pending`
 - **Evidence / reference:** `pending`
@@ -617,7 +617,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 - **Impact signals in scope:** `cross-module blast radius|intentional module supersede`
 - **Package mode:** `bounded-summary`
 - **Review isolation mode:** `fresh internal no-context reviewer`
-- **Internal reviewer mandate:** `pending audit floor`
+- **Internal reviewer mandate:** `required — fresh internal no-context reviewer before Completed`
 - **Final review status:** `not_run`
 - **Findings summary:** `pending`
 - **Evidence / reference:** `pending`
@@ -628,7 +628,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 - **Why this decision:** cutover canônico e aposentadoria da autoridade antiga.
 - **Cutover signals in scope:** `canonical cutover|legacy-path retirement`
 - **Package mode:** `bounded-file-set`
-- **Canonical multi-lane audit protocol:** `pending audit floor`
+- **Canonical multi-lane audit protocol:** `audit-protocol-triple-review required additively before Completed`
 - **Audit session / round evidence:** `n/a until run`
 - **Audit focus:** `true canonical path|current-target labels|hidden fallback|validator preservation`
 - **Cutover audit status:** `not_run`
