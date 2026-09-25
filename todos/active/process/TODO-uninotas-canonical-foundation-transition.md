@@ -42,7 +42,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `none`
-- **Next exact step:** congelar em `main` a remediação R3 de capability/core scope/estado, repetir arquitetura e crítica, e então executar os guards pré-aprovação.
+- **Next exact step:** integrar a remediação R4 de proveniência por capability, decisão canônica e comandos; publicar o baseline R4 em `main`; repetir arquitetura/crítica e então executar os guards de coerência, drift e pré-aprovação.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -68,7 +68,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 - [ ] Implementar `OperationalCase`, migrar tratamentos ou decidir agrupamento/correlação de falhas.
 - [ ] Investigar ou alterar a automação n8n/FastPay.
 - [ ] Realizar chamadas adicionais à API Smart Notas ou registrar qualquer valor de credencial/identificador.
-- [ ] Renomear repositórios, diretórios, pacotes, imagens ou serviços técnicos.
+- [ ] Renomear repositórios, diretórios de produto/runtime, pacotes, imagens ou serviços técnicos; o rename do arquivo canônico de decisões para UniNotas está explicitamente dentro do escopo.
 - [ ] Usar worktrees, checkouts auxiliares, `worker/*` ou `reconcile/*`.
 
 ## Delivery Status Semantics
@@ -116,7 +116,8 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 | `uninotas-foundation` | `technology_baseline.md` | `M` | identidade no baseline observado sem alterar fatos técnicos |
 | `uninotas-foundation` | `evolution_lifecycle.md` | `M` | relacionar lifecycle PACED ao estado separado de autoridade runtime |
 | `uninotas-foundation` | `contracts/README.md` | `M` | índice deixa de presumir exatamente seis owners |
-| `uninotas-foundation` | `decisions/monitor-de-notas-foundation-decisions.md` | `M` | decisões promovidas e arquivo renomeado somente se o diff contract for renovado |
+| `uninotas-foundation` | `decisions/monitor-de-notas-foundation-decisions.md` | `D` | aposentar o path canônico legado após migração integral das decisões |
+| `uninotas-foundation` | `decisions/uninotas-foundation-decisions.md` | `A` | autoridade canônica de decisões UniNotas, preservando histórico pelo Git |
 | `uninotas-foundation` | `modules/README.md` | `M` | índice/lifecycle dos owners |
 | `uninotas-foundation` | `modules/events-and-classification.md` | `M` | owner current e sucessores target |
 | `uninotas-foundation` | `modules/treatments-and-history.md` | `M` | owner current e sucessor target |
@@ -163,7 +164,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 - [ ] `DOD-03` Unifast/Prosperar são contextos fiscais explícitos e não tenants.
 - [ ] `DOD-04` Registry e módulos distinguem `current_runtime` de `target_planned`, com precedência, predecessor/sucessor e condição de promoção/retirada, sem declarar código futuro como implementado.
 - [ ] `DOD-05` Notas/documentos, falhas de integração e casos operacionais têm owners canônicos distintos.
-- [ ] `DOD-06` Validator e suíte rejeitam regressões de identidade, ownership, tenancy, privacidade, symlink, legado e publicação, além de módulo ausente/duplicado, successor inválido/cíclico, target com `owned_capabilities`, capability ativa sem owner e dupla autoridade runtime para o mesmo ID estável.
+- [ ] `DOD-06` Validator e suíte rejeitam regressões de identidade, ownership, tenancy, privacidade, symlink, legado e publicação, além de módulo ausente/duplicado, successor inválido/cíclico, interseção `owned_capabilities ∩ planned_capabilities`, target com `owned_capabilities`, capability transferida sem exatamente um owner atual ou um successor planejado, capability ativa sem owner, dupla autoridade runtime, successor planejado duplicado e planned membership obsoleto após promoção para o mesmo ID estável.
 - [ ] `DOD-07` Os artefatos atuais pertencem ao manifesto e a validação Foundation passa sem `frozen lifecycle tree mismatch`.
 - [ ] `DOD-08` Nenhum segredo, valor real de CNPJ/identificador do provedor, payload/resposta privada ou URL capturada de documento foi persistido; CNPJ válido é coberto deterministicamente e identificador/URL contextual por regra precisa mais revisão de diff.
 - [ ] `DOD-09` O roadmap aponta para o TODO NestJS de leitura como próximo slice, sem lhe conceder autoridade antecipada.
@@ -173,7 +174,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 - [ ] `VAL-01` Executar fail-first e suíte: `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_foundation.py`.
 - [ ] `VAL-02` Executar `python3 -B uninotas-foundation/deterministic/validate_foundation.py --root uninotas-foundation`.
 - [ ] `VAL-03` Executar `bash delphi-ai/verify_context.sh` no runner aceito pelo projeto.
-- [ ] `VAL-04` Executar os guards Delphi de diff, autoridade, conclusão e cutover definidos neste TODO.
+- [ ] `VAL-04` Executar da raiz do workspace `python3 delphi-ai/tools/todo_diff_expectation_guard.py uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md --repo-root uninotas-foundation`, além dos guards Delphi de autoridade, conclusão e cutover definidos neste TODO.
 - [ ] `VAL-05` Inspecionar `git diff --check` e o diff limitado a `uninotas-foundation`.
 
 ## Completion Evidence Matrix (Required Before Delivery Claim)
@@ -222,13 +223,22 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 ## Decision Pending (Resolve Before Freeze)
 
-- [ ] `none — decisões materiais abaixo serão confirmadas pelo APROVADO deste contrato`.
+- [x] `none — todas as decisões materiais necessárias ao freeze estão resolvidas abaixo; APROVADO autorizará a execução desse contrato, não uma decisão ainda aberta`.
 
 ## Planned Module Registry Contract
 
-O JSON machine-readable de `policies/scope_subscope_governance.md` terá `core_scope=uninotas` e uma coleção `modules`; cada entrada declara `subscope`, `path`, `runtime_authority_state`, `owned_capabilities`, `planned_capabilities`, `predecessors` e `successors`. `runtime_authority_state=current_runtime|target_planned` é um eixo distinto do lifecycle PACED de `evolution_lifecycle.md`; ele responde somente qual módulo possui autoridade sobre comportamento executável observado. Um `target_planned` sempre tem `owned_capabilities=[]`; sua intenção aparece somente em `planned_capabilities`.
+O JSON machine-readable de `policies/scope_subscope_governance.md` terá `core_scope=uninotas`, uma coleção `modules` e uma coleção `capability_transitions`. Cada módulo declara `subscope`, `path`, `runtime_authority_state`, `owned_capabilities` e `planned_capabilities`. Cada transição declara `capability_id`, `origin=transferred|new`, `predecessor` e `successor`; `predecessor=null` é válido somente para `origin=new`. `runtime_authority_state=current_runtime|target_planned` é um eixo distinto do lifecycle PACED de `evolution_lifecycle.md`; ele responde somente qual módulo possui autoridade sobre comportamento executável observado. Um `target_planned` sempre tem `owned_capabilities=[]`; sua intenção aparece somente em `planned_capabilities`.
 
-Os IDs de capability são estáveis entre predecessor e successor: `note_read_model`, `integration_error_read_model` e `operational_workflow` não mudam durante a transferência. `fiscal_document_read` é capability nova, sem predecessor. Promoção é atômica por capability: o TODO implementador remove o ID de `owned_capabilities` do predecessor e o adiciona ao successor no mesmo diff; capabilities novas passam de `planned_capabilities` para `owned_capabilities` somente quando entregues. Nenhuma capability pode ter dois owners `current_runtime`, e toda capability ativa tem exatamente um. Um predecessor com capabilities restantes continua `current_runtime` apenas para elas; sem nenhuma, sai do registry/index ativo e permanece no histórico Git.
+Os IDs de capability são estáveis entre predecessor e successor: `note_read_model`, `integration_error_read_model` e `operational_workflow` têm `origin=transferred` e não mudam durante a transferência. `fiscal_document_read` tem `origin=new`, sem predecessor. Para cada módulo, `owned_capabilities ∩ planned_capabilities = ∅`. Cada capability transferida deve ter exatamente um owner `current_runtime` e exatamente um successor planejado antes da promoção; uma capability nova pode não ter owner atual somente quando `origin=new` e `predecessor=null`. Nenhuma capability pode ter owners atuais duplicados, successors planejados duplicados, alias renomeado ou edge que contradiga `capability_transitions`.
+
+Promoção é atômica por capability: no mesmo diff, o TODO implementador remove o ID de `owned_capabilities` do predecessor, remove o ID de `planned_capabilities` do successor, adiciona o ID a `owned_capabilities` do successor e atualiza `runtime_authority_state`, registry/index e registro de transição aplicáveis. Após a entrega, planned membership residual é inválido. Um predecessor com capabilities restantes continua `current_runtime` apenas para elas; sem nenhuma, sai do registry/index ativo e permanece no histórico Git.
+
+| Capability ID | Origin | Predecessor | Successor |
+| --- | --- | --- | --- |
+| `note_read_model` | `transferred` | `events-and-classification` | `fiscal-notes-and-documents` |
+| `integration_error_read_model` | `transferred` | `events-and-classification` | `integration-error-occurrences` |
+| `operational_workflow` | `transferred` | `treatments-and-history` | `operational-cases` |
+| `fiscal_document_read` | `new` | `null` | `fiscal-notes-and-documents` |
 
 | Subscope / path | Runtime authority state | Owned / planned capability IDs | Predecessor/successor handling |
 | --- | --- | --- | --- |
@@ -247,7 +257,7 @@ Os IDs de capability são estáveis entre predecessor e successor: `note_read_mo
 - [x] `D-01` O nome canônico do produto e o `core_scope` serão `UniNotas`/`uninotas`; o repositório técnico permanece `MonitorDeNotas` nesta entrega.
 - [x] `D-02` Smart Notas é a fonte completa das notas e documentos; PostgreSQL `logs` é somente evidência de falhas de integração.
 - [x] `D-03` Unifast e Prosperar são `FiscalIssuerContext` independentes, nunca tenants, organizações ou agregação implícita.
-- [x] `D-04` O registry usará `runtime_authority_state=current_runtime|target_planned`, distinto do lifecycle PACED. IDs estáveis transferem atomicamente entre `owned_capabilities`; planned nunca concede autoridade; cada capability ativa tem exatamente um owner current.
+- [x] `D-04` O registry usará `runtime_authority_state=current_runtime|target_planned`, distinto do lifecycle PACED, e `capability_transitions` com proveniência explícita. IDs estáveis transferem atomicamente entre `owned_capabilities`; planned nunca concede autoridade; cada capability transferida tem exatamente um owner current e um successor planejado antes da promoção, enquanto uma capability nova pode ser ownerless apenas com `origin=new` e predecessor nulo.
 - [x] `D-05` Os owners alvo exatos são: `fiscal-notes-and-documents` para fatos/documentos do provedor; `integration-error-occurrences` para evidência externa, normalização e correlação determinística; `operational-cases` para workflow, membership, tratamento e autoria da aplicação.
 - [x] `D-06` `artifacts/publication-manifest.txt` será o único inventário exato da árvore; o validator manterá singletons/famílias/status permitidos, derivará o registry de módulos do scope policy + metadata dos módulos e isolará o ledger histórico do inventário geral de TODOs, sem duplicar a árvore completa em Python.
 - [x] `D-07` O writer/filter externo de falhas permanece desconhecido nesta entrega; a Foundation pode afirmar somente o alvo PostgreSQL read-only/error-evidence e não pode nomear n8n ou outro writer sem evidência posterior.
@@ -262,7 +272,7 @@ Os IDs de capability são estáveis entre predecessor e successor: `note_read_mo
 | `D-04` | `evolution_lifecycle.md` capability lifecycle | Preserve | declare separate runtime-authority axis and relationship |
 | `D-05` | events/treatments current ownership | Supersede (Intentional) | three exact target module paths/boundaries |
 | `D-06` | foundation decision `D-02`; frozen validator tree | Supersede (Intentional) | preserve Git-history recovery while making manifest sole active inventory |
-| `D-07` | No Prior Decision | Preserve | explicit unknown in feature brief, discovery ledger, runtime/target docs |
+| `D-07` | discovery decision `SD-05` + confirmed baseline (writer/filter não identificado) | Preserve | explicit unknown in feature brief, discovery ledger, runtime/target docs |
 
 ## Module Decision Baseline Snapshot (Required Before APROVADO)
 
@@ -283,7 +293,7 @@ Os IDs de capability são estáveis entre predecessor e successor: `note_read_mo
 - [x] `D-01` UniNotas/`uninotas` são identidade e core scope canônicos; o nome técnico do repositório não muda.
 - [x] `D-02` Toda nota/documento vem da Smart Notas; `logs` nunca é fallback ou espelho de notas bem-sucedidas.
 - [x] `D-03` O contexto fiscal faz parte de identidade, resolução de credencial e isolamento, sem criar tenancy.
-- [x] `D-04` O eixo de autoridade runtime, IDs estáveis e condições de promoção/retirada impedem overlap ou gap de ownership sem competir com o lifecycle PACED.
+- [x] `D-04` O eixo de autoridade runtime, IDs estáveis, proveniência por capability e condições de promoção/retirada impedem overlap, gap ou planned membership residual sem competir com o lifecycle PACED.
 - [x] `D-05` Os três paths/owners alvo e seus limites exclusivos são os definidos acima; `OperationalCase` não altera fatos das fontes.
 - [x] `D-06` Manifesto é a única enumeração exata; código valida famílias/singletons/semântica/privacidade e não mantém uma segunda cópia da árvore.
 - [x] `D-07` O writer/filter de falhas não é pré-condição do cutover Current/Target enquanto permanecer explicitamente desconhecido e bloquear apenas o futuro error-adapter.
@@ -331,7 +341,7 @@ Os IDs de capability são estáveis entre predecessor e successor: `note_read_mo
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-summary`
 - **Decision review status:** `findings_integrated`
-- **Decision review evidence / resolution:** `R3 retornou no-go por capability IDs/core scope/terminologia; achados integrados e nova revisão aguardará baseline R3`
+- **Decision review evidence / resolution:** `R4 retornou no-go por invariantes de transição, comando de diff, coerência D-07 e estado temporal; achados integrados e nova revisão aguardará baseline R4`
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -362,8 +372,8 @@ Os IDs de capability são estáveis entre predecessor e successor: `note_read_mo
 - **Material sections compared:** `template canonical set`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md`
 - **Gate status:** `not_run`
-- **Findings summary:** `pending`
-- **Evidence / reference:** `pending`
+- **Findings summary:** a medição R4 anterior retornou `go` e zero seções materiais alteradas contra o baseline R3; a integração material dos achados R4 exige novo baseline e nova medição.
+- **Evidence / reference:** `uninotas_plan_critique_r4`; repetir após freeze R4.
 - **Waiver authority / reference:** `n/a`
 
 ## Questions To Close
@@ -400,7 +410,7 @@ Os IDs de capability são estáveis entre predecessor e successor: `note_read_mo
 
 - **Strategy:** `test-first`
 - **Why:** o validator é o harness arquitetural; cada semântica precisa de mutação negativa antes do cutover.
-- **Fail-first target(s):** identidade/core scope UniNotas, source split, context-not-tenant, runtime-authority/lifecycle separation, módulo ausente/duplicado, successor inválido/cíclico, target com owned capability, capability ativa sem owner, dupla autoridade pelo mesmo ID, manifesto único, CNPJ válido e URL/identificador privado contextual.
+- **Fail-first target(s):** identidade/core scope UniNotas, source split, context-not-tenant, runtime-authority/lifecycle separation, módulo ausente/duplicado, successor inválido/cíclico, interseção owned/planned, target com owned capability, transferência sem exatamente um owner atual ou successor planejado, capability ativa sem owner, dupla autoridade pelo mesmo ID, successor planejado duplicado, alias/edge inválido, planned membership residual após promoção, capability nova legítima sem owner atual, manifesto único, CNPJ válido e URL/identificador privado contextual.
 
 ### Pre-APROVADO RED Evidence Capture
 
@@ -527,7 +537,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 | Finding ID | Source | Resolution | Evidence / rationale |
 | --- | --- | --- | --- |
 | `CRIT-01` | plan critique | Integrated | autoridade restaurada em `main`; branch remota/local removida; guard main-only instalado |
-| `CRIT-02` | plan critique | Integrated | SHA incorreta descartada; novo baseline main pendente |
+| `CRIT-02` | plan critique | Integrated | SHA incorreta descartada; baseline válido publicado em `main` |
 | `ARCH-01` | both | Integrated | D-04 congela eixo de autoridade runtime, precedência, sucessão e promoção/retirada |
 | `ARCH-02` | both | Integrated | D-06 congela manifesto como inventário exato único e registry derivado |
 | `DISC-01` | both | Integrated | AMB-11/G-23/ST-02 revisados; writer permanece desconhecido e bloqueia apenas error-adapter |
@@ -547,12 +557,17 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 | `ARCH-R3-02` | formal architecture review | Integrated | toda terminologia congelada reserva lifecycle ao PACED e usa eixo/estado para runtime authority |
 | `SCOPE-R3-01` | formal architecture review | Integrated | D-01 fixa `core_scope=uninotas` e atualiza todos os anchors/validator |
 | `STATE-R3-01` | formal critique | Integrated | status, next step, gate evidence e baseline preparados para freeze R3 |
+| `ARCH-R4-01` | formal architecture review + critique | Integrated | `capability_transitions` congela origem, predecessor e successor por ID; invariantes distinguem transferências de capability nova e tornam gap/overlap/planned residual rejeitáveis |
+| `DIFF-R4-01` | formal architecture review | Integrated | VAL-04 e Commands registram o comando executável com TODO path e repo root corretos |
+| `COHERENCE-R4-01` | formal architecture review | Integrated | D-07 agora preserva explicitamente a descoberta `SD-05` e seu unknown de writer/filter |
+| `STATE-R4-01` | both formal reviews | Integrated | next step, review evidence, drift e closeout avançam para freeze/convergência R4 |
+| `IDENTITY-R4-01` | formal critique | Integrated | decisão canônica migra para `decisions/uninotas-foundation-decisions.md`; path legado é removido e fica recuperável no Git |
 
 ## Additional Architectural Opinions
 
 - **Needed:** `yes`
 - **Why ambiguity remains:** o validator pode ser evoluído por manifesto único ou por inventário gerado; revisão independente deve desafiar a opção recomendada.
-- **Opinion count:** `2`
+- **Opinion count:** `3`
 - **Package mode:** `bounded-summary`
 - **Internal reviewer mandate:** `required — fresh internal no-context reviewer after baseline freeze`
 - **Required lenses:** `correctness|performance|elegance|structural-soundness|operational-fit`
@@ -560,7 +575,8 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 | Reviewer | Recommendation | Performance view | Elegance view | Structural soundness view | Resolution | Evidence |
 | --- | --- | --- | --- | --- | --- | --- |
 | `uninotas_architecture_opinion_main` | manifesto único + transferências por capability + matrix 1:1 | runtime neutral; harness precisa ser otimizado | melhora ao remover autoridades duplicadas | exigiu promoção parcial explícita | Integrated | formal R2 |
-| `uninotas_architecture_opinion_r3` | IDs estáveis e core scope explícito | runtime neutral | remove aliases ambíguos | exige ownership verificável pelo mesmo ID | Integrated | formal R3; nova revisão clean pendente |
+| `uninotas_architecture_opinion_r3` | IDs estáveis e core scope explícito | runtime neutral | remove aliases ambíguos | exige ownership verificável pelo mesmo ID | Integrated | formal R3 |
+| `uninotas_architecture_opinion_r4` | proveniência/invariantes por capability + comando/coerência/estado exatos | runtime neutral | decisão canônica UniNotas elimina path ativo legado | exige ownership e sucessão deterministicamente verificáveis | Integrated | formal R4; nova revisão clean pendente |
 
 ## Audit Trigger Matrix
 
@@ -595,8 +611,8 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Audit session / round evidence:** `n/a until run`
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
 - **Critique status:** `findings_integrated`
-- **Findings summary:** `R3 confirmou diff/main/lifecycle separation e apontou capability map + estado temporal; ambos integrados`.
-- **Evidence / reference:** `uninotas_plan_critique_r3; nova crítica será executada sobre baseline R3`.
+- **Findings summary:** `R4 confirmou as correções anteriores e apontou proveniência por capability, estado temporal e path canônico de decisões; achados integrados`.
+- **Evidence / reference:** `uninotas_plan_critique_r4; nova crítica será executada sobre baseline R4`.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Assumption Code Coherence
@@ -759,7 +775,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Disposition:** `keep-active`
 - **Disposition reason:** planejamento e aprovação ainda não concluídos.
 - **Post-commit/push status:** `pending`
-- **Next path/status action:** congelar baseline R3 em `main`, repetir arquitetura/crítica e executar guards pré-aprovação.
+- **Next path/status action:** publicar baseline R4 em `main`, repetir arquitetura/crítica e executar os guards de coerência, drift e pré-aprovação.
 
 ## Module Consolidation Gate
 
@@ -774,7 +790,8 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_foundation.py`
 - `python3 -B uninotas-foundation/deterministic/validate_foundation.py --root uninotas-foundation`
 - `bash delphi-ai/verify_context.sh`
-- Guards Delphi declarados neste TODO.
+- `python3 delphi-ai/tools/todo_diff_expectation_guard.py uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md --repo-root uninotas-foundation`
+- Guards Delphi adicionais declarados neste TODO.
 
 ## Files Expected (Compatibility Note)
 
