@@ -89,7 +89,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 | Scope Item | Local Branch/Commit | PR to lane threshold | PR to `stage` | PR to `main` | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Foundation UniNotas cutover | `main@pending-remediation-baseline` | `n/a — main-only authority` | `n/a` | `origin/main pending` | planning |
+| Foundation UniNotas cutover | `main@6b4dcd6` | `n/a — main-only authority` | `n/a` | `origin/main@6b4dcd6` | review baseline published |
 
 ## Diff Expectation Contract
 
@@ -190,7 +190,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 | Dependency | Why It Matters | Status | Last Verified | Verification Method | Adjustment / Workaround |
 | --- | --- | --- | --- | --- | --- |
 | Smart Notas OpenAPI | fundamenta a arquitetura-alvo | healthy | 2026-09-25 | fingerprint e probes redigidos no ledger | nenhuma chamada nesta entrega |
-| Git remote Foundation | necessário para baseline de revisão | healthy | 2026-09-25 | `main` publicado; guard main-only instalado e Git for Windows é o writer válido | publicar novo baseline após remediação R2 |
+| Git remote Foundation | necessário para baseline de revisão | healthy | 2026-09-25 | `main`/`origin/main@6b4dcd6`; guard main-only instalado e Git for Windows é o writer válido | nenhum ajuste |
 
 ## Profile Scope & Handoffs (Required Before `APROVADO`)
 
@@ -346,11 +346,11 @@ Promoção é atômica por capability, não necessariamente por módulo: o TODO 
 - **Why this decision:** a revisão altera decisões canônicas e precisa de pacote imutável.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `main`
-- **Baseline commit:** `pending fresh R2 main baseline`
-- **Baseline push reference:** `pending origin/main`
-- **Gate status:** `not_run`
-- **Findings summary:** a primeira revisão formal encontrou promoção parcial, matriz 1:1, diff contract, lifecycle-owner e push-ref incompletos; todos foram integrados e exigem novo freeze.
-- **Evidence / reference:** `origin/main` é o único ref remoto e o próximo commit congelará o pacote R2.
+- **Baseline commit:** `6b4dcd68beed9c3c8a354e7e40e057c8db152cab`
+- **Baseline push reference:** `origin/main`
+- **Gate status:** `no_material_findings`
+- **Findings summary:** remediação R2 congelada em `main`; o push ref é machine-resolvable e o guard de diff retornou `go` antes do freeze.
+- **Evidence / reference:** `origin/main@6b4dcd6`; main-only checkout e hook confirmados.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
