@@ -331,11 +331,11 @@ O JSON machine-readable de `policies/scope_subscope_governance.md` terá uma col
 - **Why this decision:** a revisão altera decisões canônicas e precisa de pacote imutável.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `main`
-- **Baseline commit:** `pending fresh post-remediation main baseline`
-- **Baseline push reference:** `pending origin/main`
-- **Gate status:** `not_run`
-- **Findings summary:** o baseline anterior foi invalidado porque usou branch proibida e SHA incorreta; o histórico foi fast-forwarded para `main`, a branch indevida foi removida e o guard main-only foi instalado.
-- **Evidence / reference:** `main@de52240` restaurou a autoridade; novo baseline será registrado após esta remediação.
+- **Baseline commit:** `58234a9b2eb3076a58daed72d4b853cba256a0ce`
+- **Baseline push reference:** `origin/main@58234a9b2eb3076a58daed72d4b853cba256a0ce`
+- **Gate status:** `no_material_findings`
+- **Findings summary:** o baseline anterior em branch proibida/SHA incorreta foi descartado; achados diagnósticos foram integrados e o pacote remediado foi congelado na autoridade single-branch `main`.
+- **Evidence / reference:** commit/push `58234a9`; guard main-only instalado no checkout canônico resolvido pelo Git for Windows.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
