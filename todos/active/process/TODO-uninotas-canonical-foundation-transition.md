@@ -42,7 +42,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `none`
-- **Next exact step:** publicar em `main` a remediação R5 de transições, IDs, diff/closeout, namespaces, pcv e runner; repetir arquitetura/crítica sobre o novo baseline.
+- **Next exact step:** executar arquitetura e crítica frescas sobre `origin/main@d2c1223`; se convergirem, executar os guards de coerência, drift e pré-aprovação.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -90,7 +90,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 | Scope Item | Local Branch/Commit | PR to lane threshold | PR to `stage` | PR to `main` | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Foundation UniNotas cutover | `main@c96874a` | `n/a — main-only authority` | `n/a` | `origin/main@c96874a` | R4 review baseline published |
+| Foundation UniNotas cutover | `main@d2c1223` | `n/a — main-only authority` | `n/a` | `origin/main@d2c1223` | R5 review baseline published |
 
 ## Diff Expectation Contract
 
@@ -196,7 +196,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 | Dependency | Why It Matters | Status | Last Verified | Verification Method | Adjustment / Workaround |
 | --- | --- | --- | --- | --- | --- |
 | Smart Notas OpenAPI | fundamenta a arquitetura-alvo | healthy | 2026-09-25 | fingerprint e probes redigidos no ledger | nenhuma chamada nesta entrega |
-| Git remote Foundation | necessário para baseline de revisão | healthy | 2026-09-25 | `main`/`origin/main@c96874a`; guard main-only instalado e Git for Windows é o writer válido | nenhum ajuste |
+| Git remote Foundation | necessário para baseline de revisão | healthy | 2026-09-25 | `main`/`origin/main@d2c1223`; guard main-only instalado e Git for Windows é o writer válido | nenhum ajuste |
 
 ## Profile Scope & Handoffs (Required Before `APROVADO`)
 
@@ -377,11 +377,11 @@ O novo arquivo `decisions/uninotas-foundation-decisions.md` preservará os IDs e
 - **Why this decision:** a revisão altera decisões canônicas e precisa de pacote imutável.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `main`
-- **Baseline commit:** `c96874ac08c9cf4f20aebba020b6d427db56e966`
+- **Baseline commit:** `d2c122300605068087c4b3a5849bc96853553445`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `findings_integrated`
-- **Findings summary:** o baseline R4 foi revisado; R5 encontrou estado terminal de transições, migração de IDs, diff/closeout, namespaces, pcv e runner incompletos, agora integrados e aguardando novo freeze.
-- **Evidence / reference:** `origin/main@c96874a`; `uninotas_architecture_opinion_r5` + `uninotas_plan_critique_r5`.
+- **Gate status:** `running`
+- **Findings summary:** estado terminal de transições, migração de IDs, diff/closeout, namespaces, pcv e runner foram congelados na autoridade `main`; revisões frescas estão pendentes.
+- **Evidence / reference:** `origin/main@d2c1223`; diff guard e validator do TODO retornaram `go`/`PASS` antes do freeze.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
@@ -804,7 +804,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Disposition:** `keep-active`
 - **Disposition reason:** planejamento e aprovação ainda não concluídos.
 - **Post-commit/push status:** `pending`
-- **Next path/status action:** publicar baseline R5 em `main`, repetir arquitetura/crítica e, após convergência, executar os guards de coerência, drift e pré-aprovação.
+- **Next path/status action:** revisar `origin/main@d2c1223`; após convergência, executar os guards de coerência, drift e pré-aprovação.
 
 ## Module Consolidation Gate
 
