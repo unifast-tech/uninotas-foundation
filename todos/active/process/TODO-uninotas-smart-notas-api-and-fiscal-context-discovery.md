@@ -302,14 +302,14 @@ These are planning requirements, not executed race evidence. The later React tac
 | `G-20` | API note read strategy | `Partial` | Provider pagination, no webhook, tab navigation, and generic detail shapes affect usability and resilience | selected-context API reads plus bounded session-memory stale-while-revalidate cache are confirmed; no persistent mirror or initial aggregate list | Freeze tactical TTL/cap, route ownership, request cancellation/deduplication, document delivery, and safe error mapping |
 | `G-21` | Pipeline failure visibility | `Closed` | FastPay/n8n/Smart Notas pipeline errors may explain missing notes, invalid addresses, or duplicate issuance | retain permanent sanitized pipeline occurrences, linked to notes when deterministic and otherwise shown in a dedicated queue | Carry contract into canonical modules and tactical ingestion/UI TODOs |
 | `G-22` | Integration-error-to-note correlation | `Partial` | Wrong links can mix companies or attach a failure to the wrong API note | exact context plus provider identifier first; proven exact `idTransacao/idCompra` second; otherwise unlinked; no fuzzy matching | Verify identifier availability and fiscal-context evidence in redacted error rows |
-| `G-23` | Integration-error persistence ownership | `Partial` | Runtime ownership and incident diagnosis depend on knowing who writes and filters PostgreSQL failures | the target role is error-only, but the exact writer and failure-selection contract are not evidenced in this repository | Confirm whether n8n performs the write and exactly which failures are persisted, without copying production payloads |
+| `G-23` | Integration-error persistence ownership | `Partial` | Runtime ownership and incident diagnosis depend on knowing who writes and filters PostgreSQL failures | the target role is error-only, but the exact external writer and failure-selection contract are not evidenced; canonical correction may preserve this as an explicit unknown and must not name a writer | Resolve before the error-adapter implementation TODO, without copying production payloads |
 
 ## 4. Current Order
 
-1. Confirm which component writes PostgreSQL integration errors and the exact rule that excludes successes from the target error boundary.
-2. Validate deterministic error-to-note correlation fields against redacted failure rows; keep all ambiguous failures unlinked.
-3. Define `OperationalCase` grouping and existing-treatment migration rules.
-4. Produce the canonical correction and bounded tactical TODO candidates for separate approval, including separate API-note and error/case delivery slices.
+1. Execute the separately approved canonical Current/Target correction without asserting an unknown PostgreSQL writer/filter.
+2. Before the error-adapter implementation TODO, confirm which external component writes PostgreSQL integration errors and the exact rule that excludes successes from the target error boundary.
+3. Validate deterministic error-to-note correlation fields against redacted failure rows; keep all ambiguous failures unlinked.
+4. Define `OperationalCase` grouping and existing-treatment migration rules, then create the separate API-note and error/case delivery slices.
 
 ## 5. Explicitly Out of Scope
 
@@ -322,8 +322,8 @@ These are planning requirements, not executed race evidence. The later React tac
 
 ## 6. Exit Condition
 
-- The API study has evidence-backed contracts for Smart Notas as the full note source and PostgreSQL as the integration-error source; both credential contexts are validated through redacted read-only evidence or explicitly marked blocked; API DTO/pagination/freshness, error correlation, treatment/history migration, and ownership are ready for canonical approval; and each implementation story has a bounded tactical TODO candidate with module anchors and validation expectations.
+- The API study has evidence-backed contracts for Smart Notas as the full target note source and PostgreSQL as the target integration-error source; both credential contexts are validated through redacted read-only evidence; unresolved error-writer/filter, correlation and case-migration facts remain explicitly labeled for their own implementation TODOs; and each implementation story has a bounded tactical TODO candidate with module anchors and validation expectations.
 
 ## 7. Next Exact Step
 
-- Investigate the error-only PostgreSQL writer/filter boundary without persisting production payloads, then validate deterministic error-to-note correlation evidence.
+- Complete planning/approval of `TODO-uninotas-canonical-foundation-transition.md`; after that cutover, investigate the error-only PostgreSQL writer/filter boundary before authorizing the error-adapter slice.

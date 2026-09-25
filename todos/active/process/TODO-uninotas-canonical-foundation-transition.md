@@ -42,7 +42,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `none`
-- **Next exact step:** concluir o contrato, congelar e publicar o baseline de revisão, executar as revisões/guards de planejamento e obter `APROVADO`.
+- **Next exact step:** integrar os achados diagnósticos, congelar novo baseline em `main`, repetir as revisões formais e executar os guards pré-aprovação.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -56,10 +56,10 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 - [ ] Registrar a topologia externa confirmada e a propriedade de dados: Smart Notas para notas/documentos, PostgreSQL `logs` somente para falhas de integração.
 - [ ] Registrar Unifast e Prosperar como `FiscalIssuerContext`, sem tenancy e sem agregação inicial de notas.
 - [ ] Separar explicitamente comportamento atual e arquitetura-alvo nas raízes, decisões, roadmap e módulos afetados.
-- [ ] Criar owners canônicos planejados para notas/documentos fiscais, ocorrências de falha de integração e casos operacionais.
+- [ ] Criar os owners canônicos planejados exatos `modules/fiscal-notes-and-documents.md`, `modules/integration-error-occurrences.md` e `modules/operational-cases.md`.
 - [ ] Atualizar a política de scope/subscope e os índices sem inventar módulos de runtime já implementados.
 - [ ] Evoluir o validador e seus testes para a nova identidade, módulos e publicação governada, mantendo proteções existentes.
-- [ ] Publicar no manifesto os artefatos de descoberta e este TODO sem persistir segredos, CNPJs, IDs, payloads, respostas ou URLs privadas.
+- [ ] Publicar no manifesto os artefatos de descoberta e este TODO sem persistir segredos, valores reais de CNPJ/identificador do provedor, payloads/respostas privadas ou URLs capturadas de documentos.
 
 ## Out of Scope
 
@@ -75,21 +75,21 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 - `Pending`: nenhuma entrega material foi concluída.
 - `Local-Implemented`: o cutover documental e o harness foram implementados e validados localmente.
-- `Lane-Promoted`: a entrega atingiu a lane `dev` declarada.
-- `Production-Ready`: a entrega foi publicada em `main` após todos os gates.
+- `Lane-Promoted`: n/a para esta autoridade documental single-branch.
+- `Production-Ready`: a entrega foi validada e publicada em `main` após todos os gates.
 
 ## Execution Lane Tracking (Required)
 
-- **Local implementation branches:** `uninotas-foundation:feature/uninotas-canonical-foundation-transition`
-- **Promotion lane path:** `feature/uninotas-canonical-foundation-transition -> dev -> stage -> main`
-- **Lane-promoted threshold for this TODO:** `dev`
-- **Production-ready threshold for this TODO:** `main`
+- **Local implementation branches:** `uninotas-foundation:main` (autoridade single-branch/single-checkout)
+- **Promotion lane path:** `main -> origin/main`
+- **Lane-promoted threshold for this TODO:** `origin/main`
+- **Production-ready threshold for this TODO:** `origin/main` após gates de conclusão
 
 ## Promotion Evidence (Required Before Lane-Promoted / Production-Ready)
 
 | Scope Item | Local Branch/Commit | PR to lane threshold | PR to `stage` | PR to `main` | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Foundation UniNotas cutover | `pending` | `pending` | `pending` | `pending` | planning |
+| Foundation UniNotas cutover | `main@pending-remediation-baseline` | `n/a — main-only authority` | `n/a` | `origin/main pending` | planning |
 
 ## Diff Expectation Contract (Required Before Delivery)
 
@@ -113,13 +113,23 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 | `uninotas-foundation` | `project_constitution.md` | `M` | topologia e invariantes |
 | `uninotas-foundation` | `domain_entities.md` | `M` | vocabulário do domínio |
 | `uninotas-foundation` | `system_roadmap.md` | `M` | sequência de entrega |
-| `uninotas-foundation` | `decisions/**` | `M|A` | decisões promovidas |
-| `uninotas-foundation` | `modules/**` | `M|A` | owners atuais e alvo |
+| `uninotas-foundation` | `decisions/monitor-de-notas-foundation-decisions.md` | `M` | decisões promovidas e arquivo renomeado somente se o diff contract for renovado |
+| `uninotas-foundation` | `modules/README.md` | `M` | índice/lifecycle dos owners |
+| `uninotas-foundation` | `modules/events-and-classification.md` | `M` | owner current e sucessores target |
+| `uninotas-foundation` | `modules/treatments-and-history.md` | `M` | owner current e sucessor target |
+| `uninotas-foundation` | `modules/identity-and-team.md` | `M` | no-tenancy e contexto fiscal |
+| `uninotas-foundation` | `modules/realtime-invalidation.md` | `M` | current logs invalidation versus target source split |
+| `uninotas-foundation` | `modules/operational-monitoring.md` | `M` | current logs summary versus target monitoring split |
+| `uninotas-foundation` | `modules/runtime-and-deployment.md` | `M` | current runtime e target external boundary |
+| `uninotas-foundation` | `modules/fiscal-notes-and-documents.md` | `A` | target provider-backed fiscal owner |
+| `uninotas-foundation` | `modules/integration-error-occurrences.md` | `A` | target external failure-evidence owner |
+| `uninotas-foundation` | `modules/operational-cases.md` | `A` | target application workflow owner |
 | `uninotas-foundation` | `policies/scope_subscope_governance.md` | `M` | novos subscopes explícitos |
 | `uninotas-foundation` | `artifacts/README.md` | `M` | indexação dos artefatos |
-| `uninotas-foundation` | `artifacts/feature-briefs/**` | `A|M` | framing já produzido |
+| `uninotas-foundation` | `artifacts/feature-briefs/uninotas-smart-notas-central.md` | `A|M` | framing já produzido e reconciliação ST-02 |
 | `uninotas-foundation` | `artifacts/publication-manifest.txt` | `M` | contrato de publicação |
-| `uninotas-foundation` | `todos/active/process/**` | `A|M` | descoberta e autoridade tática |
+| `uninotas-foundation` | `todos/active/process/TODO-uninotas-smart-notas-api-and-fiscal-context-discovery.md` | `A|M` | ledger de descoberta e sequência corrigida |
+| `uninotas-foundation` | `todos/active/process/TODO-uninotas-canonical-foundation-transition.md` | `A|M` | autoridade tática e evidência |
 | `uninotas-foundation` | `deterministic/validate_foundation.py` | `M` | validador evolutivo fail-closed |
 | `uninotas-foundation` | `deterministic/tests/**` | `M|A` | mutações e regressões do validator |
 
@@ -150,11 +160,11 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 - [ ] `DOD-01` Identidade e mandato canônicos usam UniNotas sem renomear o repositório técnico.
 - [ ] `DOD-02` Constituição e decisões registram a topologia externa e a separação de fontes aprovada.
 - [ ] `DOD-03` Unifast/Prosperar são contextos fiscais explícitos e não tenants.
-- [ ] `DOD-04` Módulos distinguem contratos atuais de owners/arquitetura-alvo, sem declarar código futuro como implementado.
+- [ ] `DOD-04` Registry e módulos distinguem `current_runtime` de `target_planned`, com precedência, predecessor/sucessor e condição de promoção/retirada, sem declarar código futuro como implementado.
 - [ ] `DOD-05` Notas/documentos, falhas de integração e casos operacionais têm owners canônicos distintos.
 - [ ] `DOD-06` Validator e suíte rejeitam regressões de identidade, ownership, tenancy, privacidade, symlink, legado e publicação.
 - [ ] `DOD-07` Os artefatos atuais pertencem ao manifesto e a validação Foundation passa sem `frozen lifecycle tree mismatch`.
-- [ ] `DOD-08` Nenhum segredo, CNPJ, ID, payload, resposta privada ou URL de documento foi persistido.
+- [ ] `DOD-08` Nenhum segredo, valor real de CNPJ/identificador do provedor, payload/resposta privada ou URL capturada de documento foi persistido; CNPJ válido é coberto deterministicamente e identificador/URL contextual por regra precisa mais revisão de diff.
 - [ ] `DOD-09` O roadmap aponta para o TODO NestJS de leitura como próximo slice, sem lhe conceder autoridade antecipada.
 
 ## Validation Steps
@@ -179,7 +189,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 | Dependency | Why It Matters | Status | Last Verified | Verification Method | Adjustment / Workaround |
 | --- | --- | --- | --- | --- | --- |
 | Smart Notas OpenAPI | fundamenta a arquitetura-alvo | healthy | 2026-09-25 | fingerprint e probes redigidos no ledger | nenhuma chamada nesta entrega |
-| Git remote Foundation | necessário para baseline de revisão | unknown | n/a | `git_write_authority_guard` antes de commit/push | bloquear review até baseline publicado |
+| Git remote Foundation | necessário para baseline de revisão | healthy | 2026-09-25 | `main` e `origin/main` em `de52240`; guard main-only instalado | publicar novo baseline após remediação |
 
 ## Profile Scope & Handoffs (Required Before `APROVADO`)
 
@@ -207,20 +217,37 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 - **Primary module doc:** `modules/events-and-classification.md`
 - **Secondary module docs:** `modules/treatments-and-history.md`, `modules/runtime-and-deployment.md`, `modules/identity-and-team.md`, `modules/realtime-invalidation.md`, `modules/operational-monitoring.md`
 - **Planned decision promotion targets:** `project_mandate.md`, `project_constitution.md`, `domain_entities.md`, `system_roadmap.md`, `decisions/`, `modules/`, `policies/scope_subscope_governance.md`
-- **Module decision consolidation targets:** novos owners `fiscal-notes-and-documents`, `integration-error-occurrences`, `operational-cases` e módulos atuais afetados.
+- **Module decision consolidation targets:** `modules/fiscal-notes-and-documents.md`, `modules/integration-error-occurrences.md`, `modules/operational-cases.md` e os seis módulos atuais afetados.
 
 ## Decision Pending (Resolve Before Freeze)
 
 - [ ] `none — decisões materiais abaixo serão confirmadas pelo APROVADO deste contrato`.
+
+## Planned Module Registry Contract
+
+O JSON machine-readable de `policies/scope_subscope_governance.md` terá uma coleção `modules`; cada entrada declara `subscope`, `path`, `lifecycle`, `successors` e `runtime_authority`. Valores de lifecycle permitidos nesta entrega são apenas `current_runtime|target_planned`. Um `target_planned` nunca tem `runtime_authority=true`. A aposentadoria futura remove o predecessor do registry/módulo ativo após o TODO de implementação promover o successor; Git mantém a história, sem criar `retired` como owner concorrente.
+
+| Subscope / path | Lifecycle | Runtime authority | Successor(s) / handling |
+| --- | --- | --- | --- |
+| `events-and-classification` / `modules/events-and-classification.md` | `current_runtime` | `true` | `fiscal-notes-and-documents`, `integration-error-occurrences`; retirar após ambos os cutovers aplicáveis |
+| `treatments-and-history` / `modules/treatments-and-history.md` | `current_runtime` | `true` | `operational-cases`; retirar após migração aprovada |
+| `identity-and-team` / `modules/identity-and-team.md` | `current_runtime` | `true` | preservar; futuras permissões por contexto exigem TODO |
+| `realtime-invalidation` / `modules/realtime-invalidation.md` | `current_runtime` | `true` | preservar contrato atual; adaptar fontes em TODO futuro |
+| `operational-monitoring` / `modules/operational-monitoring.md` | `current_runtime` | `true` | preservar contrato atual; separar métricas em TODO futuro |
+| `runtime-and-deployment` / `modules/runtime-and-deployment.md` | `current_runtime` | `true` | preservar runtime observado; registrar alvo externo sem inventar writer |
+| `fiscal-notes-and-documents` / `modules/fiscal-notes-and-documents.md` | `target_planned` | `false` | successor fiscal do read model atual |
+| `integration-error-occurrences` / `modules/integration-error-occurrences.md` | `target_planned` | `false` | successor de evidência de falha; writer/filter desconhecido |
+| `operational-cases` / `modules/operational-cases.md` | `target_planned` | `false` | successor do workflow/tratamento atual |
 
 ## Decisions (Resolved Before Freeze)
 
 - [x] `D-01` O nome canônico do produto será UniNotas; o repositório técnico permanece `MonitorDeNotas` nesta entrega.
 - [x] `D-02` Smart Notas é a fonte completa das notas e documentos; PostgreSQL `logs` é somente evidência de falhas de integração.
 - [x] `D-03` Unifast e Prosperar são `FiscalIssuerContext` independentes, nunca tenants, organizações ou agregação implícita.
-- [x] `D-04` A Foundation distinguirá `Current` de `Target`; documentação-alvo não poderá afirmar implementação inexistente.
-- [x] `D-05` A arquitetura-alvo separa owners de notas/documentos, ocorrências de falha e casos operacionais.
-- [x] `D-06` O validador deixa de ser uma fotografia do cutover inicial e passa a validar publicação governada e semântica atual, preservando todas as proteções existentes.
+- [x] `D-04` O registry machine-readable usará `current_runtime|target_planned`; runtime observado tem precedência sobre claims de implementação, target governa apenas direção futura, e promoção exige TODO implementado/aprovado que converta o successor para `current_runtime` e retire o predecessor da autoridade ativa.
+- [x] `D-05` Os owners alvo exatos são: `fiscal-notes-and-documents` para fatos/documentos do provedor; `integration-error-occurrences` para evidência externa, normalização e correlação determinística; `operational-cases` para workflow, membership, tratamento e autoria da aplicação.
+- [x] `D-06` `artifacts/publication-manifest.txt` será o único inventário exato da árvore; o validator manterá singletons/famílias/status permitidos, derivará o registry de módulos do scope policy + metadata dos módulos e isolará o ledger histórico do inventário geral de TODOs, sem duplicar a árvore completa em Python.
+- [x] `D-07` O writer/filter externo de falhas permanece desconhecido nesta entrega; a Foundation pode afirmar somente o alvo PostgreSQL read-only/error-evidence e não pode nomear n8n ou outro writer sem evidência posterior.
 
 ## Module Decision Baseline Snapshot (Required Before APROVADO)
 
@@ -231,31 +258,35 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 | `decisions#D-05` | sem business tenancy | Preserve | `policies/scope_subscope_governance.md` |
 | `events#ownership` | eventos de `logs` são o read model completo | Supersede (Intentional) | `modules/events-and-classification.md#ownership-invariant` |
 | `treatments#ownership` | tratamento é ligado somente a `ref_id` | Supersede (Intentional) | `modules/treatments-and-history.md#specification` |
-| `runtime#logs` | produção `logs` é externa e read-only | Preserve and narrow | `modules/runtime-and-deployment.md#observed-runtime-contract` |
+| `runtime#logs` | produção `logs` é externa e read-only | Preserve | `modules/runtime-and-deployment.md#observed-runtime-contract` |
+| `identity#no-tenancy` | não há business tenancy | Preserve | `modules/identity-and-team.md#module-intent--boundaries` |
+| `realtime#logs-invalidation` | polling/LISTEN atuais invalidam a experiência baseada em logs | Preserve | `modules/realtime-invalidation.md#specification` |
+| `monitoring#logs-summary` | monitor atual resume classificações de logs | Preserve | `modules/operational-monitoring.md#specification` |
 
 ## Decision Baseline (Frozen Before Implementation)
 
 - [x] `D-01` UniNotas é a identidade canônica do produto; o nome técnico do repositório não muda.
 - [x] `D-02` Toda nota/documento vem da Smart Notas; `logs` nunca é fallback ou espelho de notas bem-sucedidas.
 - [x] `D-03` O contexto fiscal faz parte de identidade, resolução de credencial e isolamento, sem criar tenancy.
-- [x] `D-04` Contratos atuais e arquitetura-alvo permanecem rotulados e verificáveis separadamente.
-- [x] `D-05` Os três owners alvo são distintos e `OperationalCase` não altera fatos das fontes.
-- [x] `D-06` A evolução do validator mantém fail-closed, privacidade e árvore manifestada sem congelar o produto no estado inicial.
+- [x] `D-04` O lifecycle/precedência `current_runtime|target_planned` e as condições de promoção/retirada impedem dois owners ativos da mesma capacidade.
+- [x] `D-05` Os três paths/owners alvo e seus limites exclusivos são os definidos acima; `OperationalCase` não altera fatos das fontes.
+- [x] `D-06` Manifesto é a única enumeração exata; código valida famílias/singletons/semântica/privacidade e não mantém uma segunda cópia da árvore.
+- [x] `D-07` O writer/filter de falhas não é pré-condição do cutover Current/Target enquanto permanecer explicitamente desconhecido e bloquear apenas o futuro error-adapter.
 
 ## Architecture Change Governance
 
 - **Applicability:** `required`
 - **Why this applies:** a entrega supersede identidade, source ownership e arquitetura modular, além de corrigir um validator de cutover que bloqueia evolução normal.
 - **Deviation / debt being retired:** Foundation afirma `logs` como fonte completa e valida apenas a árvore exata do rebase inicial.
-- **Target steady-state after closeout:** UniNotas com verdade atual/alvo separada, owners explícitos e validação evolutiva fail-closed.
+- **Target steady-state after closeout:** UniNotas com registry `current_runtime|target_planned`, precedência e sucessão explícitas, owners alvo exclusivos e validação evolutiva fail-closed.
 - **Temporary exceptions allowed:** documentos de comportamento atual podem conservar Monitor de Notas/rotas atuais apenas quando marcados como `Current` e sem autoridade sobre o alvo.
-- **Cutover / removal condition:** todas as referências canônicas não-históricas aderem a D-01..D-06 e a suíte de mutação passa.
+- **Cutover / removal condition:** todas as referências canônicas não-históricas aderem a D-01..D-07 e a suíte de mutação passa.
 
 ### Patterns To Enforce
 
 | Pattern / Decision | Source / ID | Scope | Why It Must Hold After Cutover |
 | --- | --- | --- | --- |
-| current-versus-target explicit | D-04 | Foundation | evita declarar capacidade não implementada |
+| current-versus-target lifecycle | D-04 | Foundation | evita declarar capacidade não implementada ou dois owners runtime ativos |
 | source ownership split | D-02 | modules/domain | impede fallback silencioso em logs de sucesso |
 | context is not tenancy | D-03 | scope/domain | impede vazamento conceitual e técnico |
 | manifest + semantic guards | D-06 | deterministic | permite evolução sem perder fail-closed |
@@ -267,7 +298,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 | `logs` como base de notas | ownership scanner/test | contradiz D-02 | nenhuma |
 | Unifast/Prosperar como tenants | scope policy/test | contradiz D-03 | nenhuma |
 | documento alvo rotulado Current sem código | status contract/test | cria falsa verdade | nenhuma |
-| lista exata hard-coded sem política evolutiva | mutation test | repete o bloqueio atual | nenhuma |
+| árvore exata duplicada no manifesto e no Python | mutation test | repete o bloqueio atual e cria duas autoridades | nenhuma |
 
 ### Architecture Protection Harness
 
@@ -275,6 +306,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 | --- | --- | --- | --- | --- | --- |
 | test | Foundation semantics | `test_validate_foundation.py` | identity/source/tenancy/current-target drift | implement-in-this-todo | mutation GREEN |
 | guard | publication tree | `validate_foundation.py` + manifest | arquivo não governado, symlink, privacidade | implement-in-this-todo | validator GREEN |
+| test | privacy boundary | valid formatted/compact CNPJ + contextual provider-ID/document-URL mutations | captured business/provider values without banning official docs or generic IDs | implement-in-this-todo | mutation GREEN + bounded diff review |
 | review | architecture | independent architecture/adherence review | supersede incompleto | implement-in-this-todo | review artifacts |
 
 ## Architecture Review Gates
@@ -298,12 +330,12 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 - **Gate decision:** `required`
 - **Why this decision:** a revisão altera decisões canônicas e precisa de pacote imutável.
 - **Trigger stage:** `before the first planning-side review or guard run`
-- **Baseline branch:** `feature/uninotas-canonical-foundation-transition`
-- **Baseline commit:** `999d8493d36d38146fb2dd113f7863b5a6841279`
-- **Baseline push reference:** `origin/feature/uninotas-canonical-foundation-transition@999d8493d36d38146fb2dd113f7863b5a6841279`
-- **Gate status:** `no_material_findings`
-- **Findings summary:** os três artefatos de framing/descoberta/execução foram congelados juntos; o push WSL sem credencial falhou, mas o Git for Windows autenticado publicou a mesma SHA.
-- **Evidence / reference:** `git commit 999d849` e push confirmado em `origin/feature/uninotas-canonical-foundation-transition`.
+- **Baseline branch:** `main`
+- **Baseline commit:** `pending fresh post-remediation main baseline`
+- **Baseline push reference:** `pending origin/main`
+- **Gate status:** `not_run`
+- **Findings summary:** o baseline anterior foi invalidado porque usou branch proibida e SHA incorreta; o histórico foi fast-forwarded para `main`, a branch indevida foi removida e o guard main-only foi instalado.
+- **Evidence / reference:** `main@de52240` restaurou a autoridade; novo baseline será registrado após esta remediação.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
@@ -332,9 +364,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 | Assumption ID | Assumption | Evidence | If False | Confidence | Handling |
 | --- | --- | --- | --- | --- | --- |
-| `A-01` | O runtime atual continua funcionando durante o cutover documental | nenhuma mudança de produto neste TODO | cutover teria risco runtime | High | Keep as Assumption |
-| `A-02` | O validator atual falha apenas pelo tree freeze nos novos artefatos | execução recente e código `EXPECTED_COMMON_FILES` | escopo do harness precisaria revisão | High | Keep as Assumption |
-| `A-03` | O nome técnico não precisa mudar para lançar a arquitetura UniNotas | pedido nomeia produto, não repositório | novo TODO de rename seria necessário | Medium | Promote to Decision D-01 |
+| `none` | Não há hipótese viva: ausência de mudança runtime é boundary verificável; o mismatch é fato observado; identidade técnica é D-01 | Scope, diff contract, `validate_foundation.py` e D-01 | n/a | High | Keep as Assumption |
 
 ## Execution Plan
 
@@ -344,10 +374,10 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 ### Ordered Steps
 
-1. Escrever testes de mutação fail-first para D-01..D-06 e o novo contrato de publicação.
+1. Escrever testes de mutação fail-first para D-01..D-07, lifecycle/precedência e o novo contrato de publicação.
 2. Atualizar identidade, mandato, constituição, entidades, decisões e roadmap com separação Current/Target.
 3. Criar os três owners alvo e atualizar módulos existentes, index e scope policy.
-4. Evoluir validator/manifest sem enfraquecer privacidade, symlink, legado ou ownership.
+4. Tornar o manifesto a única enumeração exata; extrair validadores puros para registry/privacidade/ownership e manter poucos testes full-tree, sem enfraquecer symlink, legado ou ownership.
 5. Executar a suíte Foundation, validator, PACED readiness e guards de entrega.
 6. Submeter diff consolidado às revisões independentes exigidas e promover decisões estáveis.
 
@@ -355,7 +385,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 - **Strategy:** `test-first`
 - **Why:** o validator é o harness arquitetural; cada semântica precisa de mutação negativa antes do cutover.
-- **Fail-first target(s):** identidade UniNotas, source split, context-not-tenant, Current/Target, module set e publicação governada.
+- **Fail-first target(s):** identidade UniNotas, source split, context-not-tenant, lifecycle/precedência, module registry, manifesto único, CNPJ válido e URL/identificador privado contextual.
 
 ### Pre-APROVADO RED Evidence Capture
 
@@ -378,7 +408,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 | Repository / CI Surface | Why In Scope | Behavior / Scenario Covered | Fixture / Seed / Runtime Preconditions | Local CI-Equivalent Command | Required Before | Status | Evidence Artifact / Command | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Foundation deterministic suite | validator e testes mudam | D-01..D-06 e mutações negativas | fixture temporária sem dados reais | `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_foundation.py` | Local-Implemented | planned | command output | suite canônica local |
+| Foundation deterministic suite | validator e testes mudam | D-01..D-07 e mutações negativas | fixtures mínimas + poucos testes full-tree; sem dados reais | `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_foundation.py` | Local-Implemented | planned | command output + duração | evitar crescimento multiplicativo sobre baseline observado ~179s |
 | Foundation validator | publicação muda | árvore canônica completa | checkout consolidado | `python3 -B uninotas-foundation/deterministic/validate_foundation.py --root uninotas-foundation` | Local-Implemented | planned | command output | deve eliminar mismatch |
 | PACED readiness | integração do alias/artefatos | contexto continua inicializável | Git Bash aceito | `bash delphi-ai/verify_context.sh` | Local-Implemented | planned | command output | runner conforme projeto |
 
@@ -404,7 +434,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
   - **Severity:** `high`
   - **Evidence:** `deterministic/validate_foundation.py:EXPECTED_COMMON_FILES` e erro observado `frozen lifecycle tree mismatch`.
   - **Why it matters now:** a árvore congelada impede que a Foundation governe novos TODOs e artefatos legítimos.
-  - **Option A (Recommended):** manter manifesto exato como allowlist versionada, mas derivar/validar famílias e contratos atuais sem lista duplicada rígida no código.
+  - **Option A (Recommended):** manifesto como única enumeração exata; Python mantém singletons/famílias/status e deriva registry de módulos do scope policy + metadata, sem copiar a árvore completa.
     - **Effort/Risk/Blast/Maintenance:** medium/medium/cross-module/low.
     - **Performance/Elegance/Structural:** neutral/improves/improves.
   - **Option B:** acrescentar manualmente cada novo caminho à constante e ao manifesto.
@@ -413,13 +443,13 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
   - **Option C (Do Nothing):** conservar o bloqueio.
     - **Effort/Risk/Blast/Maintenance:** low/high/cross-module/high.
     - **Performance/Elegance/Structural:** neutral/regresses/regresses.
-  - **Recommendation:** Option A, preservando o manifesto fail-closed e eliminando duplicação frágil.
+  - **Recommendation:** Option A congelada em D-06; adição legítima exige mudança explícita do manifesto e aprovação nas famílias/semântica permitidas.
 
 - **Issue ID:** `ARCH-02`
   - **Severity:** `high`
   - **Evidence:** `project_constitution.md#invariants` versus feature brief `Confirmed Direction`.
   - **Why it matters now:** substituir a verdade atual pela futura sem rotulagem faria a documentação mentir até o código migrar.
-  - **Option A (Recommended):** seções explícitas `Current Runtime` e `Target Architecture` com status de módulo.
+  - **Option A (Recommended):** registry `current_runtime|target_planned`, matriz de precedência/sucessão e condição de promoção/retirada, refletidos nas seções de módulo.
     - **Effort/Risk/Blast/Maintenance:** medium/low/cross-module/low.
     - **Performance/Elegance/Structural:** neutral/improves/improves.
   - **Option B:** publicar somente o alvo como atual.
@@ -430,6 +460,36 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
     - **Performance/Elegance/Structural:** neutral/regresses/regresses.
   - **Recommendation:** Option A, única que preserva verdade observada e direção aprovada.
 
+- **Issue ID:** `SEC-01`
+  - **Severity:** `medium`
+  - **Evidence:** `DOD-08` versus os patterns atuais em `deterministic/validate_foundation.py`.
+  - **Why it matters now:** CNPJ e URL privada capturada ainda não têm cobertura objetiva, enquanto “ID” genérico causaria falso positivo.
+  - **Option A (Recommended):** detectar CNPJ formatado/compacto válido; rejeitar identifier/URL somente em contexto de valor capturado/provedor e complementar com diff review.
+    - **Effort/Risk/Blast/Maintenance:** medium/low/local/low.
+    - **Performance/Elegance/Structural:** neutral/improves/improves.
+  - **Option B:** banir qualquer número longo ou URL.
+    - **Effort/Risk/Blast/Maintenance:** low/high/cross-module/high.
+    - **Performance/Elegance/Structural:** regresses/regresses/regresses.
+  - **Option C (Do Nothing):** depender apenas de revisão humana.
+    - **Effort/Risk/Blast/Maintenance:** low/medium/local/medium.
+    - **Performance/Elegance/Structural:** neutral/neutral/regresses.
+  - **Recommendation:** Option A, refletida em DOD-08 e no harness.
+
+- **Issue ID:** `TEST-01`
+  - **Severity:** `medium`
+  - **Evidence:** suíte atual observada em aproximadamente 179 segundos e cópias/full scans por mutação em `deterministic/tests/test_validate_foundation.py`.
+  - **Why it matters now:** novas matrizes de mutação podem tornar o feedback local impraticável.
+  - **Option A (Recommended):** extrair validadores puros, usar fixtures mínimas e manter poucos testes end-to-end full-tree com duração registrada.
+    - **Effort/Risk/Blast/Maintenance:** medium/low/local/low.
+    - **Performance/Elegance/Structural:** improves/improves/improves.
+  - **Option B:** apenas adicionar mutações ao harness atual.
+    - **Effort/Risk/Blast/Maintenance:** low/medium/local/high.
+    - **Performance/Elegance/Structural:** regresses/regresses/neutral.
+  - **Option C (Do Nothing):** não adicionar cobertura.
+    - **Effort/Risk/Blast/Maintenance:** low/high/local/medium.
+    - **Performance/Elegance/Structural:** neutral/regresses/regresses.
+  - **Recommendation:** Option A como obrigação de entrega, sem SLO rígido inventado.
+
 ### Failure Modes & Edge Cases
 
 - [ ] Validator aceita arquivo não manifestado ou symlink.
@@ -438,11 +498,29 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 - [ ] Fiscal context é confundido com tenancy.
 - [ ] Novo módulo é marcado Current antes de existir no produto.
 - [ ] Testes persistem exemplos que parecem credenciais ou dados pessoais.
+- [ ] A suíte de mutação repete cópias/full scans e cresce muito além do baseline de aproximadamente 179 segundos.
 
 ### Residual Unknowns / Risks
 
-- [ ] O writer/filter exato das falhas no PostgreSQL permanece investigação posterior e não será inventado aqui.
+- [ ] O writer/filter exato das falhas no PostgreSQL permanece investigação posterior, explicitamente não bloqueia este cutover e não será inventado aqui.
 - [ ] Permissões por contexto, identidade opaca da nota e DANFE continuam decisões dos próximos TODOs.
+
+### Diagnostic Review Finding Resolution
+
+Os pareceres executados sobre a branch indevida são diagnóstico útil, mas não satisfazem os gates formais. Ambos serão repetidos por revisores frescos sobre um baseline válido em `main`.
+
+| Finding ID | Source | Resolution | Evidence / rationale |
+| --- | --- | --- | --- |
+| `CRIT-01` | plan critique | Integrated | autoridade restaurada em `main`; branch remota/local removida; guard main-only instalado |
+| `CRIT-02` | plan critique | Integrated | SHA incorreta descartada; novo baseline main pendente |
+| `ARCH-01` | both | Integrated | D-04 congela lifecycle, precedência, sucessão e promoção/retirada |
+| `ARCH-02` | both | Integrated | D-06 congela manifesto como inventário exato único e registry derivado |
+| `DISC-01` | both | Integrated | AMB-11/G-23/ST-02 revisados; writer permanece desconhecido e bloqueia apenas error-adapter |
+| `COHERENCE-01` | plan critique | Integrated | baseline module matrix agora cobre seis módulos e usa somente enums canônicos |
+| `SEC-01` | both | Integrated | DOD/harness distinguem CNPJ determinístico de ID/URL contextual |
+| `DIFF-01` | plan critique | Integrated | globs de decisions/modules/feature-brief/TODOs foram substituídos por paths exatos |
+| `ASSUME-01` | plan critique | Integrated | hipóteses redundantes removidas; decisões/fatos/constraints assumem seus owners corretos |
+| `TEST-01` | both | Integrated | fixtures mínimas, validadores puros e duração viram obrigação de entrega |
 
 ## Additional Architectural Opinions
 
@@ -455,7 +533,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 | Reviewer | Recommendation | Performance view | Elegance view | Structural soundness view | Resolution | Evidence |
 | --- | --- | --- | --- | --- | --- | --- |
-| pending | pending | pending | pending | pending | pending | pending |
+| `uninotas_architecture_opinion` | manifesto único + registry lifecycle/precedência | runtime neutral; harness precisa ser otimizado | melhora ao remover autoridades duplicadas | aceitável após D-04/D-06/D-07 explícitas | Integrated | parecer diagnóstico pré-main; revisão formal será repetida no novo baseline |
 
 ## Audit Trigger Matrix
 
@@ -499,7 +577,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 - **Gate decision:** `required`
 - **Why this decision:** A-01/A-02 dependem da árvore e validator reais.
 - **Trigger stage:** `after critique convergence and before APROVADO`
-- **Guard scope:** `A-01,A-02`
+- **Guard scope:** `none — fatos/decisões substituíram as hipóteses vivas; o guard ainda confirma coerência dos anchors`
 - **Guard command:** `python3 delphi-ai/tools/assumption_code_coherence_guard.py --todo uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md`
 - **Gate status:** `not_run`
 - **Findings summary:** `pending`
@@ -511,7 +589,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 - **Approved by:** `pending explicit APROVADO`
 - **Approval scope:** `pending`
 - **Execution not authorized by approval:** `backend, frontend, database, runtime, secrets, API calls, worktrees`
-- **Renewed approval required when:** D-01..D-06, scope, module topology, validation semantics ou risco material mudar.
+- **Renewed approval required when:** D-01..D-07, scope, module topology, validation semantics ou risco material mudar.
 
 ## Rules Acknowledgement / Ingestion
 
@@ -538,14 +616,14 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 - **Worktree / auxiliary-checkout authorization:** `not-authorized`
 - **Worktree authorization evidence:** `n/a`
 - **Writer scheduling policy:** `single-writer-serialized`
-- **Guard outcome:** `go — agent_role_routing_guard.py`
+- **Guard outcome:** `go`
 - **Waiver / exception reference:** `n/a`
 
 ## Decision Adherence Validation
 
 | Decision ID | Status | Evidence | Notes |
 | --- | --- | --- | --- |
-| `D-01..D-06` | pending | pending implementation | preencher antes da entrega |
+| `D-01..D-07` | pending | pending implementation | preencher antes da entrega |
 
 ## Module Decision Consistency Validation
 
@@ -643,7 +721,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 ## Module Consolidation Gate
 
-- [ ] Canonical module docs updated with D-01..D-06.
+- [ ] Canonical module docs updated with D-01..D-07.
 - [ ] Decision promotion ledger links to this TODO.
 - [ ] Prior decisions preserved or intentionally superseded.
 - [ ] Conflicting tactical notes replaced by canonical references.
