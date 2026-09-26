@@ -905,7 +905,7 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 - **Why this decision:** identidade pós-seed depende da linhagem first-parent observável e não existe âncora externa independente nesta entrega.
 - **Trigger stage:** `precommit base check + post-commit fresh remote pre-push check for C0/C1 + post-C1-push remote activation check`
 - **Protection evidence rule:** registrar somente proteção non-fast-forward observável; `unavailable` é estado permitido apenas com `APROVADO` que aceita `RISK-HIST-01`, nunca prova positiva.
-- **Gate status:** `not_run`
+- **Gate status:** `no_material_findings`
 - **Findings summary:** explicit `APROVADO` accepted `RISK-HIST-01`; phase-specific remote/base/lease observations remain mandatory execution-time predicates and are intentionally produced only during C0/C1 promotion.
 - **Evidence / reference:** rows faseadas abaixo; nenhuma credencial/API adicional será usada para consultar configuração remota.
 - **Waiver authority / reference:** `n/a — residual risk acceptance is part of Approval, not a technical waiver`
