@@ -42,7 +42,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `none`
-- **Next exact step:** publicar as correções R8K como baseline R8L, executar arquitetura/crítica R8L sem contexto e concluir os guards pré-aprovação.
+- **Next exact step:** publicar as correções R8L como baseline R8M, executar arquitetura/crítica R8M sem contexto e concluir os guards pré-aprovação.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -78,14 +78,14 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 - `Pending`: nenhuma entrega material foi concluída.
 - `Local-Implemented`: o cutover documental e o harness foram implementados e validados localmente.
 - `Lane-Promoted`: n/a para esta autoridade documental single-branch; pushes de baseline de revisão não são delivery promotion.
-- `Production-Ready`: C0 contém a implementação validada com o TODO ainda ativo; o candidate C1 move o TODO atomicamente para completed, atualiza somente o closeout allowlisted e persiste a stage com qualifier condicional. A stage só se torna efetiva quando C1 está publicado em `main`, seu SHA é verificado e o active scan retorna go no handoff externo; falha em qualquer condição invalida o closeout sem tentar autorreferência.
+- `Production-Ready`: C0 contém a implementação validada com o TODO ainda ativo; o candidate C1 move o TODO atomicamente para completed, atualiza somente o closeout allowlisted e persiste a stage com qualifier condicional. A stage só se torna efetiva quando C1 está publicado em `main`, seu SHA é verificado e o active scan semântico retorna `todo_count=1` com exatamente o TODO discovery ativo e nenhum stale path desta transição; falha em qualquer condição invalida o closeout.
 
 ## Execution Lane Tracking (Required)
 
 - **Local implementation branches:** `uninotas-foundation:main` (autoridade single-branch/single-checkout)
 - **Promotion lane path:** `main -> origin/main`
 - **Lane-promoted threshold for this TODO:** `n/a — single-branch authority`
-- **Production-ready threshold for this TODO:** C0 publicado/verificado + `origin/main@C1` após move atômico, verificação externa de C1 e post-C1 active scan go; antes disso o valor C1 é somente candidate condicional
+- **Production-ready threshold for this TODO:** C0 publicado/verificado + `origin/main@C1` após move atômico, verificação externa de C1 e post-C1 semantic scan `{todo_count:1, active_paths:[discovery TODO], stale_transition_path:false}`; antes disso o valor C1 é somente candidate condicional
 
 ## Promotion Evidence (Required Before Lane-Promoted / Production-Ready)
 
@@ -189,10 +189,10 @@ Esta tabela autoriza a união rotulada de `delivery` e `lifecycle`; ausência do
 - [ ] `DOD-09` O roadmap aponta para o TODO NestJS de leitura como próximo slice, sem lhe conceder autoridade antecipada.
 - [ ] `DOD-10` O arquivo/índice canônico de decisões migra para UniNotas sem links obsoletos nem reutilização semântica de IDs: D-01..D-05 preservam sua proveniência/handling e D-06..D-11 recebem somente autoridades novas.
 - [ ] `DOD-11` Antes de qualquer claim `Local-Implemented`/closeout, o `todo_closeout_guard.py` corrigido reconhece este path como `active` e o scan `--all-active --repo uninotas-foundation` encontra os TODOs ativos reais; falso `go` com `path_state=other` ou `todo_count=0` bloqueia entrega.
-- [ ] `DOD-12` O closeout publica C0 com TODO ativo e toda implementação/audits verdes. O único commit final C1 move atomicamente o TODO para completed, atualiza manifesto/backlinks e grava apenas C0 OID/verificação + evidência repository-verifiable disponível antes de C1. Completion/authority/closeout guards rodam sobre o candidate C1 completo; push/verificação de C1 e active scan ativam externamente `Production-Ready`, sem commit intermediário incompleto ou checkbox autorreferente.
+- [ ] `DOD-12` C0 publicado mantém o TODO ativo e toda implementação/audits verdes. O candidate C1 move atomicamente o TODO para completed, atualiza manifesto/backlinks, grava C0 OID/verificação e contém todos os critérios repository-verifiable concluídos; completion/authority/closeout guards aceitam esse estado exato antes do commit. Não existe completed intermediário ou evidência prospectiva de C1.
 - [ ] `DOD-13` `deterministic/enumerate_change_paths.py` é o helper project-owned único para profile/lifecycle/human review: mode delivery representa o net diff contra `0fe906c`; mode lifecycle representa C0..C1 e emite os dois endpoints do move. O Delphi diff guard continua independente e obrigatório, sem interface de input inventada.
 - [ ] `DOD-14` `validate_closeout_diff.py --base C0` exige o move atômico final, exatamente cinco paths e somente células/links allowlisted; nenhum C1 OID/prova prospectiva pode ser persistido no próprio candidate.
-- [ ] `DOD-15` O `Gate: History Trust Evidence` usa protocolo realizável por fase: antes do commit, registra remote OID observado e prova que ele é ancestor do base HEAD congelado; após criar o commit local, verifica parent/ancestry do OID real antes do push. C0 facts podem ser persistidos em C1; C1 facts ficam no handoff externo. Ausência de proteção non-fast-forward só prossegue com `APROVADO` que aceita `RISK-HIST-01`.
+- [ ] `DOD-15` O candidate C1 registra no `Gate: History Trust Evidence` os facts C0 já observados e a prova precommit de que `origin/main==C0==base HEAD`; proteção non-fast-forward ausente usa o aceite explícito de `RISK-HIST-01`. Verificação do OID real de C1 permanece obrigação exclusiva do handoff externo e não integra este critério repository-verifiable.
 
 ## Validation Steps
 
@@ -202,10 +202,10 @@ Esta tabela autoriza a união rotulada de `delivery` e `lifecycle`; ausência do
 - [ ] `VAL-04` Executar da raiz do workspace `python3 delphi-ai/tools/todo_diff_expectation_guard.py uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md --repo-root uninotas-foundation`, além dos guards Delphi de autoridade, conclusão e cutover definidos neste TODO.
 - [ ] `VAL-05` Executar independentemente o Delphi diff-expectation guard, o helper `mode=delivery`, profile scope alimentado pelo helper, diff check e status/rename view; revisão humana confirma que cada path observado na modalidade aplicável possui row autorizada, sem alegar que o Delphi guard consome output externo.
 - [ ] `VAL-06` Após o TODO Delphi separado reparar o guard standalone, executar os dois comandos de closeout deste contrato e verificar semanticamente `path_state=active` no path individual e `todo_count>=1` no scan ativo; exit code/`go` isolado não basta.
-- [ ] `VAL-07` Executar a sequência de `DOD-12`: guards pre-C0; criar C0 local, verificar parent/ancestry, publicar/verificar e revalidar seu checkout limpo; preparar o move candidate C1; executar closeout-diff/structure/Foundation/diff/profile/authority/completion/closeout sobre o mesmo candidate; criar C1 local e, no handoff externo, verificar parent/ancestry, publicar/verificar C1 e executar `--all-active`.
+- [ ] `VAL-07` Executar toda a sequência repository-verifiable até o candidate C1: guards pre-C0; criar/publicar/verificar C0 e revalidar seu checkout limpo; preparar o move atômico; executar closeout-diff/structure/Foundation/diff/profile/authority/completion/closeout sobre o mesmo candidate. A formação/publicação/verificação do OID C1 pertence ao handoff externo e não integra este checkbox.
 - [ ] `VAL-08` Executar `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_enumerate_change_paths.py` cobrindo untracked, staged D/A, rename reconhecido como R e source criado após delivery baseline/movido antes de C1, com expectativas distintas para delivery e lifecycle.
 - [ ] `VAL-09` Executar `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_closeout_diff.py` e `python3 uninotas-foundation/deterministic/validate_closeout_diff.py --repo uninotas-foundation --base <C0> --todo todos/completed/process/TODO-uninotas-canonical-foundation-transition.md` antes dos completion guards do candidate C1.
-- [ ] `VAL-10` Em C0 e C1, capturar o remote OID e provar precommit que ele é ancestor do base HEAD congelado; depois de criar cada commit local, provar que seu parent é o base congelado e que o remote OID é ancestor do OID real antes do push. Persistir C0 facts em C1; reportar C1 facts somente no handoff externo. Proteção indisponível fica `unavailable — accepted only by explicit RISK-HIST-01 approval`.
+- [ ] `VAL-10` Para C0, capturar e verificar precommit/post-commit/pre-push remote/base/parent/ancestry e persistir os facts observados no candidate C1. Para C1, antes do commit, capturar `origin/main`, exigir `origin/main==C0==base HEAD` e registrar proteção disponível/`unavailable — accepted only by explicit RISK-HIST-01 approval`. Parent/ancestry/push do OID C1 são verificados somente no handoff externo.
 
 ## Completion Evidence Matrix (Required Before Delivery Claim)
 
@@ -335,12 +335,23 @@ C0 é publicado com toda implementação/audits verdes, stage `Local-Implemented
 O completed TODO de C1 deve ser semanticamente idêntico ao active TODO de C0, exceto por allowlist de célula/campo:
 
 - `Artifact Identity -> Lifecycle state` muda para `Completed — conditional Production-Ready candidate`;
-- `Delivery Status Canon` muda para `Current delivery stage: Production-Ready`, qualifier fixa `conditional — effective only after external HEAD==origin/main==C1 verification and post-C1 active scan go; failed publication invalidates closeout`, e next step fixa `external C1 verification + active scan handoff`;
+- `Delivery Status Canon` muda para `Current delivery stage: Production-Ready`, qualifier fixa `conditional — effective only after external HEAD==origin/main==C1 verification and semantic post-C1 scan todo_count=1/exact discovery path/no stale transition; failed publication or scan mismatch invalidates closeout`, e next step fixa `external C1 verification + semantic active scan handoff`;
 - na row desta entrega em `Promotion Evidence`, somente `Local Branch/Commit`, `PR to main` e `Current Status`; scope/thresholds ficam congelados e nenhum campo tenta registrar o próprio C1 SHA;
 - somente tokens de checkbox e `Status`/`Notes` das rows de Completion Evidence ainda abertas em C0; texto, IDs, criteria/evidence-command cells ficam congelados;
 - History Trust recebe evidência observada de C0 e a verificação precommit de que `origin/main==C0` é o base HEAD congelado do candidate C1; fatos sobre o OID/push de C1 ficam exclusivamente no handoff externo;
 - `TODO Closeout Disposition` muda para `move-completed`, razão fixa `candidate C1 guards green; Production-Ready remains conditional on external handoff`, post status `C0 verified; C1 external verification pending` e next action `external C1 verification + active scan handoff`;
 - `Post-Push Attestation` registra somente C0 OID/verificação e a descrição fixa do handoff externo de C1.
+
+Os quatro critérios tardios possuem estados exatos; não existe status intermediário implícito:
+
+| Criterion | C0 active | Candidate C1 completed | External handoff (not persisted in C1) |
+| --- | --- | --- | --- |
+| `DOD-12` | checkbox open; evidence `planned` | checkbox checked; evidence `passed` com outputs do closeout-diff + guards sobre o candidate | ativa a qualifier somente após C1 remoto + scan semântico |
+| `DOD-15` | checkbox open; evidence `planned` | checkbox checked; evidence `passed` com C0 observed facts + `origin/main==C0==base HEAD` precommit | prova `parent(C1)=C0` e ancestry do OID real |
+| `VAL-07` | checkbox open; evidence `planned` | checkbox checked; evidence `passed` com a sequência repository-verifiable completa até o working tree candidate | cria/publica/verifica C1; não reabre o checkbox |
+| `VAL-10` | checkbox open; evidence `planned` | checkbox checked; evidence `passed` para C0 full protocol + C1 precommit base check | executa C1 post-commit/pre-push/remote checks |
+
+`DOD-14` e `VAL-09` também são checked/passed no candidate após `validate_closeout_diff.py`. Todos os demais DOD/VAL já estão checked/passed em C0. `CLOSEOUT-POS-02` deve invocar os `todo_authority_guard.py`, `todo_completion_guard.py --require-delivery` e `todo_closeout_guard.py` reais contra exatamente esse candidate: nenhum guard wrapper ou mock pode substituir o comportamento Delphi. Qualquer row `planned`, checkbox aberto, placeholder ou texto `pending` na Completion Evidence Matrix do candidate é no-go.
 
 `validate_closeout_diff.py --base C0` valida paths, move e células antes de qualquer completion guard. Deterministic validation, Foundation validator, diff/profile gates, authority, completion e closeout rodam sobre esse mesmo working tree candidate. Todos os critérios repository-verifiable tornam-se completos antes de formar C1. Após o commit local, o handoff prova que o parent de C1 é exatamente C0, que C0/origin observado é ancestor de C1, publica C1 e confirma `HEAD==origin/main==C1` mais active scan go. Esses fatos dependentes do OID novo nunca são pré-preenchidos dentro do próprio commit. Falha invalida o closeout/claim; não há C2 nem commit autorreferente.
 
@@ -348,12 +359,14 @@ O completed TODO de C1 deve ser semanticamente idêntico ao active TODO de C0, e
 | --- | --- | --- |
 | `CLOSEOUT-POS-01` | `atomic_move_and_allowed_cells` | C0 active → candidate C1 completed com cinco paths/células exatos é aceito |
 | `CLOSEOUT-POS-02` | `completed_path_guard_sequence` | fixture Git temporária executa closeout-diff, structure, authority, completion e closeout sobre o mesmo candidate C1 |
+| `CLOSEOUT-POS-03` | `post_c1_semantic_active_scan` | handoff fixture exige `todo_count=1`, active path igual ao TODO discovery e zero stale canonical-transition path |
 | `CLOSEOUT-NEG-01` | `incomplete_todo_moved_to_completed` | `completed path requires all repository-verifiable criteria complete` |
 | `CLOSEOUT-NEG-02` | `unexpected_sixth_path_or_backlink_edit` | `final closeout changed a non-allowlisted path or backlink content` |
 | `CLOSEOUT-NEG-03` | `todo_semantic_text_changed` | `final closeout changed frozen contract content` |
 | `CLOSEOUT-NEG-04` | `promotion_static_cell_changed` | `final closeout changed frozen promotion scope or threshold cell` |
 | `CLOSEOUT-NEG-05` | `self_commit_or_prospective_oid_persisted` | `final closeout cannot persist facts that depend on the uncreated C1 OID` |
 | `CLOSEOUT-NEG-06` | `delivery_or_closeout_value_outside_state_machine` | `final closeout used a non-contract stage or disposition transition` |
+| `CLOSEOUT-NEG-07` | `post_c1_false_go_zero_or_wrong_active_set` | `post-C1 active scan semantic result does not match the exact remaining active TODO set` |
 
 ## External Dependency Readiness
 
@@ -577,7 +590,7 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-summary`
 - **Decision review status:** `not_run`
-- **Decision review evidence / resolution:** `R8K encontrou OIDs exigidos antes de existir, completed intermediário incompleto, wildcard de testes e wall-clock irreprodutível; closeout foi simplificado para C0 ativo + C1 atômico + handoff externo, nova rodada R8L obrigatória`
+- **Decision review evidence / resolution:** `R8L arquitetura considerou Option A pronta com RISK-HIST-01; crítica exigiu estados tardios exatos e scan semântico pós-C1, integrados; nova rodada R8M obrigatória`
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -894,12 +907,16 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 | `CRIT-R8K-02` | formal critique R8K | Integrated | current-action avança de baseline R8K já publicada para integração/freeze R8L, sem repetir ação concluída |
 | `CRIT-R8K-03` | formal critique R8K | Integrated | wildcard `deterministic/tests/**` substituído pelos cinco arquivos de teste exatos autorizados |
 | `CRIT-R8K-04` | formal critique R8K | Integrated | wall-clock ~179s vira tendência advisory; hard gates permanecem scan count `<=3`, history calls `<=k+2` e zero helper full-tree |
+| `RISK-HIST-01-R8L` | formal architecture review R8L | Accepted residual | reviewer considerou arquitetura pronta; risco permanece explicitamente condicionado ao APROVADO e ao History Trust Gate |
+| `CRIT-R8L-01` | formal critique R8L | Integrated | phase table fixa C0/candidate C1/handoff para DOD-12/15 e VAL-07/10; candidate exige todos checkboxes checked/rows passed e `CLOSEOUT-POS-02` invoca guards Delphi reais |
+| `CRIT-R8L-02` | formal critique R8L | Integrated | pós-C1 exige `todo_count=1`, exact discovery TODO membership e ausência do stale transition path; `CLOSEOUT-POS-03`/`NEG-07` cobrem false-go |
+| `CRIT-R8L-03` | formal critique R8L | Integrated | current-action avança de baseline R8L já publicada para integração/freeze R8M, sem repetir freeze concluído |
 
 ## Additional Architectural Opinions
 
 - **Needed:** `yes`
 - **Why ambiguity remains:** o validator pode ser evoluído por manifesto único ou por inventário gerado; revisão independente deve desafiar a opção recomendada.
-- **Opinion count:** `16`
+- **Opinion count:** `17`
 - **Package mode:** `bounded-summary`
 - **Internal reviewer mandate:** `required — fresh internal no-context reviewer after baseline freeze`
 - **Required lenses:** `correctness|performance|elegance|structural-soundness|operational-fit`
@@ -922,6 +939,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 | `uninotas_architecture_opinion_r8i` | manter manifesto/registry/ledger/C0-C2, corrigindo a âncora genesis e o procedimento operacional | strong positive | strong positive | strong positive; operational fit mixed até correção | Integrated / Rerun required | merges R8I válidos; genesis/baseline/history budget/traceability/comandos closeout integrados, baseline R8J obrigatória |
 | `uninotas_architecture_opinion_r8j` | manter Option A e definir state machine executável para bootstrap C0 e attestation C2 | strong positive | strong positive | mixed até fechar lifecycle boundaries | Integrated / Rerun required | merges R8J válidos; bootstrap/state table/cell allowlist/conditional stage/history gate/digest integrados, baseline R8K obrigatória |
 | `uninotas_architecture_opinion_r8k` | manter Option A, mas substituir C0/C1/C2 por C0 ativo + C1 final atômico + handoff externo | strong positive | mixed | mixed até remover estados impossíveis | Integrated / Rerun required | merges R8K válidos; closeout atômico, history ordering, exact test paths e performance determinística integrados, baseline R8L obrigatória |
+| `uninotas_architecture_opinion_r8l` | adotar Option A; arquitetura pronta com aceite explícito do risco residual | strong positive | strong positive | strong positive | Accepted / Ready with RISK-HIST-01 | merge R8L válido; crítica paralela exigiu apenas estados tardios/scan semântico, baseline R8M obrigatória |
 
 ## Audit Trigger Matrix
 
@@ -956,8 +974,8 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Audit session / round evidence:** `n/a until run`
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
 - **Critique status:** `not_run`
-- **Findings summary:** `R8K apontou candidate OID inexistente nos gates, TODO incompleto publicado em completed, current-action stale, wildcard de testes e budget wall-clock irreprodutível; todos foram integrados e exigem crítica R8L`.
-- **Evidence / reference:** merges derivados `uninotas-r8k-architecture-merge.json` e `uninotas-r8k-critique-merge.json`; nova crítica obrigatória após freeze R8L.
+- **Findings summary:** `R8L arquitetura retornou ready com RISK-HIST-01; crítica apontou estados tardios não enumerados, scan pós-C1 reduzido a bare go e current-action stale; todos foram integrados e exigem crítica R8M`.
+- **Evidence / reference:** merges derivados `uninotas-r8l-architecture-merge.json` e `uninotas-r8l-critique-merge.json`; nova crítica obrigatória após freeze R8M.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Assumption Code Coherence
@@ -1132,15 +1150,15 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **C1 atomic completed-tree commit:** `external handoff after local commit/push; never persisted into itself`
 - **C1 parent/ancestry verification:** `external handoff must prove parent(C1)=C0 and C0 ancestor of C1`
 - **C1 remote verification:** `external handoff must prove HEAD==origin/main==C1`
-- **Post-C1 active scan:** `external handoff; must be go with no stale active entry for this TODO`
-- **Production-Ready evidence:** `pending external tuple {c0_genesis_commit, final_closeout_commit: C1, parent_is_c0: true, head_equals_origin: true, post_c1_active_scan: go, production_ready_effective: true}`
+- **Post-C1 active scan:** `external handoff; must report go, todo_count=1, exact active_paths=[todos/active/process/TODO-uninotas-smart-notas-api-and-fiscal-context-discovery.md], and stale_transition_path=false`
+- **Production-Ready evidence:** `pending external tuple {c0_genesis_commit, final_closeout_commit: C1, parent_is_c0: true, head_equals_origin: true, post_c1_active_scan: {outcome: go, todo_count: 1, active_paths: [todos/active/process/TODO-uninotas-smart-notas-api-and-fiscal-context-discovery.md], stale_transition_path: false}, production_ready_effective: true}`
 
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
 - **Disposition reason:** planejamento e aprovação ainda não concluídos.
 - **Post-commit/push status:** `pending`
-- **Next path/status action:** publicar a baseline R8L, executar as revisões/guards pré-aprovação e solicitar `APROVADO` explícito com aceite de `RISK-HIST-01`.
+- **Next path/status action:** publicar a baseline R8M, executar as revisões/guards pré-aprovação e solicitar `APROVADO` explícito com aceite de `RISK-HIST-01`.
 
 ## Module Consolidation Gate
 
@@ -1194,8 +1212,8 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 3. Em checkout limpo de C0, repetir Foundation validator sob a exceção bootstrap fechada, executar closeout guard no path ativo e confirmar `path_state=active`. C0 vira `LEDGER_GENESIS` e baseline de `mode=lifecycle`.
 4. Confirmar `origin/main==C0`, congelar base HEAD=C0 e preparar em um único working tree o move active→completed, manifesto/backlinks finais, C0 OID/verificação, todos os critérios/evidence repository-verifiable e a stage condicional; nenhum fato do futuro C1 é persistido.
 5. Executar, nessa ordem, `C1 atomic closeout boundary`, `C1 completed-path structure`, Foundation validator, `C1 completed-path diff gate`, `mode=delivery`, `mode=lifecycle`, status views, profile scope, diff check, `C1 delivery authority`, `C1 completion` e `C1 closeout` sobre o mesmo candidate.
-6. Criar C1 local; no handoff externo, provar `parent(C1)=C0` e C0 ancestor de C1, publicar, provar `HEAD==origin/main==C1` e executar `--all-active`, confirmando ausência de stale entry deste TODO. Só então a stage condicional se torna efetiva.
-7. O handoff externo reporta `{c0_genesis_commit: C0, final_closeout_commit: C1, parent_is_c0: true, head_equals_origin: true, post_c1_active_scan: go, production_ready_effective: true}`. Não existe C2 nem persistência do próprio SHA.
+6. Criar C1 local; no handoff externo, provar `parent(C1)=C0` e C0 ancestor de C1, publicar, provar `HEAD==origin/main==C1` e executar `--all-active`. O resultado deve ser semanticamente `todo_count=1`, exact active path igual ao TODO discovery e stale canonical-transition path ausente; exit code/`go` isolado não satisfaz.
+7. O handoff externo reporta `{c0_genesis_commit: C0, final_closeout_commit: C1, parent_is_c0: true, head_equals_origin: true, post_c1_active_scan: {outcome: go, todo_count: 1, active_paths: [todos/active/process/TODO-uninotas-smart-notas-api-and-fiscal-context-discovery.md], stale_transition_path: false}, production_ready_effective: true}`. Não existe C2 nem persistência do próprio SHA.
 
 ## Files Expected (Compatibility Note)
 
