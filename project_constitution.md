@@ -1,4 +1,14 @@
-# Monitor de Notas — Project Constitution
+# UniNotas — Project Constitution
+
+## UniNotas canonical target
+
+**UniNotas** is the canonical product and `uninotas` is the core scope; `MonitorDeNotas` remains the technical repository name.
+
+Namespaces: nestjs, react, vite, postgresql, prisma, docker, railway
+
+Smart Notas is the target-planned source of truth for fiscal notes and documents. Unifast and Prosperar are distinct `FiscalIssuerContext` values, not tenants. After the adapter transition, PostgreSQL `logs` retains only integration-failure evidence and never becomes the fiscal-note source.
+
+Current runtime evidence and target-planned architecture are separate axes from PACED lifecycle/status. FastPay (Routerfy) -> n8n -> Smart Notas is the approved external flow; external writer/filter behavior for `logs` is unknown unless evidenced.
 
 ## Authority
 
@@ -13,8 +23,8 @@ NestJS, React/Vite, PostgreSQL/Prisma, Docker, and Railway are observed product 
 
 ## Invariants
 
-- Routerfy owns and writes the authoritative production `logs`; Monitor de Notas reads that external table only and writes only `monitor_usuarios` and `monitor_tratamentos`.
-- The local development `logs` replica is derived, disposable, and non-authoritative. Only the explicit mirror tooling may populate it; it never transfers ownership from Routerfy or authorizes application writes to production `logs`.
+- Current `logs` is an external, read-only, mixed emission-event projection containing success, pending, and error records; its writer, ingestion, and filter semantics are unknown. Smart Notas becomes the complete fiscal-note/document authority only after the planned capability transition.
+- The local development `logs` replica is derived, disposable, and non-authoritative. Only the explicit mirror tooling may populate it; this establishes no source ownership and authorizes no application writes to production `logs`.
 - [Events](modules/events-and-classification.md) owns read projections, [treatments](modules/treatments-and-history.md) owns treatment writes, and [identity](modules/identity-and-team.md) owns user writes.
 - `ref_id` is correlation, never uniqueness proof.
 - The latest treatment supplies effective status; `PENDENTE` reopens original status.

@@ -1,4 +1,10 @@
-# Monitor de Notas Foundation Lifecycle
+# UniNotas Foundation Lifecycle
+
+## UniNotas current/target boundary
+
+UniNotas uses `current_runtime` for observed behavior and `target_planned` for future architecture; lifecycle evidence does not itself alter runtime authority.
+
+PACED states govern delivery method and evidence only. They never collapse, replace, or promote the independent current/target authority axis.
 
 This document owns lifecycle semantics. Modules own stable local truth; TODOs own approval and delivery evidence; decisions own rationale; artifacts are evidence only.
 

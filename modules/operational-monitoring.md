@@ -1,9 +1,12 @@
 # Operational Monitoring
 
 ## Module Intent & Boundaries
-- **Core scope:** `monitor-de-notas`
+- **Core scope:** `uninotas`
 - **Subscope:** `operational-monitoring`
 - **EnvironmentType:** `landlord` (PACED technical adapter only; no business tenancy)
+- **Runtime authority state:** `current_runtime`
+- **Owned capabilities:** `legacy_log_monitoring`
+- **Planned capabilities:** none
 - **Out-of-scope guardrails:** Claiming availability from an empty result or changing runtime monitoring.
 - **Dependency boundaries:** Reuses the events summary semantics for an external monitor or alert.
 

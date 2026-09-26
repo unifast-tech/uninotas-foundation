@@ -6,3 +6,6 @@
 - [Realtime Invalidation](realtime-invalidation.md)
 - [Operational Monitoring](operational-monitoring.md)
 - [Runtime and Deployment](runtime-and-deployment.md)
+- [Fiscal Notes and Documents](fiscal-notes-and-documents.md)
+- [Integration Error Occurrences](integration-error-occurrences.md)
+- [Operational Cases](operational-cases.md)

@@ -1,9 +1,12 @@
 # Realtime Invalidation
 
 ## Module Intent & Boundaries
-- **Core scope:** `monitor-de-notas`
+- **Core scope:** `uninotas`
 - **Subscope:** `realtime-invalidation`
 - **EnvironmentType:** `landlord` (PACED technical adapter only; no business tenancy)
+- **Runtime authority state:** `current_runtime`
+- **Owned capabilities:** `legacy_log_invalidation`
+- **Planned capabilities:** none
 - **Out-of-scope guardrails:** Treating SSE messages as data truth or promising durable delivery.
 - **Dependency boundaries:** SSE signals API, continuous backend polling, and optional parallel database notification; clients re-fetch the API.
 

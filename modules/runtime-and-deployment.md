@@ -1,9 +1,12 @@
 # Runtime and Deployment
 
 ## Module Intent & Boundaries
-- **Core scope:** `monitor-de-notas`
+- **Core scope:** `uninotas`
 - **Subscope:** `runtime-and-deployment`
 - **EnvironmentType:** `landlord` (PACED technical adapter only; no business tenancy)
+- **Runtime authority state:** `current_runtime`
+- **Owned capabilities:** `runtime_topology`, `health_read`
+- **Planned capabilities:** none
 - **Out-of-scope guardrails:** Runtime modifications, secret values, or health claims not evidenced by product configuration.
 - **Dependency boundaries:** Observed Docker, Railway, NestJS, React/Vite, PostgreSQL, and Prisma configuration.
 
@@ -17,7 +20,7 @@ Owns observed topology and the public health-read contract. Changes to Docker, R
 
 ## Observed Runtime Contract
 
-The observed runtime boundary composes NestJS, React/Vite, PostgreSQL/Prisma, Docker, and Railway. Routerfy remains the owner and sole writer of the external production `logs` table, which the application reads only. Development may use a local `logs` replica that is derived, disposable, and non-authoritative; only the explicit `backend/prisma/espelhar.ts` mirror tool may populate it, against the local shape declared by `backend/prisma/sql/002_logs_dev.sql`. The replica cannot become a source of truth and does not authorize application or production writes. This module owns no secret value, availability target, or service-level objective.
+The observed runtime boundary composes NestJS, React/Vite, PostgreSQL/Prisma, Docker, and Railway. The external production `logs` boundary is a read-only mixed emission-event source for the legacy current runtime; its source-row owner, writer, ingestion, and filter semantics are unknown. Development may use a local `logs` replica that is derived, disposable, and non-authoritative; only the explicit `backend/prisma/espelhar.ts` mirror tool may populate it, against the local shape declared by `backend/prisma/sql/002_logs_dev.sql`. The replica cannot become a source of truth and does not authorize application or production writes. This module owns no secret value, availability target, or service-level objective.
 
 ## Observed Health Contract
 

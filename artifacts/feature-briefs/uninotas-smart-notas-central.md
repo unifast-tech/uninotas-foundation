@@ -8,6 +8,8 @@
 ## Source Idea / Request
 
 - Expand the current monitor into **UniNotas**, using the Smart Notas API as the complete note-data source while retaining PostgreSQL only for integration failures.
+
+The canonical foundation transition TODO is a prerequisite: it separates current runtime evidence from this target architecture and grants no implementation authority.
 - Support two fiscal contexts from the outset: **Unifast** and **Prosperar**.
 - Prepare a local environment surface for the corresponding API credentials without persisting secret values in Foundation or Git.
 
@@ -22,18 +24,18 @@
 - **Fiscal context:** Unifast and Prosperar are separate `FiscalIssuerContext` values only, not business tenants or organizations.
 - **Delivery:** capabilities will be introduced in stages, beginning with read-only note/report access.
 - **Confirmed flow:** FastPay (Routerfy) originates the sale/emission request, n8n performs the automation, and Smart Notas processes it. UniNotas reads notes directly from the Smart Notas API; PostgreSQL retains integration failures only.
-- **Source ownership:** Smart Notas API owns the complete note read model—list, detail, status, fiscal fields, PDF/DANFE, XML, and approved reports. PostgreSQL `logs` owns only failed-attempt evidence that may not have produced a provider note.
+- **Target source ownership:** after capability promotion, Smart Notas API owns the complete note read model—list, detail, status, fiscal fields, PDF/DANFE, XML, and approved reports—and PostgreSQL `logs` supplies only failed-attempt evidence that may not have produced a provider note. Until then, current runtime remains the explicitly labeled mixed `logs`-derived projection.
 - **Note identity:** UniNotas maps an opaque `noteId` to `(provider, fiscalContext, idInterno)`. `ref_id` belongs only to error occurrences; `idTransacao`/`idCompra` is secondary correlation, never note identity.
 - **Projection/cache:** the first target has no persistent local note mirror. It reads Smart Notas and keeps only a bounded in-memory session cache so `Geral -> Erros -> Geral` can restore recent rows immediately and revalidate stale entries in the background.
 - **Context-first navigation:** the first delivery requires one active fiscal context, Unifast or Prosperar, and has no aggregate “Todos” list. Provider pagination remains isolated per selected context.
 - **State separation:** Smart Notas fiscal status, integration-error category, document readiness, and UniNotas workflow are independent states. `OperationalCase` is the sole owner of `ABERTO|RESOLVIDO|IGNORADO` and treatment history, containing one optional API note and zero or more integration-error occurrences while requiring at least one source anchor.
 - **Integration errors:** FastPay/n8n/Smart Notas validation, duplicate/already-issued, transport, and provider failures captured in PostgreSQL remain permanent scope. Deterministically linked errors appear separately on note detail; unlinked errors remain in a dedicated operational queue.
-- **Current versus target truth:** canonical Foundation continues to describe the running `logs`-based system until a separate canonical change and tactical implementation are approved. This brief records product direction, not completed migration or implementation authority.
+- **Current versus target truth:** the canonical product identity is now UniNotas under TD-01/D-06, while `MonitorDeNotas` remains only the technical repository name. The running product still has explicitly labeled Current `logs`-based behavior until later tactical implementation TODOs promote the target capabilities; this brief grants no runtime implementation authority.
 
 ## Constraints / Non-Goals
 
 - **Constraints:** preserve current running behavior until superseded by approved decisions; never store tokens in tracked files or Foundation; call Smart Notas only from the backend; verify list/detail/document shapes rather than inferring them; keep Unifast and Prosperar data, credentials, cache keys, audit records, and UI context distinguishable.
-- **Non-goals:** this brief does not rename the product canonically, perform fiscal mutations, migrate data, implement API clients, create database schema, or redesign the external FastPay/n8n automation.
+- **Non-goals:** this brief does not rename the technical repository, perform fiscal mutations, migrate data, implement API clients, create database schema, or redesign the external FastPay/n8n automation.
 
 ## Canonical Touchpoints
 
@@ -67,7 +69,7 @@
 | `AMB-03` | Whether “account” is a fiscal emitter, organization, credential profile, or user-visible workspace | Prevents accidental tenancy and authorization design | User confirmed that Unifast and Prosperar are different fiscal contexts only | `resolved` — use `FiscalIssuerContext`, not tenancy |
 | `AMB-04` | Read-only first release versus immediate issue/cancel capability | Write operations carry fiscal, authorization, idempotency, and audit risk | User confirmed staged delivery and agreed to proceed in parts | `resolved` — read-only first; mutations are separately approved slices |
 | `AMB-05` | Polling, rate limits, idempotency, sandbox, and webhook availability | Determines reliability and operational cost | Published API exposes asynchronous issuance and no webhook or rate-limit contract | `carry as TODO assumption` and request provider confirmation |
-| `AMB-06` | Canonical product rename and repository identity | A rename affects mandate, modules, runtime labels, branding, and delivery topology | Current canonical identity remains Monitor de Notas / `MonitorDeNotas` | `block` until a dedicated strategic decision is approved |
+| `AMB-06` | Canonical product identity versus technical repository identity | A rename affects mandate, modules, runtime labels, branding, and delivery topology | TD-01/D-06 resolves the canonical product as UniNotas while preserving `MonitorDeNotas` as the technical repository name in this delivery | `resolved` — use UniNotas for product authority and retain `MonitorDeNotas` only where the technical repository identity is intended |
 | `AMB-07` | Product mapping for context-scoped Smart Notas `idInterno` | Current routes use error `ref_id`, while target note/detail/document routes must use API identity safely | Public API uses `idInterno` under token+CNPJ scope | `resolve now` — define opaque `noteId` mapping and context-safe route behavior without relying on `logs` |
 | `AMB-08` | Whether Smart Notas exposes every note field required by the target UI | The API must now supply customer, sale, issuer, status, and document data instead of successful log payloads | Redacted list/detail/report shapes are captured for both contexts; nullable fields and endpoint-specific type differences are recorded | `partially resolved` — normalized DTO candidate exists; confirm target UI field selection and keep defensive decoding |
 | `AMB-09` | API refresh, pagination, DANFE readiness, and URL lifetime | Determines context list behavior, freshness, retry, cache safety, and user-visible errors | selected-context pagination, no initial aggregate list, manual refresh, and bounded in-memory stale-while-revalidate cache are confirmed; API has no webhook, PDF may return `202`, and URL lifetime is unspecified | `partially resolved` — tactical TTL/cap and request-race guards remain; polling, persistent cache, and document proxy choice stay deferred |

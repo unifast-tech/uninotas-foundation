@@ -14,9 +14,11 @@
 
 - Produce an evidence-backed recommendation for integrating Smart Notas into UniNotas, including API coverage, credential lifecycle, account-context semantics, source ownership, security boundaries, and story-sized implementation handoffs.
 
+The canonical UniNotas/source-split transition TODO at `todos/active/process/TODO-uninotas-canonical-foundation-transition.md` is a prerequisite for any implementation handoff; this discovery ledger preserves its decisions and grants no runtime authority.
+
 ## 2. Confirmed Baseline
 
-- The current canonical product is Monitor de Notas: it reads pipeline results persisted in the PostgreSQL `logs` table, writes only application-owned users/treatments, and has no documented business tenancy or organization model.
+- The current technical MonitorDeNotas runtime reads pipeline results persisted in the PostgreSQL `logs` table, writes only application-owned users/treatments, and has no documented business tenancy or organization model.
 - The desired future product direction is UniNotas, a central for fiscal notes using Smart Notas, with two fiscal contexts: Unifast and Prosperar.
 - The confirmed emission flow is `FastPay (Routerfy) -> n8n -> Smart Notas`. UniNotas obtains its complete note base, including note data and PDF/DANFE, from the Smart Notas API. The PostgreSQL `logs` boundary is retained only for integration failures.
 - On 2026-09-25, the user explicitly confirmed the resulting source-ownership consequences: Smart Notas is the complete note source; PostgreSQL is error-only; `ref_id` is not note identity; ambiguous errors remain unlinked; and the first target has no persistent local note mirror.

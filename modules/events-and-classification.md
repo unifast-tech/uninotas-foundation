@@ -1,10 +1,13 @@
 # Events and Classification
 
 ## Module Intent & Boundaries
-- **Core scope:** `monitor-de-notas`
+- **Core scope:** `uninotas`
 - **Subscope:** `events-and-classification`
 - **EnvironmentType:** `landlord` (PACED technical adapter only; no business tenancy)
-- **Out-of-scope guardrails:** Writing Routerfy `logs`, defining source ingestion, or treating `ref_id` as a primary key.
+- **Runtime authority state:** `current_runtime`
+- **Owned capabilities:** `note_read_model`, `integration_error_read_model`
+- **Planned capabilities:** none
+- **Out-of-scope guardrails:** Writing external `logs`, defining source ingestion/ownership, or treating `ref_id` as a primary key.
 - **Dependency boundaries:** Read-only SQL over `logs`; API consumers use explicit list, filter, summary, detail, and export contracts.
 
 ## Canonical Coverage Status
@@ -13,7 +16,7 @@
 - **Remaining Migration Scope:** `none`
 
 ## Specification
-Owns external event observation, filters, pagination, export, and original/effective classification. Only records with `org_path = 'SmartNotas'` are relevant. SQL and TypeScript classification projections must preserve equivalent semantics. Effective status incorporates the latest treatment; `PENDENTE` restores original status.
+Owns the current mixed external emission-event projection—success, pending, error, and treated views—plus filters, pagination, export, and original/effective classification. The external source-row owner, writer, ingestion, and filter semantics are unknown. SQL and TypeScript classification projections must preserve equivalent semantics. Effective status incorporates the latest treatment; `PENDENTE` restores original status.
 
 ## Observed API Contract
 
@@ -34,13 +37,13 @@ Validation/auth/not-found failures use the standard error body `{statusCode,erro
 
 ## Ownership Invariant
 
-The cross-module data-ownership invariant is owned by the [project constitution](../project_constitution.md#invariants). This module performs read-only projections over Routerfy-owned `logs` and owns no application write contract.
+The cross-module data-ownership invariant is owned by the [project constitution](../project_constitution.md#invariants). This module performs read-only projections over external `logs` evidence and owns no application write contract.
 
 ## Purpose, Owned Entities, and Workflows
-**Purpose:** provide the authoritative read model for emission-event investigation. **Owned/orchestrated entities:** `LogEvent` and classification projections; Routerfy remains owner of persisted source rows. **Workflows/capabilities:** list, filter, paginate, summarize, export, and inspect detail. **Invariants/validation/auth:** source remains read-only, SmartNotas filter applies, `ref_id` is correlation only, and protected API access is enforced by the identity boundary. **Observed contracts:** raw SQL, classifier, mapper, routes, request bounds, response fields, media type, and errors above are evidenced; no SLO is asserted.
+**Purpose:** provide the current authoritative read model for legacy emission-event investigation until the planned capability transitions complete. **Owned/orchestrated entities:** `LogEvent` and classification projections; external persisted source-row owner/writer/ingestion semantics remain unknown. **Workflows/capabilities:** list, filter, paginate, summarize, export, and inspect detail. **Invariants/validation/auth:** source remains read-only, SmartNotas filter applies, `ref_id` is correlation only, and protected API access is enforced by the identity boundary. **Observed contracts:** raw SQL, classifier, mapper, routes, request bounds, response fields, media type, and errors above are evidenced; no SLO is asserted.
 
 ## Cross-Module Considerations
-Routerfy owns `logs`; [treatments and history](treatments-and-history.md) owns application treatment writes.
+External `logs` writer/filter behavior is unknown; [treatments and history](treatments-and-history.md) owns application treatment writes.
 
 ## Failure and Degradation Modes
 Source-query failure is not represented as zero matching events; clients use the API result/error contract rather than treating an export or summary as source truth.

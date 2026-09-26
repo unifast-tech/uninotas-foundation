@@ -40,27 +40,56 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 ## Delivery Status Canon (Required)
 
-- **Current delivery stage:** `Pending`
+- **Current delivery stage:** `Local-Implemented`
 - **Qualifiers:** `none`
-- **Next exact step:** solicitar `APROVADO` explícito para TD-01..TD-07, D-T01..D-T05, DOD-01..DOD-15/VAL-01..VAL-10 e aceite de `RISK-HIST-01`; somente depois iniciar implementação.
+- **Next exact step:** validate final independent reviews, then promote C0 to main by CAS
+
+## Provisional Notes
+
+- **Missing for production-ready:** publicação C1, segunda observação remota e scan semântico pós-C1 ainda precisam ser materializados no handoff externo.
+- **Revisit criteria:** remover `Provisional` somente após `activate --phase c1` emitir e validar o handoff production completo contra o C1 publicado.
+- **Dependencies unblocked:** o C0 validado permite formar o candidate C1; trabalho de produto continua governado pelo TODO discovery ativo.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
 - **Work state:** `review`
-- **Why this state now:** o contrato está em refinamento/revisão pré-aprovação; nenhuma implementação canônica ou determinística foi iniciada.
-- **Exit condition:** baseline aprovado, implementação validada e gates de entrega concluídos.
+- **Why this state now:** implementation and primary validation complete; independent delivery audits and C0 publication remain.
+- **Exit condition:** all delivery reviews and guards green; C0 published and verified before atomic C1 formation.
+
+### Implementation and validation evidence
+
+- **Fail-first RED:** as novas fixtures inicialmente falharam por imports/helpers ausentes, `verify`/`activate` ainda stub e, depois, pelo contrato de performance full-tree; todos foram corrigidos antes do GREEN.
+- **GREEN semantic (final; supersedes earlier runs):** `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_registry_semantics.py uninotas-foundation/deterministic/tests/test_privacy_predicate.py` — 86 tests, 4.491s.
+- **GREEN full-tree/lifecycle (final):** `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_foundation.py` — 4 tests, 55.589s; três chamadas full-tree (`scan_count=3`) mais a matrix Git-backed de lifecycle/genesis sem scan adicional.
+- **GREEN change-set (final):** `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_enumerate_change_paths.py` — 7 tests, 0.959s.
+- **GREEN closeout/handoff (final; supersedes earlier runs):** `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_closeout_diff.py uninotas-foundation/deterministic/tests/test_closeout_handoff.py` — 81 tests, 363.587s.
+- **GREEN Foundation:** `python3 -B uninotas-foundation/deterministic/validate_foundation.py --root uninotas-foundation` passed; `verify_context` reported `PACED-Ready`.
+- **GREEN closeout semantics:** individual guard returned `path_state=active`; `--all-active --repo uninotas-foundation` returned `todo_count=2` with exactly this transition and the Smart Notas discovery TODO.
+- **GREEN delivery triple-review:** Round 11 independently rebound the exact 41-path candidate and returned zero findings across performance, test quality and cutover integrity; the test-quality lane reproduced 173/173 tests plus Foundation validator, diff check and PACED readiness.
+
+### Security bug-fix evidence (`SEC-C0-01` / `SEC-C0-02`)
+
+- **Before / reproduction:** the final adversarial review reproduced false-green paths for a checksum-valid CNPJ split by direct/escaped `Cf` or `Mn` characters and for sensitive keys inside simple, list, nested, quoted/escaped and duplicate YAML flow mappings.
+- **Coverage matrix:** raw document input=`covered`; Unicode/escape canonicalization=`false-green -> covered`; JSON key/value traversal=`covered`; YAML block pairs=`covered`; YAML flow mappings=`missing -> covered`; contextual diagnostic/full-tree publication=`covered`; backend/database/UI=`not applicable` because this is an offline Foundation scanner with no runtime payload path.
+- **Existing-test gap:** `GUARD-PRIV-06..10` protected disguised keys and structured JSON, but no test split a valid CNPJ value or parsed YAML flow mappings, so no pre-existing test failed.
+- **RED -> GREEN:** `test_guard_priv_11_invisible_or_escaped_characters_cannot_split_valid_cnpj` and `test_guard_priv_12_yaml_flow_mappings_cannot_bypass_sensitive_contexts` failed in 13 subcases before the fix and passed after candidate-text normalization plus duplicate-preserving flow-pair extraction.
+- **Real payload question:** no database/provider payload is read or required by this delivery; sanitized deterministic strings reproduce the exact parser boundary without persisting fiscal data.
+- **Architecture prevention assessment:** `no-rule-needed`; this was a project-owned parser coverage gap, not a statically recognizable dependency/architecture violation suitable for a general analyzer rule.
+- **Performance remediation:** `PERF-C0-01` reproduced quadratic work in the first YAML flow extractor. `test_guard_priv_13_flow_mapping_scan_has_linear_work_budget` failed before the replacement and now proves a one-pass character budget plus bounded key/value materialization at depth 4000; no wall-clock-only assertion is used.
+- **Long-key remediation:** `PRIV-C0-03` reproduced a false green when a flow key exceeded 256 raw characters through repeated invisible escapes. `test_guard_priv_14_long_escape_padded_flow_key_cannot_bypass_detection` failed before removing that discard and now passes while PRIV-13 still proves total key materialization is linear.
+- **Nested-key remediation:** `PERF-C0-02` reproduced overlapping key spans when flow mappings were themselves used as mapping keys. `test_guard_priv_15_nested_mapping_keys_keep_global_linear_materialization_budget` observed 8,029,011 materialized key characters from a 16,037-character input before the fix; structural outer keys are now discarded without slicing/normalization, while their nested sensitive scalar pairs remain detectable.
 
 ## Scope
 
-- [ ] Canonicalizar `UniNotas` como nome do produto e `uninotas` como `core_scope`, preservando `MonitorDeNotas` como nome técnico do repositório nesta entrega.
-- [ ] Declarar na constituição `Namespaces: nestjs,react,vite,postgresql,prisma,docker,railway`, refletindo somente a topologia já verificada e mantendo cada capability independente.
-- [ ] Registrar a topologia externa confirmada e a propriedade de dados: Smart Notas para notas/documentos, PostgreSQL `logs` somente para falhas de integração.
-- [ ] Registrar Unifast e Prosperar como `FiscalIssuerContext`, sem tenancy e sem agregação inicial de notas.
-- [ ] Separar explicitamente comportamento atual e arquitetura-alvo nas raízes, decisões, roadmap e módulos afetados.
-- [ ] Criar os owners canônicos planejados exatos `modules/fiscal-notes-and-documents.md`, `modules/integration-error-occurrences.md` e `modules/operational-cases.md`.
-- [ ] Atualizar a política de scope/subscope e os índices sem inventar módulos de runtime já implementados.
-- [ ] Evoluir o validador e seus testes para a nova identidade, módulos e publicação governada, mantendo proteções existentes.
-- [ ] Publicar no manifesto os artefatos de descoberta e este TODO sem persistir segredos, valores reais de CNPJ/identificador do provedor, payloads/respostas privadas ou URLs capturadas de documentos.
+- [x] Canonicalizar `UniNotas` como nome do produto e `uninotas` como `core_scope`, preservando `MonitorDeNotas` como nome técnico do repositório nesta entrega.
+- [x] Declarar na constituição `Namespaces: nestjs,react,vite,postgresql,prisma,docker,railway`, refletindo somente a topologia já verificada e mantendo cada capability independente.
+- [x] Registrar a topologia externa confirmada e separar as duas verdades: current runtime mantém a projeção mista read-only de `logs`; no target após promoção, Smart Notas governa notas/documentos e `logs` fica somente para falhas de integração.
+- [x] Registrar Unifast e Prosperar como `FiscalIssuerContext`, sem tenancy e sem agregação inicial de notas.
+- [x] Separar explicitamente comportamento atual e arquitetura-alvo nas raízes, decisões, roadmap e módulos afetados.
+- [x] Criar os owners canônicos planejados exatos `modules/fiscal-notes-and-documents.md`, `modules/integration-error-occurrences.md` e `modules/operational-cases.md`.
+- [x] Atualizar a política de scope/subscope e os índices sem inventar módulos de runtime já implementados.
+- [x] Evoluir o validador e seus testes para a nova identidade, módulos e publicação governada, mantendo proteções existentes.
+- [x] Publicar no manifesto os artefatos de descoberta e este TODO sem persistir segredos, valores reais de CNPJ/identificador do provedor, payloads/respostas privadas ou URLs capturadas de documentos.
 
 ## Out of Scope
 
@@ -171,7 +200,7 @@ Esta tabela autoriza a união rotulada de `delivery` e `lifecycle`; ausência do
 
 | Diff item | Classification | Evidence / agent defense | Decision | User validation / renewed approval |
 | --- | --- | --- | --- | --- |
-| `n/a` | `n/a` | `guard ainda não executado` | `n/a` | `n/a` |
+| `none` | `not_triggered` | diff-expectation guard passed with 41/41 authorized paths and zero forbidden/unclassified paths | `no deviation` | `not_required` |
 
 ## Bounded But Elastic Guardrails
 
@@ -180,73 +209,73 @@ Esta tabela autoriza a união rotulada de `delivery` e `lifecycle`; ausência do
 
 ## Definition of Done
 
-- [ ] `DOD-01` Identidade/mandato usam UniNotas, todos os anchors usam `core_scope=uninotas` e a constituição declara os `Namespaces` verificados, sem renomear o repositório técnico.
-- [ ] `DOD-02` Constituição e decisões registram a topologia externa e a separação de fontes aprovada.
-- [ ] `DOD-03` Unifast/Prosperar são contextos fiscais explícitos e não tenants.
-- [ ] `DOD-04` Registry e módulos distinguem `current_runtime` de `target_planned`, preservam identidades no `baseline_capability_catalog` confrontado com o identity ledger independente e registram precedência, predecessor/sucessor e condição de promoção/retirada, sem declarar código futuro como implementado.
-- [ ] `DOD-05` Notas/documentos, falhas de integração e casos operacionais têm owners canônicos distintos.
-- [ ] `DOD-06` Validator e suíte rejeitam regressões de identidade, decisão/link canônico obsoleto, ownership, tenancy, privacidade, symlink, legado e publicação, além de quebra da bijeção módulo/catálogo ou ledger-origin-new/transition, ID/path/transition/membership/ledger duplicado, conflito baseline/new, alteração do conjunto baseline após genesis, binding LEDGER_GENESIS ausente/duplicada/malformada/conflitante ou substituída por descendente, descendant com genesis pending/ausente, remoção/rename/alias coordenada do seed inicial contra digest canônico ou de identidade posterior dentro da linhagem first-parent observável, histórico shallow/truncado/non-descendant/replaced ou sem genesis, capability current direta sem origem, módulo retired ainda ativo/capable ou com documento/manifest entry publicado, módulo ativo vazio ou incompatível com sua cardinalidade runtime, sequence gap, fork, ciclo, predecessor desconhecido/nulo em transferência, chain edge ou origin inválida, aresta não terminal planned, interseção `owned_capabilities ∩ planned_capabilities`, target com `owned_capabilities`, aresta terminal planned sem exatamente um owner atual/predecessor ou successor membership, planned membership órfã sem aresta terminal correspondente, capability transferida/planned ou terminal completed sem o owner exigido, dupla autoridade runtime, successor planejado duplicado e planned membership obsoleto após promoção; reescrita alternativa descendente de C0 pertence explicitamente a `RISK-HIST-01`. Fixtures positivas cobrem estado inicial, bootstrap pre-C0, checkout limpo de C0, C1 com C0 exato, ownership current estável, append de capability nova, ancestralidade completa, histórico longo com subprocess/blob-read counts limitados e tempo advisory, promoção parcial/final, tombstone retired, predecessor retirado e segundo hop.
-- [ ] `DOD-07` Os artefatos atuais pertencem ao manifesto e a validação Foundation passa sem `frozen lifecycle tree mismatch`.
-- [ ] `DOD-08` Nenhum segredo, valor real de CNPJ/identificador do provedor, payload/resposta privada ou URL capturada de documento foi persistido; CNPJ válido é coberto deterministicamente e identificador/URL contextual por regra precisa mais revisão de diff.
-- [ ] `DOD-09` O roadmap aponta para o TODO NestJS de leitura como próximo slice, sem lhe conceder autoridade antecipada.
-- [ ] `DOD-10` O arquivo/índice canônico de decisões migra para UniNotas sem links obsoletos nem reutilização semântica de IDs: D-01..D-05 preservam sua proveniência/handling e D-06..D-11 recebem somente autoridades novas.
-- [ ] `DOD-11` Antes de qualquer claim `Local-Implemented`/closeout, o `todo_closeout_guard.py` corrigido reconhece este path como `active` e o scan `--all-active --repo uninotas-foundation` encontra os TODOs ativos reais; falso `go` com `path_state=other` ou `todo_count=0` bloqueia entrega.
-- [ ] `DOD-12` O harness implementa e testa o modelo C0 ativo → candidate C1 atômico → handoff externo, sem completed intermediário, evidência prospectiva ou guard que exija seu próprio output como input; `CLOSEOUT-POS-01/02` executam a state machine e os guards Delphi reais em repositório temporário antes de C0.
-- [ ] `DOD-13` `deterministic/enumerate_change_paths.py` é o helper project-owned único para profile/lifecycle/human review: mode delivery representa o net diff de `0fe906c` até working tree bootstrap ou `--candidate-tree`; mode lifecycle representa C0..candidate C1 e emite os dois endpoints do move com `--candidate-tree`. O Delphi diff guard continua independente e obrigatório, como worktree-proxy quando não aceita tree OID.
-- [ ] `DOD-14` Closeout/recovery separam delivery scope de phase delta, exigem tree estável, consumer sets fechados por fase/base, C0_POST evidence, proof bridges, focused reviews e handoffs production/recovery tipados; activation liga remote/HEAD/commit-tree/index/worktree/untracked/scan ao C1/C1R.
-- [ ] `DOD-15` O harness publica C0/C1/C1R por durable-intent + expected-value lease + strict resume; phase evidence inclui provenance e CAS por fase, mismatch entra em local-unpublished-diverged, activation/recovery usa duas observações remotas e ausência de proteção exige aceite de `RISK-HIST-01`.
+- [x] `DOD-01` Identidade/mandato usam UniNotas, todos os anchors usam `core_scope=uninotas` e a constituição declara os `Namespaces` verificados, sem renomear o repositório técnico.
+- [x] `DOD-02` Constituição e decisões registram a projeção mista de `logs` como current, Smart Notas/error-only como target pós-promoção e writer/owner/ingestion/filter externos como desconhecidos.
+- [x] `DOD-03` Unifast/Prosperar são contextos fiscais explícitos e não tenants.
+- [x] `DOD-04` Registry e módulos distinguem `current_runtime` de `target_planned`, preservam identidades no `baseline_capability_catalog` confrontado com o identity ledger independente e registram precedência, predecessor/sucessor e condição de promoção/retirada, sem declarar código futuro como implementado.
+- [x] `DOD-05` Notas/documentos, falhas de integração e casos operacionais têm owners canônicos distintos.
+- [x] `DOD-06` Validator e suíte rejeitam regressões de identidade, decisão/link canônico obsoleto, ownership, tenancy, privacidade, symlink, legado e publicação, além de quebra da bijeção módulo/catálogo ou ledger-origin-new/transition, ID/path/transition/membership/ledger duplicado, conflito baseline/new, alteração do conjunto baseline após genesis, binding LEDGER_GENESIS ausente/duplicada/malformada/conflitante ou substituída por descendente, descendant com genesis pending/ausente, remoção/rename/alias coordenada do seed inicial contra digest canônico ou de identidade posterior dentro da linhagem first-parent observável, histórico shallow/truncado/non-descendant/replaced ou sem genesis, capability current direta sem origem, módulo retired ainda ativo/capable ou com documento/manifest entry publicado, módulo ativo vazio ou incompatível com sua cardinalidade runtime, sequence gap, fork, ciclo, predecessor desconhecido/nulo em transferência, chain edge ou origin inválida, aresta não terminal planned, interseção `owned_capabilities ∩ planned_capabilities`, target com `owned_capabilities`, aresta terminal planned sem exatamente um owner atual/predecessor ou successor membership, planned membership órfã sem aresta terminal correspondente, capability transferida/planned ou terminal completed sem o owner exigido, dupla autoridade runtime, successor planejado duplicado e planned membership obsoleto após promoção; reescrita alternativa descendente de C0 pertence explicitamente a `RISK-HIST-01`. Fixtures positivas cobrem estado inicial, bootstrap pre-C0, checkout limpo de C0, C1 com C0 exato, ownership current estável, append de capability nova, ancestralidade completa, histórico longo com subprocess/blob-read counts limitados e tempo advisory, promoção parcial/final, tombstone retired, predecessor retirado e segundo hop.
+- [x] `DOD-07` Os artefatos atuais pertencem ao manifesto e a validação Foundation passa sem `frozen lifecycle tree mismatch`.
+- [x] `DOD-08` Nenhum segredo, valor real de CNPJ/identificador do provedor, payload/resposta privada ou URL capturada de documento foi persistido; CNPJ válido é coberto deterministicamente e identificador/URL contextual por regra precisa mais revisão de diff.
+- [x] `DOD-09` O roadmap aponta para o TODO NestJS de leitura como próximo slice, sem lhe conceder autoridade antecipada.
+- [x] `DOD-10` O arquivo/índice canônico de decisões migra para UniNotas sem links obsoletos nem reutilização semântica de IDs: D-01..D-05 preservam sua proveniência/handling e D-06..D-11 recebem somente autoridades novas.
+- [x] `DOD-11` Antes de qualquer claim `Local-Implemented`/closeout, o `todo_closeout_guard.py` corrigido reconhece este path como `active` e o scan `--all-active --repo uninotas-foundation` encontra os TODOs ativos reais; falso `go` com `path_state=other` ou `todo_count=0` bloqueia entrega.
+- [x] `DOD-12` O harness implementa e testa o modelo C0 ativo → candidate C1 atômico → handoff externo, sem completed intermediário, evidência prospectiva ou guard que exija seu próprio output como input; `CLOSEOUT-POS-01/02` executam a state machine e os guards Delphi reais em repositório temporário antes de C0.
+- [x] `DOD-13` `deterministic/enumerate_change_paths.py` é o helper project-owned único para profile/lifecycle/human review: mode delivery representa o net diff de `0fe906c` até working tree bootstrap ou `--candidate-tree`; mode lifecycle representa C0..candidate C1 e emite os dois endpoints do move com `--candidate-tree`. O Delphi diff guard continua independente e obrigatório, como worktree-proxy quando não aceita tree OID.
+- [x] `DOD-14` Closeout/recovery separam delivery scope de phase delta, exigem tree estável, consumer sets fechados por fase/base, C0_POST evidence, proof bridges, focused reviews e handoffs production/recovery tipados; activation liga remote/HEAD/commit-tree/index/worktree/untracked/scan ao C1/C1R.
+- [x] `DOD-15` O harness publica C0/C1/C1R por durable-intent + lease compare-and-swap de valor exato + strict resume; phase evidence inclui provenance e CAS por fase, mismatch entra em local-unpublished-diverged, activation/recovery usa duas observações remotas e ausência de proteção exige aceite de `RISK-HIST-01`.
 
 ## Validation Steps
 
-- [ ] `VAL-01` Executar fail-first e as duas lanes: `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_registry_semantics.py uninotas-foundation/deterministic/tests/test_privacy_predicate.py` e `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_foundation.py`, registrando RED/GREEN, duração separada/agregada e scan counters de `D-T05`.
-- [ ] `VAL-02` Executar `python3 -B uninotas-foundation/deterministic/validate_foundation.py --root uninotas-foundation`.
-- [ ] `VAL-03` Executar `'/mnt/c/Program Files/Git/bin/bash.exe' -lc 'cd /c/Unifast/MonitorDeNotas && bash delphi-ai/verify_context.sh'`, runner canônico que evita a limitação CRLF do wrapper sob WSL.
-- [ ] `VAL-04` Executar da raiz do workspace `python3 delphi-ai/tools/todo_diff_expectation_guard.py uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md --repo-root uninotas-foundation`, além dos guards Delphi de autoridade, conclusão e cutover definidos neste TODO.
-- [ ] `VAL-05` Executar independentemente o Delphi diff-expectation guard, o helper `mode=delivery`, profile scope alimentado pelo helper, diff check e status/rename view; revisão humana confirma que cada path observado na modalidade aplicável possui row autorizada, sem alegar que o Delphi guard consome output externo.
-- [ ] `VAL-06` Consumir a correção Delphi standalone já publicada: executar os dois comandos de closeout deste contrato e verificar semanticamente `path_state=active` no path individual e `todo_count>=1` no scan ativo; exit code/`go` isolado não basta.
-- [ ] `VAL-07` Executar a fixture Git `CLOSEOUT-POS-02`, que prepara C0/candidate C1 com evidence já concluída e invoca closeout-diff/structure/authority/completion/closeout reais sem alterar o candidate após validação; outputs da entrega real pertencem ao handoff externo.
-- [ ] `VAL-08` Executar `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_enumerate_change_paths.py` cobrindo untracked, staged D/A, rename reconhecido como R, source criado após delivery baseline/movido antes de C1 e `--candidate-tree` independente do working tree, com expectativas distintas para delivery e lifecycle.
-- [ ] `VAL-09` Executar `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_closeout_diff.py uninotas-foundation/deterministic/tests/test_closeout_handoff.py`, cobrindo phase partitions/path bases, proof bridges, durable intent/resume, C0_POST, strict production/recovery schemas e clean scan bindings; fixtures alteram cada campo/observação e usam bare remotes reais.
-- [ ] `VAL-10` Executar fixtures History Trust/CAS para C0/C1/C1R, durable intent/resume após crash/write failure, sibling/compatible remote advance, C0_POST evidence, clean production/recovery scan binding, parent/ancestry, proteção indisponível e proibição de persistir OID próprio.
+- [x] `VAL-01` Executar fail-first e as duas lanes: `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_registry_semantics.py uninotas-foundation/deterministic/tests/test_privacy_predicate.py` e `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_foundation.py`, registrando RED/GREEN, duração separada/agregada e scan counters de `D-T05`.
+- [x] `VAL-02` Executar `python3 -B uninotas-foundation/deterministic/validate_foundation.py --root uninotas-foundation`.
+- [x] `VAL-03` Executar `'/mnt/c/Program Files/Git/bin/bash.exe' -lc 'cd /c/Unifast/MonitorDeNotas && bash delphi-ai/verify_context.sh'`, runner canônico que evita a limitação CRLF do wrapper sob WSL.
+- [x] `VAL-04` Executar da raiz do workspace `python3 delphi-ai/tools/todo_diff_expectation_guard.py uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md --repo-root uninotas-foundation`, além dos guards Delphi de autoridade, conclusão e cutover definidos neste TODO.
+- [x] `VAL-05` Executar independentemente o Delphi diff-expectation guard, o helper `mode=delivery`, profile scope alimentado pelo helper, diff check e status/rename view; revisão humana confirma que cada path observado na modalidade aplicável possui row autorizada, sem alegar que o Delphi guard consome output externo.
+- [x] `VAL-06` Consumir a correção Delphi standalone já publicada e validar contagem, records completos, `path_state=active` e conjunto exato de paths por fase: C0/C1R com transition+discovery e C1 somente com discovery; exit code/`go`, substring ou `todo_count>=1` isolados não bastam.
+- [x] `VAL-07` Executar a fixture Git `CLOSEOUT-POS-02`, que prepara C0/candidate C1 com evidence já concluída e invoca closeout-diff/structure/authority/completion/closeout reais sem alterar o candidate após validação; outputs da entrega real pertencem ao handoff externo.
+- [x] `VAL-08` Executar `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_enumerate_change_paths.py` cobrindo untracked, staged D/A, rename reconhecido como R, source criado após delivery baseline/movido antes de C1 e `--candidate-tree` independente do working tree, com expectativas distintas para delivery e lifecycle.
+- [x] `VAL-09` Executar `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_closeout_diff.py uninotas-foundation/deterministic/tests/test_closeout_handoff.py`, cobrindo phase partitions/path bases, proof bridges, durable intent/resume, C0_POST, strict production/recovery schemas e clean scan bindings; fixtures alteram cada campo/observação e usam bare remotes reais.
+- [x] `VAL-10` Executar fixtures History Trust/CAS para C0/C1/C1R, durable intent/resume após crash/write failure, sibling/compatible remote advance, C0_POST evidence, clean production/recovery scan binding, parent/ancestry, proteção indisponível e proibição de persistir OID próprio.
 
 ## Completion Evidence Matrix (Required Before Delivery Claim)
 
 | Criterion ID | Source Section | Criterion | Evidence Type | Evidence Artifact / Command | Runtime Target | Status | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `SCOPE-01` | Scope | identidade canônica | doc+test | roots/anchors | local | planned | Canonicalizar `UniNotas` como nome do produto e `uninotas` como `core_scope`, preservando `MonitorDeNotas` como nome técnico do repositório nesta entrega. |
-| `SCOPE-02` | Scope | namespaces observados | doc+test | constitution/validator | local | planned | Declarar na constituição `Namespaces: nestjs,react,vite,postgresql,prisma,docker,railway`, refletindo somente a topologia já verificada e mantendo cada capability independente. |
-| `SCOPE-03` | Scope | source ownership | doc+test | constitution/decisions | local | planned | Registrar a topologia externa confirmada e a propriedade de dados: Smart Notas para notas/documentos, PostgreSQL `logs` somente para falhas de integração. |
-| `SCOPE-04` | Scope | contextos fiscais | doc+test | scope/identity | local | planned | Registrar Unifast e Prosperar como `FiscalIssuerContext`, sem tenancy e sem agregação inicial de notas. |
-| `SCOPE-05` | Scope | Current/Target | doc+test | roots/decisions/modules | local | planned | Separar explicitamente comportamento atual e arquitetura-alvo nas raízes, decisões, roadmap e módulos afetados. |
-| `SCOPE-06` | Scope | novos owners | doc+test | module files/index | local | planned | Criar os owners canônicos planejados exatos `modules/fiscal-notes-and-documents.md`, `modules/integration-error-occurrences.md` e `modules/operational-cases.md`. |
-| `SCOPE-07` | Scope | policy/indexes | doc+test | scope policy/indexes | local | planned | Atualizar a política de scope/subscope e os índices sem inventar módulos de runtime já implementados. |
-| `SCOPE-08` | Scope | validator evolutivo | code+test | deterministic harness | local | planned | Evoluir o validador e seus testes para a nova identidade, módulos e publicação governada, mantendo proteções existentes. |
-| `SCOPE-09` | Scope | publicação privada-safe | doc+test+review | manifest/privacy guards | local | planned | Publicar no manifesto os artefatos de descoberta e este TODO sem persistir segredos, valores reais de CNPJ/identificador do provedor, payloads/respostas privadas ou URLs capturadas de documentos. |
-| `DOD-01` | Definition of Done | identidade/core scope/Namespaces | doc+test | roots/anchors + `test_identity_core_scope_and_namespaces` | local | planned | `DOD-01` Identidade/mandato usam UniNotas, todos os anchors usam `core_scope=uninotas` e a constituição declara os `Namespaces` verificados, sem renomear o repositório técnico. |
-| `DOD-02` | Definition of Done | topologia e source ownership | doc+test | constitution/decisions + `test_source_ownership_split` | local | planned | `DOD-02` Constituição e decisões registram a topologia externa e a separação de fontes aprovada. |
-| `DOD-03` | Definition of Done | fiscal context sem tenancy | doc+test | scope/identity + `test_fiscal_context_is_not_tenancy` | local | planned | `DOD-03` Unifast/Prosperar são contextos fiscais explícitos e não tenants. |
-| `DOD-04` | Definition of Done | `DOD-04` Registry e módulos distinguem `current_runtime` de `target_planned`, preservam identidades no `baseline_capability_catalog` confrontado com o identity ledger independente e registram precedência, predecessor/sucessor e condição de promoção/retirada, sem declarar código futuro como implementado. | doc+test | registry/modules + casos `CAP-*` + full-tree integration test | local | planned | multi-hop e catálogo; sem runtime externo |
-| `DOD-05` | Definition of Done | três owners target distintos | doc+test | module index + `test_target_owner_boundaries` | local | planned | `DOD-05` Notas/documentos, falhas de integração e casos operacionais têm owners canônicos distintos. |
-| `DOD-06` | Definition of Done | `DOD-06` Validator e suíte rejeitam regressões de identidade, decisão/link canônico obsoleto, ownership, tenancy, privacidade, symlink, legado e publicação, além de quebra da bijeção módulo/catálogo ou ledger-origin-new/transition, ID/path/transition/membership/ledger duplicado, conflito baseline/new, alteração do conjunto baseline após genesis, binding LEDGER_GENESIS ausente/duplicada/malformada/conflitante ou substituída por descendente, descendant com genesis pending/ausente, remoção/rename/alias coordenada do seed inicial contra digest canônico ou de identidade posterior dentro da linhagem first-parent observável, histórico shallow/truncado/non-descendant/replaced ou sem genesis, capability current direta sem origem, módulo retired ainda ativo/capable ou com documento/manifest entry publicado, módulo ativo vazio ou incompatível com sua cardinalidade runtime, sequence gap, fork, ciclo, predecessor desconhecido/nulo em transferência, chain edge ou origin inválida, aresta não terminal planned, interseção `owned_capabilities ∩ planned_capabilities`, target com `owned_capabilities`, aresta terminal planned sem exatamente um owner atual/predecessor ou successor membership, planned membership órfã sem aresta terminal correspondente, capability transferida/planned ou terminal completed sem o owner exigido, dupla autoridade runtime, successor planejado duplicado e planned membership obsoleto após promoção; reescrita alternativa descendente de C0 pertence explicitamente a `RISK-HIST-01`. Fixtures positivas cobrem estado inicial, bootstrap pre-C0, checkout limpo de C0, C1 com C0 exato, ownership current estável, append de capability nova, ancestralidade completa, histórico longo com subprocess/blob-read counts limitados e tempo advisory, promoção parcial/final, tombstone retired, predecessor retirado e segundo hop. | test | casos `CAP-*`/`GUARD-*` mutation + full-tree integration test | local | planned | diagnósticos específicos; nenhum placeholder em evidence/notes |
-| `DOD-07` | Definition of Done | publicação sem frozen-tree mismatch | test | manifest + Foundation full-tree integration test | local | planned | `DOD-07` Os artefatos atuais pertencem ao manifesto e a validação Foundation passa sem `frozen lifecycle tree mismatch`. |
-| `DOD-08` | Definition of Done | privacidade e nenhum segredo/PII | test+review | `GUARD-PRIV-*` mutation integration test + `REVIEW-PRIV-01` | local | planned | `DOD-08` Nenhum segredo, valor real de CNPJ/identificador do provedor, payload/resposta privada ou URL capturada de documento foi persistido; CNPJ válido é coberto deterministicamente e identificador/URL contextual por regra precisa mais revisão de diff. |
-| `DOD-09` | Definition of Done | sequência do roadmap | doc+review | `system_roadmap.md` + aderência | n/a | planned | `DOD-09` O roadmap aponta para o TODO NestJS de leitura como próximo slice, sem lhe conceder autoridade antecipada. |
-| `DOD-10` | Definition of Done | migração estável de decisões | doc+test | decision map/index + test | local | planned | `DOD-10` O arquivo/índice canônico de decisões migra para UniNotas sem links obsoletos nem reutilização semântica de IDs: D-01..D-05 preservam sua proveniência/handling e D-06..D-11 recebem somente autoridades novas. |
-| `DOD-11` | Definition of Done | closeout guard standalone | external guard+regression | Delphi fix + semantic probes | local | planned | `DOD-11` Antes de qualquer claim `Local-Implemented`/closeout, o `todo_closeout_guard.py` corrigido reconhece este path como `active` e o scan `--all-active --repo uninotas-foundation` encontra os TODOs ativos reais; falso `go` com `path_state=other` ou `todo_count=0` bloqueia entrega. |
-| `DOD-12` | Definition of Done | state machine sem self-reference | guard+test+git | `CLOSEOUT-POS-01/02` | local | planned | `DOD-12` O harness implementa e testa o modelo C0 ativo → candidate C1 atômico → handoff externo, sem completed intermediário, evidência prospectiva ou guard que exija seu próprio output como input; `CLOSEOUT-POS-01/02` executam a state machine e os guards Delphi reais em repositório temporário antes de C0. |
-| `DOD-13` | Definition of Done | helper delivery/lifecycle | tool+test | helper + `CHANGESET-*` | local | planned | `DOD-13` `deterministic/enumerate_change_paths.py` é o helper project-owned único para profile/lifecycle/human review: mode delivery representa o net diff de `0fe906c` até working tree bootstrap ou `--candidate-tree`; mode lifecycle representa C0..candidate C1 e emite os dois endpoints do move com `--candidate-tree`. O Delphi diff guard continua independente e obrigatório, como worktree-proxy quando não aceita tree OID. |
-| `DOD-14` | Definition of Done | candidate-tree/closeout enforcement | guard+test | closeout + tree-binding suite | local | planned | `DOD-14` Closeout/recovery separam delivery scope de phase delta, exigem tree estável, consumer sets fechados por fase/base, C0_POST evidence, proof bridges, focused reviews e handoffs production/recovery tipados; activation liga remote/HEAD/commit-tree/index/worktree/untracked/scan ao C1/C1R. |
-| `DOD-15` | Definition of Done | History Trust sem autorreferência | git+test | History Trust fixtures | local | planned | `DOD-15` O harness publica C0/C1/C1R por durable-intent + expected-value lease + strict resume; phase evidence inclui provenance e CAS por fase, mismatch entra em local-unpublished-diverged, activation/recovery usa duas observações remotas e ausência de proteção exige aceite de `RISK-HIST-01`. |
-| `VAL-01` | Validation Steps | suíte determinística | test | comandos unittest exatos | local | planned | `VAL-01` Executar fail-first e as duas lanes: `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_registry_semantics.py uninotas-foundation/deterministic/tests/test_privacy_predicate.py` e `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_foundation.py`, registrando RED/GREEN, duração separada/agregada e scan counters de `D-T05`. |
-| `VAL-02` | Validation Steps | Foundation validator | test | validator command | local | planned | `VAL-02` Executar `python3 -B uninotas-foundation/deterministic/validate_foundation.py --root uninotas-foundation`. |
-| `VAL-03` | Validation Steps | PACED readiness | environment | Git Bash command | local | planned | `VAL-03` Executar `'/mnt/c/Program Files/Git/bin/bash.exe' -lc 'cd /c/Unifast/MonitorDeNotas && bash delphi-ai/verify_context.sh'`, runner canônico que evita a limitação CRLF do wrapper sob WSL. |
-| `VAL-04` | Validation Steps | guards authority/delivery/cutover | guard | Commands section | local | planned | `VAL-04` Executar da raiz do workspace `python3 delphi-ai/tools/todo_diff_expectation_guard.py uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md --repo-root uninotas-foundation`, além dos guards Delphi de autoridade, conclusão e cutover definidos neste TODO. |
-| `VAL-05` | Validation Steps | diff baseline-aware | review | helper/profile/diff/status commands | local | planned | `VAL-05` Executar independentemente o Delphi diff-expectation guard, o helper `mode=delivery`, profile scope alimentado pelo helper, diff check e status/rename view; revisão humana confirma que cada path observado na modalidade aplicável possui row autorizada, sem alegar que o Delphi guard consome output externo. |
-| `VAL-06` | Validation Steps | closeout sem false-go | guard | individual + `--all-active` | local | planned | `VAL-06` Consumir a correção Delphi standalone já publicada: executar os dois comandos de closeout deste contrato e verificar semanticamente `path_state=active` no path individual e `todo_count>=1` no scan ativo; exit code/`go` isolado não basta. |
-| `VAL-07` | Validation Steps | real-guard fixture | test+guard | `CLOSEOUT-POS-02` integration test | local | planned | `VAL-07` Executar a fixture Git `CLOSEOUT-POS-02`, que prepara C0/candidate C1 com evidence já concluída e invoca closeout-diff/structure/authority/completion/closeout reais sem alterar o candidate após validação; outputs da entrega real pertencem ao handoff externo. |
-| `VAL-08` | Validation Steps | path-set endpoints/untracked | test | `test_enumerate_change_paths.py` | local | planned | `VAL-08` Executar `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_enumerate_change_paths.py` cobrindo untracked, staged D/A, rename reconhecido como R, source criado após delivery baseline/movido antes de C1 e `--candidate-tree` independente do working tree, com expectativas distintas para delivery e lifecycle. |
-| `VAL-09` | Validation Steps | closeout/recovery/tree binding | test | closeout diff + handoff integration tests | local | planned | `VAL-09` Executar `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_closeout_diff.py uninotas-foundation/deterministic/tests/test_closeout_handoff.py`, cobrindo phase partitions/path bases, proof bridges, durable intent/resume, C0_POST, strict production/recovery schemas e clean scan bindings; fixtures alteram cada campo/observação e usam bare remotes reais. |
-| `VAL-10` | Validation Steps | temporal History Trust fixtures | git+test | temp Git fixtures | local | planned | `VAL-10` Executar fixtures History Trust/CAS para C0/C1/C1R, durable intent/resume após crash/write failure, sibling/compatible remote advance, C0_POST evidence, clean production/recovery scan binding, parent/ancestry, proteção indisponível e proibição de persistir OID próprio. |
+| `SCOPE-01` | Scope | identidade canônica | doc+test | roots/anchors | local | passed | Canonicalizar `UniNotas` como nome do produto e `uninotas` como `core_scope`, preservando `MonitorDeNotas` como nome técnico do repositório nesta entrega. |
+| `SCOPE-02` | Scope | namespaces observados | doc+test | constitution/validator | local | passed | Declarar na constituição `Namespaces: nestjs,react,vite,postgresql,prisma,docker,railway`, refletindo somente a topologia já verificada e mantendo cada capability independente. |
+| `SCOPE-03` | Scope | source ownership | doc+test | constitution/decisions | local | passed | Registrar a topologia externa confirmada e separar as duas verdades: current runtime mantém a projeção mista read-only de `logs`; no target após promoção, Smart Notas governa notas/documentos e `logs` fica somente para falhas de integração. |
+| `SCOPE-04` | Scope | contextos fiscais | doc+test | scope/identity | local | passed | Registrar Unifast e Prosperar como `FiscalIssuerContext`, sem tenancy e sem agregação inicial de notas. |
+| `SCOPE-05` | Scope | Current/Target | doc+test | roots/decisions/modules | local | passed | Separar explicitamente comportamento atual e arquitetura-alvo nas raízes, decisões, roadmap e módulos afetados. |
+| `SCOPE-06` | Scope | novos owners | doc+test | module files/index | local | passed | Criar os owners canônicos planejados exatos `modules/fiscal-notes-and-documents.md`, `modules/integration-error-occurrences.md` e `modules/operational-cases.md`. |
+| `SCOPE-07` | Scope | policy/indexes | doc+test | scope policy/indexes | local | passed | Atualizar a política de scope/subscope e os índices sem inventar módulos de runtime já implementados. |
+| `SCOPE-08` | Scope | validator evolutivo | code+test | deterministic harness | local | passed | Evoluir o validador e seus testes para a nova identidade, módulos e publicação governada, mantendo proteções existentes. |
+| `SCOPE-09` | Scope | publicação privada-safe | doc+test+review | manifest/privacy guards | local | passed | Publicar no manifesto os artefatos de descoberta e este TODO sem persistir segredos, valores reais de CNPJ/identificador do provedor, payloads/respostas privadas ou URLs capturadas de documentos. |
+| `DOD-01` | Definition of Done | identidade/core scope/Namespaces | doc+test | roots/anchors + `FoundationTreeContractTests.test_registry_composes_with_module_files` (`canonical identity mismatch`) | local | passed | `DOD-01` Identidade/mandato usam UniNotas, todos os anchors usam `core_scope=uninotas` e a constituição declara os `Namespaces` verificados, sem renomear o repositório técnico. |
+| `DOD-02` | Definition of Done | topologia e source ownership | doc+test | constitution/decisions + `FoundationTreeContractTests.test_registry_composes_with_module_files` (`canonical ownership mismatch`; `retired Routerfy log ownership claim`) | local | passed | `DOD-02` Constituição e decisões registram a projeção mista de `logs` como current, Smart Notas/error-only como target pós-promoção e writer/owner/ingestion/filter externos como desconhecidos. Integration test `n/a` por desvio structure-only aprovado em 2026-09-26: somente contratos/validadores da Foundation mudam; nenhum runtime ou fluxo observável de usuário pode mudar. |
+| `DOD-03` | Definition of Done | fiscal context sem tenancy | doc+test | scope/identity + `FoundationTreeContractTests.test_registry_composes_with_module_files` (`canonical fiscal context mismatch`) | local | passed | `DOD-03` Unifast/Prosperar são contextos fiscais explícitos e não tenants. |
+| `DOD-04` | Definition of Done | `DOD-04` Registry e módulos distinguem `current_runtime` de `target_planned`, preservam identidades no `baseline_capability_catalog` confrontado com o identity ledger independente e registram precedência, predecessor/sucessor e condição de promoção/retirada, sem declarar código futuro como implementado. | doc+test | registry/modules + casos `CAP-*` + full-tree integration test | local | passed | multi-hop e catálogo; sem runtime externo |
+| `DOD-05` | Definition of Done | três owners target distintos | doc+test | module index + `FoundationTreeContractTests.test_registry_composes_with_module_files` (`canonical target owner mismatch`) | local | passed | `DOD-05` Notas/documentos, falhas de integração e casos operacionais têm owners canônicos distintos. |
+| `DOD-06` | Definition of Done | `DOD-06` Validator e suíte rejeitam regressões de identidade, decisão/link canônico obsoleto, ownership, tenancy, privacidade, symlink, legado e publicação, além de quebra da bijeção módulo/catálogo ou ledger-origin-new/transition, ID/path/transition/membership/ledger duplicado, conflito baseline/new, alteração do conjunto baseline após genesis, binding LEDGER_GENESIS ausente/duplicada/malformada/conflitante ou substituída por descendente, descendant com genesis pending/ausente, remoção/rename/alias coordenada do seed inicial contra digest canônico ou de identidade posterior dentro da linhagem first-parent observável, histórico shallow/truncado/non-descendant/replaced ou sem genesis, capability current direta sem origem, módulo retired ainda ativo/capable ou com documento/manifest entry publicado, módulo ativo vazio ou incompatível com sua cardinalidade runtime, sequence gap, fork, ciclo, predecessor desconhecido/nulo em transferência, chain edge ou origin inválida, aresta não terminal planned, interseção `owned_capabilities ∩ planned_capabilities`, target com `owned_capabilities`, aresta terminal planned sem exatamente um owner atual/predecessor ou successor membership, planned membership órfã sem aresta terminal correspondente, capability transferida/planned ou terminal completed sem o owner exigido, dupla autoridade runtime, successor planejado duplicado e planned membership obsoleto após promoção; reescrita alternativa descendente de C0 pertence explicitamente a `RISK-HIST-01`. Fixtures positivas cobrem estado inicial, bootstrap pre-C0, checkout limpo de C0, C1 com C0 exato, ownership current estável, append de capability nova, ancestralidade completa, histórico longo com subprocess/blob-read counts limitados e tempo advisory, promoção parcial/final, tombstone retired, predecessor retirado e segundo hop. | test | casos `CAP-*`/`GUARD-*` mutation + full-tree integration test | local | passed | diagnósticos específicos; nenhum placeholder em evidence/notes |
+| `DOD-07` | Definition of Done | publicação sem frozen-tree mismatch | test | manifest + Foundation full-tree integration test | local | passed | `DOD-07` Os artefatos atuais pertencem ao manifesto e a validação Foundation passa sem `frozen lifecycle tree mismatch`. |
+| `DOD-08` | Definition of Done | privacidade e nenhum segredo/PII | test+review | `GUARD-PRIV-*` mutation integration test + `REVIEW-PRIV-01` | local | passed | `DOD-08` Nenhum segredo, valor real de CNPJ/identificador do provedor, payload/resposta privada ou URL capturada de documento foi persistido; CNPJ válido é coberto deterministicamente e identificador/URL contextual por regra precisa mais revisão de diff. |
+| `DOD-09` | Definition of Done | sequência do roadmap | doc+review | `system_roadmap.md` + aderência | n/a | passed | `DOD-09` O roadmap aponta para o TODO NestJS de leitura como próximo slice, sem lhe conceder autoridade antecipada. |
+| `DOD-10` | Definition of Done | migração estável de decisões | doc+test | decision map/index + test | local | passed | `DOD-10` O arquivo/índice canônico de decisões migra para UniNotas sem links obsoletos nem reutilização semântica de IDs: D-01..D-05 preservam sua proveniência/handling e D-06..D-11 recebem somente autoridades novas. |
+| `DOD-11` | Definition of Done | closeout guard standalone | external guard+regression | Delphi fix + semantic probes | local | passed | `DOD-11` Antes de qualquer claim `Local-Implemented`/closeout, o `todo_closeout_guard.py` corrigido reconhece este path como `active` e o scan `--all-active --repo uninotas-foundation` encontra os TODOs ativos reais; falso `go` com `path_state=other` ou `todo_count=0` bloqueia entrega. |
+| `DOD-12` | Definition of Done | state machine sem self-reference | guard+test+git | `CLOSEOUT-POS-01/02` | local | passed | `DOD-12` O harness implementa e testa o modelo C0 ativo → candidate C1 atômico → handoff externo, sem completed intermediário, evidência prospectiva ou guard que exija seu próprio output como input; `CLOSEOUT-POS-01/02` executam a state machine e os guards Delphi reais em repositório temporário antes de C0. |
+| `DOD-13` | Definition of Done | helper delivery/lifecycle | tool+test | helper + `CHANGESET-*` | local | passed | `DOD-13` `deterministic/enumerate_change_paths.py` é o helper project-owned único para profile/lifecycle/human review: mode delivery representa o net diff de `0fe906c` até working tree bootstrap ou `--candidate-tree`; mode lifecycle representa C0..candidate C1 e emite os dois endpoints do move com `--candidate-tree`. O Delphi diff guard continua independente e obrigatório, como worktree-proxy quando não aceita tree OID. |
+| `DOD-14` | Definition of Done | candidate-tree/closeout enforcement | guard+test | closeout + tree-binding suite | local | passed | `DOD-14` Closeout/recovery separam delivery scope de phase delta, exigem tree estável, consumer sets fechados por fase/base, C0_POST evidence, proof bridges, focused reviews e handoffs production/recovery tipados; activation liga remote/HEAD/commit-tree/index/worktree/untracked/scan ao C1/C1R. |
+| `DOD-15` | Definition of Done | History Trust sem autorreferência | git+test | `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_closeout_handoff.py` | local | passed | `DOD-15` O harness publica C0/C1/C1R por durable-intent + lease compare-and-swap de valor exato + strict resume; phase evidence inclui provenance e CAS por fase, mismatch entra em local-unpublished-diverged, activation/recovery usa duas observações remotas e ausência de proteção exige aceite de `RISK-HIST-01`. |
+| `VAL-01` | Validation Steps | suíte determinística | test | comandos unittest exatos | local | passed | `VAL-01` Executar fail-first e as duas lanes: `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_registry_semantics.py uninotas-foundation/deterministic/tests/test_privacy_predicate.py` e `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_foundation.py`, registrando RED/GREEN, duração separada/agregada e scan counters de `D-T05`. |
+| `VAL-02` | Validation Steps | Foundation validator | test | validator command | local | passed | `VAL-02` Executar `python3 -B uninotas-foundation/deterministic/validate_foundation.py --root uninotas-foundation`. |
+| `VAL-03` | Validation Steps | PACED readiness | environment | Git Bash command | local | passed | `VAL-03` Executar `'/mnt/c/Program Files/Git/bin/bash.exe' -lc 'cd /c/Unifast/MonitorDeNotas && bash delphi-ai/verify_context.sh'`, runner canônico que evita a limitação CRLF do wrapper sob WSL. |
+| `VAL-04` | Validation Steps | guards authority/delivery/cutover | guard | diff-expectation + authority/completion through exact-tree C0 integration | local | passed | `VAL-04` Executar da raiz do workspace `python3 delphi-ai/tools/todo_diff_expectation_guard.py uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md --repo-root uninotas-foundation`, além dos guards Delphi de autoridade, conclusão e cutover definidos neste TODO. Evidence: diff expectation observed 41/41 authorized paths and zero forbidden/unclassified; the exact-tree positive C0 fixture invokes the canonical Delphi authority/completion guards and fails closed on any non-go result. |
+| `VAL-05` | Validation Steps | diff baseline-aware | review | helper/profile/diff/status commands | local | passed | `VAL-05` Executar independentemente o Delphi diff-expectation guard, o helper `mode=delivery`, profile scope alimentado pelo helper, diff check e status/rename view; revisão humana confirma que cada path observado na modalidade aplicável possui row autorizada, sem alegar que o Delphi guard consome output externo. Evidência: diff guard 41/41, helper delivery 41 paths, diff check limpo; `profile_scope_check` retornou `review required` somente para paths determinísticos/decisões reconciliados pelo Handoff Log e por rows exatas do Diff Expectation Contract. |
+| `VAL-06` | Validation Steps | closeout sem false-go | integration-test+guard | Python integration test em repositórios Git temporários: `test_closeout_neg_active_scan_requires_exact_count_and_exact_path_set_in_all_phases` + guard individual/`--all-active` | local | passed | `VAL-06` Consumir a correção Delphi standalone já publicada e validar contagem, records completos, `path_state=active` e conjunto exato de paths por fase: C0/C1R com transition+discovery e C1 somente com discovery; exit code/`go`, substring ou `todo_count>=1` isolados não bastam. Evidência: integration test negativa rejeita contagens 20/10 e path extra/substituído em C0/C1/C1R. |
+| `VAL-07` | Validation Steps | real-guard fixture | test+guard | `CLOSEOUT-POS-02` integration test | local | passed | `VAL-07` Executar a fixture Git `CLOSEOUT-POS-02`, que prepara C0/candidate C1 com evidence já concluída e invoca closeout-diff/structure/authority/completion/closeout reais sem alterar o candidate após validação; outputs da entrega real pertencem ao handoff externo. |
+| `VAL-08` | Validation Steps | path-set endpoints/untracked | test | `test_enumerate_change_paths.py` | local | passed | `VAL-08` Executar `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_enumerate_change_paths.py` cobrindo untracked, staged D/A, rename reconhecido como R, source criado após delivery baseline/movido antes de C1 e `--candidate-tree` independente do working tree, com expectativas distintas para delivery e lifecycle. |
+| `VAL-09` | Validation Steps | closeout/recovery/tree binding | test | integration test suite: `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_closeout_diff.py uninotas-foundation/deterministic/tests/test_closeout_handoff.py` | local | passed | `VAL-09` Executar `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_closeout_diff.py uninotas-foundation/deterministic/tests/test_closeout_handoff.py`, cobrindo phase partitions/path bases, proof bridges, durable intent/resume, C0_POST, strict production/recovery schemas e clean scan bindings; fixtures alteram cada campo/observação e usam bare remotes reais. |
+| `VAL-10` | Validation Steps | temporal History Trust fixtures | git+test | temp Git fixtures | local | passed | `VAL-10` Executar fixtures History Trust/CAS para C0/C1/C1R, durable intent/resume após crash/write failure, sibling/compatible remote advance, C0_POST evidence, clean production/recovery scan binding, parent/ancestry, proteção indisponível e proibição de persistir OID próprio. |
 
 ### DOD-06 Validator Case Matrix
 
@@ -309,20 +338,26 @@ Os nomes abaixo são o contrato mínimo de fixtures/builders e testes. Cada test
 | `CAP-NEG-40` | negative | `new_identity_transition_capability_mismatch` | `origin new identity record capability does not match transition` |
 | `CAP-NEG-41` | negative | `duplicate_identity_ledger_capability` | `capability identity ledger id is not unique` |
 | `CAP-NEG-42` | negative | `baseline_and_new_origin_conflict` | `capability identity cannot have both baseline and new origins` |
-| `CAP-NEG-43` | negative+git-history | `recorded_genesis_replaced_by_later_descendant` | `recorded ledger genesis is not the earliest first-parent ledger introduction commit` |
+| `CAP-NEG-43` | negative+genesis-separation | `ledger_genesis_mirror_present` | `capability identity ledger must not publish genesis`; o OID pertence somente ao lifecycle TODO |
 | `CAP-NEG-44` | negative+git-history | `post_genesis_identity_reclassified_as_baseline` | `post-genesis capability identities must use origin new`; cobre append coordenado de ledger baseline + baseline catalog + owner current |
 | `CAP-POS-11` | positive+git-history+performance | `long_unrelated_history_with_sparse_ledger_changes` | 200 commits não relacionados e 5 mudanças do ledger visitam somente as 6 versões relevantes; Git calls `<= versions + 2` |
 | `CAP-POS-12` | positive+git-history | `pre_c0_uncommitted_bootstrap_candidate` | genesis pending é aceito somente com active TODO, ledger seed canônico exato, HEAD sem ledger e candidate prestes a introduzi-lo |
 | `CAP-POS-13` | positive+git-history | `clean_published_c0_bootstrap` | checkout limpo em HEAD=C0, primeiro commit que introduziu o ledger, aceita pending somente com seed canônico exato |
 | `CAP-POS-14` | positive+git-history | `c1_records_exact_c0` | primeiro descendant exige e aceita LEDGER_GENESIS igual ao primeiro commit first-parent que introduziu o ledger |
+| `CAP-NEG-55` | negative+git-history+full-tree | `c1_records_descendant_instead_of_c0` | `recorded LEDGER_GENESIS differs from earliest first-parent ledger introduction commit` no lifecycle completed real |
+| `CAP-NEG-56` | negative+git-history+full-tree | `completed_c1_keeps_pending_genesis` | `ledger genesis must be recorded after the clean C0 bootstrap commit` |
+| `CAP-NEG-57` | negative+git-history+full-tree | `completed_c1_genesis_missing_malformed_or_duplicate` | diagnóstico fechado para cardinalidade ou lowercase 40-hex inválido no campo canônico |
 | `CAP-POS-15` | positive+canonicalization | `ledger_formatting_and_key_order_change` | whitespace/key-order JSON diferentes produzem a mesma representação/digest canônicos |
-| `CAP-NEG-45` | negative+git-history | `descendant_with_pending_or_missing_genesis` | `ledger genesis must be recorded after the clean C0 bootstrap commit` |
+| `CAP-POS-16` | positive+registry | `new_origin_completed_with_sole_successor_owner` | capability `origin=new` concluída pertence ao único successor `current_runtime`, sem planned membership residual |
+| `CAP-POS-17` | positive+catalog-history | `catalog_backed_retired_predecessor_and_complete_second_hop` | cadeia A→B→C completa permanece válida com A/B somente como tombstones retired no `module_catalog` |
+| `CAP-NEG-54` | negative+catalog-history | `transition_predecessor_missing_from_catalog` | `transition references unknown module` para predecessor/successor jamais catalogado |
+| `CAP-NEG-45` | negative+ledger-schema | `ledger_genesis_member_present` | `capability identity ledger schema is invalid`; o JSON aceita somente `schema` e `identities` |
 | `CAP-NEG-46` | negative+canonicalization | `seed_semantic_field_mutation` | `frozen initial capability identity digest mismatch` para qualquer campo semântico alterado |
-| `CAP-NEG-47` | negative+genesis-binding | `ledger_genesis_field_missing` | `canonical LEDGER_GENESIS field is missing` |
-| `CAP-NEG-48` | negative+genesis-binding | `ledger_genesis_field_duplicate` | `canonical LEDGER_GENESIS field must occur exactly once` |
-| `CAP-NEG-49` | negative+genesis-binding | `ledger_genesis_oid_malformed` | `canonical LEDGER_GENESIS must be pending bootstrap or lowercase 40-hex OID` |
+| `CAP-NEG-47` | negative+ledger-schema | `ledger_schema_member_missing` | `capability identity ledger schema is invalid` |
+| `CAP-NEG-48` | negative+genesis-separation | `ledger_genesis_member_duplicate` | `capability identity ledger must not publish genesis` |
+| `CAP-NEG-49` | negative+ledger-schema | `ledger_schema_version_invalid` | `capability identity ledger schema is invalid` |
 | `CAP-NEG-50` | negative+genesis-binding | `active_and_completed_todo_both_publish_genesis` | `exactly one canonical lifecycle TODO path may publish LEDGER_GENESIS` |
-| `CAP-NEG-51` | negative+genesis-binding | `ledger_genesis_descendant_substitution` | `recorded LEDGER_GENESIS differs from earliest first-parent ledger introduction commit` |
+| `CAP-NEG-51` | negative+genesis-separation | `ledger_genesis_descendant_mirror` | `capability identity ledger must not publish genesis`; substituição do lifecycle OID continua validada pelo full-tree history binding |
 | `GUARD-ID-01` | negative | `legacy_identity_or_decision_link` | identidade/índice canônico legado é rejeitado |
 | `GUARD-TENANCY-01` | negative | `fiscal_context_as_tenant` | contexto fiscal tratado como tenancy é rejeitado |
 | `GUARD-PUB-01` | negative | `unmanifested_or_missing_path` | árvore diverge do manifesto |
@@ -367,10 +402,12 @@ O protocolo obrigatório é:
 | --- | --- | --- |
 | `tree-native` | `validate_closeout_diff.py`, `enumerate_change_paths.py` e qualquer helper que aceite tree OID | recebe `--candidate-tree <CANDIDATE_TREE_OID>` e lê/diffa essa árvore explicitamente |
 | `worktree-proxy` | Foundation validator, Delphi TODO guards, profile scope, diff/status views e suites que não aceitam tree OID | single-code-writer exclusivo; exigir index/worktree equality, zero untracked e `git write-tree==CANDIDATE_TREE_OID` imediatamente antes e depois de cada comando; mismatch descarta o output e reinicia o batch |
-| `implementation-human-review@C0` | `REVIEW-PRIV-01`, delivery triple-review, security, architecture adherence, performance/concurrency, test-quality e final review | executar após capture de C0; attestation externa `{phase:C0, candidate_tree_oid, exact_path_set, reviewer_or_session, outcome}` permanece válida somente para conteúdo de implementação comprovadamente byte-frozen pelo proof bridge |
-| `closeout-human-review@C1/C1R` | `REVIEW-C1-01` cutover integrity e `REVIEW-C1R-01` recovery integrity | executar após capture do candidate correspondente; conferir exact five-path delta, cells/links/failure tuple allowlisted, proof-bridge output e ausência de conteúdo de implementação novo; OID change exige rerun |
+| `implementation-human-review@C0` | `REVIEW-PRIV-01`, delivery triple-review, security, architecture adherence, performance/concurrency, test-quality e final review | executar após capture de C0; attestation externa `{consumer_id, phase:C0, candidate_tree_oid, exact_path_set, reviewer_or_session, outcome:no_material_findings, scope:implementation_content}` permanece válida somente para conteúdo de implementação comprovadamente byte-frozen pelo proof bridge |
+| `closeout-human-review@C1/C1R` | `REVIEW-C1-01` cutover integrity e `REVIEW-C1R-01` recovery integrity | executar após capture do candidate correspondente; attestation externa `{consumer_id, phase:C1|C1R, candidate_tree_oid, exact_path_set, reviewer_or_session, outcome:no_material_findings}` confere exact five-path delta, cells/links/failure tuple allowlisted, proof-bridge output e ausência de conteúdo de implementação novo; OID change exige rerun |
 
 O proof bridge obrigatório é `validate_closeout_diff.py --base <C0|FAILED_C1> --candidate-tree <OID>`: ele prova deterministicamente que C1/C1R contém somente a transformação fechada já testada, registra base commit/tree, candidate tree, exact delta e resultado, e autoriza carregar apenas attestations C0 marcadas `scope=implementation_content`. Ele não carrega cutover/recovery review. `REVIEW-C1-01` é obrigatório antes do commit C1 e `REVIEW-C1R-01` antes do C1R. Qualquer byte fora do bridge, attestation C0 sem binding ou focused review ligado a outro OID é no-go. Nenhuma attestation dependente do OID é persistida no próprio candidate.
+
+Essas attestations são metadados de integridade/freshness dentro da fronteira operacional aprovada, não credenciais nem assinaturas criptográficas. O operador humano autenticado do release é o trust anchor que fornece `reviewer_or_session`; um ator com escrita arbitrária no checkout e capacidade de se passar por esse operador está fora deste threat model. O validador fecha schema, consumer set, fase, tree, path set, outcome e escopo, mas não faz claim de autenticação criptográfica. Assinatura externa exigiria autoridade e infraestrutura próprias e deve ser tratada em TODO separado se esse threat model mudar.
 
 | Case ID | Fixture | Expected assertion |
 | --- | --- | --- |
@@ -406,8 +443,8 @@ Se o remoto avançar depois do commit local de C0 ou C1 e antes/durante o CAS pu
 
 Interfaces fechadas:
 
-- `promote --phase c0|c1|c1r --repo <repo> --expected-remote <OID> --new-commit <OID> --candidate-tree <OID> --consumer-bindings <ignored-json> [--base-evidence <ignored-json>] [--c0-post-evidence <ignored-json>] [--proof-bridge <ignored-json>] --journal <ignored-json> --output <ignored-json>`: revalida tree/parent/fast-forward/phase consumer set/remote, persiste+sincroniza intent journal `prepared` antes do push, executa o lease e emite phase evidence após fresh post-push checks. C1 exige C0 promotion + C0 post-verify evidence.
-- `resume --phase c0|c1|c1r --repo <repo> --journal <ignored-json> --output <ignored-json>`: aceita somente journal strict `prepared`, revalida todos inputs/hashes/tree/parent/bindings; se remote ainda é expected, repete o CAS; se remote é exatamente new commit, adota somente após prova parent/tree/fast-forward e registra `promotion_observation:"resumed_remote_already_at_new_commit"` com `lease_result:"not_observed_after_interruption"`; qualquer terceiro OID é no-go.
+- `promote --phase c0|c1|c1r --repo <repo> --expected-remote <OID> --new-commit <OID> --candidate-tree <OID> --consumer-bindings <ignored-json> [--delphi-root <canonical-path>] [--base-evidence <ignored-json>] [--c0-post-evidence <ignored-json>] [--implementation-reviews <ignored-json>] [--focused-review <ignored-json>] [--failure-tuple <ignored-json>] --journal <ignored-json> --output <ignored-json>`: revalida tree/parent/fast-forward/phase consumer set/remote, persiste+sincroniza intent journal `prepared` antes do push, executa o lease e emite phase evidence após fresh post-push checks. Em C0, o entry point resolve o sibling Delphi canônico (um override só existe para remote local temporário de teste), exige o baseline aprovado `0fe906c1e496a1d38f1603cf188c224711011c32`, executa diff-expectation, authority `--require-delivery-gates` e completion `--require-delivery`, exige `go`, verifica que a tree permaneceu imutável e grava command/result hashes em `live_gate_evidence`; bindings declarativos nunca substituem esses resultados. C1/C1R recebem somente os inputs de review, executam internamente o `validate_closeout_diff.py` canônico e persistem o proof bridge resultante; C1 exige C0 promotion + C0 post-verify evidence e C1R exige o failure tuple fechado idêntico ao candidate e ao reverse bridge.
+- `resume --phase c0|c1|c1r --repo <repo> --journal <ignored-json> --output <ignored-json>`: aceita somente journal strict `prepared` e reexecuta os três gates canônicos em C0 ou a prova canônica de closeout/recovery em C1/C1R a partir dos inputs persistidos; evidência live ou proof bridge adulterado nunca é confiado. Depois revalida tree/parent/bindings; se remote ainda é expected, repete o CAS; se remote é exatamente new commit, adota somente após prova parent/tree/fast-forward e registra `promotion_observation:"resumed_remote_already_at_new_commit"` com `lease_result:"not_observed_after_interruption"`; qualquer terceiro OID é no-go.
 - `verify --phase c0 --repo <repo> --phase-evidence <json> --delphi-root <path> --output <ignored-json>`: exige remote/HEAD/tracking/tree/index/worktree/untracked todos coerentes com C0, executa Foundation validator, active-path closeout e exact two-active-TODO scan, revalida a árvore e emite C0 post-verify evidence.
 - `activate --phase c1 --repo <repo> --c0-evidence <json> --c0-post-evidence <json> --c1-evidence <json> --delphi-root <path> --output <ignored-json>`: valida schemas/phase sets, exige HEAD/commit-tree/index/tracked worktree/untracked coerentes com C1 imediatamente antes/depois do scan, observa remote C1, executa Delphi scan com `scanned_head_oid=C1`, reobserva remote e emite production somente se tudo permanecer coerente.
 - `activate --phase c1r --repo <repo> --c0-evidence <json> --c0-post-evidence <json> --failed-c1-evidence <json> --c1r-evidence <json> --failure-tuple <json> --delphi-root <path> --output <ignored-json>`: valida recovery phase sets/bridge/lease, exige checkout C1R limpo imediatamente antes/depois do exact two-TODO scan, reobserva remote e emite recovery-effective only.
@@ -416,19 +453,26 @@ Antes de cada `promote`/`resume`, o operador executa o Git write authority guard
 
 Schema production `uninotas-closeout-handoff-v1`:
 
+- `schema:"uninotas-closeout-handoff-v1"`, `handoff_kind:"production"` e `recovery_effective:false`;
 - `c0` e `c1`: `{commit_oid, candidate_tree_oid, commit_tree_oid, tree_equal:true, parent_oid, delivery_scope_set:[...], phase_commit_delta_set:[...]}`;
 - `proof_bridge`: `{validator:"validate_closeout_diff.py", base_commit_oid:C0, base_tree_oid, candidate_tree_oid:C1_TREE, exact_delta_set:[...], outcome:"go"}`;
 - `consumer_bindings`: união exata/única `C0_PHASE_IDS ∪ C0_POST_IDS ∪ C1_PHASE_IDS`; C1R IDs são proibidos no production handoff;
 - `remote_promotions`: `{c0:{fresh_pre_push_oid, expected_lease_oid, lease_result:<success|not_observed_after_interruption>, promotion_observation, parent_and_fast_forward:true, post_push_remote_main_oid:C0, local_head_oid:C0, local_tracking_oid:C0}, c1:{fresh_pre_push_oid:C0, expected_lease_oid:C0, lease_result:<success|not_observed_after_interruption>, promotion_observation, parent_and_fast_forward:true, post_push_remote_main_oid:C1, local_head_oid:C1, local_tracking_oid:C1}}`;
 - `c0_post_verify`: `{head_oid:C0, commit_tree_oid:C0_TREE, remote_main_oid:C0, checkout_clean:true, foundation_validator:"go", active_path_state:"active", active_todo_count:2, active_paths:[exact canonical transition, exact discovery]}`;
 - `post_c1_active_scan`: `{scanned_head_oid:C1, outcome:"go", todo_count:1, active_paths:[exact discovery path], stale_transition_path:false}`;
-- `actual_remote_main_oid:C1` observado após o scan; `production_ready_effective:true` somente quando todos os campos anteriores são coerentes.
+- `actual_remote_main_oid:C1` observado após o scan; `production_ready_effective:true` somente quando todos os campos anteriores são coerentes. O artefato serializado usa esse conjunto exato de chaves e é revalidado como unidade imediatamente antes da escrita atômica.
 
-Schema recovery usa `handoff_kind:"recovery"`, referencia/valida C0 promotion + C0 post verify + failed C1 promotion e agrega exatamente `C0_PHASE_IDS ∪ C0_POST_IDS ∪ C1_PHASE_IDS ∪ C1R_PHASE_IDS`; inclui `c1r` tree equality, reverse bridge, failure tuple, `remote_promotions.c1r`, `post_c1r_active_scan:{scanned_head_oid:C1R,todo_count:2,active_paths:[exact canonical transition, exact discovery],stale_completed_path:false}`, segunda observação C1R, `recovery_effective:true` e `production_ready_effective:false`.
+Schema recovery usa o mesmo `schema`, `handoff_kind:"recovery"`, phase records completos `c0|c1|c1r`, C0 post verify, failure tuple, reverse bridge, e `remote_promotions:{c0,c1,c1r}` completos; agrega exatamente `C0_PHASE_IDS ∪ C0_POST_IDS ∪ C1_PHASE_IDS ∪ C1R_PHASE_IDS`; inclui `post_c1r_active_scan:{scanned_head_oid:C1R,outcome:"go",todo_count:2,active_paths:[exact canonical transition, exact discovery],stale_completed_path:false}`, `actual_remote_main_oid:C1R`, `recovery_effective:true` e `production_ready_effective:false`. O failure tuple externo tem schema fechado `{failure_id,failed_c1_oid,predicate,observed,recorded_at_utc}`, usa somente o enum versionado e deve ser semanticamente idêntico ao único `Failure-Tuple` do blob C1R e ao tuple do reverse bridge. O conjunto de chaves é exato e o artefato serializado é revalidado como unidade antes da escrita.
+
+Todo journal, phase evidence, C0 post evidence, bridge, failure tuple e output aceito por `promote|resume|verify|activate` deve estar sob `artifacts/tmp/` e satisfazer `git check-ignore`; estar apenas lexicalmente nesse diretório não basta, e um path tracked bloqueia a operação antes de parsing/push/scan.
+
+Os comandos publicados são executados da raiz do workspace: `--repo` e operands externos são normalizados uma vez para paths absolutos; `--delphi-root` precisa resolver ao sibling canônico do entry point em produção, e somente fixtures com remote local temporário podem substituí-lo. Operands `uninotas-foundation/artifacts/tmp/...` são convertidos para paths relativos ao repo somente na chamada a `git check-ignore`. A suíte executa essas spellings workspace-relative para `promote`, `resume`, `verify` e ambos os modos de `activate`.
 
 #### Required Consumer Binding Matrix
 
 Cada ID aparece exatamente uma vez no conjunto de sua fase; ausente, duplicado, inesperado, phase/class/scope/binding diferente ou outcome fora da coluna é no-go. `binding_subject` identifica os bytes efetivamente lidos; `change_scope_source` materializa a lista de mudanças relevante, sem alegar que um full-tree consumer recebeu paths como input.
+
+As rows `diff-expectation-c0`, `todo-authority-c0` e `todo-completion-c0` possuem ainda prova executável interna obrigatória: `promote c0` não aceita somente o outcome do JSON; ele executa os três guards pelo Delphi canônico contra o checkout limpo cuja commit tree é `C0_CANDIDATE_TREE` e persiste para cada um `{consumer_id,candidate_tree_oid,command,exit_code,outcome,stdout_sha256,stderr_sha256}`. O `resume c0` sempre reexecuta esses comandos exatos e substitui evidência anterior. Ausência, command identity divergente, schema aberto, hash malformado, tree divergente ou resultado real diferente de `go` bloqueia o push e o resume. Em C1/C1R, `promote`, `resume` e `activate` reexecutam internamente `validate_closeout_diff.py`; um JSON de bridge fabricado pelo chamador não é uma entrada aceita.
 
 - `C0_PHASE_IDS`: todas as rows C0 abaixo; `promote c0` aceita exatamente esse set.
 - `C0_POST_IDS`: as três rows C0_POST; `verify c0` aceita exatamente esse set.
@@ -447,15 +491,16 @@ Cada ID aparece exatamente uma vez no conjunto de sua fase; ausente, duplicado, 
 | `diff-expectation-c0` | C0 | worktree-proxy | implementation_content | `C0_CANDIDATE_TREE` | `DELIVERY_SCOPE_SET` | `go` |
 | `profile-scope-c0` | C0 | worktree-proxy | implementation_content | `C0_CANDIDATE_TREE` | `DELIVERY_SCOPE_SET` | `go` |
 | `todo-authority-c0` | C0 | worktree-proxy | implementation_content | `C0_CANDIDATE_TREE` | `DELIVERY_SCOPE_SET` | `go` |
+| `todo-completion-c0` | C0 | worktree-proxy | implementation_content | `C0_CANDIDATE_TREE` | `DELIVERY_SCOPE_SET` | `go` |
 | `privacy-review-c0` | C0 | implementation-human-review | implementation_content | `C0_CANDIDATE_TREE` | `DELIVERY_SCOPE_SET` | `no_material_findings` |
 | `architecture-adherence-c0` | C0 | implementation-human-review | implementation_content | `C0_CANDIDATE_TREE` | `DELIVERY_SCOPE_SET` | `no_material_findings` |
 | `security-review-c0` | C0 | implementation-human-review | implementation_content | `C0_CANDIDATE_TREE` | `DELIVERY_SCOPE_SET` | `no_material_findings` |
 | `test-quality-c0` | C0 | implementation-human-review | implementation_content | `C0_CANDIDATE_TREE` | `DELIVERY_SCOPE_SET` | `no_material_findings` |
 | `final-review-c0` | C0 | implementation-human-review | implementation_content | `C0_CANDIDATE_TREE` | `DELIVERY_SCOPE_SET` | `no_material_findings` |
 | `verification-debt-c0` | C0 | implementation-human-review | implementation_content | `C0_CANDIDATE_TREE` | `DELIVERY_SCOPE_SET` | `no_material_findings` |
-| `triple-correctness-c0` | C0 | implementation-human-review | implementation_content | `C0_CANDIDATE_TREE` | `DELIVERY_SCOPE_SET` | `no_material_findings` |
-| `triple-security-c0` | C0 | implementation-human-review | implementation_content | `C0_CANDIDATE_TREE` | `DELIVERY_SCOPE_SET` | `no_material_findings` |
+| `triple-performance-c0` | C0 | implementation-human-review | implementation_content | `C0_CANDIDATE_TREE` | `DELIVERY_SCOPE_SET` | `no_material_findings` |
 | `triple-test-quality-c0` | C0 | implementation-human-review | implementation_content | `C0_CANDIDATE_TREE` | `DELIVERY_SCOPE_SET` | `no_material_findings` |
+| `triple-cutover-integrity-c0` | C0 | implementation-human-review | implementation_content | `C0_CANDIDATE_TREE` | `DELIVERY_SCOPE_SET` | `no_material_findings` |
 | `performance-concurrency-c0` | C0 | implementation-human-review | implementation_content | `C0_CANDIDATE_TREE` | `DELIVERY_SCOPE_SET` | `no_material_findings` |
 | `foundation-validator-c0-post` | C0_POST | worktree-proxy | published_bootstrap | `C0_COMMIT_TREE_CLEAN` | `CLEAN_C0_TREE` | `go` |
 | `active-path-closeout-c0-post` | C0_POST | worktree-proxy | published_bootstrap | `C0_COMMIT_TREE_CLEAN` | `CLEAN_C0_TREE` | `go` |
@@ -505,8 +550,10 @@ Cada ID aparece exatamente uma vez no conjunto de sua fase; ausente, duplicado, 
 | `HANDOFF-NEG-09` | `consumer_change_scope_base_swapped` | cumulative and phase-delta consumers reject mislabeled scope source |
 | `HANDOFF-POS-04` | `c0_post_publish_verification_chain` | clean C0 validator, active path and exact two-TODO scan evidence feed C1 and final handoff |
 | `HANDOFF-NEG-10` | `missing_or_stale_c0_post_verify` | C1 promotion/final handoff reject absent, wrong-tree, non-active or wrong-count C0 post evidence |
-| `HANDOFF-POS-05` | `resume_after_push_before_evidence_for_all_phases` | synced intent permits strict adoption of remote==new commit with explicit resumed provenance |
+| `HANDOFF-POS-05` | `resume_after_push_before_evidence_for_c0` | synced intent permits strict adoption of remote==new commit only after canonical C0 gates are reexecuted and forged prior command/hash evidence is replaced |
+| `HANDOFF-POS-06` | `resume_reexecutes_internal_proof_for_c1_and_c1r` | C1/C1R resume regenerates the canonical closeout proof from stored review inputs before adoption/push |
 | `HANDOFF-NEG-11` | `intent_write_failure_or_remote_third_oid` | no push occurs without durable intent; resume rejects remote other than expected/new |
+| `HANDOFF-NEG-12` | `declared_go_contradicts_live_c0_guard` | C0 promotion executes diff/authority/completion itself and rejects a declared `go` when any real guard is nonzero or not exactly `go` |
 
 ### Atomic Final Closeout Diff Contract
 
@@ -515,7 +562,7 @@ C0 é publicado com implementação pronta, stage `Local-Implemented`, delivery 
 O completed TODO de C1 deve ser semanticamente idêntico ao active TODO de C0, exceto por allowlist de célula/campo:
 
 - `Artifact Identity -> Lifecycle state` muda para `Completed — conditional Production-Ready candidate`;
-- `Delivery Status Canon` muda para `Current delivery stage: Production-Ready`, qualifier fixa `conditional — effective only after fresh actual_remote_main_oid==HEAD==origin/main==C1 verification and semantic post-C1 scan bound to scanned_head_oid=C1 with todo_count=1/exact discovery path/no stale transition; failed publication, remote mismatch or scan mismatch invalidates closeout`, e next step fixa `external C1 remote verification + semantic active scan handoff`;
+- `Delivery Status Canon` muda para `Current delivery stage: Production-Ready`, qualifier canônica `Provisional` (as condições exatas permanecem no threshold e no handoff externo), e next step fixa `external C1 remote verification + semantic active scan handoff`;
 - na row desta entrega em `Promotion Evidence`, somente `Local Branch/Commit`, `PR to main` e `Current Status`; scope/thresholds ficam congelados e nenhum campo tenta registrar o próprio C1 SHA;
 - checkboxes, toda `Completion Evidence Matrix` e seus outputs já estão completos em C0 e ficam byte-frozen em C1; nenhum resultado dos guards finais é escrito de volta no TODO;
 - History Trust recebe evidência observada de C0 e a verificação precommit de que fresh remote tip, `origin/main` e base HEAD são C0; fatos sobre o OID/push/remote activation de C1 ficam exclusivamente no handoff externo;
@@ -576,6 +623,9 @@ Todo o restante é byte-frozen. Sobre o candidate C1R rodam recovery boundary, s
 | `CLOSEOUT-NEG-13` | `bare_remote_advanced_local_tracking_stale` | `fresh ls-remote observation blocks recovery even when local origin/main still equals FAILED_C1` |
 | `CLOSEOUT-NEG-14` | `local_commit_remote_advanced_before_push` | `unpublished C0/C1 cannot push or enter published-C1 recovery; reconciliation/rebaseline and renewed approval required` |
 | `CLOSEOUT-NEG-15` | `remote_advanced_after_c1_push_before_activation` | `Production-Ready requires fresh actual remote main exactly equal to C1 and scan bound to C1` |
+| `CLOSEOUT-NEG-16` | `standalone_state_literal_outside_typed_field` | comparação byte-frozen rejeita literal de estado fora das linhas mutáveis tipadas em C1 e C1R |
+| `CLOSEOUT-NEG-17` | `remote_advanced_immediately_after_promote_or_resumed_push` | comando falha antes de emitir success evidence quando a observação fresh pós-push difere do commit promovido |
+| `CLOSEOUT-NEG-18` | `successful_c1_contains_recovery_marker` | closeout de sucesso exige zero `Failure-Tuple` e zero `Observed-Failure`; recovery exige exatamente um par coerente |
 | `CLOSEOUT-NEG-12` | `recovery_field_outside_exact_state_table` | `recovery changed a byte-frozen field or used an invalid failure tuple` |
 
 ## External Dependency Readiness
@@ -586,6 +636,15 @@ Todo o restante é byte-frozen. Sobre o candidate C1R rodam recovery boundary, s
 | Git remote Foundation | necessário para baseline de revisão | healthy | 2026-09-26 | `main`/`origin/main@1b8a5e9`; baseline material R8V publicada; guard main-only instalado e Git for Windows é o writer válido | nenhum ajuste |
 | `DEP-CLOSEOUT-01` Delphi standalone closeout support | impede falso `go` e stale active TODO no closeout | healthy/resolved | 2026-09-25 | TODO Delphi concluído em `6dc5bd4`/`0e54e2a`; comando individual retornou `path_state=active`; `--all-active --repo uninotas-foundation` retornou `todo_count=2`, ambos paths ativos reais e zero violações | consumir a correção já publicada e repetir os dois comandos antes do closeout |
 | `DEP-CLOSEOUT-STATES-02` Delphi completed/recovery compatibility | final candidate e C1R dependem dos guards atuais sem alteração Delphi | healthy/resolved by pre-approval synthetic probe | 2026-09-25 | exact-shape temp TODOs: completed conditional e active/Blocked recovery retornaram `go` nos três guards reais (`todo_completion_guard --require-delivery`, `todo_authority_guard --require-delivery-gates`, `todo_closeout_guard --repo`); artifacts `artifacts/tmp/r8n-*-probe*.txt` | CI matrix reduzida ao schema canônico e Completion Evidence agora possui 34 bindings literais; repetir nas fixtures source-owned e entrega real |
+
+## Package-First Assessment
+
+- **Queries executed:** `bash delphi-ai/tools/query_packages.sh --project-root /mnt/c/unifast/monitordenotas --search "foundation validation"`; `--search "git closeout"`; `--search "handoff"`.
+- **Relevant packages found:** nenhum nas três consultas (`0 package(s) found`).
+- **READMEs read:** `n/a` — nenhuma correspondência retornada.
+- **Decision:** implementação local na própria Foundation.
+- **Tier:** `Local`.
+- **Rationale:** validator, enumeração de change-set e handoff atômico são contratos específicos da autoridade documental deste repositório; não existe pacote proprietário registrado que cubra ou possa ser estendido sem criar acoplamento indevido.
 
 ## Profile Scope & Handoffs (Required Before `APROVADO`)
 
@@ -599,8 +658,8 @@ Todo o restante é byte-frozen. Sobre o candidate C1R rodam recovery boundary, s
 
 | From Profile | To Profile | Why the Handoff Exists | Touched Surfaces | Status / Evidence |
 | --- | --- | --- | --- | --- |
-| strategic-cto | operational-coder | implementar alterações determinísticas após congelamento estratégico | `deterministic/**` | planned |
-| operational-coder | strategic-cto | consolidar constituição/mandato/decisões | roots, modules, policies | planned |
+| strategic-cto | operational-coder | implementar alterações determinísticas após congelamento estratégico | `deterministic/**` | completed — `APROVADO` 2026-09-26; primary-checkout-single-writer; implementation GREEN |
+| operational-coder | strategic-cto | consolidar constituição/mandato/decisões e reconciliar paths `review required` do profile | roots, modules, policies, deterministic harness | completed — returned for candidate validation; every observed path has an Expected Changed Paths row |
 | strategic-cto | assurance-tester-quality | auditar harness e cutover | TODO + diff + tests | planned |
 
 ## Complexity
@@ -624,6 +683,8 @@ Todo o restante é byte-frozen. Sobre o candidate C1R rodam recovery boundary, s
 
 O JSON machine-readable de `policies/scope_subscope_governance.md` terá `core_scope=uninotas`, uma coleção ativa `modules`, um catálogo persistente `module_catalog` e uma coleção ordenada `capability_transitions`. Cada módulo ativo declara `subscope`, `path`, `runtime_authority_state`, `owned_capabilities` e `planned_capabilities`; cada array não contém IDs duplicados. Cada entrada do catálogo declara `module_id`, `path` e `catalog_state=active|retired`; `module_id` e `path` são globalmente únicos. Existe uma bijeção exata entre `modules` e entradas `active` do catálogo, com mesmo ID/path. Uma entrada `retired` não pode coexistir em `modules`, possuir ou planejar capability, nem compartilhar ID/path com outra entrada. Cada transição declara `transition_id`, `capability_id`, `sequence`, `origin=transferred|new`, `transition_state=planned|completed`, `predecessor` e `successor`; `transition_id` é globalmente único. `origin=new` exige `sequence=1` e `predecessor=null`; `origin=transferred` sempre exige predecessor não nulo presente no `module_catalog`, inclusive em arestas históricas completed; toda aresta posterior à primeira usa `origin=transferred`. `runtime_authority_state=current_runtime|target_planned` é um eixo distinto do lifecycle PACED de `evolution_lifecycle.md`; ele responde somente qual módulo possui autoridade sobre comportamento executável observado. Um `target_planned` sempre tem `owned_capabilities=[]` e pelo menos um ID em `planned_capabilities`. Um módulo `current_runtime` possui pelo menos um ID em `owned_capabilities`, pode manter outros em `planned_capabilities` e preserva conjuntos disjuntos. Nenhum módulo ativo pode ter ambos os arrays vazios.
 
+O validator deriva do `module_catalog` o conjunto completo de paths ativos, os subscopes e o índice publicado; não mantém uma segunda enumeração exata dos nove módulos. Código conserva somente invariantes de schema, contratos observados estáveis por módulo e os três mínimos constitucionais de target owner. Evolução legítima acrescenta módulo/catalog/path/manifesto de forma coordenada sem alterar um catálogo paralelo no validator.
+
 O mesmo JSON terá um `baseline_capability_catalog` histórico e imutável, autoridade única para IDs que já existiam antes deste cutover. Cada entrada contém somente `capability_id` e `baseline_owner`; ambos são únicos e não podem ser apagados, renomeados ou receber alias. Seu conjunto deve permanecer exatamente igual à projeção `capability_id`/`baseline_owner` das rows `origin=baseline` presentes na versão do ledger em C0; não basta ser um subconjunto estável do seed. Capabilities posteriores não entram retroativamente nesse catálogo: toda row adicionada depois de C0 deve usar `origin=new`, e sua identidade nasce em uma aresta sequence 1 `origin=new`. Todo ID em owned/planned/transitions deve ser coberto por exatamente uma origem: entrada baseline ou cadeia cuja primeira aresta é `origin=new`. Um ID baseline sem transição permanece exatamente no `baseline_owner`; quando possui transição, sua cadeia terminal governa ownership/planned pelas regras abaixo. Um ID não catalogado não pode aparecer diretamente em `owned_capabilities`; ele só pode se tornar owned por uma cadeia `origin=new` terminal completed. Desaparecimento/rename de baseline, alias, append baseline pós-C0 e inserção current direta sem origem são inválidos.
 
 | Baseline capability ID | Baseline owner |
@@ -638,7 +699,7 @@ O mesmo JSON terá um `baseline_capability_catalog` histórico e imutável, auto
 | `runtime_topology` | `runtime-and-deployment` |
 | `health_read` | `runtime-and-deployment` |
 
-`deterministic/capability_identity_ledger.json` é o oracle de enforcement independente da projeção mutável acima. Ele contém registros normalizados append-only: baseline usa `capability_id`, `origin=baseline`, `baseline_owner`; capability nova usa `capability_id`, `origin=new`, `origin_transition_id`. O seed inicial completo — as nove rows baseline mais `fiscal_document_read` como primeiro registro `origin=new` ligado a `fiscal-document-read-001` — é ancorado por `FROZEN_INITIAL_CAPABILITY_IDENTITY_DIGEST` em `validate_foundation.py`, seguindo o padrão fail-closed já usado pelo frozen legacy ledger.
+`deterministic/capability_identity_ledger.json` é o oracle de enforcement independente da projeção mutável acima. Seu objeto raiz tem exatamente `schema` e `identities`; ele nunca publica `genesis`, pois a única autoridade desse OID é o campo lifecycle do TODO descrito abaixo. O ledger contém registros normalizados append-only: baseline usa `capability_id`, `origin=baseline`, `baseline_owner`; capability nova usa `capability_id`, `origin=new`, `origin_transition_id`. O seed inicial completo — as nove rows baseline mais `fiscal_document_read` como primeiro registro `origin=new` ligado a `fiscal-document-read-001` — é ancorado por `FROZEN_INITIAL_CAPABILITY_IDENTITY_DIGEST` em `validate_foundation.py`, seguindo o padrão fail-closed já usado pelo frozen legacy ledger.
 
 A representação canônica versionada `capability-identity-ledger-v1` governa digest e comparação semântica. O parser rejeita chaves extras/ausentes e normaliza cada row para exatamente os campos permitidos por sua origem; rows são ordenadas por `capability_id` em ordem Unicode code-point (os IDs contratados permanecem ASCII). O array é serializado em UTF-8 como JSON minificado com chaves lexicograficamente ordenadas, `ensure_ascii=false`, separators `(',', ':')`, sem BOM ou newline final; o digest é SHA-256 lowercase hexadecimal desses bytes. Whitespace, indentação e ordem original de chaves/rows não mudam a identidade; qualquer mudança em `capability_id`, `origin`, `baseline_owner` ou `origin_transition_id` muda a forma canônica e deve falhar. O seed digest aplica-se exatamente às dez rows iniciais, identificadas pelo conjunto congelado de IDs, enquanto a comparação histórica aplica a mesma canonicalização a cada record.
 
@@ -808,8 +869,8 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
 - **Adherence review package:** `bounded-file-set`
-- **Adherence review status:** `not_run`
-- **Adherence review evidence / resolution:** `pending implementation`
+- **Adherence review status:** `no_material_findings`
+- **Adherence review evidence / resolution:** `R14 identified the stale triple-lane catalog; implementation now requires performance/test-quality/cutover-integrity in both validators, tests and TODO. TD-01..TD-07 otherwise remained adherent; exact-tree confirmation remains external and OID-bound before C0.`
 - **No-go handling:** retornar ao ciclo afetado; não solicitar aprovação nem concluir com divergência aberta.
 
 ## Gate: Review Baseline Freeze
@@ -845,7 +906,7 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 - **Trigger stage:** `precommit base check + post-commit fresh remote pre-push check for C0/C1 + post-C1-push remote activation check`
 - **Protection evidence rule:** registrar somente proteção non-fast-forward observável; `unavailable` é estado permitido apenas com `APROVADO` que aceita `RISK-HIST-01`, nunca prova positiva.
 - **Gate status:** `not_run`
-- **Findings summary:** `pending delivery; human acceptance is pending explicit APROVADO`.
+- **Findings summary:** explicit `APROVADO` accepted `RISK-HIST-01`; phase-specific remote/base/lease observations remain mandatory execution-time predicates and are intentionally produced only during C0/C1 promotion.
 - **Evidence / reference:** rows faseadas abaixo; nenhuma credencial/API adicional será usada para consultar configuração remota.
 - **Waiver authority / reference:** `n/a — residual risk acceptance is part of Approval, not a technical waiver`
 
@@ -896,7 +957,7 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 
 - **Strategy:** `test-first`
 - **Why:** o validator é o harness arquitetural; cada semântica precisa de mutação negativa antes do cutover.
-- **Fail-first target(s):** identidade/core scope UniNotas, source split, context-not-tenant, runtime-authority/lifecycle separation, módulo/catálogo ausente ou duplicado, membership duplicado, remoção/rename/alias simples ou coordenada de capability baseline/new contra digest/histórico, capability current sem baseline ou `origin=new`, bijeção exata entre cada ledger record `origin=new` e uma única transição sequence 1 `origin=new` da mesma capability (`CAP-NEG-38..42`), substituição do genesis registrado por descendente (`CAP-NEG-43`), append pós-C0 reclassificado como baseline (`CAP-NEG-44`), bootstrap pre-C0/C0/C1 e descendant pending inválido (`CAP-POS-12..14`/`CAP-NEG-45`), canonicalização/digest semântico (`CAP-POS-15`/`CAP-NEG-46`), binding genesis única/exata (`CAP-NEG-47..51`), histórico monotônico inclusive remove→readd/mutate→revert (`CAP-NEG-52/53`) e longo com leituras limitadas (`CAP-POS-11`), módulo ativo vazio ou com cardinalidade incompatível, sequence gap, fork/ciclo, predecessor desconhecido ou nulo em transferência, chain edge inválida, interseção owned/planned, target com owned capability, aresta terminal planned sem exatamente um owner atual ou successor planejado, planned membership órfã, terminal completed sem owner successor, transferência planned sem owner predecessor, dupla autoridade pelo mesmo ID, successor planejado duplicado, planned membership residual, owner incompatível com aresta terminal, ownership baseline estável respaldado pelo catálogo/ledger sem transição sintética, capability nova legítima e ownerless enquanto planned, append de identidade nova, predecessor retirado legítimo, segundo hop planned/completed, limitação documentada de rewrite alternativo que preserva C0 (`CAP-LIMIT-01`/`RISK-HIST-01`), manifesto único, CNPJ válido, credenciais, provider ID/URL privada em contexto formalizado, limites permitidos sem falso positivo, candidate/review binding (`TREE-POS-01..03`/`TREE-NEG-01..08`), handoff tipado (`HANDOFF-POS-01`/`HANDOFF-NEG-01..03`), recovery remote (`CLOSEOUT-NEG-13`) e CAS promotion/activation (`REMOTE-POS-01`/`REMOTE-NEG-01..04`/`CLOSEOUT-NEG-14..15`).
+- **Fail-first target(s):** identidade/core scope UniNotas, source split, context-not-tenant, runtime-authority/lifecycle separation, módulo/catálogo ausente ou duplicado, membership duplicado, remoção/rename/alias simples ou coordenada de capability baseline/new contra digest/histórico, capability current sem baseline ou `origin=new`, bijeção exata entre cada ledger record `origin=new` e uma única transição sequence 1 `origin=new` da mesma capability (`CAP-NEG-38..42`), proibição de qualquer mirror de genesis no ledger (`CAP-NEG-43/45/47..49/51`), append pós-C0 reclassificado como baseline (`CAP-NEG-44`), bootstrap pre-C0/C0/C1 e lifecycle genesis pending/descendant inválido (`CAP-POS-12..14` + full-tree history binding), canonicalização/digest semântico (`CAP-POS-15`/`CAP-NEG-46`), unicidade do lifecycle path (`CAP-NEG-50`), histórico monotônico inclusive remove→readd/mutate→revert (`CAP-NEG-52/53`) e longo com leituras limitadas (`CAP-POS-11`), módulo ativo vazio ou com cardinalidade incompatível, sequence gap, fork/ciclo, predecessor desconhecido ou nulo em transferência, chain edge inválida, interseção owned/planned, target com owned capability, aresta terminal planned sem exatamente um owner atual ou successor planejado, planned membership órfã, terminal completed sem owner successor, transferência planned sem owner predecessor, dupla autoridade pelo mesmo ID, successor planejado duplicado, planned membership residual, owner incompatível com aresta terminal, ownership baseline estável respaldado pelo catálogo/ledger sem transição sintética, capability nova legítima e ownerless enquanto planned, append de identidade nova, predecessor retirado legítimo, segundo hop planned/completed, limitação documentada de rewrite alternativo que preserva C0 (`CAP-LIMIT-01`/`RISK-HIST-01`), manifesto único, CNPJ válido, credenciais, provider ID/URL privada em contexto formalizado, limites permitidos sem falso positivo, candidate/review binding (`TREE-POS-01..03`/`TREE-NEG-01..08`), handoff tipado (`HANDOFF-POS-01`/`HANDOFF-NEG-01..03`), schemas fechados e scans de conjunto exato, recovery remote (`CLOSEOUT-NEG-13`) e CAS promotion/activation (`REMOTE-POS-01`/`REMOTE-NEG-01..04`/`CLOSEOUT-NEG-14..15`).
 - **`D-T01` evidence layer:** validadores puros + fixtures mínimas são a camada primária para semântica de registry, decisões e privacidade.
 - **`D-T02` compatibility layer:** poucos testes full-tree comprovam manifesto, links, symlinks, legado e composição real da Foundation.
 - **`D-T03` topology/exclusion:** nenhum banco, API, browser, container ou dado fiscal real é necessário; `CAP-NEG-36/52/53` usam repositório Git temporário real para provar append-only monotônico, inclusive remove→readd e mutate→revert, sem mock de Git.
@@ -924,13 +985,13 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 
 | Repository / CI Surface | Why In Scope | Local CI-Equivalent Command | Required Before | Status | Evidence Artifact / Command | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| Foundation pure semantic suite | registry/privacy; CAP/GUARD em memória, zero full-tree scan | `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_registry_semantics.py uninotas-foundation/deterministic/tests/test_privacy_predicate.py` | Local-Implemented | planned | command output + duração + scan counter=0 | falha se qualquer fixture copiar/varrer a árvore |
-| Foundation full-tree compatibility | manifesto, symlink/legado e registry↔módulos; três scans allowlisted | `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_foundation.py` | Local-Implemented | planned | command output + duração + scan counter<=3 | somente três testes nomeados varrem a árvore uma vez cada |
-| Foundation change-set helper | delivery/lifecycle, D/A, R, untracked e source pós-baseline em Git temporário | `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_enumerate_change_paths.py` | Local-Implemented | planned | command output | helper único; mode-specific expectations |
-| Foundation atomic closeout/handoff | C0→C1/C1R, partitioned consumers, proof bridges, durable CAS/resume, C0_POST e strict clean activation/recovery | `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_closeout_diff.py uninotas-foundation/deterministic/tests/test_closeout_handoff.py` | Local-Implemented | planned | command output | usa bare remote/entry point real; cobre crash pós-push, output failure, base swap, phase evidence, dirty scan e remote races |
-| Foundation core-validator performance | subprocess/blob reads, scan count e wall-clock advisory | executar pure/full-tree sequencialmente e medir history/change-set/closeout | Local-Implemented | planned | hard counters + advisory timings | hard: scans<=3, history calls<=k+2, zero helper full-tree |
-| Foundation validator | árvore canônica completa | `python3 -B uninotas-foundation/deterministic/validate_foundation.py --root uninotas-foundation` | Local-Implemented | planned | command output | deve eliminar mismatch |
-| PACED readiness | alias/artefatos continuam inicializáveis | `'/mnt/c/Program Files/Git/bin/bash.exe' -lc 'cd /c/Unifast/MonitorDeNotas && bash delphi-ai/verify_context.sh'` | Local-Implemented | planned | command output | runner Git Bash; limitação CRLF WSL isolada |
+| Foundation pure semantic suite | registry/privacy; CAP/GUARD em memória, zero full-tree scan | `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_registry_semantics.py uninotas-foundation/deterministic/tests/test_privacy_predicate.py` | Local-Implemented | passed | command output + duração + scan counter=0 | falha se qualquer fixture copiar/varrer a árvore |
+| Foundation full-tree compatibility | manifesto, symlink/legado e registry↔módulos; três scans allowlisted | `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_foundation.py` | Local-Implemented | passed | command output + duração + scan counter<=3 | somente três testes nomeados varrem a árvore uma vez cada |
+| Foundation change-set helper | delivery/lifecycle, D/A, R, untracked e source pós-baseline em Git temporário | `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_enumerate_change_paths.py` | Local-Implemented | passed | command output | helper único; mode-specific expectations |
+| Foundation atomic closeout/handoff | C0→C1/C1R, partitioned consumers, proof bridges, durable CAS/resume, C0_POST e strict clean activation/recovery | `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_closeout_diff.py uninotas-foundation/deterministic/tests/test_closeout_handoff.py` | Local-Implemented | passed | command output | usa bare remote/entry point real; cobre crash pós-push, output failure, base swap, phase evidence, dirty scan e remote races |
+| Foundation core-validator performance | subprocess/blob reads, scan count e wall-clock advisory | executar pure/full-tree sequencialmente e medir history/change-set/closeout | Local-Implemented | passed | hard counters + advisory timings | hard: scans<=3, history calls<=k+2, zero helper full-tree |
+| Foundation validator | árvore canônica completa | `python3 -B uninotas-foundation/deterministic/validate_foundation.py --root uninotas-foundation` | Local-Implemented | passed | command output | deve eliminar mismatch |
+| PACED readiness | alias/artefatos continuam inicializáveis | `'/mnt/c/Program Files/Git/bin/bash.exe' -lc 'cd /c/Unifast/MonitorDeNotas && bash delphi-ai/verify_context.sh'` | Local-Implemented | passed | command output | runner Git Bash; limitação CRLF WSL isolada |
 
 ### Runtime / Rollout Notes
 
@@ -1258,8 +1319,8 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 
 ## Approval
 
-- **Approved by:** `pending explicit APROVADO`
-- **Approval scope:** `pending — must explicitly include TD-01..TD-07, D-T01..D-T05, DOD-01..DOD-15/VAL-01..VAL-10 and acceptance of RISK-HIST-01`
+- **Approved by:** `human owner — explicit APROVADO received 2026-09-26`
+- **Approval scope:** `TD-01..TD-07, D-T01..D-T05, DOD-01..DOD-15/VAL-01..VAL-10 and explicit acceptance of RISK-HIST-01`
 - **Execution not authorized by approval:** `backend, frontend, database, runtime, secrets, API calls, worktrees`
 - **Renewed approval required when:** TD-01..TD-07, mapeamento D-01..D-11, scope, module topology, validation semantics ou risco material mudar.
 
@@ -1282,63 +1343,63 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 ## Agent Routing Preflight
 
 - **Client surface:** `codex`
-- **Current governed action:** `formal-review`
-- **Selected role:** `formal-reviewer`
-- **Selected model:** `gpt-5.6-sol`
-- **Selected effort:** `xhigh`
+- **Current governed action:** `implementation`
+- **Selected role:** `routine-executor`
+- **Selected model:** `gpt-5.6-terra`
+- **Selected effort:** `medium`
 - **Proof mode:** `declared`
 - **Exception reason:** `n/a`
-- **Subagent / delegation authorization:** `fresh no-context architecture_opinion and critique reviewers required by the applicable routing workflow; read-only and no parallel code writers`
-- **Execution topology:** `n/a — read-only formal review`
+- **Subagent / delegation authorization:** `routine executor lane required by effort-selection; one writer only, with assurance reviewers deferred until delivery gates`
+- **Execution topology:** `primary-checkout-single-writer`
 - **Worktree / auxiliary-checkout authorization:** `not-authorized`
 - **Worktree authorization evidence:** `n/a`
-- **Writer scheduling policy:** `n/a — reviewers do not mutate source`
+- **Writer scheduling policy:** `exactly one writer mutates Foundation shared canonical/docs/deterministic surfaces; no worktree or auxiliary checkout`
 - **Guard outcome:** `go`
 - **Waiver / exception reference:** `n/a`
-- **Post-approval implementation routing:** `provisional routine-executor/gpt-5.6-terra/medium on primary-checkout-single-writer; must rerun agent_role_routing_guard.py after explicit APROVADO and before implementation`.
+- **Post-approval implementation routing:** `routine-executor/gpt-5.6-terra/medium on primary-checkout-single-writer; deterministic guard evidence required immediately before implementation`.
 
 ## Decision Adherence Validation
 
 | Decision ID | Status | Evidence | Notes |
 | --- | --- | --- | --- |
-| `TD-01` | pending | pending implementation | identidade UniNotas + `core_scope=uninotas` |
-| `TD-02` | pending | pending implementation | source ownership split |
-| `TD-03` | pending | pending implementation | fiscal context sem tenancy |
-| `TD-04` | pending | pending implementation | runtime-authority state e transferências por capability |
-| `TD-05` | pending | pending implementation | três owners target exclusivos |
-| `TD-06` | pending | pending implementation | manifesto único + semantic registry |
-| `TD-07` | pending | pending implementation | writer/filter explicitamente desconhecido |
-| `D-T01` | pending | pending implementation | validadores puros + fixtures mínimas |
-| `D-T02` | pending | pending implementation | poucos testes full-tree de compatibilidade |
-| `D-T03` | pending | pending implementation | exclusão explícita de runtime/dados reais |
-| `D-T04` | pending | pending implementation | RED/GREEN e diagnóstico específico por caso |
-| `D-T05` | pending | pending implementation | hard: três scans full-tree no máximo e history `git_calls<=k+2`; wall-clock incluindo ~179s é advisory |
+| `TD-01` | Adherent | canonical files + deterministic tests | identidade UniNotas + `core_scope=uninotas` |
+| `TD-02` | Adherent | canonical files + deterministic tests | source ownership split |
+| `TD-03` | Adherent | canonical files + deterministic tests | fiscal context sem tenancy |
+| `TD-04` | Adherent | canonical files + deterministic tests | runtime-authority state e transferências por capability |
+| `TD-05` | Adherent | canonical files + deterministic tests | três owners target exclusivos |
+| `TD-06` | Adherent | canonical files + deterministic tests | manifesto único + semantic registry |
+| `TD-07` | Adherent | canonical files + deterministic tests | writer/filter explicitamente desconhecido |
+| `D-T01` | Adherent | passed: `test_registry_semantics.py` + `test_privacy_predicate.py` (86 tests/4.491s) | validadores puros e fixtures mínimas exercitam as invariantes sem runtime |
+| `D-T02` | Adherent | passed: `FoundationTreeContractTests` (4 tests/55.589s; `scan_count=3`) | três scans full-tree concentram a compatibilidade publicada; o quarto teste exercita mutations Git-backed de lifecycle/genesis sem scan adicional |
+| `D-T03` | Adherent | passed: fixtures temporárias Git/árvore e scanner de privacidade | sem runtime, dados reais, credenciais ou chamadas externas persistidas |
+| `D-T04` | Adherent | passed: RED inicial registrado; diagnósticos literais nas matrizes registry/privacy/closeout | cada caso negativo verifica a falha específica antes do GREEN |
+| `D-T05` | Adherent | passed: contador determinístico `scan_count=3` e arquitetura de três scans | limite hard de scans full-tree preservado; wall-clock permanece advisory |
 
 ## Module Decision Consistency Validation
 
 | Module Decision Ref | Planned Handling | Delivery Status | Evidence | Notes |
 | --- | --- | --- | --- | --- |
-| `decisions#D-01` | Supersede (Intentional) | pending | pending | identity/core scope |
-| `decisions#D-04` | Supersede (Intentional) | pending | pending | source ownership target split |
-| `decisions#D-05` | Preserve | pending | pending | no business tenancy |
-| `events#ownership` | Supersede (Intentional) | pending | pending | current capabilities e successors |
-| `treatments#ownership` | Supersede (Intentional) | pending | pending | successor operational-cases |
-| `runtime#logs` | Preserve | pending | pending | facts observed; writer unknown |
-| `identity#no-tenancy` | Preserve | pending | pending | context is not tenancy |
-| `realtime#logs-invalidation` | Preserve | pending | pending | current invalidation |
-| `monitoring#logs-summary` | Preserve | pending | pending | current monitoring |
+| `decisions#D-01` | Supersede (Intentional) | consistent | `decisions/uninotas-foundation-decisions.md`; `validate_foundation.py` identity checks | identity/core scope canonicalized as UniNotas/`uninotas` |
+| `decisions#D-04` | Supersede (Intentional) | consistent | D-07 current/target split; full-tree Routerfy-ownership mutation | current mixed projection preservada; target Smart Notas/error-only separado; owner/writer/ingestion/filter externos desconhecidos |
+| `decisions#D-05` | Preserve | consistent | `policies/scope_subscope_governance.md`; tenancy tests | fiscal context is not business tenancy |
+| `events#ownership` | Supersede (Intentional) | consistent | module metadata + capability identity ledger tests | current capabilities and named successors are explicit |
+| `treatments#ownership` | Supersede (Intentional) | consistent | `modules/operational-cases.md`; registry tests | planned operational-cases successor is bounded |
+| `runtime#logs` | Preserve | consistent | `project_mandate.md`; `test_registry_semantics.py` source-split cases | observed facts retained; writer/filter unknown |
+| `identity#no-tenancy` | Preserve | consistent | scope policy and full-tree tenancy guard | fiscal issuer context is not tenancy |
+| `realtime#logs-invalidation` | Preserve | consistent | current module metadata and module contract tests | current invalidation contract remains byte-semantic |
+| `monitoring#logs-summary` | Preserve | consistent | current module metadata and module contract tests | current monitoring contract remains byte-semantic |
 
 ## Pipeline/Copilot P1/P2 Preflight
 
 | Reviewer Surface / Package | Review Focus | Status | Evidence Artifact / Command | Findings | Resolution / Notes |
 | --- | --- | --- | --- | --- | --- |
-| bounded Foundation diff | P1/P2 contract/privacy/validator drift | planned | pending | pending | pre-delivery |
+| staged Foundation delivery diff + governing TODO | correctness/contract, CI/tooling and cutover-integrity | passed | no-context sessions `copilot_correctness_r15`, `copilot_tooling_r15`, `copilot_cutover_r15`; targeted regressions | privacy NFKC/structured JSON, baseline-owner, transition-ID, exact C0 live guards and strict proof JSON findings integrated; zero release blockers | C1/C1R proxy rerun finding classified `by-design/no-action`: canonical proof bridge, exact five-path transform, candidate-bound focused review and human operator boundary are the approved enforcement model |
 
 ## Rule-Spirit Anti-Pattern Hunt
 
 | Rule / Principle Surface | Bypass or Anti-Pattern Search Lens | Status | Evidence Artifact / Command | Findings | Resolution / Notes |
 | --- | --- | --- | --- | --- | --- |
-| TODO authority + Foundation sync | future-as-current, weakened validator, hidden tenancy/fallback | planned | pending | pending | pre-delivery |
+| TODO authority + Foundation sync | future-as-current, weakened validator, hidden tenancy/fallback | passed | completed `git diff --cached --unified=0 0fe906c... -- '*.md' deterministic | rg 'future|target|tenant|fallback|compatib'`; completed no-context `architecture_r14` + `copilot_cutover_r15` | zero release blockers; target owners remain planned, fiscal context remains non-tenant and no successful-log fallback was introduced | canonical audit consumers corrected to performance/test-quality/cutover-integrity; direct proof CLI made duplicate-safe |
 
 ## Security Risk Assessment
 
@@ -1347,14 +1408,15 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Attack surface in scope:** `documentation privacy scanner; credential/PII persistence prevention`.
 - **Attack simulation decision:** `required`
 - **Review evidence:** `audit floor SEC-AUTH-OR-TENANT; security-adversarial-review required before Completed`.
-- **Residual security risk:** `pending review`.
+- **Review outcome:** `findings_integrated`; independent adversarial reviews found Unicode/escaped structured-data bypasses, including `SEC-C0-01`/`SEC-C0-02` and the long-key `PRIV-C0-03`, all integrated with direct regressions; exact-tree security confirmation remains mandatory before C0.
+- **Residual security risk:** `low` após scanner reforçado e revisão independente; detecção automática de PII contextual continua não exaustiva, por isso a atestação C0 permanece obrigatória e externa.
 
 ## Performance & Concurrency Risk Assessment
 
 - **Policy schema version:** `pcv-1`
 - **Global sensitivity level:** `low`
 - **Why this level:** nenhuma superfície runtime muda, mas o piso recomenda classificação independente por ser release-sensitive.
-- **Current delivery stage at review time:** `Pending`
+- **Current delivery stage at review time:** `Local-Implemented`
 
 | Policy | Lane ID | Lane | Trigger Result | Trigger Severity | Trigger Reason Code | Trigger Rationale | Gate Deadline | Minimum Evidence Rule | State | Residual Risk | Uncertainty Reason Code | Recorded At UTC | Executor ID |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -1363,13 +1425,15 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 | `pcv-1` | `BCI` | backend-concurrency-idempotency-validation | not_needed | low | BCI-EXACT-ONCE-SEMANTICS | nenhuma escrita backend ou superfície de overlap muda; o reason code foi avaliado como falso | before_local_implemented | BCI-INV | not_applicable | none | none | `2026-09-25T16:12:12Z` | `codex-primary` |
 | `pcv-1` | `RLS` | runtime-load-stress-validation | not_needed | low | RLS-SLO-CLAIM | nenhuma superfície de pressão runtime ou claim de SLO muda; o reason code foi avaliado como falso | before_production_ready | RLS-E1 | not_applicable | none | none | `2026-09-25T16:12:12Z` | `codex-primary` |
 
+`PERF-C0-01` e `PERF-C0-02` foram integrados antes de C0: o extrator YAML flow deixou de copiar/reprocessar todos os interiores aninhados e passou a um scanner iterativo de passe único; mappings/listas usados como chaves estruturais são descartados antes de slicing/normalização do span externo. As regressões estruturais exigem `characters_scanned<=len(input)`, materialização total de chaves linear e no máximo 512 caracteres materializados por valor sensível, inclusive para nesting em posição de valor e de chave, sem acrescentar scan de filesystem.
+
 ## Verification Debt Assessment
 
-- **Audit outcome:** `required before Completed`
-- **Why this outcome:** big architectural cutover requires audit before completion.
-- **Inline code TODO debt:** `none expected`
-- **Evidence / audit artifact:** `pending`
-- **Accepted residual debt:** `none currently accepted`
+- **Audit outcome:** `no_material_findings`
+- **Why this outcome:** the deterministic helper reported heuristic `high`, but manual classification found only intentional Out-of-Scope/prohibited-scenario checkboxes, historical review vocabulary, phase-gated C0/C1/C1R predicates and the explicitly approved `RISK-HIST-01`; none substitutes for missing implementation verification.
+- **Inline code TODO debt:** `none`; all modified paths were scanned and every `TODO` token belongs to governed lifecycle documentation rather than an unowned code marker.
+- **Evidence / audit artifact:** `verification_debt_audit.sh --todo todos/active/process/TODO-uninotas-canonical-foundation-transition.md --repo . --scan-git-modified`; heuristic counts were manually reconciled against the exact unchecked set and live gate sections before final-tree freeze.
+- **Accepted residual debt:** `none`; `RISK-HIST-01` is an explicitly approved governance limit, while remote C0/C1 observations are mandatory future-phase evidence, not waived verification.
 
 ## Independent Test Quality Audit Gate
 
@@ -1381,9 +1445,9 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Canonical method:** `wf-docker-independent-test-quality-audit-method`
 - **Audit isolation mode:** `fresh internal no-context reviewer`
 - **Internal reviewer mandate:** `required — fresh internal no-context reviewer before Completed`
-- **Audit status:** `not_run`
-- **Findings summary:** `pending`
-- **Evidence / reference:** `pending`
+- **Audit status:** `no_material_findings`
+- **Findings summary:** Round 11 reproduced 173/173 tests with no test-quality finding; the adversarial privacy, long-key and both linear-work RED regressions raise the final suite to 178 tests and preserve exact diagnostics, real Git/bare-remote boundaries, `scan_count=3`, and the no-mock/no-fallback contract.
+- **Evidence / reference:** external ignored audit session `artifacts/tmp/uninotas-canonical-foundation-transition-audit`, Round 11 plus the final `SEC-C0-01`/`SEC-C0-02` RED/GREEN record; final C0 OID/path binding is emitted externally after the last tracked sync.
 
 ## Independent No-Context Final Review Gate
 
@@ -1393,9 +1457,9 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Package mode:** `bounded-summary`
 - **Review isolation mode:** `fresh internal no-context reviewer`
 - **Internal reviewer mandate:** `required — fresh internal no-context reviewer before Completed`
-- **Final review status:** `not_run`
-- **Findings summary:** `pending`
-- **Evidence / reference:** `pending`
+- **Final review status:** `no_material_findings`
+- **Findings summary:** independent architecture, correctness/tooling/cutover and triple-review passes integrated every material finding; the latest triple-review returned three clean lanes and zero findings.
+- **Evidence / reference:** no-context sessions `architecture_r14`, `copilot_correctness_r15`, `copilot_tooling_r15`, `copilot_cutover_r15` and external ignored Round 11; exact final C0 tree attestation remains an external handoff input by design.
 
 ## Independent Cutover Integrity Audit Gate
 
@@ -1404,10 +1468,11 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Cutover signals in scope:** `canonical cutover|legacy-path retirement`
 - **Package mode:** `bounded-file-set`
 - **Canonical multi-lane audit protocol:** `audit-protocol-triple-review required additively before Completed`
-- **Audit session / round evidence:** `n/a until run`
+- **Audit session / round evidence:** external ignored session `artifacts/tmp/uninotas-canonical-foundation-transition-audit`; Round 11 resolved clean with exact candidate/path binding and zero findings in all three lanes.
 - **Audit focus:** `true canonical path|current-target labels|hidden fallback|validator preservation`
-- **Cutover audit status:** `not_run`
-- **Findings summary:** `pending`
+- **Cutover audit status:** `no_material_findings`
+- **Findings summary:** Round 11 confirmed canonical UniNotas identity, truthful current/target ownership, retirement of the legacy decision path, absence of successful-log fallback and bounded C0/C1/C1R cutover/recovery semantics.
+- **Evidence / reference:** external ignored Round 11 cutover-integrity result; final C0 candidate OID/path binding is refreshed after this tracked status sync.
 
 ## Post-Push Attestation (Atomic Final Closeout)
 
@@ -1424,17 +1489,17 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
-- **Disposition reason:** planejamento e aprovação ainda não concluídos.
+- **Disposition reason:** implementation locally complete; independent delivery gates and C0 publication remain.
 - **Post-commit/push status:** `pending`
-- **Next path/status action:** aguardar `APROVADO` explícito cobrindo o contrato integral e o aceite de `RISK-HIST-01`; então iniciar implementação test-first.
+- **Next path/status action:** finish independent reviews, publish/verify C0, then form atomic C1
 
 ## Module Consolidation Gate
 
-- [ ] Canonical module docs updated with TD-01..TD-07 and canonical decision migration D-01..D-11.
-- [ ] Decision promotion ledger links to this TODO.
-- [ ] Prior decisions preserved or intentionally superseded.
-- [ ] Conflicting tactical notes replaced by canonical references.
-- [ ] TODO/module links updated after lifecycle movement.
+- [x] Canonical module docs updated with TD-01..TD-07 and canonical decision migration D-01..D-11.
+- [x] Decision promotion ledger links to this TODO.
+- [x] Prior decisions preserved or intentionally superseded.
+- [x] Conflicting tactical notes replaced by canonical references.
+- [x] TODO/module links updated for the current active path; the atomic C1 validator enforces the completed-path rewrite.
 
 ## Commands (Run Locally)
 
@@ -1460,8 +1525,8 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - `git -C uninotas-foundation diff --name-status --find-renames 0fe906c1e496a1d38f1603cf188c224711011c32 --`
 - Audit package start: `python3 delphi-ai/skills/audit-protocol-triple-review/scripts/triple_audit_session.py start --package uninotas-foundation/artifacts/analysis/uninotas-canonical-foundation-transition-delivery-package.md --todo uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md --extra-lane cutover-integrity --run-root uninotas-foundation/artifacts/tmp/uninotas-canonical-foundation-transition-audit`
 - Final delivery authority/completion: run on the same uncommitted candidate C1 tree against the completed path, after atomic-closeout diff validation.
-- C1 atomic closeout boundary: `python3 uninotas-foundation/deterministic/validate_closeout_diff.py --repo uninotas-foundation --base <C0> --candidate-tree <CANDIDATE_TREE_OID> --todo todos/completed/process/TODO-uninotas-canonical-foundation-transition.md`
-- Failed-C1 recovery boundary: `python3 uninotas-foundation/deterministic/validate_closeout_diff.py --mode recovery --repo uninotas-foundation --base <FAILED_C1> --candidate-tree <CANDIDATE_TREE_OID> --todo todos/active/process/TODO-uninotas-canonical-foundation-transition.md`
+- C1 atomic closeout boundary: `python3 uninotas-foundation/deterministic/validate_closeout_diff.py --repo uninotas-foundation --base <C0> --candidate-tree <CANDIDATE_TREE_OID> --todo todos/completed/process/TODO-uninotas-canonical-foundation-transition.md --implementation-reviews <IGNORED_C0_REVIEWS_JSON> --focused-review <IGNORED_C1_FOCUSED_REVIEW_JSON>`
+- Failed-C1 recovery boundary: `python3 uninotas-foundation/deterministic/validate_closeout_diff.py --mode recovery --repo uninotas-foundation --base <FAILED_C1> --candidate-tree <CANDIDATE_TREE_OID> --todo todos/active/process/TODO-uninotas-canonical-foundation-transition.md --implementation-reviews <IGNORED_C0_REVIEWS_JSON> --focused-review <IGNORED_C1R_FOCUSED_REVIEW_JSON>`
 - Failed-C1 recovery tip precondition: `REMOTE_MAIN_OID=$(git -C uninotas-foundation ls-remote --exit-code origin refs/heads/main | awk 'NR==1 {print $1}'); test "$REMOTE_MAIN_OID" = "<FAILED_C1>" && test "$(git -C uninotas-foundation rev-parse origin/main)" = "<FAILED_C1>" && test "$(git -C uninotas-foundation rev-parse HEAD)" = "<FAILED_C1>" && test -z "$(git -C uninotas-foundation status --porcelain)"` (repeat fresh `ls-remote==FAILED_C1` immediately before commit and push; local `origin/main` is additional only; mismatch stops for reconciliation).
 - C1 completed-path structure: `python3 delphi-ai/tools/todo_deterministic_validator.py --todo uninotas-foundation/todos/completed/process/TODO-uninotas-canonical-foundation-transition.md`
 - C1 completed-path diff gate: `python3 delphi-ai/tools/todo_diff_expectation_guard.py uninotas-foundation/todos/completed/process/TODO-uninotas-canonical-foundation-transition.md --repo-root uninotas-foundation`
@@ -1471,12 +1536,12 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - Pre-move closeout after `DEP-CLOSEOUT-01`: `python3 delphi-ai/tools/todo_closeout_guard.py uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md --repo uninotas-foundation` (must report `path_state=active`, not only `go`).
 - Git commit authority: `python3 delphi-ai/tools/git_write_authority_guard.py --repo uninotas-foundation --action git-commit --authority-surface foundation_documentation`
 - Git push authority: `python3 delphi-ai/tools/git_write_authority_guard.py --repo uninotas-foundation --action git-push --authority-surface foundation_documentation`
-- C0 CAS promotion/evidence: `python3 uninotas-foundation/deterministic/closeout_handoff.py promote --phase c0 --repo uninotas-foundation --expected-remote <BASE_REMOTE_OID> --new-commit <C0> --candidate-tree <C0_TREE> --consumer-bindings <IGNORED_C0_BINDINGS_JSON> --journal uninotas-foundation/artifacts/tmp/uninotas-c0-intent.json --output uninotas-foundation/artifacts/tmp/uninotas-c0-promotion.json`
+- C0 CAS promotion/evidence: `python3 uninotas-foundation/deterministic/closeout_handoff.py promote --phase c0 --repo uninotas-foundation --expected-remote <BASE_REMOTE_OID> --new-commit <C0> --candidate-tree <C0_TREE> --delivery-baseline 0fe906c1e496a1d38f1603cf188c224711011c32 --consumer-bindings <IGNORED_C0_BINDINGS_JSON> --implementation-reviews <IGNORED_C0_IMPLEMENTATION_REVIEWS_JSON> --delphi-root delphi-ai --journal uninotas-foundation/artifacts/tmp/uninotas-c0-intent.json --output uninotas-foundation/artifacts/tmp/uninotas-c0-promotion.json`
 - Any-phase strict resume: `python3 uninotas-foundation/deterministic/closeout_handoff.py resume --phase <c0|c1|c1r> --repo uninotas-foundation --journal <IGNORED_PHASE_INTENT_JSON> --output <IGNORED_PHASE_EVIDENCE_JSON>`
 - C0 post-publish verification: `python3 uninotas-foundation/deterministic/closeout_handoff.py verify --phase c0 --repo uninotas-foundation --phase-evidence uninotas-foundation/artifacts/tmp/uninotas-c0-promotion.json --delphi-root delphi-ai --output uninotas-foundation/artifacts/tmp/uninotas-c0-post-verify.json`
-- C1 CAS promotion/evidence: `python3 uninotas-foundation/deterministic/closeout_handoff.py promote --phase c1 --repo uninotas-foundation --expected-remote <C0> --new-commit <C1> --candidate-tree <C1_TREE> --consumer-bindings <IGNORED_C1_BINDINGS_JSON> --base-evidence uninotas-foundation/artifacts/tmp/uninotas-c0-promotion.json --c0-post-evidence uninotas-foundation/artifacts/tmp/uninotas-c0-post-verify.json --proof-bridge <IGNORED_C1_BRIDGE_JSON> --journal uninotas-foundation/artifacts/tmp/uninotas-c1-intent.json --output uninotas-foundation/artifacts/tmp/uninotas-c1-promotion.json`
+- C1 CAS promotion/evidence: `python3 uninotas-foundation/deterministic/closeout_handoff.py promote --phase c1 --repo uninotas-foundation --expected-remote <C0> --new-commit <C1> --candidate-tree <C1_TREE> --consumer-bindings <IGNORED_C1_BINDINGS_JSON> --base-evidence uninotas-foundation/artifacts/tmp/uninotas-c0-promotion.json --c0-post-evidence uninotas-foundation/artifacts/tmp/uninotas-c0-post-verify.json --implementation-reviews <IGNORED_C0_IMPLEMENTATION_REVIEWS_JSON> --focused-review <IGNORED_C1_FOCUSED_REVIEW_JSON> --journal uninotas-foundation/artifacts/tmp/uninotas-c1-intent.json --output uninotas-foundation/artifacts/tmp/uninotas-c1-promotion.json`
 - C1 production activation: `python3 uninotas-foundation/deterministic/closeout_handoff.py activate --phase c1 --repo uninotas-foundation --c0-evidence uninotas-foundation/artifacts/tmp/uninotas-c0-promotion.json --c0-post-evidence uninotas-foundation/artifacts/tmp/uninotas-c0-post-verify.json --c1-evidence uninotas-foundation/artifacts/tmp/uninotas-c1-promotion.json --delphi-root delphi-ai --output uninotas-foundation/artifacts/tmp/uninotas-closeout-handoff-v1.json`
-- C1R CAS promotion/evidence: `python3 uninotas-foundation/deterministic/closeout_handoff.py promote --phase c1r --repo uninotas-foundation --expected-remote <FAILED_C1> --new-commit <C1R> --candidate-tree <C1R_TREE> --consumer-bindings <IGNORED_C1R_BINDINGS_JSON> --base-evidence <IGNORED_FAILED_C1_EVIDENCE_JSON> --c0-post-evidence uninotas-foundation/artifacts/tmp/uninotas-c0-post-verify.json --proof-bridge <IGNORED_C1R_BRIDGE_JSON> --journal uninotas-foundation/artifacts/tmp/uninotas-c1r-intent.json --output uninotas-foundation/artifacts/tmp/uninotas-c1r-promotion.json`
+- C1R CAS promotion/evidence: `python3 uninotas-foundation/deterministic/closeout_handoff.py promote --phase c1r --repo uninotas-foundation --expected-remote <FAILED_C1> --new-commit <C1R> --candidate-tree <C1R_TREE> --consumer-bindings <IGNORED_C1R_BINDINGS_JSON> --base-evidence <IGNORED_FAILED_C1_EVIDENCE_JSON> --c0-post-evidence uninotas-foundation/artifacts/tmp/uninotas-c0-post-verify.json --implementation-reviews <IGNORED_C0_IMPLEMENTATION_REVIEWS_JSON> --focused-review <IGNORED_C1R_FOCUSED_REVIEW_JSON> --failure-tuple <IGNORED_CANONICAL_FAILURE_TUPLE_JSON> --journal uninotas-foundation/artifacts/tmp/uninotas-c1r-intent.json --output uninotas-foundation/artifacts/tmp/uninotas-c1r-promotion.json`
 - C1R recovery activation: `python3 uninotas-foundation/deterministic/closeout_handoff.py activate --phase c1r --repo uninotas-foundation --c0-evidence uninotas-foundation/artifacts/tmp/uninotas-c0-promotion.json --c0-post-evidence uninotas-foundation/artifacts/tmp/uninotas-c0-post-verify.json --failed-c1-evidence <IGNORED_FAILED_C1_EVIDENCE_JSON> --c1r-evidence uninotas-foundation/artifacts/tmp/uninotas-c1r-promotion.json --failure-tuple <IGNORED_FAILURE_TUPLE_JSON> --delphi-root delphi-ai --output uninotas-foundation/artifacts/tmp/uninotas-recovery-handoff-v1.json`
 - Post-commit/push active scan: `python3 delphi-ai/tools/todo_closeout_guard.py --all-active --repo uninotas-foundation` (must report the real nonzero active TODO count, not only `go`).
 - History trust remote observation: `git -C uninotas-foundation ls-remote --exit-code origin refs/heads/main`
@@ -1488,7 +1553,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - Candidate index/worktree equality: `git -C uninotas-foundation diff --quiet -- && test -z "$(git -C uninotas-foundation ls-files --others --exclude-standard)"` after staging the complete phase allowlist.
 - Candidate tree capture/recheck: `git -C uninotas-foundation write-tree` (record as `<CANDIDATE_TREE_OID>`), then rerun immediately before commit and require the same OID.
 - Worktree-proxy binding wrapper: before and after each non-tree-native command, require candidate index/worktree equality and `test "$(git -C uninotas-foundation write-tree)" = "<CANDIDATE_TREE_OID>"`; any mismatch invalidates the command output and all later attestations.
-- Human-review binding: record ignored/external attestation `{candidate_tree_oid, exact_path_set, reviewer_or_session, outcome}` after capture; candidate OID change requires rerun and no self-dependent OID is persisted in the candidate.
+- Human-review binding: record ignored/external implementation attestation `{consumer_id, phase:"C0", candidate_tree_oid, exact_path_set, reviewer_or_session, outcome:"no_material_findings", scope:"implementation_content"}` after capture; focused C1/C1R omits only `scope`; `reviewer_or_session` follows the visible ASCII grammar `[A-Za-z0-9][A-Za-z0-9._:@/-]{0,127}`; candidate OID change requires rerun and no self-dependent OID is persisted in the candidate.
 - Commit tree binding: `test "$(git -C uninotas-foundation rev-parse HEAD^{tree})" = "<CANDIDATE_TREE_OID>"` immediately after commit and before push.
 
 ### Final-tree closeout (Required Order)

@@ -1,6 +1,10 @@
-# Monitor de Notas Foundation
+# UniNotas Foundation
 
-`uninotas-foundation` is the canonical product documentation for Monitor de Notas. It records verified product boundaries; it does not authorize runtime changes.
+## Canonical product identity
+
+**UniNotas** is the canonical product. `MonitorDeNotas` remains the technical repository name; this Foundation is the durable product authority.
+
+`core_scope=uninotas`. `MonitorDeNotas` remains the technical repository name. This Foundation records current runtime facts and target architecture separately; PACED is delivery governance, not either authority axis.
 
 Start with the [mandate](project_mandate.md), [constitution](project_constitution.md), [domain entities](domain_entities.md), [technology baseline](technology_baseline.md), lifecycle record, and [module index](modules/README.md).
 

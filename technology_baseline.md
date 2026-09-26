@@ -1,4 +1,8 @@
-# Monitor de Notas — Technology Baseline
+# UniNotas — Technology Baseline
+
+## UniNotas baseline label
+
+UniNotas preserves these observed technologies without implying runtime changes.
 
 Verified on 2026-09-24 from the read-only product tree.
 
@@ -9,4 +13,4 @@ Verified on 2026-09-24 from the read-only product tree.
 | Data | PostgreSQL via Prisma; raw SQL for external `logs` | `../backend/prisma/`, `../backend/src/logs/` |
 | Runtime | Docker and Railway configuration | `../Dockerfile`, `../docker-compose.yml`, `../railway.json` |
 
-This is navigation evidence, not authorization to change infrastructure, providers, secrets, or runtime health.
+This is current-runtime navigation evidence, not authorization to change infrastructure, providers, secrets, or runtime health. The Smart Notas target does not imply an implemented adapter.
