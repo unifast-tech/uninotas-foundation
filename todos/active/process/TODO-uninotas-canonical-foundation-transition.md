@@ -42,7 +42,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `none`
-- **Next exact step:** executar arquitetura/crítica R8F sem contexto sobre a baseline renovada e concluir os guards pré-aprovação.
+- **Next exact step:** integrar os achados R8F, publicar a baseline R8G, repetir arquitetura/crítica sem contexto e concluir os guards pré-aprovação.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -78,14 +78,14 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 - `Pending`: nenhuma entrega material foi concluída.
 - `Local-Implemented`: o cutover documental e o harness foram implementados e validados localmente.
 - `Lane-Promoted`: n/a para esta autoridade documental single-branch; pushes de baseline de revisão não são delivery promotion.
-- `Production-Ready`: a entrega foi validada e publicada em `main` após todos os gates.
+- `Production-Ready`: a entrega usa evidência em duas fases: commit C1 contém a árvore de delivery pós-move validada; commit C2 contém somente a atestação de C1 no TODO completed. Ambos são publicados em `main`, e o SHA de C2 é verificado/reportado externamente no handoff sem tentar autorreferência.
 
 ## Execution Lane Tracking (Required)
 
 - **Local implementation branches:** `uninotas-foundation:main` (autoridade single-branch/single-checkout)
 - **Promotion lane path:** `main -> origin/main`
 - **Lane-promoted threshold for this TODO:** `n/a — single-branch authority`
-- **Production-ready threshold for this TODO:** `origin/main` após gates de conclusão
+- **Production-ready threshold for this TODO:** `origin/main` após C1 (delivery tree) + C2 (attestation-only) e verificação externa dos dois OIDs
 
 ## Promotion Evidence (Required Before Lane-Promoted / Production-Ready)
 
@@ -99,7 +99,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 - **Policy:** `strict; unclassified or forbidden paths block delivery`
 - **User validation:** `required on deviation`
 - **Comparison mode:** `working_tree`
-- **Canonical path-set enumerator:** `bash -lc '{ git -C uninotas-foundation diff --name-only 0fe906c1e496a1d38f1603cf188c224711011c32 --; git -C uninotas-foundation ls-files --others --exclude-standard; } | LC_ALL=C sort -u'`; esta é a única enumeração de paths para tracked/staged/unstaged e untracked não ignorado, e `--name-only` expande ambos os endpoints de rename.
+- **Canonical path-set enumerator:** após implementação, `python3 uninotas-foundation/deterministic/enumerate_change_paths.py --repo uninotas-foundation --baseline 0fe906c1e496a1d38f1603cf188c224711011c32`; o helper usa `git diff --no-renames --name-only` + `git ls-files --others --exclude-standard`, normaliza paths relativos e aplica `LC_ALL=C`/ordenação única, garantindo source e destination como D+A mesmo quando a status view reconhece `R`. Antes do helper existir, o preflight usa exatamente o bootstrap equivalente `bash -lc '{ git -C uninotas-foundation diff --no-renames --name-only 0fe906c1e496a1d38f1603cf188c224711011c32 --; git -C uninotas-foundation ls-files --others --exclude-standard; } | LC_ALL=C sort -u'`; depois da criação, o fallback inline é proibido.
 - **Status/rename evidence view:** `bash -lc '{ git -C uninotas-foundation diff --name-status --find-renames 0fe906c1e496a1d38f1603cf188c224711011c32 --; git -C uninotas-foundation ls-files --others --exclude-standard | sed "s#^#A\\t#"; } | LC_ALL=C sort -u -k2,2 -k1,1'`; esta view não define o path set e serve somente para tipos de mudança/rename.
 - **Enumerator consumers:** profile scope consome diretamente o canonical path-set enumerator; diff-expectation reconciliation e revisão humana comparam seus paths contra a mesma saída byte-a-byte. Divergência, path ausente ou path extra bloqueia entrega.
 - **Rename evidence:** antes de ambos os lados estarem visíveis ao Git, o par autorizado `decisions/monitor-de-notas-foundation-decisions.md` (`D`) + `decisions/uninotas-foundation-decisions.md` (`A`) é aceito como migração pendente; após staging e no commit final, `git diff --name-status --find-renames` deve reconhecê-lo como `R` ou a revisão registra explicitamente o par D/A com conteúdo/proveniência equivalentes.
@@ -145,6 +145,8 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 | `uninotas-foundation` | `todos/active/process/TODO-uninotas-smart-notas-api-and-fiscal-context-discovery.md` | `A, M` | ledger de descoberta e sequência corrigida |
 | `uninotas-foundation` | `todos/active/process/TODO-uninotas-canonical-foundation-transition.md` | `A, M, D, R` | autoridade tática/evidência e origem do closeout final |
 | `uninotas-foundation` | `todos/completed/process/TODO-uninotas-canonical-foundation-transition.md` | `A, R` | destino exato autorizado somente no closeout após todos os gates |
+| `uninotas-foundation` | `deterministic/capability_identity_ledger.json` | `A` | oracle append-only de identidade, independente da projeção mutável do registry |
+| `uninotas-foundation` | `deterministic/enumerate_change_paths.py` | `A` | única implementação executável do canonical path set pós-approval |
 | `uninotas-foundation` | `deterministic/validate_foundation.py` | `M` | validador evolutivo fail-closed |
 | `uninotas-foundation` | `deterministic/tests/**` | `A, M` | mutações e regressões do validator |
 
@@ -172,15 +174,16 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 - [ ] `DOD-01` Identidade/mandato usam UniNotas, todos os anchors usam `core_scope=uninotas` e a constituição declara os `Namespaces` verificados, sem renomear o repositório técnico.
 - [ ] `DOD-02` Constituição e decisões registram a topologia externa e a separação de fontes aprovada.
 - [ ] `DOD-03` Unifast/Prosperar são contextos fiscais explícitos e não tenants.
-- [ ] `DOD-04` Registry e módulos distinguem `current_runtime` de `target_planned`, preservam identidades no `baseline_capability_catalog` e registram precedência, predecessor/sucessor e condição de promoção/retirada, sem declarar código futuro como implementado.
+- [ ] `DOD-04` Registry e módulos distinguem `current_runtime` de `target_planned`, preservam identidades no `baseline_capability_catalog` confrontado com o identity ledger independente e registram precedência, predecessor/sucessor e condição de promoção/retirada, sem declarar código futuro como implementado.
 - [ ] `DOD-05` Notas/documentos, falhas de integração e casos operacionais têm owners canônicos distintos.
-- [ ] `DOD-06` Validator e suíte rejeitam regressões de identidade, decisão/link canônico obsoleto, ownership, tenancy, privacidade, symlink, legado e publicação, além de quebra da bijeção módulo/catálogo, ID/path/transition ou membership duplicado, remoção/rename/alias de capability baseline, capability current direta sem origem, módulo retired ainda ativo/capable ou com documento/manifest entry publicado, módulo ativo vazio ou incompatível com sua cardinalidade runtime, sequence gap, fork, ciclo, predecessor desconhecido/nulo em transferência, chain edge ou origin inválida, aresta não terminal planned, interseção `owned_capabilities ∩ planned_capabilities`, target com `owned_capabilities`, aresta terminal planned sem exatamente um owner atual/predecessor ou successor membership, planned membership órfã sem aresta terminal correspondente, capability transferida/planned ou terminal completed sem o owner exigido, dupla autoridade runtime, successor planejado duplicado e planned membership obsoleto após promoção; fixtures positivas cobrem estado inicial, ownership current estável respaldado pelo baseline catalog sem transição sintética, capability nova, promoção parcial/final, tombstone retired sem documento, predecessor retirado e segundo hop planned/completed.
+- [ ] `DOD-06` Validator e suíte rejeitam regressões de identidade, decisão/link canônico obsoleto, ownership, tenancy, privacidade, symlink, legado e publicação, além de quebra da bijeção módulo/catálogo, ID/path/transition ou membership duplicado, remoção/rename/alias — inclusive coordenada — de capability baseline/new contra digest ou histórico Git do identity ledger, capability current direta sem origem, módulo retired ainda ativo/capable ou com documento/manifest entry publicado, módulo ativo vazio ou incompatível com sua cardinalidade runtime, sequence gap, fork, ciclo, predecessor desconhecido/nulo em transferência, chain edge ou origin inválida, aresta não terminal planned, interseção `owned_capabilities ∩ planned_capabilities`, target com `owned_capabilities`, aresta terminal planned sem exatamente um owner atual/predecessor ou successor membership, planned membership órfã sem aresta terminal correspondente, capability transferida/planned ou terminal completed sem o owner exigido, dupla autoridade runtime, successor planejado duplicado e planned membership obsoleto após promoção; fixtures positivas cobrem estado inicial, ownership current estável respaldado pelo baseline catalog/identity ledger sem transição sintética, append de capability nova, promoção parcial/final, tombstone retired sem documento, predecessor retirado e segundo hop planned/completed.
 - [ ] `DOD-07` Os artefatos atuais pertencem ao manifesto e a validação Foundation passa sem `frozen lifecycle tree mismatch`.
 - [ ] `DOD-08` Nenhum segredo, valor real de CNPJ/identificador do provedor, payload/resposta privada ou URL capturada de documento foi persistido; CNPJ válido é coberto deterministicamente e identificador/URL contextual por regra precisa mais revisão de diff.
 - [ ] `DOD-09` O roadmap aponta para o TODO NestJS de leitura como próximo slice, sem lhe conceder autoridade antecipada.
 - [ ] `DOD-10` O arquivo/índice canônico de decisões migra para UniNotas sem links obsoletos nem reutilização semântica de IDs: D-01..D-05 preservam sua proveniência/handling e D-06..D-11 recebem somente autoridades novas.
 - [ ] `DOD-11` Antes de qualquer claim `Local-Implemented`/closeout, o `todo_closeout_guard.py` corrigido reconhece este path como `active` e o scan `--all-active --repo uninotas-foundation` encontra os TODOs ativos reais; falso `go` com `path_state=other` ou `todo_count=0` bloqueia entrega.
-- [ ] `DOD-12` O closeout move este TODO e atualiza manifesto/links no mesmo diff; validator Foundation, diff expectation, diff check, deterministic TODO validation e guards de authority/completion/closeout passam novamente sobre a árvore final, e `Production-Ready` aponta para o commit final publicado — nunca para evidência pré-move.
+- [ ] `DOD-12` O closeout move este TODO e atualiza manifesto/links no mesmo diff; validator Foundation, diff expectation, diff check, deterministic TODO validation e guards de authority/completion/closeout passam sobre C1. Após publicar C1, um C2 restrito ao TODO completed registra `delivery_tree_commit=C1` e a prova remota; C2 é revalidado/publicado, e seu próprio SHA fica no handoff externo para evitar autorreferência.
+- [ ] `DOD-13` `deterministic/enumerate_change_paths.py` é a única implementação pós-approval do canonical path set, sempre emite ambos os endpoints como paths individuais, inclui untracked não ignorado e alimenta profile/diff/human review sem pipelines duplicados.
 
 ## Validation Steps
 
@@ -190,7 +193,8 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 - [ ] `VAL-04` Executar da raiz do workspace `python3 delphi-ai/tools/todo_diff_expectation_guard.py uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md --repo-root uninotas-foundation`, além dos guards Delphi de autoridade, conclusão e cutover definidos neste TODO.
 - [ ] `VAL-05` Executar o canonical path-set enumerator, reconciliar exatamente sua saída com o diff-expectation guard e profile scope, executar `git -C uninotas-foundation diff --check 0fe906c1e496a1d38f1603cf188c224711011c32 --` e, após staging/final commit, executar separadamente a status/rename evidence view.
 - [ ] `VAL-06` Após o TODO Delphi separado reparar o guard standalone, executar os dois comandos de closeout deste contrato e verificar semanticamente `path_state=active` no path individual e `todo_count>=1` no scan ativo; exit code/`go` isolado não basta.
-- [ ] `VAL-07` Executar a sequência atômica pós-move de `DOD-12` usando `todos/completed/process/TODO-uninotas-canonical-foundation-transition.md`, publicar o commit final e só então executar o scan `--all-active --repo uninotas-foundation`.
+- [ ] `VAL-07` Executar a sequência pós-move de `DOD-12` usando `todos/completed/process/TODO-uninotas-canonical-foundation-transition.md`, publicar/verificar C1, criar/revalidar/publicar C2 attestation-only e só então executar o scan `--all-active --repo uninotas-foundation`.
+- [ ] `VAL-08` Executar `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_enumerate_change_paths.py` cobrindo untracked, staged D/A e rename reconhecido como R, sempre com source+destination no path set.
 
 ## Completion Evidence Matrix (Required Before Delivery Claim)
 
@@ -207,14 +211,16 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 | `DOD-09` | Definition of Done | sequência do roadmap | doc+review | `system_roadmap.md` + decisão de aderência | n/a | planned | não autoriza backend |
 | `DOD-10` | Definition of Done | migração estável de decisões | doc+test | decision map/index + `test_decision_id_migration_and_links` | local | planned | D-01..D-05 não mudam de significado |
 | `DOD-11` | Definition of Done | closeout guard cobre Foundation standalone | external guard+regression | TODO Delphi concluído + path state/count reais | local | planned | precondição externa satisfeita; repetir antes do closeout |
-| `DOD-12` | Definition of Done | árvore final pós-move revalidada e publicada | guard+test+git | sequência atômica final + commit SHA remoto | local/origin | planned | evidência pré-move não autoriza Production-Ready |
+| `DOD-12` | Definition of Done | árvore final pós-move revalidada e publicada sem SHA autorreferente | guard+test+git | C1 delivery tree + C2 attestation-only + handoff externo | local/origin | planned | evidência pré-move não autoriza Production-Ready |
+| `DOD-13` | Definition of Done | canonical path set único e completo | tool+test | helper + casos `CHANGESET-*` | local | planned | status/rename view não é autoridade de paths |
 | `VAL-01` | Validation Steps | suíte determinística | test | comando unittest exato | local | planned | registrar duração e RED/GREEN |
 | `VAL-02` | Validation Steps | Foundation validator | test | comando validator exato | local | planned | deve passar integralmente |
 | `VAL-03` | Validation Steps | PACED readiness | environment | comando Git Bash exato | local | planned | requer `PACED-Ready` |
 | `VAL-04` | Validation Steps | guards de autoridade/delivery/cutover | guard | comandos exatos em Commands | local | planned | todos devem retornar go |
 | `VAL-05` | Validation Steps | diff baseline-aware | review | dois comandos Git exatos | local | planned | inclui rename detection |
 | `VAL-06` | Validation Steps | closeout sem falso go | guard | comando individual + `--all-active --repo uninotas-foundation` | local | planned | preflight provou path_state active e count 2; repetir antes do closeout |
-| `VAL-07` | Validation Steps | validação pós-move/remanifest | test+guard+git | comandos `Final-tree closeout` abaixo | local/origin | planned | completed path + manifesto no mesmo diff |
+| `VAL-07` | Validation Steps | validação pós-move/remanifest e atestação | test+guard+git | comandos `Final-tree closeout` abaixo | local/origin | planned | completed path + manifesto em C1; somente evidence fields em C2 |
+| `VAL-08` | Validation Steps | endpoints/untracked do path set | test | `test_enumerate_change_paths.py` | local | planned | staging e rename detection cobertos |
 
 ### DOD-06 Validator Case Matrix
 
@@ -230,6 +236,7 @@ Os nomes abaixo são o contrato mínimo de fixtures/builders e testes. Cada test
 | `CAP-POS-06` | positive | `second_hop_completed` | histórico A→B e terminal B→C completed governam C somente |
 | `CAP-POS-07` | positive | `stable_current_ownership_without_transition` | capability baseline sem transferência permanece em exatamente um owner current e não ganha proveniência sintética |
 | `CAP-POS-08` | positive+full-tree | `retired_catalog_tombstone_without_document` | predecessor retired permanece no catálogo/histórico por ID/path, enquanto seu documento e manifest entry não existem |
+| `CAP-POS-09` | positive | `append_new_origin_identity` | capability `origin=new` é anexada ao ledger e ligada à transition sequence 1 correspondente |
 | `CAP-NEG-01` | negative | `owned_planned_overlap` | `owned_capabilities intersects planned_capabilities` |
 | `CAP-NEG-02` | negative | `duplicate_current_owner` | `capability has multiple current owners` |
 | `CAP-NEG-03` | negative | `planned_terminal_missing_owner` | `planned transfer predecessor is not the current owner` |
@@ -264,6 +271,8 @@ Os nomes abaixo são o contrato mínimo de fixtures/builders e testes. Cada test
 | `CAP-NEG-32` | negative | `baseline_capability_deleted` | `baseline capability is missing from governed ownership or transition state` |
 | `CAP-NEG-33` | negative | `baseline_capability_renamed_or_aliased` | `baseline capability id is immutable and aliases are forbidden` |
 | `CAP-NEG-34` | negative | `uncataloged_capability_inserted_directly_as_owned` | `non-baseline capability requires origin new transition history` |
+| `CAP-NEG-35` | negative | `coordinated_initial_identity_erasure` | `frozen initial capability identity digest mismatch` mesmo após remover registry/ownership/transitions relacionados |
+| `CAP-NEG-36` | negative+git-history | `coordinated_new_origin_identity_erasure` | `capability identity ledger removed or changed historical record` mesmo após remover transition/memberships relacionados |
 | `GUARD-ID-01` | negative | `legacy_identity_or_decision_link` | identidade/índice canônico legado é rejeitado |
 | `GUARD-TENANCY-01` | negative | `fiscal_context_as_tenant` | contexto fiscal tratado como tenancy é rejeitado |
 | `GUARD-PUB-01` | negative | `unmanifested_or_missing_path` | árvore diverge do manifesto |
@@ -273,14 +282,25 @@ Os nomes abaixo são o contrato mínimo de fixtures/builders e testes. Cada test
 | `GUARD-PRIV-02` | negative | `concrete_provider_identifier_context` | valor concreto em chave provider-ID reconhecida é rejeitado com diagnóstico específico |
 | `GUARD-PRIV-03` | negative | `captured_document_url_context` | URL concreta em chave PDF/XML/DANFE/document reconhecida é rejeitada com diagnóstico específico |
 | `GUARD-PRIV-POS-01` | positive | `official_url_generic_id_and_placeholders` | URL oficial da especificação, ID genérico e placeholders permitidos não geram falso positivo |
+| `GUARD-PRIV-04` | negative | `concrete_credential_key_matrix` | token, authorization/bearer ou valor concreto sob chave CNPJ reconhecida é rejeitado em cada sintaxe, mesmo quando o CNPJ não passa checksum |
+| `GUARD-PRIV-POS-02` | positive | `credential_placeholder_matrix` | cada placeholder permitido é aceito para cada família de chave e sintaxe suportada, inclusive fenced examples |
 | `REVIEW-PRIV-01` | manual review | checklist de diff limitado aos paths esperados | nenhum valor contextual privado escapa das regras automáticas; evidência registra reviewer, commit, paths e resultado sem copiar o valor sensível |
+
+### Canonical Change-Set Case Matrix
+
+| Case ID | Fixture | Expected assertion |
+| --- | --- | --- |
+| `CHANGESET-POS-01` | `untracked_nonignored_file` | path untracked aparece exatamente uma vez |
+| `CHANGESET-POS-02` | `staged_delete_and_add_pair` | source D e destination A aparecem como dois paths individuais |
+| `CHANGESET-POS-03` | `git_recognized_rename` | mesmo quando status view retorna R, canonical path set contém source e destination individualmente |
+| `CHANGESET-POS-04` | `ignored_file` | path ignorado não aparece |
 
 ## External Dependency Readiness
 
 | Dependency | Why It Matters | Status | Last Verified | Verification Method | Adjustment / Workaround |
 | --- | --- | --- | --- | --- | --- |
 | Smart Notas OpenAPI | fundamenta a arquitetura-alvo | healthy | 2026-09-25 | fingerprint e probes redigidos no ledger | nenhuma chamada nesta entrega |
-| Git remote Foundation | necessário para baseline de revisão | healthy | 2026-09-25 | `main`/`origin/main@939d3df`; baseline material R8F publicada; guard main-only instalado e Git for Windows é o writer válido | nenhum ajuste |
+| Git remote Foundation | necessário para baseline de revisão | healthy | 2026-09-25 | `main`/`origin/main@c366a0e`; baseline material R8F `939d3df` alcançável; guard main-only instalado e Git for Windows é o writer válido | publicar baseline R8G após integração |
 | `DEP-CLOSEOUT-01` Delphi standalone closeout support | impede falso `go` e stale active TODO no closeout | healthy/resolved | 2026-09-25 | TODO Delphi concluído em `6dc5bd4`/`0e54e2a`; comando individual retornou `path_state=active`; `--all-active --repo uninotas-foundation` retornou `todo_count=2`, ambos paths ativos reais e zero violações | consumir a correção já publicada e repetir os dois comandos antes do closeout |
 
 ## Profile Scope & Handoffs (Required Before `APROVADO`)
@@ -288,7 +308,7 @@ Os nomes abaixo são o contrato mínimo de fixtures/builders e testes. Cada test
 - **Primary execution profile:** `strategic-cto`
 - **Active technical scope:** `cross-stack`
 - **Expected supporting profiles:** `operational-coder; assurance-tester-quality`
-- **Scope-check command:** `bash -lc 'mapfile -t paths < <({ git -C uninotas-foundation diff --name-only 0fe906c1e496a1d38f1603cf188c224711011c32 --; git -C uninotas-foundation ls-files --others --exclude-standard; } | sort -u | sed "s#^#foundation_documentation/#"); ((${#paths[@]} > 0)) && python3 delphi-ai/tools/profile_scope_check.py --profile strategic-cto "${paths[@]}"'`
+- **Scope-check command:** pre-implementation bootstrap: `bash -lc 'mapfile -t paths < <({ git -C uninotas-foundation diff --no-renames --name-only 0fe906c1e496a1d38f1603cf188c224711011c32 --; git -C uninotas-foundation ls-files --others --exclude-standard; } | LC_ALL=C sort -u | sed "s#^#foundation_documentation/#"); ((${#paths[@]} > 0)) && python3 delphi-ai/tools/profile_scope_check.py --profile strategic-cto "${paths[@]}"'`; pós-criação do helper: `bash -lc 'mapfile -t paths < <(python3 uninotas-foundation/deterministic/enumerate_change_paths.py --repo uninotas-foundation --baseline 0fe906c1e496a1d38f1603cf188c224711011c32 | sed "s#^#foundation_documentation/#"); ((${#paths[@]} > 0)) && python3 delphi-ai/tools/profile_scope_check.py --profile strategic-cto "${paths[@]}"'`.
 - **Scope-check interpretation:** `no changed paths detected` é inválido para esta entrega; `allowed` segue o profile e `review required|unknown` deve ser reconciliado pela Handoff Log, não tratado como passe silencioso.
 
 ### Handoff Log
@@ -334,6 +354,10 @@ O mesmo JSON terá um `baseline_capability_catalog` histórico e imutável, auto
 | `runtime_topology` | `runtime-and-deployment` |
 | `health_read` | `runtime-and-deployment` |
 
+`deterministic/capability_identity_ledger.json` é o oracle de enforcement independente da projeção mutável acima. Ele contém registros normalizados append-only: baseline usa `capability_id`, `origin=baseline`, `baseline_owner`; capability nova usa `capability_id`, `origin=new`, `origin_transition_id`. O seed inicial completo — as nove rows baseline mais `fiscal_document_read` como primeiro registro `origin=new` ligado a `fiscal-document-read-001` — é ancorado por `FROZEN_INITIAL_CAPABILITY_IDENTITY_DIGEST` em `validate_foundation.py`, seguindo o padrão fail-closed já usado pelo frozen legacy ledger.
+
+O validator full-tree exige histórico Git disponível: coleta todas as versões alcançáveis do ledger desde sua primeira publicação, deriva a união por `capability_id` e rejeita remoção ou alteração de qualquer registro histórico no ledger corrente. Falha ao acessar Git/histórico após a primeira publicação é no-go, não fallback para o registry atual. Antes do primeiro commit desta entrega, o frozen initial digest ancora as dez identidades e todo registro `origin=new` precisa corresponder a uma transition sequence 1 presente. Validadores puros recebem snapshots históricos explícitos; testes full-tree usam repositório Git temporário real. Assim, apagar coordenadamente registry+membership+transition+ledger ainda falha contra o digest inicial ou a união histórica, sem duplicar o inventário de arquivos de TD-06.
+
 Os IDs de capability são estáveis entre predecessor e successor: `note_read_model`, `integration_error_read_model` e `operational_workflow` têm `origin=transferred` e não mudam durante a transferência. `fiscal_document_read` tem `origin=new`, sem predecessor. Para cada módulo, `owned_capabilities ∩ planned_capabilities = ∅`. A cadeia de cada capability tem `sequence` inteira, única e contígua iniciando em `1`; a aresta `n+1` deve ter `predecessor=successor` da aresta `n`; nenhum fork, ciclo, alias, gap ou módulo ausente do `module_catalog` é válido. Toda aresta não terminal deve estar `completed`; somente a aresta terminal (maior `sequence`) governa ownership/planned atuais. Arestas concluídas anteriores preservam proveniência, mas não exigem que seus successors continuem owners. O conjunto governado de capabilities é exatamente a união do `baseline_capability_catalog` com IDs cuja cadeia começa em `origin=new`; owned/planned/transitions são estados/referências desse universo, não sua autoridade de identidade. `capability_transitions` registra somente capability nova planejada ou transferência real/histórica: uma capability baseline estável sem transição é válida exatamente quando aparece uma única vez em `owned_capabilities` do `baseline_owner` ativo `current_runtime` e zero vezes em `planned_capabilities`; não se inventa aresta histórica para ela.
 
 Quando a aresta terminal está `planned`, uma transferência exige exatamente um owner `current_runtime` no predecessor ativo e exatamente um planned membership no successor ativo; o successor deve existir em `modules`. Uma capability nova na primeira aresta exige zero owners atuais, exatamente um planned membership no successor, `origin=new` e `predecessor=null`; essa capability ainda é intenção target, não capability runtime ativa. Quando a aresta terminal está `completed`, exige exatamente um owner no successor `current_runtime` e zero planned memberships. Cada ocorrência em `planned_capabilities` possui relação bijetiva com exatamente uma aresta terminal `planned` do mesmo `capability_id` cujo `successor` é o módulo que contém a ocorrência; planned membership sem essa aresta, ou uma aresta planned com membership ausente/duplicada, é inválida. Uma nova aresta multi-hop só pode ser acrescentada depois que a anterior está `completed`; ela usa `origin=transferred` e parte do owner current anterior.
@@ -368,7 +392,7 @@ Os IDs `TD-*` pertencem somente a este contrato tático e não reutilizam os IDs
 - [x] `TD-01` O nome canônico do produto e o `core_scope` serão `UniNotas`/`uninotas`; o repositório técnico permanece `MonitorDeNotas` nesta entrega.
 - [x] `TD-02` Smart Notas é a fonte completa das notas e documentos; PostgreSQL `logs` é somente evidência de falhas de integração.
 - [x] `TD-03` Unifast e Prosperar são `FiscalIssuerContext` independentes, nunca tenants, organizações ou agregação implícita.
-- [x] `TD-04` O registry usará `runtime_authority_state=current_runtime|target_planned`, distinto do lifecycle PACED, `baseline_capability_catalog` imutável para identidades preexistentes e `capability_transitions` persistentes com `planned|completed`. IDs estáveis transferem atomicamente; planned nunca concede autoridade; as regras pré/pós-promoção e de capability nova são as congeladas no registry contract.
+- [x] `TD-04` O registry usará `runtime_authority_state=current_runtime|target_planned`, distinto do lifecycle PACED, `baseline_capability_catalog` para identidades preexistentes confrontado com identity ledger independente digest+Git-history e `capability_transitions` persistentes com `planned|completed`. IDs estáveis transferem atomicamente; planned nunca concede autoridade; as regras pré/pós-promoção e de capability nova são as congeladas no registry contract.
 - [x] `TD-05` Os owners alvo exatos são: `fiscal-notes-and-documents` para fatos/documentos do provedor; `integration-error-occurrences` para evidência externa, normalização e correlação determinística; `operational-cases` para workflow, membership, tratamento e autoria da aplicação.
 - [x] `TD-06` `artifacts/publication-manifest.txt` será o único inventário exato da árvore; o validator manterá singletons/famílias/status permitidos, derivará o registry de módulos do scope policy + metadata dos módulos e isolará o ledger histórico do inventário geral de TODOs, sem duplicar a árvore completa em Python.
 - [x] `TD-07` O writer/filter externo de falhas permanece desconhecido nesta entrega; a Foundation pode afirmar somente o alvo PostgreSQL read-only/error-evidence e não pode nomear n8n ou outro writer sem evidência posterior.
@@ -418,7 +442,7 @@ O novo arquivo `decisions/uninotas-foundation-decisions.md` preservará os IDs e
 - [x] `TD-01` UniNotas/`uninotas` são identidade e core scope canônicos; o nome técnico do repositório não muda.
 - [x] `TD-02` Toda nota/documento vem da Smart Notas; `logs` nunca é fallback ou espelho de notas bem-sucedidas.
 - [x] `TD-03` O contexto fiscal faz parte de identidade, resolução de credencial e isolamento, sem criar tenancy.
-- [x] `TD-04` O eixo de autoridade runtime, baseline capability catalog, IDs estáveis, proveniência persistente e condições pré/pós-promoção impedem delete/alias, overlap, gap ou planned membership residual sem competir com o lifecycle PACED.
+- [x] `TD-04` O eixo de autoridade runtime, baseline capability catalog confrontado com ledger digest+Git-history, IDs estáveis, proveniência persistente e condições pré/pós-promoção impedem coordinated delete/alias, overlap, gap ou planned membership residual sem competir com o lifecycle PACED.
 - [x] `TD-05` Os três paths/owners alvo e seus limites exclusivos são os definidos acima; `OperationalCase` não altera fatos das fontes.
 - [x] `TD-06` Manifesto é a única enumeração exata; código valida famílias/singletons/semântica/privacidade e não mantém uma segunda cópia da árvore.
 - [x] `TD-07` O writer/filter de falhas não é pré-condição do cutover Current/Target enquanto permanecer explicitamente desconhecido e bloquear apenas o futuro error-adapter.
@@ -464,13 +488,14 @@ O novo arquivo `decisions/uninotas-foundation-decisions.md` preservará os IDs e
 
 O scanner opera sobre o texto governado publicado pelo manifesto e sobre fixtures puras sem persistir valores reais. A gramática reconhecida é line-oriented e fechada: (1) env/assignment `KEY=VALUE`, com `export` opcional; (2) YAML ou item de lista `KEY: VALUE`, com `-` opcional; (3) JSON de uma linha `"KEY": VALUE`; e (4) tabela Markdown, em que uma célula com chave reconhecida usa a célula imediatamente seguinte como valor. Linhas dentro de fenced code blocks são examinadas pela mesma gramática. Inline code sem par, links Markdown, prosa livre e estruturas multilinha não são inferidos e pertencem ao checklist `REVIEW-PRIV-01`.
 
-Após extração, chaves são normalizadas por Unicode NFKC, separação de camelCase, `casefold` e substituição de espaço/hífen por `_`; valores removem somente whitespace e uma camada externa de aspas/backticks. Para URL, scheme/host são comparados em lowercase e percent-decoding ocorre exatamente uma vez. Não há heurística probabilística. `GUARD-PRIV-02`, `GUARD-PRIV-03` e `GUARD-PRIV-POS-01` são parametrizados sobre as quatro sintaxes suportadas, incluindo fenced examples e pares rejeitados/permitidos.
+Após extração, chaves são normalizadas por Unicode NFKC, separação de camelCase, `casefold` e substituição de espaço/hífen por `_`; valores removem somente whitespace e uma camada externa de aspas/backticks. Para URL, scheme/host são comparados em lowercase e percent-decoding ocorre exatamente uma vez. Não há heurística probabilística. `GUARD-PRIV-02`, `GUARD-PRIV-03`, `GUARD-PRIV-04`, `GUARD-PRIV-POS-01` e `GUARD-PRIV-POS-02` são parametrizados sobre as quatro sintaxes suportadas, incluindo fenced examples, cada família de chave e pares rejeitados/permitidos.
 
 - `GUARD-PRIV-01` reconhece somente candidatos compactos `(?<!\d)\d{14}(?!\d)` ou formatados `(?<!\d)\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}(?!\d)`, confirma os dígitos verificadores e rejeita os válidos; fixtures constroem o valor durante o teste para que nenhum CNPJ válido fique versionado. Outras representações ficam em `REVIEW-PRIV-01`.
 - Credenciais concretas são rejeitadas quando uma atribuição ou par estruturado usa `smart_notas_unifast_token`, `smart_notas_prosperar_token`, `smart_notas_unifast_cnpj`, `smart_notas_prosperar_cnpj`, `authorization` ou `bearer_token` com valor não permitido.
 - `GUARD-PRIV-02` cobre as chaves normalizadas `id_interno`, `provider_id` e `smart_notas_note_id`; qualquer valor concreto nessas chaves é privado.
 - `GUARD-PRIV-03` cobre `pdf_url`, `xml_url`, `danfe_url`, `document_url` e `smart_notas_document_url`; qualquer URL concreta nessas chaves é privada.
 - Valores permitidos são somente vazio, `<redacted>`, `<placeholder>`, `REDACTED`, referência `${NOME_DA_VARIAVEL}` bem formada ou URL sob `https://example.invalid/`. O único URL oficial real permitido pela regra é a raiz pública `https://app.smart-notas.com/api/docs`, quando não aparece como valor de uma chave de documento capturado.
+- `GUARD-PRIV-04` exige diagnóstico por família (`token credential`, `CNPJ credential`, `authorization credential`) e rejeita qualquer valor concreto nas chaves reconhecidas; a chave CNPJ não depende do checksum de `GUARD-PRIV-01`. `GUARD-PRIV-POS-02` prova cada placeholder permitido em cada família/sintaxe para impedir tanto bypass quanto falso positivo.
 - Nomes de chave sem valor, IDs genéricos fora das chaves reconhecidas e menções textuais à API não são rejeitados. Variantes não cobertas pelo predicado ficam exclusivamente em `REVIEW-PRIV-01`; o checklist registra diff/commit/paths e conclusão sem copiar o candidato sensível.
 
 ## Architecture Review Gates
@@ -480,7 +505,7 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-summary`
 - **Decision review status:** `not_run`
-- **Decision review evidence / resolution:** `R8E encontrou autoridade persistente de IDs baseline, path-set normalization, lane semantics e metadata; achados integrados, nova rodada R8F obrigatória`
+- **Decision review evidence / resolution:** `R8F encontrou oracle independente de identidade/history, rename endpoints, attestation sem autorreferência e fixtures de credenciais; integrados, nova rodada R8G obrigatória`
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -497,9 +522,9 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 - **Baseline branch:** `main`
 - **Baseline commit:** `939d3df229d5f1657264303e4a8e07a9130c4868`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `findings_integrated`
-- **Findings summary:** os achados R8E foram integrados e a baseline R8F imutável foi publicada somente como evidência de revisão.
-- **Evidence / reference:** `origin/main@939d3df`; merges derivados `uninotas-r8e-architecture-merge.json` e `uninotas-r8e-critique-merge.json`.
+- **Gate status:** `not_run`
+- **Findings summary:** os achados R8F foram integrados; as seções materiais exigem nova baseline R8G.
+- **Evidence / reference:** baseline R8F anterior `origin/main@939d3df`; merges derivados `uninotas-r8f-architecture-merge.json` e `uninotas-r8f-critique-merge.json`; novo commit pendente.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
@@ -511,8 +536,8 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 - **Material sections compared:** `template canonical set`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md`
 - **Gate status:** `not_run`
-- **Findings summary:** baseline R8F publicada; arquitetura/crítica e o guard de drift ainda não foram concluídos.
-- **Evidence / reference:** freeze `origin/main@939d3df229d5f1657264303e4a8e07a9130c4868`; este SHA deve ser exatamente o consumido pelo drift guard após convergência.
+- **Findings summary:** a integração R8F altera seções materiais; repetir somente após freeze R8G.
+- **Evidence / reference:** `uninotas_architecture_opinion_r8f` + `uninotas_plan_critique_r8f`; baseline R8G pendente.
 - **Waiver authority / reference:** `n/a`
 
 ## Questions To Close
@@ -557,10 +582,10 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 
 - **Strategy:** `test-first`
 - **Why:** o validator é o harness arquitetural; cada semântica precisa de mutação negativa antes do cutover.
-- **Fail-first target(s):** identidade/core scope UniNotas, source split, context-not-tenant, runtime-authority/lifecycle separation, módulo/catálogo ausente ou duplicado, membership duplicado, remoção/rename/alias de capability baseline, capability current sem baseline ou `origin=new`, módulo ativo vazio ou com cardinalidade incompatível, sequence gap, fork/ciclo, predecessor desconhecido ou nulo em transferência, chain edge inválida, interseção owned/planned, target com owned capability, aresta terminal planned sem exatamente um owner atual ou successor planejado, planned membership órfã, terminal completed sem owner successor, transferência planned sem owner predecessor, dupla autoridade pelo mesmo ID, successor planejado duplicado, planned membership residual, owner incompatível com aresta terminal, ownership baseline estável respaldado pelo catálogo sem transição sintética, capability nova legítima e ownerless enquanto planned, predecessor retirado legítimo, segundo hop planned/completed, manifesto único, CNPJ válido, provider ID/URL privada em contexto formalizado e limites permitidos sem falso positivo.
+- **Fail-first target(s):** identidade/core scope UniNotas, source split, context-not-tenant, runtime-authority/lifecycle separation, módulo/catálogo ausente ou duplicado, membership duplicado, remoção/rename/alias simples ou coordenada de capability baseline/new contra digest/histórico, capability current sem baseline ou `origin=new`, módulo ativo vazio ou com cardinalidade incompatível, sequence gap, fork/ciclo, predecessor desconhecido ou nulo em transferência, chain edge inválida, interseção owned/planned, target com owned capability, aresta terminal planned sem exatamente um owner atual ou successor planejado, planned membership órfã, terminal completed sem owner successor, transferência planned sem owner predecessor, dupla autoridade pelo mesmo ID, successor planejado duplicado, planned membership residual, owner incompatível com aresta terminal, ownership baseline estável respaldado pelo catálogo/ledger sem transição sintética, capability nova legítima e ownerless enquanto planned, append de identidade nova, predecessor retirado legítimo, segundo hop planned/completed, manifesto único, CNPJ válido, credenciais, provider ID/URL privada em contexto formalizado e limites permitidos sem falso positivo.
 - **`D-T01` evidence layer:** validadores puros + fixtures mínimas são a camada primária para semântica de registry, decisões e privacidade.
 - **`D-T02` compatibility layer:** poucos testes full-tree comprovam manifesto, links, symlinks, legado e composição real da Foundation.
-- **`D-T03` topology/exclusion:** nenhum banco, API, browser, container ou dado fiscal real é necessário; substituir essa ausência por mock não acrescenta prova.
+- **`D-T03` topology/exclusion:** nenhum banco, API, browser, container ou dado fiscal real é necessário; `CAP-NEG-36` usa repositório Git temporário real para provar append-only history, sem mock de Git.
 - **`D-T04` gate:** cada caso `CAP-*`/`GUARD-*` deve falhar antes da implementação correspondente e passar depois, com diagnóstico específico; `REVIEW-PRIV-01` é evidência manual separada e não conta como fixture; suíte agregada sozinha não satisfaz o critério.
 - **`D-T05` performance evidence:** casos semânticos ficam em `test_registry_semantics.py`/`test_privacy_predicate.py` e executam zero cópias/scans full-tree; somente `FoundationTreeContractTests.test_manifest_matches_published_tree`, `test_symlink_and_legacy_contracts` e `test_registry_composes_with_module_files` podem varrer a árvore, uma vez cada. Evidência registra duração das lanes pure/full-tree/agregada e contador de scans. Mais de três scans ou duração agregada acima do baseline observado de aproximadamente 179s bloqueia conclusão até análise explícita do gate de performance/concurrency registrar causa e aceitação/correção; não pode ser aprovado silenciosamente.
 
@@ -750,12 +775,16 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 | `CRIT-R8E-01` | formal critique R8E | Integrated | canonical path-set usa name-only+untracked e é a única entrada dos consumidores; status/rename é view separada |
 | `CRIT-R8E-02` | formal critique R8E | Integrated | `Lane-Promoted` e threshold são n/a; baseline push é review evidence e somente SHA final pode ser Production-Ready |
 | `GATE-STATE-R8E-01` / `CRIT-R8E-03` | both formal reviews R8E | Integrated | baseline/drift lifecycle será vinculado ao mesmo SHA R8F antes da próxima revisão |
+| `ARCH-R8F-01` / `CRIT-R8F-02` | both formal reviews R8F | Integrated | identity ledger append-only usa frozen initial digest + união histórica Git fail-closed; coordinated erasure possui `CAP-NEG-35/36` |
+| `OPS-R8F-01` / `CRIT-R8F-01` | both formal reviews R8F | Integrated | helper único usa `--no-renames`, untracked e C-sort; profile consome helper; `CHANGESET-*` cobre D/A, R e untracked |
+| `CRIT-R8F-03` | formal critique R8F | Integrated | closeout C1 delivery tree + C2 attestation-only elimina commit contendo o próprio SHA; handoff externo reporta ambos |
+| `CRIT-R8F-04` | formal critique R8F | Integrated | `GUARD-PRIV-04`/`POS-02` cobrem cada credential-key family, sintaxe, fenced example, concrete value e placeholder com diagnóstico específico |
 
 ## Additional Architectural Opinions
 
 - **Needed:** `yes`
 - **Why ambiguity remains:** o validator pode ser evoluído por manifesto único ou por inventário gerado; revisão independente deve desafiar a opção recomendada.
-- **Opinion count:** `10`
+- **Opinion count:** `11`
 - **Package mode:** `bounded-summary`
 - **Internal reviewer mandate:** `required — fresh internal no-context reviewer after baseline freeze`
 - **Required lenses:** `correctness|performance|elegance|structural-soundness|operational-fit`
@@ -772,6 +801,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 | `uninotas_architecture_opinion_r8c` | manter arquitetura; explicitar ownership baseline sem transição sintética | strong positive | strong positive | mixed até fechar cardinalidades | Integrated / Rerun required | merge R8C válido; achados integrados e baseline R8D obrigatória |
 | `uninotas_architecture_opinion_r8d` | adotar manifesto único + registry derivado + transições persistentes | strong positive | strong positive | strong positive | Accepted / Clean | merge R8D válido; zero achados arquiteturais, crítica paralela exigiu refinamentos operacionais |
 | `uninotas_architecture_opinion_r8e` | manter arquitetura e adicionar baseline capability catalog | strong positive | strong positive | mixed até persistir identidade baseline | Integrated / Rerun required | merge R8E válido; IDs baseline e lane/path-set integrados, baseline R8F obrigatória |
+| `uninotas_architecture_opinion_r8f` | manter arquitetura e adicionar oracle independente digest+Git history | strong positive | strong positive | mixed até fechar coordinated erasure | Integrated / Rerun required | merge R8F válido; oracle/path/attestation/privacy integrados, baseline R8G obrigatória |
 
 ## Audit Trigger Matrix
 
@@ -806,8 +836,8 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Audit session / round evidence:** `n/a until run`
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
 - **Critique status:** `not_run`
-- **Findings summary:** `R8E apontou path-set normalization, semântica main-only e metadata; todos foram integrados, junto ao finding arquitetural do baseline capability catalog, e exigem crítica R8F`.
-- **Evidence / reference:** merge derivado `uninotas-r8e-critique-merge.json`; nova crítica obrigatória após freeze R8F.
+- **Findings summary:** `R8F apontou path endpoints, oracle independente, attestation em duas fases e fixtures de credenciais; todos foram integrados e exigem crítica R8G`.
+- **Evidence / reference:** merge derivado `uninotas-r8f-critique-merge.json`; nova crítica obrigatória após freeze R8G.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Assumption Code Coherence
@@ -979,7 +1009,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Disposition:** `keep-active`
 - **Disposition reason:** planejamento e aprovação ainda não concluídos.
 - **Post-commit/push status:** `pending`
-- **Next path/status action:** revisar a baseline R8F, executar guards pré-aprovação e solicitar `APROVADO` explícito.
+- **Next path/status action:** publicar/revisar a baseline R8G, executar guards pré-aprovação e solicitar `APROVADO` explícito.
 
 ## Module Consolidation Gate
 
@@ -995,11 +1025,14 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - Pre-approval coherence: `python3 delphi-ai/tools/assumption_code_coherence_guard.py --todo uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md`
 - Pre-approval drift: `python3 delphi-ai/tools/review_scope_drift_guard.py --todo uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md`
 - Pre-approval authority: `python3 delphi-ai/tools/todo_authority_guard.py uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md --pre-approval`
-- Canonical path-set enumerator: `bash -lc '{ git -C uninotas-foundation diff --name-only 0fe906c1e496a1d38f1603cf188c224711011c32 --; git -C uninotas-foundation ls-files --others --exclude-standard; } | LC_ALL=C sort -u'`
+- Pre-implementation bootstrap path set: `bash -lc '{ git -C uninotas-foundation diff --no-renames --name-only 0fe906c1e496a1d38f1603cf188c224711011c32 --; git -C uninotas-foundation ls-files --others --exclude-standard; } | LC_ALL=C sort -u'`
+- Post-implementation canonical path set: `python3 uninotas-foundation/deterministic/enumerate_change_paths.py --repo uninotas-foundation --baseline 0fe906c1e496a1d38f1603cf188c224711011c32`
 - Status/rename evidence view: `bash -lc '{ git -C uninotas-foundation diff --name-status --find-renames 0fe906c1e496a1d38f1603cf188c224711011c32 --; git -C uninotas-foundation ls-files --others --exclude-standard | sed "s#^#A\\t#"; } | LC_ALL=C sort -u -k2,2 -k1,1'`
-- Profile scope on the complete Foundation change set: `bash -lc 'mapfile -t paths < <({ git -C uninotas-foundation diff --name-only 0fe906c1e496a1d38f1603cf188c224711011c32 --; git -C uninotas-foundation ls-files --others --exclude-standard; } | sort -u | sed "s#^#foundation_documentation/#"); ((${#paths[@]} > 0)) && python3 delphi-ai/tools/profile_scope_check.py --profile strategic-cto "${paths[@]}"'`
+- Pre-implementation profile scope: `bash -lc 'mapfile -t paths < <({ git -C uninotas-foundation diff --no-renames --name-only 0fe906c1e496a1d38f1603cf188c224711011c32 --; git -C uninotas-foundation ls-files --others --exclude-standard; } | LC_ALL=C sort -u | sed "s#^#foundation_documentation/#"); ((${#paths[@]} > 0)) && python3 delphi-ai/tools/profile_scope_check.py --profile strategic-cto "${paths[@]}"'`
+- Post-implementation profile scope: `bash -lc 'mapfile -t paths < <(python3 uninotas-foundation/deterministic/enumerate_change_paths.py --repo uninotas-foundation --baseline 0fe906c1e496a1d38f1603cf188c224711011c32 | sed "s#^#foundation_documentation/#"); ((${#paths[@]} > 0)) && python3 delphi-ai/tools/profile_scope_check.py --profile strategic-cto "${paths[@]}"'`
 - After `APROVADO`, before implementation: `python3 delphi-ai/tools/todo_authority_guard.py uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md`
 - Pure semantic lane: `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_registry_semantics.py uninotas-foundation/deterministic/tests/test_privacy_predicate.py`
+- Change-set helper lane: `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_enumerate_change_paths.py`
 - `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_foundation.py`
 - `python3 -B uninotas-foundation/deterministic/validate_foundation.py --root uninotas-foundation`
 - `'/mnt/c/Program Files/Git/bin/bash.exe' -lc 'cd /c/Unifast/MonitorDeNotas && bash delphi-ai/verify_context.sh'`
@@ -1022,8 +1055,10 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 4. Executar novamente `python3 -B uninotas-foundation/deterministic/validate_foundation.py --root uninotas-foundation`.
 5. Executar novamente `python3 delphi-ai/tools/todo_diff_expectation_guard.py uninotas-foundation/todos/completed/process/TODO-uninotas-canonical-foundation-transition.md --repo-root uninotas-foundation`, o canonical path-set enumerator, a status/rename evidence view e `git -C uninotas-foundation diff --check 0fe906c1e496a1d38f1603cf188c224711011c32 --`; os path sets do guard/enumerator devem coincidir.
 6. Executar `python3 delphi-ai/tools/todo_authority_guard.py uninotas-foundation/todos/completed/process/TODO-uninotas-canonical-foundation-transition.md --require-delivery-gates`, `python3 delphi-ai/tools/todo_completion_guard.py uninotas-foundation/todos/completed/process/TODO-uninotas-canonical-foundation-transition.md` e `python3 delphi-ai/tools/todo_closeout_guard.py uninotas-foundation/todos/completed/process/TODO-uninotas-canonical-foundation-transition.md --repo uninotas-foundation`.
-7. Commitar e publicar a árvore final; registrar esse SHA, e não o SHA pré-move, como evidência `Production-Ready`.
-8. Somente após o push, executar `python3 delphi-ai/tools/todo_closeout_guard.py --all-active --repo uninotas-foundation` e confirmar que os TODOs ativos reais restantes são encontrados sem stale entry deste TODO.
+7. Criar C1 com a árvore de delivery pós-move validada, publicar em `origin/main` e provar `git rev-parse HEAD == git rev-parse origin/main == C1`; nenhum arquivo em C1 tenta conter o próprio SHA.
+8. Criar C2 com diff restrito aos evidence/status fields do TODO completed, registrando `delivery_tree_commit=C1`, comandos/resultados e verificação remota de C1. Reexecutar deterministic TODO validation, Foundation validator, diff expectation e diff check; canonical docs, manifesto, validator e testes devem permanecer byte-identical a C1.
+9. Publicar C2, provar `git rev-parse HEAD == git rev-parse origin/main == C2` e executar `python3 delphi-ai/tools/todo_closeout_guard.py --all-active --repo uninotas-foundation`, confirmando TODOs ativos reais sem stale entry deste TODO.
+10. O handoff externo reporta `{delivery_tree_commit: C1, attestation_commit: C2}`. `Production-Ready` é esse par verificável; C2 não contém o próprio SHA e não gera uma terceira atualização autorreferente.
 
 ## Files Expected (Compatibility Note)
 
