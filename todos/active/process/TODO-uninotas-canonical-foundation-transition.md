@@ -42,7 +42,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `none`
-- **Next exact step:** executar arquitetura/crítica R8C sem contexto sobre a baseline renovada e concluir os guards pré-aprovação.
+- **Next exact step:** integrar os achados R8C, publicar a baseline R8D, repetir arquitetura/crítica sem contexto e concluir os guards pré-aprovação.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -170,7 +170,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 - [ ] `DOD-03` Unifast/Prosperar são contextos fiscais explícitos e não tenants.
 - [ ] `DOD-04` Registry e módulos distinguem `current_runtime` de `target_planned`, com precedência, predecessor/sucessor e condição de promoção/retirada, sem declarar código futuro como implementado.
 - [ ] `DOD-05` Notas/documentos, falhas de integração e casos operacionais têm owners canônicos distintos.
-- [ ] `DOD-06` Validator e suíte rejeitam regressões de identidade, decisão/link canônico obsoleto, ownership, tenancy, privacidade, symlink, legado e publicação, além de quebra da bijeção módulo/catálogo, ID/path/transition duplicado, módulo retired ainda ativo/capable, sequence gap, fork, ciclo, predecessor desconhecido, chain edge ou origin inválida, aresta não terminal planned, interseção `owned_capabilities ∩ planned_capabilities`, target com `owned_capabilities`, aresta terminal planned sem exatamente um owner atual/predecessor ou successor membership, planned membership órfã sem aresta terminal correspondente, capability transferida/planned ou terminal completed sem o owner exigido, dupla autoridade runtime, successor planejado duplicado e planned membership obsoleto após promoção; fixtures positivas cobrem estado inicial, capability nova, promoção parcial/final, predecessor retirado e segundo hop planned/completed.
+- [ ] `DOD-06` Validator e suíte rejeitam regressões de identidade, decisão/link canônico obsoleto, ownership, tenancy, privacidade, symlink, legado e publicação, além de quebra da bijeção módulo/catálogo, ID/path/transition ou membership duplicado, módulo retired ainda ativo/capable, módulo ativo vazio ou incompatível com sua cardinalidade runtime, sequence gap, fork, ciclo, predecessor desconhecido/nulo em transferência, chain edge ou origin inválida, aresta não terminal planned, interseção `owned_capabilities ∩ planned_capabilities`, target com `owned_capabilities`, aresta terminal planned sem exatamente um owner atual/predecessor ou successor membership, planned membership órfã sem aresta terminal correspondente, capability transferida/planned ou terminal completed sem o owner exigido, dupla autoridade runtime, successor planejado duplicado e planned membership obsoleto após promoção; fixtures positivas cobrem estado inicial, ownership current estável sem transição sintética, capability nova, promoção parcial/final, predecessor retirado e segundo hop planned/completed.
 - [ ] `DOD-07` Os artefatos atuais pertencem ao manifesto e a validação Foundation passa sem `frozen lifecycle tree mismatch`.
 - [ ] `DOD-08` Nenhum segredo, valor real de CNPJ/identificador do provedor, payload/resposta privada ou URL capturada de documento foi persistido; CNPJ válido é coberto deterministicamente e identificador/URL contextual por regra precisa mais revisão de diff.
 - [ ] `DOD-09` O roadmap aponta para o TODO NestJS de leitura como próximo slice, sem lhe conceder autoridade antecipada.
@@ -220,6 +220,7 @@ Os nomes abaixo são o contrato mínimo de fixtures/builders e testes. Cada test
 | `CAP-POS-04` | positive | `complete_promotion_retired_predecessor` | predecessor retired conhecido + terminal completed é aceito |
 | `CAP-POS-05` | positive | `second_hop_planned` | histórico A→B completed + terminal B→C planned governa B/C |
 | `CAP-POS-06` | positive | `second_hop_completed` | histórico A→B e terminal B→C completed governam C somente |
+| `CAP-POS-07` | positive | `stable_current_ownership_without_transition` | capability baseline sem transferência permanece em exatamente um owner current e não ganha proveniência sintética |
 | `CAP-NEG-01` | negative | `owned_planned_overlap` | `owned_capabilities intersects planned_capabilities` |
 | `CAP-NEG-02` | negative | `duplicate_current_owner` | `capability has multiple current owners` |
 | `CAP-NEG-03` | negative | `planned_terminal_missing_owner` | `planned transfer predecessor is not the current owner` |
@@ -244,13 +245,21 @@ Os nomes abaixo são o contrato mínimo de fixtures/builders e testes. Cada test
 | `CAP-NEG-22` | negative | `target_planned_with_owned_capability` | `target_planned module cannot own capability` |
 | `CAP-NEG-23` | negative | `completed_terminal_without_successor_owner` | `terminal completed capability has no sole successor owner` |
 | `CAP-NEG-24` | negative | `orphan_planned_membership` | `planned membership has no matching terminal planned transition` |
+| `CAP-NEG-25` | negative | `transferred_with_null_predecessor` | `transferred capability requires a predecessor` |
+| `CAP-NEG-26` | negative | `duplicate_owned_membership` | `owned_capabilities contains duplicate capability id` |
+| `CAP-NEG-27` | negative | `duplicate_planned_membership` | `planned_capabilities contains duplicate capability id` |
+| `CAP-NEG-28` | negative | `current_runtime_without_owned_capability` | `current_runtime module must own at least one capability` |
+| `CAP-NEG-29` | negative | `target_planned_without_planned_capability` | `target_planned module must plan at least one capability` |
+| `CAP-NEG-30` | negative | `active_module_without_capabilities` | `active module has neither owned nor planned capabilities` |
 | `GUARD-ID-01` | negative | `legacy_identity_or_decision_link` | identidade/índice canônico legado é rejeitado |
 | `GUARD-TENANCY-01` | negative | `fiscal_context_as_tenant` | contexto fiscal tratado como tenancy é rejeitado |
 | `GUARD-PUB-01` | negative | `unmanifested_or_missing_path` | árvore diverge do manifesto |
 | `GUARD-SYMLINK-01` | negative | `unexpected_symlink` | symlink fora do contrato é rejeitado |
 | `GUARD-LEGACY-01` | negative | `legacy_exception_mutation` | ledger histórico congelado é rejeitado |
 | `GUARD-PRIV-01` | negative | `valid_cnpj_value` | CNPJ válido persistido é rejeitado |
-| `GUARD-PRIV-02` | negative | `high_confidence_provider_identifier_or_document_url_context` | identificador/URL em contexto formalizado de segredo ou documento capturado é rejeitado com diagnóstico específico |
+| `GUARD-PRIV-02` | negative | `concrete_provider_identifier_context` | valor concreto em chave provider-ID reconhecida é rejeitado com diagnóstico específico |
+| `GUARD-PRIV-03` | negative | `captured_document_url_context` | URL concreta em chave PDF/XML/DANFE/document reconhecida é rejeitada com diagnóstico específico |
+| `GUARD-PRIV-POS-01` | positive | `official_url_generic_id_and_placeholders` | URL oficial da especificação, ID genérico e placeholders permitidos não geram falso positivo |
 | `REVIEW-PRIV-01` | manual review | checklist de diff limitado aos paths esperados | nenhum valor contextual privado escapa das regras automáticas; evidência registra reviewer, commit, paths e resultado sem copiar o valor sensível |
 
 ## External Dependency Readiness
@@ -258,7 +267,7 @@ Os nomes abaixo são o contrato mínimo de fixtures/builders e testes. Cada test
 | Dependency | Why It Matters | Status | Last Verified | Verification Method | Adjustment / Workaround |
 | --- | --- | --- | --- | --- | --- |
 | Smart Notas OpenAPI | fundamenta a arquitetura-alvo | healthy | 2026-09-25 | fingerprint e probes redigidos no ledger | nenhuma chamada nesta entrega |
-| Git remote Foundation | necessário para baseline de revisão | healthy | 2026-09-25 | `main`/`origin/main@3bfdeab`; baseline material R8C publicada; guard main-only instalado e Git for Windows é o writer válido | nenhum ajuste |
+| Git remote Foundation | necessário para baseline de revisão | healthy | 2026-09-25 | `main`/`origin/main@108552a`; baseline material R8C `3bfdeab` alcançável; guard main-only instalado e Git for Windows é o writer válido | publicar baseline R8D após integração |
 | `DEP-CLOSEOUT-01` Delphi standalone closeout support | impede falso `go` e stale active TODO no closeout | healthy/resolved | 2026-09-25 | TODO Delphi concluído em `6dc5bd4`/`0e54e2a`; comando individual retornou `path_state=active`; `--all-active --repo uninotas-foundation` retornou `todo_count=2`, ambos paths ativos reais e zero violações | consumir a correção já publicada e repetir os dois comandos antes do closeout |
 
 ## Profile Scope & Handoffs (Required Before `APROVADO`)
@@ -296,9 +305,9 @@ Os nomes abaixo são o contrato mínimo de fixtures/builders e testes. Cada test
 
 ## Planned Module Registry Contract
 
-O JSON machine-readable de `policies/scope_subscope_governance.md` terá `core_scope=uninotas`, uma coleção ativa `modules`, um catálogo persistente `module_catalog` e uma coleção ordenada `capability_transitions`. Cada módulo ativo declara `subscope`, `path`, `runtime_authority_state`, `owned_capabilities` e `planned_capabilities`. Cada entrada do catálogo declara `module_id`, `path` e `catalog_state=active|retired`; `module_id` e `path` são globalmente únicos. Existe uma bijeção exata entre `modules` e entradas `active` do catálogo, com mesmo ID/path. Uma entrada `retired` não pode coexistir em `modules`, possuir ou planejar capability, nem compartilhar ID/path com outra entrada. Cada transição declara `transition_id`, `capability_id`, `sequence`, `origin=transferred|new`, `transition_state=planned|completed`, `predecessor` e `successor`; `transition_id` é globalmente único. `predecessor=null` e `origin=new` são válidos somente em `sequence=1`; toda aresta posterior usa `origin=transferred`. `runtime_authority_state=current_runtime|target_planned` é um eixo distinto do lifecycle PACED de `evolution_lifecycle.md`; ele responde somente qual módulo possui autoridade sobre comportamento executável observado. Um `target_planned` sempre tem `owned_capabilities=[]`; sua intenção aparece somente em `planned_capabilities`. Um módulo `current_runtime` pode possuir capabilities já promovidas e manter outras em `planned_capabilities`, desde que os conjuntos sejam disjuntos.
+O JSON machine-readable de `policies/scope_subscope_governance.md` terá `core_scope=uninotas`, uma coleção ativa `modules`, um catálogo persistente `module_catalog` e uma coleção ordenada `capability_transitions`. Cada módulo ativo declara `subscope`, `path`, `runtime_authority_state`, `owned_capabilities` e `planned_capabilities`; cada array não contém IDs duplicados. Cada entrada do catálogo declara `module_id`, `path` e `catalog_state=active|retired`; `module_id` e `path` são globalmente únicos. Existe uma bijeção exata entre `modules` e entradas `active` do catálogo, com mesmo ID/path. Uma entrada `retired` não pode coexistir em `modules`, possuir ou planejar capability, nem compartilhar ID/path com outra entrada. Cada transição declara `transition_id`, `capability_id`, `sequence`, `origin=transferred|new`, `transition_state=planned|completed`, `predecessor` e `successor`; `transition_id` é globalmente único. `origin=new` exige `sequence=1` e `predecessor=null`; `origin=transferred` sempre exige predecessor não nulo presente no `module_catalog`, inclusive em arestas históricas completed; toda aresta posterior à primeira usa `origin=transferred`. `runtime_authority_state=current_runtime|target_planned` é um eixo distinto do lifecycle PACED de `evolution_lifecycle.md`; ele responde somente qual módulo possui autoridade sobre comportamento executável observado. Um `target_planned` sempre tem `owned_capabilities=[]` e pelo menos um ID em `planned_capabilities`. Um módulo `current_runtime` possui pelo menos um ID em `owned_capabilities`, pode manter outros em `planned_capabilities` e preserva conjuntos disjuntos. Nenhum módulo ativo pode ter ambos os arrays vazios.
 
-Os IDs de capability são estáveis entre predecessor e successor: `note_read_model`, `integration_error_read_model` e `operational_workflow` têm `origin=transferred` e não mudam durante a transferência. `fiscal_document_read` tem `origin=new`, sem predecessor. Para cada módulo, `owned_capabilities ∩ planned_capabilities = ∅`. A cadeia de cada capability tem `sequence` inteira, única e contígua iniciando em `1`; a aresta `n+1` deve ter `predecessor=successor` da aresta `n`; nenhum fork, ciclo, alias, gap ou módulo ausente do `module_catalog` é válido. Toda aresta não terminal deve estar `completed`; somente a aresta terminal (maior `sequence`) governa ownership/planned atuais. Arestas concluídas anteriores preservam proveniência, mas não exigem que seus successors continuem owners. O conjunto governado de capabilities é exatamente a união dos IDs presentes em `owned_capabilities`, `planned_capabilities` e `capability_transitions`; nenhum ID pode existir em apenas um desses locais contrariando a cardinalidade terminal abaixo.
+Os IDs de capability são estáveis entre predecessor e successor: `note_read_model`, `integration_error_read_model` e `operational_workflow` têm `origin=transferred` e não mudam durante a transferência. `fiscal_document_read` tem `origin=new`, sem predecessor. Para cada módulo, `owned_capabilities ∩ planned_capabilities = ∅`. A cadeia de cada capability tem `sequence` inteira, única e contígua iniciando em `1`; a aresta `n+1` deve ter `predecessor=successor` da aresta `n`; nenhum fork, ciclo, alias, gap ou módulo ausente do `module_catalog` é válido. Toda aresta não terminal deve estar `completed`; somente a aresta terminal (maior `sequence`) governa ownership/planned atuais. Arestas concluídas anteriores preservam proveniência, mas não exigem que seus successors continuem owners. O conjunto governado de capabilities é exatamente a união dos IDs presentes em `owned_capabilities`, `planned_capabilities` e `capability_transitions`. `capability_transitions` registra somente capability nova planejada ou transferência real/histórica: uma capability baseline estável sem transição é válida exatamente quando aparece uma única vez em `owned_capabilities` de módulo ativo `current_runtime` e zero vezes em `planned_capabilities`; não se inventa aresta histórica para ela.
 
 Quando a aresta terminal está `planned`, uma transferência exige exatamente um owner `current_runtime` no predecessor ativo e exatamente um planned membership no successor ativo; o successor deve existir em `modules`. Uma capability nova na primeira aresta exige zero owners atuais, exatamente um planned membership no successor, `origin=new` e `predecessor=null`; essa capability ainda é intenção target, não capability runtime ativa. Quando a aresta terminal está `completed`, exige exatamente um owner no successor `current_runtime` e zero planned memberships. Cada ocorrência em `planned_capabilities` possui relação bijetiva com exatamente uma aresta terminal `planned` do mesmo `capability_id` cujo `successor` é o módulo que contém a ocorrência; planned membership sem essa aresta, ou uma aresta planned com membership ausente/duplicada, é inválida. Uma nova aresta multi-hop só pode ser acrescentada depois que a anterior está `completed`; ela usa `origin=transferred` e parte do owner current anterior.
 
@@ -422,6 +431,17 @@ O novo arquivo `decisions/uninotas-foundation-decisions.md` preservará os IDs e
 | review | residual privacy boundary | `REVIEW-PRIV-01` checklist sobre diff/path esperado | valor contextual privado fora dos padrões automatizáveis | implement-in-this-todo | registro de reviewer, commit, paths e resultado, sem reproduzir valor sensível |
 | review | architecture | independent architecture/adherence review | supersede incompleto | implement-in-this-todo | review artifacts |
 
+### Deterministic Privacy Predicate
+
+O scanner opera sobre o texto governado publicado pelo manifesto e sobre fixtures puras sem persistir valores reais. Chaves são normalizadas por Unicode NFKC, separação de camelCase, `casefold` e substituição de espaço/hífen por `_`; valores removem somente whitespace e uma camada externa de aspas/backticks. Para URL, scheme/host são comparados em lowercase e percent-decoding ocorre exatamente uma vez. Não há heurística probabilística.
+
+- `GUARD-PRIV-01` rejeita qualquer CNPJ válido após remover somente `.`, `/`, `-` e whitespace; fixtures constroem o valor durante o teste para que nenhum CNPJ válido fique versionado.
+- Credenciais concretas são rejeitadas quando uma atribuição ou par estruturado usa `smart_notas_unifast_token`, `smart_notas_prosperar_token`, `smart_notas_unifast_cnpj`, `smart_notas_prosperar_cnpj`, `authorization` ou `bearer_token` com valor não permitido.
+- `GUARD-PRIV-02` cobre as chaves normalizadas `id_interno`, `provider_id` e `smart_notas_note_id`; qualquer valor concreto nessas chaves é privado.
+- `GUARD-PRIV-03` cobre `pdf_url`, `xml_url`, `danfe_url`, `document_url` e `smart_notas_document_url`; qualquer URL concreta nessas chaves é privada.
+- Valores permitidos são somente vazio, `<redacted>`, `<placeholder>`, `REDACTED`, referência `${NOME_DA_VARIAVEL}` bem formada ou URL sob `https://example.invalid/`. O único URL oficial real permitido pela regra é a raiz pública `https://app.smart-notas.com/api/docs`, quando não aparece como valor de uma chave de documento capturado.
+- Nomes de chave sem valor, IDs genéricos fora das chaves reconhecidas e menções textuais à API não são rejeitados. Variantes não cobertas pelo predicado ficam exclusivamente em `REVIEW-PRIV-01`; o checklist registra diff/commit/paths e conclusão sem copiar o candidato sensível.
+
 ## Architecture Review Gates
 
 - **Architecture decision review:** `required`
@@ -429,7 +449,7 @@ O novo arquivo `decisions/uninotas-foundation-decisions.md` preservará os IDs e
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-summary`
 - **Decision review status:** `not_run`
-- **Decision review evidence / resolution:** `R8B encontrou bijeção planned/terminal ausente e metadata stale; achados integrados, nova arquitetura R8C sem contexto é obrigatória sobre baseline renovada`
+- **Decision review evidence / resolution:** `R8C encontrou cardinalidade de capabilities baseline, predecessor transferred, cardinalidade de módulos/listas, predicado de privacidade e metadata; achados integrados, nova arquitetura R8D é obrigatória`
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -446,9 +466,9 @@ O novo arquivo `decisions/uninotas-foundation-decisions.md` preservará os IDs e
 - **Baseline branch:** `main`
 - **Baseline commit:** `3bfdeab4e10161f1032a881ecf86223625b0f98a`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `findings_integrated`
-- **Findings summary:** os achados R8B foram integrados e a baseline R8C imutável foi publicada para repetição das revisões pré-aprovação.
-- **Evidence / reference:** `origin/main@3bfdeab`; merges derivados `uninotas-r8b-architecture-merge.json` e `uninotas-r8b-critique-merge.json`.
+- **Gate status:** `not_run`
+- **Findings summary:** R8C foi integrado; as seções materiais mudaram e exigem uma nova baseline R8D imutável.
+- **Evidence / reference:** baseline R8C anterior `origin/main@3bfdeab`; merges derivados `uninotas-r8c-architecture-merge.json` e `uninotas-r8c-critique-merge.json`; novo commit pendente.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
@@ -460,8 +480,8 @@ O novo arquivo `decisions/uninotas-foundation-decisions.md` preservará os IDs e
 - **Material sections compared:** `template canonical set`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md`
 - **Gate status:** `not_run`
-- **Findings summary:** a integração R8B altera seções materiais; repetir somente após freeze R8C.
-- **Evidence / reference:** `uninotas_architecture_opinion_r8b` + `uninotas_plan_critique_r8b`; baseline renovada pendente.
+- **Findings summary:** a integração R8C altera seções materiais; repetir somente após freeze R8D.
+- **Evidence / reference:** `uninotas_architecture_opinion_r8c` + `uninotas_plan_critique_r8c`; baseline R8D pendente.
 - **Waiver authority / reference:** `n/a`
 
 ## Questions To Close
@@ -506,7 +526,7 @@ O novo arquivo `decisions/uninotas-foundation-decisions.md` preservará os IDs e
 
 - **Strategy:** `test-first`
 - **Why:** o validator é o harness arquitetural; cada semântica precisa de mutação negativa antes do cutover.
-- **Fail-first target(s):** identidade/core scope UniNotas, source split, context-not-tenant, runtime-authority/lifecycle separation, módulo/catálogo ausente ou duplicado, sequence gap, fork/ciclo, predecessor desconhecido, chain edge inválida, interseção owned/planned, target com owned capability, aresta terminal planned sem exatamente um owner atual ou successor planejado, planned membership órfã, terminal completed sem owner successor, transferência planned sem owner predecessor, dupla autoridade pelo mesmo ID, successor planejado duplicado, planned membership residual, owner incompatível com aresta terminal, capability nova legítima e ownerless enquanto planned, predecessor retirado legítimo, segundo hop planned/completed, manifesto único, CNPJ válido e URL/identificador privado em contexto formalizado.
+- **Fail-first target(s):** identidade/core scope UniNotas, source split, context-not-tenant, runtime-authority/lifecycle separation, módulo/catálogo ausente ou duplicado, membership duplicado, módulo ativo vazio ou com cardinalidade incompatível, sequence gap, fork/ciclo, predecessor desconhecido ou nulo em transferência, chain edge inválida, interseção owned/planned, target com owned capability, aresta terminal planned sem exatamente um owner atual ou successor planejado, planned membership órfã, terminal completed sem owner successor, transferência planned sem owner predecessor, dupla autoridade pelo mesmo ID, successor planejado duplicado, planned membership residual, owner incompatível com aresta terminal, ownership baseline estável sem transição sintética, capability nova legítima e ownerless enquanto planned, predecessor retirado legítimo, segundo hop planned/completed, manifesto único, CNPJ válido, provider ID/URL privada em contexto formalizado e limites permitidos sem falso positivo.
 - **`D-T01` evidence layer:** validadores puros + fixtures mínimas são a camada primária para semântica de registry, decisões e privacidade.
 - **`D-T02` compatibility layer:** poucos testes full-tree comprovam manifesto, links, symlinks, legado e composição real da Foundation.
 - **`D-T03` topology/exclusion:** nenhum banco, API, browser, container ou dado fiscal real é necessário; substituir essa ausência por mock não acrescenta prova.
@@ -681,12 +701,17 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 | `TEST-R8-01` | formal critique R8B | Integrated | `GUARD-PRIV-02` virou fixture automática de contexto formalizado e `REVIEW-PRIV-01` tornou a revisão residual evidência separada |
 | `STATE-R8-01` / `OPS-R8B-01` | both formal reviews R8B | Integrated | remote readiness, next step e baseline lifecycle foram reconciliados e exigem novo freeze R8C |
 | `ROUTING-R8-01` | formal critique R8B | Integrated | ação atual é formal-review; implementação fica provisória e exige novo guard após APROVADO |
+| `ARCH-R8C-01` | formal architecture review R8C | Integrated | capability baseline estável sem transição possui cardinalidade explícita e `CAP-POS-07`, sem proveniência sintética |
+| `CRIT-R8C-01` | formal critique R8C | Integrated | toda aresta transferred exige predecessor não nulo no catálogo; `CAP-NEG-25` cobre inclusive historical completed |
+| `CRIT-R8C-02` | formal critique R8C | Integrated | arrays são únicos, estados de módulo têm mínimos explícitos e `CAP-NEG-26..30` cobrem duplicata/vazio/incompatibilidade |
+| `CRIT-R8C-03` | formal critique R8C | Integrated | predicado de privacidade congela normalização, context keys, placeholders, URL oficial e fixtures negativa/positiva; residual permanece manual |
+| `OPS-R8C-01` / `CRIT-R8C-04` | both formal reviews R8C | Integrated | gate, next step e closeout apontam para novo freeze R8D, sem referência pendente à baseline já publicada |
 
 ## Additional Architectural Opinions
 
 - **Needed:** `yes`
 - **Why ambiguity remains:** o validator pode ser evoluído por manifesto único ou por inventário gerado; revisão independente deve desafiar a opção recomendada.
-- **Opinion count:** `7`
+- **Opinion count:** `8`
 - **Package mode:** `bounded-summary`
 - **Internal reviewer mandate:** `required — fresh internal no-context reviewer after baseline freeze`
 - **Required lenses:** `correctness|performance|elegance|structural-soundness|operational-fit`
@@ -700,6 +725,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 | `uninotas_architecture_opinion_r6` | GO sem achados materiais no baseline d2c1223 | runtime neutral | manifesto/registry permanecem simples | confirmou source/current-target/IDs/diff/pcv | Accepted | formal R6; crítica paralela exigiu evolução multi-hop |
 | `uninotas_architecture_opinion_r7` | catálogo/mutações adicionais + correção do closeout guard standalone | runtime neutral | mantém chain oracle explícito | falso go externo impedia fechamento confiável | Integrated / External resolved | formal R7; DEP-CLOSEOUT-01 resolvida em Delphi `6dc5bd4`/`0e54e2a` |
 | `uninotas_architecture_opinion_r8b` | manifesto/registry/transições mantidos; fechar bijeção planned↔terminal | acceptable | strong positive | mixed até integrar a bijeção | Integrated / Rerun required | merge R8B válido; achados integrados e baseline R8C obrigatória |
+| `uninotas_architecture_opinion_r8c` | manter arquitetura; explicitar ownership baseline sem transição sintética | strong positive | strong positive | mixed até fechar cardinalidades | Integrated / Rerun required | merge R8C válido; achados integrados e baseline R8D obrigatória |
 
 ## Audit Trigger Matrix
 
@@ -734,8 +760,8 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Audit session / round evidence:** `n/a until run`
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
 - **Critique status:** `not_run`
-- **Findings summary:** `R8B apontou ambiguidade de owner/cardinalidade, contrato híbrido de privacidade, metadata de baseline e routing prematuro; todos foram integrados e exigem crítica R8C sobre baseline renovada`.
-- **Evidence / reference:** merge derivado `uninotas-r8b-critique-merge.json`; nova crítica obrigatória após freeze R8C.
+- **Findings summary:** `R8C apontou predecessor transferred, cardinalidade completa de módulos/listas, predicado reproduzível de privacidade e metadata; todos foram integrados e exigem crítica R8D sobre baseline renovada`.
+- **Evidence / reference:** merge derivado `uninotas-r8c-critique-merge.json`; nova crítica obrigatória após freeze R8D.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Assumption Code Coherence
@@ -907,7 +933,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Disposition:** `keep-active`
 - **Disposition reason:** planejamento e aprovação ainda não concluídos.
 - **Post-commit/push status:** `pending`
-- **Next path/status action:** publicar/revisar a baseline R8 pós-resolução de DEP-CLOSEOUT-01, executar guards pré-aprovação e solicitar `APROVADO` explícito.
+- **Next path/status action:** publicar/revisar a baseline R8D pós-integração dos achados R8C, executar guards pré-aprovação e solicitar `APROVADO` explícito.
 
 ## Module Consolidation Gate
 
