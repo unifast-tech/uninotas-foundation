@@ -41,7 +41,7 @@ Smart Notas target modules remain planned. Current route contracts and current l
 | Registry, identity, privacy | `python3 -B -m unittest deterministic/tests/test_registry_semantics.py deterministic/tests/test_privacy_predicate.py` from the Foundation root equivalent | 86 tests; 4.491s; passed |
 | Publication/module projection | `python3 -B -m unittest deterministic/tests/test_validate_foundation.py` | 4 tests; 55.589s; three full-tree scans plus one Git lifecycle/genesis mutation contract; `scan_count=3`; passed |
 | Delivery/lifecycle set | `python3 -B -m unittest deterministic/tests/test_enumerate_change_paths.py` | 7 tests; 0.959s; passed |
-| Closeout/CAS/handoff | `python3 -B -m unittest deterministic/tests/test_validate_closeout_diff.py deterministic/tests/test_closeout_handoff.py` | 81 tests; 363.587s; passed |
+| Closeout/CAS/handoff | `python3 -B -m unittest deterministic/tests/test_validate_closeout_diff.py deterministic/tests/test_closeout_handoff.py` | 82 tests; 337.194s; passed |
 | Canonical tree | `python3 -B deterministic/validate_foundation.py --root .` from Foundation root equivalent | passed |
 | PACED readiness | `bash delphi-ai/verify_context.sh` through Git Bash | `PACED-Ready` |
 | Diff contract | Delphi diff expectation guard after staging | 41 observed/41 authorized, zero forbidden/unclassified |

@@ -98,6 +98,9 @@ def c0_state_is_exact(text):
     return all(value in text for value in required) and len(checks)==5 and all(mark=="x" for mark in checks)
 
 def c1_state_is_exact(text, base_text, base_oid):
+    genesis_match=re.search(r"\*\*C0 active implementation/genesis commit:\*\* `([^`]+)`",base_text)
+    pending="pending delivery — persisted in C1 after observation"
+    genesis_oid=base_oid if genesis_match and genesis_match.group(1)==pending else genesis_match.group(1) if genesis_match and re.fullmatch(r"[0-9a-f]{40}",genesis_match.group(1)) else None
     required=(
         "**Lifecycle state:** `Completed — conditional Production-Ready candidate`",
         "**Current delivery stage:** `Production-Ready`",
@@ -110,8 +113,8 @@ def c1_state_is_exact(text, base_text, base_oid):
         "**Next path/status action:** external C1 verification + active scan handoff",
     )
     promotion=re.search(rf"^\| Foundation UniNotas cutover \| `main@{base_oid}` \| `n/a — main-only authority` \| `n/a` \| `origin/main@{base_oid}` \| C1 conditional; external activation pending \|$", text, re.M)
-    return (all(value in text for value in required) and promotion is not None
-            and f"**C0 active implementation/genesis commit:** `{base_oid}`" in text
+    return (genesis_oid is not None and all(value in text for value in required) and promotion is not None
+            and f"**C0 active implementation/genesis commit:** `{genesis_oid}`" in text
             and f"**C0 remote verification:** `fresh remote/origin/main/base HEAD all observed as {base_oid}`" in text
             and field_line(text, "Why this state now") == field_line(base_text, "Why this state now")
             and field_line(text, "Exit condition") == field_line(base_text, "Exit condition"))

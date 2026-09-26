@@ -16,6 +16,7 @@ class CloseoutDiffTests(unittest.TestCase):
     def repo(self):
         temp=tempfile.TemporaryDirectory(); self.addCleanup(temp.cleanup); repo=pathlib.Path(temp.name); self.git(repo,"init","-q"); self.git(repo,"config","user.email","test@example.invalid"); self.git(repo,"config","user.name","Test")
         todo=(FOUNDATION / ACTIVE).read_text(encoding="utf-8")
+        todo=re.sub(r"\*\*C0 active implementation/genesis commit:\*\* `[0-9a-f]{40}`","**C0 active implementation/genesis commit:** `pending delivery — persisted in C1 after observation`",todo,count=1)
         # C0 is delivery-ready in this fixture: production validation must not
         # exempt the two real delivery-review criteria from its prerequisite.
         todo=todo.replace("- [ ] `VAL-04`", "- [x] `VAL-04`").replace("- [ ] `VAL-05`", "- [x] `VAL-05`")
@@ -54,6 +55,16 @@ class CloseoutDiffTests(unittest.TestCase):
     def test_closeout_pos_01_atomic_move_and_allowed_cells(self):
         repo=self.repo(); base=self.git(repo,"rev-parse","HEAD").stdout.strip(); tree=self.candidate(repo); result=self.validate_candidate(repo,base,tree)
         self.assertEqual(0,result.returncode,result.stderr); proof=json.loads(result.stdout); self.assertEqual("go",proof["outcome"]); self.assertEqual(sorted((*STATIC,ACTIVE,COMPLETED)),proof["exact_delta"])
+    def test_closeout_preserves_recorded_genesis_when_latest_c0_is_a_descendant(self):
+        repo=self.repo(); genesis=self.git(repo,"rev-parse","HEAD").stdout.strip(); path=repo/ACTIVE
+        path.write_text(path.read_text().replace("**C0 active implementation/genesis commit:** `pending delivery — persisted in C1 after observation`",f"**C0 active implementation/genesis commit:** `{genesis}`"))
+        self.git(repo,"add",ACTIVE); self.git(repo,"commit","-qm","corrective active C0")
+        base=self.git(repo,"rev-parse","HEAD").stdout.strip(); self.assertNotEqual(genesis,base)
+        tree=self.candidate(repo); result=self.validate_candidate(repo,base,tree)
+        self.assertEqual(0,result.returncode,result.stderr)
+        completed=self.git(repo,"show",f"{tree}:{COMPLETED}").stdout
+        self.assertIn(f"**C0 active implementation/genesis commit:** `{genesis}`",completed)
+        self.assertIn(f"**C0 remote verification:** `fresh remote/origin/main/base HEAD all observed as {base}`",completed)
     def test_closeout_rejects_non_visible_focused_reviewer_session(self):
         for reviewer in ("\u200b","\u034f","reviewer\nforged","a"*129):
             with self.subTest(reviewer=repr(reviewer)):

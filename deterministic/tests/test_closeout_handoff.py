@@ -57,6 +57,7 @@ class CloseoutHandoffTests(unittest.TestCase):
         if phase=="c1r": value["reverse_bridge"]=bridge
         return value
     def delivery_ready_todo(self, text):
+        text=re.sub(r"\*\*C0 active implementation/genesis commit:\*\* `[0-9a-f]{40}`","**C0 active implementation/genesis commit:** `pending delivery — persisted in C1 after observation`",text,count=1)
         return (text.replace("`not_run`","`no_material_findings`")
                 .replace("| bounded Foundation diff | P1/P2 contract/privacy/validator drift | planned | pending | pending | pre-delivery |","| bounded Foundation diff | P1/P2 contract/privacy/validator drift | passed | clean candidate-bound review artifact | no P1/P2 findings | pre-delivery |")
                 .replace("| TODO authority + Foundation sync | future-as-current, weakened validator, hidden tenancy/fallback | planned | pending | pending | pre-delivery |","| TODO authority + Foundation sync | future-as-current, weakened validator, hidden tenancy/fallback | passed | clean candidate-bound review artifact | no findings | pre-delivery |"))

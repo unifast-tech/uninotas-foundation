@@ -22,6 +22,8 @@ class FoundationTreeContractTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory(); self.addCleanup(temporary.cleanup)
         root = pathlib.Path(temporary.name) / "foundation"
         shutil.copytree(ROOT, root, ignore=shutil.ignore_patterns(".git", "__pycache__", "artifacts/tmp"))
+        active = root / "todos/active/process/TODO-uninotas-canonical-foundation-transition.md"
+        active.write_text(re.sub(r"\*\*C0 active implementation/genesis commit:\*\* `[0-9a-f]{40}`","**C0 active implementation/genesis commit:** `pending delivery — persisted in C1 after observation`",active.read_text(encoding="utf-8"),count=1),encoding="utf-8")
         subprocess.run(["git", "-C", str(root), "init", "-q"], check=True)
         subprocess.run(["git", "-C", str(root), "config", "user.email", "test@example.invalid"], check=True)
         subprocess.run(["git", "-C", str(root), "config", "user.name", "Test"], check=True)
