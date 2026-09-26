@@ -42,7 +42,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `none`
-- **Next exact step:** integrar os achados R8G, publicar a baseline R8H, repetir arquitetura/crítica sem contexto e concluir os guards pré-aprovação.
+- **Next exact step:** executar arquitetura/crítica R8H sem contexto sobre a baseline renovada e concluir os guards pré-aprovação.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -91,7 +91,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 | Scope Item | Local Branch/Commit | PR to lane threshold | PR to `stage` | PR to `main` | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Foundation UniNotas cutover | `main@dd6573f` | `n/a — main-only authority` | `n/a` | `origin/main@dd6573f` | R8G review-baseline evidence only; not delivery promotion |
+| Foundation UniNotas cutover | `main@66153fd` | `n/a — main-only authority` | `n/a` | `origin/main@66153fd` | R8H review-baseline evidence only; not delivery promotion |
 
 ## Diff Expectation Contract
 
@@ -322,7 +322,7 @@ Entre C1 e o working tree de C2, o único path alterável é `todos/completed/pr
 | Dependency | Why It Matters | Status | Last Verified | Verification Method | Adjustment / Workaround |
 | --- | --- | --- | --- | --- | --- |
 | Smart Notas OpenAPI | fundamenta a arquitetura-alvo | healthy | 2026-09-25 | fingerprint e probes redigidos no ledger | nenhuma chamada nesta entrega |
-| Git remote Foundation | necessário para baseline de revisão | healthy | 2026-09-25 | `main`/`origin/main@13b458b`; baseline material R8G `dd6573f` alcançável; guard main-only instalado e Git for Windows é o writer válido | publicar baseline R8H após integração |
+| Git remote Foundation | necessário para baseline de revisão | healthy | 2026-09-25 | `main`/`origin/main@66153fd`; baseline material R8H publicada; guard main-only instalado e Git for Windows é o writer válido | nenhum ajuste |
 | `DEP-CLOSEOUT-01` Delphi standalone closeout support | impede falso `go` e stale active TODO no closeout | healthy/resolved | 2026-09-25 | TODO Delphi concluído em `6dc5bd4`/`0e54e2a`; comando individual retornou `path_state=active`; `--all-active --repo uninotas-foundation` retornou `todo_count=2`, ambos paths ativos reais e zero violações | consumir a correção já publicada e repetir os dois comandos antes do closeout |
 
 ## Profile Scope & Handoffs (Required Before `APROVADO`)
@@ -542,11 +542,11 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 - **Why this decision:** a revisão altera decisões canônicas e precisa de pacote imutável.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `main`
-- **Baseline commit:** `dd6573f39349ad0c969f0617a305005733f49261`
+- **Baseline commit:** `66153fd3979bb26ac06acca42782fc1fde754654`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `not_run`
-- **Findings summary:** os achados R8G foram integrados; as seções materiais exigem nova baseline R8H.
-- **Evidence / reference:** baseline R8G anterior `origin/main@dd6573f`; merges derivados `uninotas-r8g-architecture-merge.json` e `uninotas-r8g-critique-merge.json`; novo commit pendente.
+- **Gate status:** `findings_integrated`
+- **Findings summary:** os achados R8G foram integrados e a baseline R8H imutável foi publicada somente como evidência de revisão.
+- **Evidence / reference:** `origin/main@66153fd`; merges derivados `uninotas-r8g-architecture-merge.json` e `uninotas-r8g-critique-merge.json`.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
@@ -558,8 +558,8 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 - **Material sections compared:** `template canonical set`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md`
 - **Gate status:** `not_run`
-- **Findings summary:** a integração R8G altera seções materiais; repetir somente após freeze R8H.
-- **Evidence / reference:** `uninotas_architecture_opinion_r8g` + `uninotas_plan_critique_r8g`; baseline R8H pendente.
+- **Findings summary:** baseline R8H publicada; arquitetura/crítica e o guard de drift ainda não foram concluídos.
+- **Evidence / reference:** freeze `origin/main@66153fd3979bb26ac06acca42782fc1fde754654`; este SHA deve ser exatamente o consumido pelo drift guard após convergência.
 - **Waiver authority / reference:** `n/a`
 
 ## Questions To Close
@@ -1049,7 +1049,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Disposition:** `keep-active`
 - **Disposition reason:** planejamento e aprovação ainda não concluídos.
 - **Post-commit/push status:** `pending`
-- **Next path/status action:** publicar/revisar a baseline R8H, executar guards pré-aprovação e solicitar `APROVADO` explícito.
+- **Next path/status action:** revisar a baseline R8H, executar guards pré-aprovação e solicitar `APROVADO` explícito.
 
 ## Module Consolidation Gate
 
