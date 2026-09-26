@@ -42,7 +42,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `none`
-- **Next exact step:** obter autorização humana para abrir/entregar um TODO Delphi separado para `DEP-CLOSEOUT-01`; depois congelar a remediação R7, repetir arquitetura/crítica e executar os guards finais.
+- **Next exact step:** publicar uma nova baseline pós-remediação de `DEP-CLOSEOUT-01`, executar arquitetura/crítica R8 sem contexto e concluir os guards pré-aprovação.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -70,7 +70,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 - [ ] Investigar ou alterar a automação n8n/FastPay.
 - [ ] Realizar chamadas adicionais à API Smart Notas ou registrar qualquer valor de credencial/identificador.
 - [ ] Renomear repositórios, diretórios de produto/runtime, pacotes, imagens ou serviços técnicos; o rename do arquivo canônico de decisões para UniNotas está explicitamente dentro do escopo.
-- [ ] Alterar `delphi-ai`; o suporte do `todo_closeout_guard.py` à autoridade Foundation standalone exige um TODO Delphi separado e aprovado antes do closeout desta entrega.
+- [ ] Alterar `delphi-ai`; o suporte standalone já foi entregue separadamente pelos commits Delphi `6dc5bd4` e `0e54e2a` e será apenas consumido/validado nesta entrega.
 - [ ] Usar worktrees, checkouts auxiliares, `worker/*` ou `reconcile/*`.
 
 ## Delivery Status Semantics
@@ -200,13 +200,13 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 | `DOD-08` | Definition of Done | privacidade e nenhum segredo/PII | test+review | `GUARD-PRIV-*` + revisão de diff | local | planned | nenhum valor real em fixture |
 | `DOD-09` | Definition of Done | sequência do roadmap | doc+review | `system_roadmap.md` + decisão de aderência | n/a | planned | não autoriza backend |
 | `DOD-10` | Definition of Done | migração estável de decisões | doc+test | decision map/index + `test_decision_id_migration_and_links` | local | planned | D-01..D-05 não mudam de significado |
-| `DOD-11` | Definition of Done | closeout guard cobre Foundation standalone | external guard+regression | TODO Delphi aprovado + path state/count reais | local | blocked | DEP-CLOSEOUT-01; não impede iniciar implementação Foundation |
+| `DOD-11` | Definition of Done | closeout guard cobre Foundation standalone | external guard+regression | TODO Delphi concluído + path state/count reais | local | planned | precondição externa satisfeita; repetir antes do closeout |
 | `VAL-01` | Validation Steps | suíte determinística | test | comando unittest exato | local | planned | registrar duração e RED/GREEN |
 | `VAL-02` | Validation Steps | Foundation validator | test | comando validator exato | local | planned | deve passar integralmente |
 | `VAL-03` | Validation Steps | PACED readiness | environment | comando Git Bash exato | local | planned | requer `PACED-Ready` |
 | `VAL-04` | Validation Steps | guards de autoridade/delivery/cutover | guard | comandos exatos em Commands | local | planned | todos devem retornar go |
 | `VAL-05` | Validation Steps | diff baseline-aware | review | dois comandos Git exatos | local | planned | inclui rename detection |
-| `VAL-06` | Validation Steps | closeout sem falso go | guard | comando individual + `--all-active --repo uninotas-foundation` | local | blocked | requer path_state active e count real |
+| `VAL-06` | Validation Steps | closeout sem falso go | guard | comando individual + `--all-active --repo uninotas-foundation` | local | planned | preflight provou path_state active e count 2; repetir antes do closeout |
 
 ### DOD-06 Validator Case Matrix
 
@@ -256,8 +256,8 @@ Os nomes abaixo são o contrato mínimo de fixtures/builders e testes. Cada test
 | Dependency | Why It Matters | Status | Last Verified | Verification Method | Adjustment / Workaround |
 | --- | --- | --- | --- | --- | --- |
 | Smart Notas OpenAPI | fundamenta a arquitetura-alvo | healthy | 2026-09-25 | fingerprint e probes redigidos no ledger | nenhuma chamada nesta entrega |
-| Git remote Foundation | necessário para baseline de revisão | healthy | 2026-09-25 | `main`/`origin/main@a5c7ec1`; guard main-only instalado e Git for Windows é o writer válido | nenhum ajuste |
-| `DEP-CLOSEOUT-01` Delphi standalone closeout support | impede falso `go` e stale active TODO no closeout | blocked | 2026-09-25 | comando individual retornou `path_state=other`; all-active retornou `todo_count=0` | requer escopo/TODO Delphi separado aprovado; não bloqueia implementação Foundation, bloqueia `Local-Implemented`, completion e move-completed |
+| Git remote Foundation | necessário para baseline de revisão | healthy | 2026-09-25 | `main`/`origin/main@5a06037`; guard main-only instalado e Git for Windows é o writer válido | nenhum ajuste |
+| `DEP-CLOSEOUT-01` Delphi standalone closeout support | impede falso `go` e stale active TODO no closeout | healthy/resolved | 2026-09-25 | TODO Delphi concluído em `6dc5bd4`/`0e54e2a`; comando individual retornou `path_state=active`; `--all-active --repo uninotas-foundation` retornou `todo_count=2`, ambos paths ativos reais e zero violações | consumir a correção já publicada e repetir os dois comandos antes do closeout |
 
 ## Profile Scope & Handoffs (Required Before `APROVADO`)
 
@@ -290,7 +290,7 @@ Os nomes abaixo são o contrato mínimo de fixtures/builders e testes. Cada test
 
 ## Decision Pending (Resolve Before Freeze)
 
-- [ ] `DEP-CLOSEOUT-01 — autorização humana para um TODO Delphi separado que torne todo_closeout_guard compatível com a autoridade Foundation standalone; não altera decisões UniNotas, mas bloqueia approval/conclusão até ter owner explícito`.
+- [x] `DEP-CLOSEOUT-01 — resolvida pelo TODO Delphi standalone concluído em 0e54e2a; a correção 6dc5bd4 tornou o guard compatível com a autoridade Foundation e os probes reais confirmaram path_state=active e todo_count=2`.
 
 ## Planned Module Registry Contract
 
@@ -425,8 +425,8 @@ O novo arquivo `decisions/uninotas-foundation-decisions.md` preservará os IDs e
 - **Decision review lifecycle:** `after diagnosis is closed and before APROVADO`
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-summary`
-- **Decision review status:** `blocked`
-- **Decision review evidence / resolution:** `R7 encontrou falso go do closeout guard standalone e mutações/catalog/profile/evidence incompletos; achados locais integrados, DEP-CLOSEOUT-01 aguarda autorização separada`
+- **Decision review status:** `not_run`
+- **Decision review evidence / resolution:** `R7 teve seus achados locais integrados e DEP-CLOSEOUT-01 foi resolvida externamente; nova arquitetura R8 sem contexto é obrigatória sobre a baseline pós-remediação`
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -443,9 +443,9 @@ O novo arquivo `decisions/uninotas-foundation-decisions.md` preservará os IDs e
 - **Baseline branch:** `main`
 - **Baseline commit:** `a5c7ec1ae52d5423027b51cc8e133201f204cd94`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `findings_integrated`
-- **Findings summary:** o baseline R6 foi revisado; R7 encontrou falso go do closeout guard standalone e gaps de mutação/profile/evidence, integrados localmente exceto a dependência Delphi que exige autorização humana separada.
-- **Evidence / reference:** `origin/main@a5c7ec1`; `uninotas_architecture_opinion_r7` + `uninotas_plan_critique_r7`.
+- **Gate status:** `not_run`
+- **Findings summary:** R7 foi integrado e a dependência Delphi foi resolvida; falta publicar a baseline R8 imutável que será submetida às revisões pré-aprovação.
+- **Evidence / reference:** baseline anterior `origin/main@a5c7ec1`; resolução externa Delphi `6dc5bd4` + `0e54e2a`; novo commit Foundation pendente.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
@@ -457,8 +457,8 @@ O novo arquivo `decisions/uninotas-foundation-decisions.md` preservará os IDs e
 - **Material sections compared:** `template canonical set`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md`
 - **Gate status:** `not_run`
-- **Findings summary:** a medição anterior retornou zero seções materiais alteradas contra o baseline então vigente; a integração material dos achados R7 e futura resolução DEP-CLOSEOUT-01 exigem novo baseline e nova medição.
-- **Evidence / reference:** `uninotas_architecture_opinion_r7` + `uninotas_plan_critique_r7`; repetir após freeze R7.
+- **Findings summary:** a medição anterior retornou zero seções materiais alteradas contra o baseline então vigente; a resolução de DEP-CLOSEOUT-01 exige nova baseline e nova medição R8.
+- **Evidence / reference:** `uninotas_architecture_opinion_r7` + `uninotas_plan_critique_r7`; repetir após freeze R8.
 - **Waiver authority / reference:** `n/a`
 
 ## Questions To Close
@@ -469,7 +469,7 @@ O novo arquivo `decisions/uninotas-foundation-decisions.md` preservará os IDs e
 - [x] Lista agregada: fora da primeira entrega.
 - [x] Fonte das notas: Smart Notas somente.
 - [x] Papel do PostgreSQL: falhas de integração somente.
-- [ ] Autorizar um TODO Delphi separado para corrigir o falso `go` do closeout guard standalone (`DEP-CLOSEOUT-01`).
+- [x] Corrigir o falso `go` do closeout guard standalone (`DEP-CLOSEOUT-01`): TODO Delphi concluído em `0e54e2a`, correção em `6dc5bd4` e probes reais verdes.
 
 ## Assumptions Preview
 
@@ -489,7 +489,7 @@ O novo arquivo `decisions/uninotas-foundation-decisions.md` preservará os IDs e
 2. Atualizar identidade, mandato, constituição, entidades, decisões e roadmap com separação Current/Target.
 3. Criar os três owners alvo e atualizar módulos existentes, index e scope policy.
 4. Tornar o manifesto a única enumeração exata; extrair validadores puros para registry/privacidade/ownership e manter poucos testes full-tree, sem enfraquecer symlink, legado ou ownership.
-5. Resolver `DEP-CLOSEOUT-01` por TODO Delphi separado/aprovado e provar path state/count reais; este passo pode ocorrer em paralelo à implementação Foundation, mas deve terminar antes de qualquer claim `Local-Implemented`.
+5. Consumir a resolução já publicada de `DEP-CLOSEOUT-01` e repetir os probes de path state/count reais antes de qualquer claim `Local-Implemented` ou closeout.
 6. Executar a suíte Foundation, validator, PACED readiness e guards de entrega.
 7. Submeter diff consolidado às revisões independentes exigidas e promover decisões estáveis.
 
@@ -664,7 +664,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 | `VALIDATION-01` | formal critique R6 | Integrated | Completion Evidence tem uma row por DOD/VAL e DOD-06 possui casos positivos/negativos com fixture e diagnóstico esperado |
 | `EXECUTION-01` | formal critique R6 | Integrated | regras de teste/delivery/closeout ingeridas; comandos exatos cobrem authority, audits, completion, repo-scoped closeout e active scan |
 | `CATALOG-R7-01` / `F-01` | both formal reviews R7 | Integrated | bijeção catalog/modules, retired/active, terminal membership, origin/sequence e 12 mutações adicionais fecham o oracle 1:1 |
-| `CLOSEOUT-R7-01` / `F-02` | both formal reviews R7 | Blocked external | `todo_closeout_guard.py` retorna falso go para autoridade standalone; DEP-CLOSEOUT-01 exige TODO Delphi separado aprovado antes de novo approval review |
+| `CLOSEOUT-R7-01` / `F-02` | both formal reviews R7 | Resolved external | TODO Delphi concluído em `0e54e2a`; correção `6dc5bd4`; probes reais retornam `path_state=active`, `todo_count=2` e zero violações |
 | `PROFILE-R7-01` / `F-03` | formal critique R7 | Integrated | scope command agora classifica o diff Foundation real com prefixo de autoridade; empty diff não satisfaz |
 | `TEST-R7-01` / `F-04` | formal critique R7 | Integrated | evidence matrix exige unit + full-tree integration/contract sem runtime externo |
 
@@ -684,7 +684,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 | `uninotas_architecture_opinion_r4` | proveniência/invariantes por capability + comando/coerência/estado exatos | runtime neutral | decisão canônica UniNotas elimina path ativo legado | exige ownership e sucessão deterministicamente verificáveis | Integrated | formal R4 |
 | `uninotas_architecture_opinion_r5` | lifecycle terminal, migração estável de IDs e contrato operacional completo | runtime neutral | preserva proveniência sem ambiguidade | exige transições persistentes, paths/runner/namespaces/pcv fechados | Integrated | formal R5 |
 | `uninotas_architecture_opinion_r6` | GO sem achados materiais no baseline d2c1223 | runtime neutral | manifesto/registry permanecem simples | confirmou source/current-target/IDs/diff/pcv | Accepted | formal R6; crítica paralela exigiu evolução multi-hop |
-| `uninotas_architecture_opinion_r7` | catálogo/mutações adicionais + correção do closeout guard standalone | runtime neutral | mantém chain oracle explícito | falso go externo impede fechamento confiável | Partially Integrated / Blocked | formal R7; DEP-CLOSEOUT-01 requer autoridade humana |
+| `uninotas_architecture_opinion_r7` | catálogo/mutações adicionais + correção do closeout guard standalone | runtime neutral | mantém chain oracle explícito | falso go externo impedia fechamento confiável | Integrated / External resolved | formal R7; DEP-CLOSEOUT-01 resolvida em Delphi `6dc5bd4`/`0e54e2a` |
 
 ## Audit Trigger Matrix
 
@@ -718,9 +718,9 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Canonical multi-lane audit protocol:** `n/a for planning critique; audit-protocol-triple-review required additively before Completed`
 - **Audit session / round evidence:** `n/a until run`
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
-- **Critique status:** `blocked`
-- **Findings summary:** `R7 apontou mutações do catálogo, falso go closeout standalone, scope check vazio e evidence layer; três integrados, DEP-CLOSEOUT-01 depende de autorização separada`.
-- **Evidence / reference:** `uninotas_plan_critique_r7; nova crítica somente após resolver DEP-CLOSEOUT-01`.
+- **Critique status:** `not_run`
+- **Findings summary:** `R7 apontou quatro grupos; os achados locais foram integrados e DEP-CLOSEOUT-01 foi resolvida externamente; falta crítica R8 sobre baseline publicada`.
+- **Evidence / reference:** `uninotas_plan_critique_r7`; resolução Delphi `6dc5bd4`/`0e54e2a`; nova crítica obrigatória após freeze R8.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Assumption Code Coherence
@@ -891,7 +891,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Disposition:** `keep-active`
 - **Disposition reason:** planejamento e aprovação ainda não concluídos.
 - **Post-commit/push status:** `pending`
-- **Next path/status action:** obter autorização humana e resolver DEP-CLOSEOUT-01 em TODO Delphi separado; então publicar/revisar baseline R7 e executar os guards finais.
+- **Next path/status action:** publicar/revisar a baseline R8 pós-resolução de DEP-CLOSEOUT-01, executar guards pré-aprovação e solicitar `APROVADO` explícito.
 
 ## Module Consolidation Gate
 
