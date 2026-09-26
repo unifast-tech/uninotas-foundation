@@ -42,7 +42,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `none`
-- **Next exact step:** executar arquitetura/crítica R8H sem contexto sobre a baseline renovada e concluir os guards pré-aprovação.
+- **Next exact step:** publicar as correções R8H como baseline R8I, executar arquitetura/crítica R8I sem contexto e concluir os guards pré-aprovação.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -101,7 +101,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 - **Comparison mode:** `working_tree`
 - **Canonical path-set enumerator:** uma implementação, dois baselines explícitos. `--mode delivery --baseline 0fe906c1e496a1d38f1603cf188c224711011c32` produz o net path set global; como o TODO ativo nasceu depois desse baseline e não existe em C1, somente o destino completed aparece no resultado final. `--mode lifecycle --baseline <C0_PRE_MOVE>` compara C1 com o commit pre-move publicado onde o path ativo existe e deve emitir source ativo D + destination completed A. O helper usa `git diff --no-renames --name-only`, normaliza paths relativos e aplica C-sort; `lifecycle` exige baseline ancestor com source ativo presente. Antes do helper existir, apenas o preflight delivery usa o bootstrap equivalente `bash -lc '{ git -C uninotas-foundation diff --no-renames --name-only 0fe906c1e496a1d38f1603cf188c224711011c32 --; git -C uninotas-foundation ls-files --others --exclude-standard; } | LC_ALL=C sort -u'`; depois da criação, fallback inline é proibido.
 - **Status/rename evidence view:** a view delivery usa `git diff --name-status --find-renames 0fe906c...`; a view lifecycle repete contra `C0_PRE_MOVE`. Nenhuma define path authority; servem somente para tipos de mudança/rename, e apenas a lifecycle pode provar o move active→completed.
-- **Enumerator consumers:** profile scope e diff-expectation global consomem `mode=delivery`; closeout/move usa `mode=lifecycle` contra C0. A revisão humana reconcilia a união rotulada das duas saídas com Expected Changed Paths; não exige que um path historicamente criado e removido apareça no net delivery set. Divergência, path ausente na modalidade aplicável ou path extra bloqueia entrega.
+- **Gate interface:** o Delphi `todo_diff_expectation_guard.py` não aceita input do helper; ele permanece um gate independente e classifica o working-tree delivery diff contra `0fe906c` com sua implementação existente (`--find-renames` + untracked). O helper project-owned alimenta profile scope, lifecycle move evidence e revisão humana; não há alegação de integração inexistente. Ambos usam a mesma Expected Changed Paths como allowlist, mas somente `mode=lifecycle` prova o source ativo criado após baseline. No-go em qualquer gate bloqueia entrega.
 - **Rename evidence:** a decisão-file rename usa a view delivery porque o source existe em `0fe906c`; o TODO move usa exclusivamente a view lifecycle porque seu source nasceu depois de `0fe906c`. Após staging, cada view deve reconhecer seu par como `R` ou a revisão registra explicitamente D/A com conteúdo/proveniência equivalentes.
 
 ### Repository Baselines
@@ -109,7 +109,6 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 | Repository | Path | Baseline ref | Comparison mode |
 | --- | --- | --- | --- |
 | `uninotas-foundation` | `.` | `main@0fe906c` | `working_tree` |
-| `uninotas-foundation lifecycle move` | `.` | `C0_PRE_MOVE — commit Local-Implemented publicado com TODO ativo; preencher antes do closeout` | `C0..C1` |
 
 ### Expected Changed Paths
 
@@ -180,14 +179,14 @@ Esta tabela autoriza a união rotulada de `delivery` e `lifecycle`; ausência do
 - [ ] `DOD-03` Unifast/Prosperar são contextos fiscais explícitos e não tenants.
 - [ ] `DOD-04` Registry e módulos distinguem `current_runtime` de `target_planned`, preservam identidades no `baseline_capability_catalog` confrontado com o identity ledger independente e registram precedência, predecessor/sucessor e condição de promoção/retirada, sem declarar código futuro como implementado.
 - [ ] `DOD-05` Notas/documentos, falhas de integração e casos operacionais têm owners canônicos distintos.
-- [ ] `DOD-06` Validator e suíte rejeitam regressões de identidade, decisão/link canônico obsoleto, ownership, tenancy, privacidade, symlink, legado e publicação, além de quebra da bijeção módulo/catálogo, ID/path/transition ou membership duplicado, remoção/rename/alias — inclusive coordenada — de capability baseline/new contra digest ou histórico Git completo do identity ledger, histórico shallow/truncado/non-descendant/replaced ou sem genesis, capability current direta sem origem, módulo retired ainda ativo/capable ou com documento/manifest entry publicado, módulo ativo vazio ou incompatível com sua cardinalidade runtime, sequence gap, fork, ciclo, predecessor desconhecido/nulo em transferência, chain edge ou origin inválida, aresta não terminal planned, interseção `owned_capabilities ∩ planned_capabilities`, target com `owned_capabilities`, aresta terminal planned sem exatamente um owner atual/predecessor ou successor membership, planned membership órfã sem aresta terminal correspondente, capability transferida/planned ou terminal completed sem o owner exigido, dupla autoridade runtime, successor planejado duplicado e planned membership obsoleto após promoção; fixtures positivas cobrem estado inicial, ownership current estável respaldado pelo baseline catalog/identity ledger sem transição sintética, append de capability nova, ancestralidade completa desde genesis, promoção parcial/final, tombstone retired sem documento, predecessor retirado e segundo hop planned/completed.
+- [ ] `DOD-06` Validator e suíte rejeitam regressões de identidade, decisão/link canônico obsoleto, ownership, tenancy, privacidade, symlink, legado e publicação, além de quebra da bijeção módulo/catálogo ou ledger-origin-new/transition, ID/path/transition/membership/ledger duplicado, conflito baseline/new, remoção/rename/alias coordenada do seed inicial contra digest ou de identidade posterior dentro da linhagem first-parent observável, histórico shallow/truncado/non-descendant/replaced ou sem genesis, capability current direta sem origem, módulo retired ainda ativo/capable ou com documento/manifest entry publicado, módulo ativo vazio ou incompatível com sua cardinalidade runtime, sequence gap, fork, ciclo, predecessor desconhecido/nulo em transferência, chain edge ou origin inválida, aresta não terminal planned, interseção `owned_capabilities ∩ planned_capabilities`, target com `owned_capabilities`, aresta terminal planned sem exatamente um owner atual/predecessor ou successor membership, planned membership órfã sem aresta terminal correspondente, capability transferida/planned ou terminal completed sem o owner exigido, dupla autoridade runtime, successor planejado duplicado e planned membership obsoleto após promoção; reescrita alternativa descendente de C0 pertence explicitamente a `RISK-HIST-01`. Fixtures positivas cobrem estado inicial, ownership current estável, append de capability nova, ancestralidade completa, promoção parcial/final, tombstone retired, predecessor retirado e segundo hop.
 - [ ] `DOD-07` Os artefatos atuais pertencem ao manifesto e a validação Foundation passa sem `frozen lifecycle tree mismatch`.
 - [ ] `DOD-08` Nenhum segredo, valor real de CNPJ/identificador do provedor, payload/resposta privada ou URL capturada de documento foi persistido; CNPJ válido é coberto deterministicamente e identificador/URL contextual por regra precisa mais revisão de diff.
 - [ ] `DOD-09` O roadmap aponta para o TODO NestJS de leitura como próximo slice, sem lhe conceder autoridade antecipada.
 - [ ] `DOD-10` O arquivo/índice canônico de decisões migra para UniNotas sem links obsoletos nem reutilização semântica de IDs: D-01..D-05 preservam sua proveniência/handling e D-06..D-11 recebem somente autoridades novas.
 - [ ] `DOD-11` Antes de qualquer claim `Local-Implemented`/closeout, o `todo_closeout_guard.py` corrigido reconhece este path como `active` e o scan `--all-active --repo uninotas-foundation` encontra os TODOs ativos reais; falso `go` com `path_state=other` ou `todo_count=0` bloqueia entrega.
 - [ ] `DOD-12` O closeout publica C0 pre-move, move este TODO e atualiza manifesto/links em C1; após C1 ser publicado/verificado, C2 registra `delivery_tree_commit=C1`. Completion/authority/closeout guards rodam sobre o working tree de C2, quando toda evidência repository-verifiable já existe; o push/verificação de C2 e active scan são promotion evidence externa posterior, não checkbox autorreferente.
-- [ ] `DOD-13` `deterministic/enumerate_change_paths.py` é a única implementação pós-approval: mode delivery representa o net diff contra `0fe906c`; mode lifecycle representa C0..C1 e emite os dois endpoints do move. Ambos incluem/normalizam os paths aplicáveis sem inventar source ausente do baseline.
+- [ ] `DOD-13` `deterministic/enumerate_change_paths.py` é o helper project-owned único para profile/lifecycle/human review: mode delivery representa o net diff contra `0fe906c`; mode lifecycle representa C0..C1 e emite os dois endpoints do move. O Delphi diff guard continua independente e obrigatório, sem interface de input inventada.
 - [ ] `DOD-14` `validate_attestation_diff.py --base C1` exige que C2 altere somente o TODO completed e somente campos/rows allowlisted de status/evidência/attestation; todos os demais paths e bytes de canonical docs, manifesto, validator e testes permanecem idênticos a C1.
 
 ## Validation Steps
@@ -196,7 +195,7 @@ Esta tabela autoriza a união rotulada de `delivery` e `lifecycle`; ausência do
 - [ ] `VAL-02` Executar `python3 -B uninotas-foundation/deterministic/validate_foundation.py --root uninotas-foundation`.
 - [ ] `VAL-03` Executar `'/mnt/c/Program Files/Git/bin/bash.exe' -lc 'cd /c/Unifast/MonitorDeNotas && bash delphi-ai/verify_context.sh'`, runner canônico que evita a limitação CRLF do wrapper sob WSL.
 - [ ] `VAL-04` Executar da raiz do workspace `python3 delphi-ai/tools/todo_diff_expectation_guard.py uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md --repo-root uninotas-foundation`, além dos guards Delphi de autoridade, conclusão e cutover definidos neste TODO.
-- [ ] `VAL-05` Executar o canonical path-set enumerator, reconciliar exatamente sua saída com o diff-expectation guard e profile scope, executar `git -C uninotas-foundation diff --check 0fe906c1e496a1d38f1603cf188c224711011c32 --` e, após staging/final commit, executar separadamente a status/rename evidence view.
+- [ ] `VAL-05` Executar independentemente o Delphi diff-expectation guard, o helper `mode=delivery`, profile scope alimentado pelo helper, diff check e status/rename view; revisão humana confirma que cada path observado na modalidade aplicável possui row autorizada, sem alegar que o Delphi guard consome output externo.
 - [ ] `VAL-06` Após o TODO Delphi separado reparar o guard standalone, executar os dois comandos de closeout deste contrato e verificar semanticamente `path_state=active` no path individual e `todo_count>=1` no scan ativo; exit code/`go` isolado não basta.
 - [ ] `VAL-07` Executar a sequência faseada de `DOD-12`: guards pre-C0/pre-C1, publicar/verificar C0 e C1, preparar C2, executar guards de completion/authority/closeout sobre C2, publicar/verificar C2 e então executar o scan externo `--all-active --repo uninotas-foundation`.
 - [ ] `VAL-08` Executar `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_enumerate_change_paths.py` cobrindo untracked, staged D/A, rename reconhecido como R e source criado após delivery baseline/movido antes de C1, com expectativas distintas para delivery e lifecycle.
@@ -282,7 +281,13 @@ Os nomes abaixo são o contrato mínimo de fixtures/builders e testes. Cada test
 | `CAP-NEG-34` | negative | `uncataloged_capability_inserted_directly_as_owned` | `non-baseline capability requires origin new transition history` |
 | `CAP-NEG-35` | negative | `coordinated_initial_identity_erasure` | `frozen initial capability identity digest mismatch` mesmo após remover registry/ownership/transitions relacionados |
 | `CAP-NEG-36` | negative+git-history | `coordinated_new_origin_identity_erasure` | `capability identity ledger removed or changed historical record` mesmo após remover transition/memberships relacionados |
-| `CAP-NEG-37` | negative+git-history | `shallow_truncated_missing_or_non_descendant_genesis` | `capability identity history is incomplete or untrusted` para shallow, missing genesis, non-descendant, replace/graft ou ancestry não fast-forward |
+| `CAP-NEG-37` | negative+git-history | `shallow_truncated_missing_or_non_descendant_genesis` | `capability identity history is incomplete or untrusted` para shallow, missing genesis, non-descendant ou replace/graft |
+| `CAP-LIMIT-01` | documented limitation+git-history | `alternate_descendant_rewrite_preserving_genesis` | validator não detecta rewrite coerente que preserva C0; teste documenta `RISK-HIST-01` e impede claim fail-closed mais amplo |
+| `CAP-NEG-38` | negative | `new_transition_missing_identity_ledger_record` | `origin new transition requires exactly one identity ledger record` |
+| `CAP-NEG-39` | negative | `new_identity_record_missing_transition` | `origin new identity record references no sequence one transition` |
+| `CAP-NEG-40` | negative | `new_identity_transition_capability_mismatch` | `origin new identity record capability does not match transition` |
+| `CAP-NEG-41` | negative | `duplicate_identity_ledger_capability` | `capability identity ledger id is not unique` |
+| `CAP-NEG-42` | negative | `baseline_and_new_origin_conflict` | `capability identity cannot have both baseline and new origins` |
 | `GUARD-ID-01` | negative | `legacy_identity_or_decision_link` | identidade/índice canônico legado é rejeitado |
 | `GUARD-TENANCY-01` | negative | `fiscal_context_as_tenant` | contexto fiscal tratado como tenancy é rejeitado |
 | `GUARD-PUB-01` | negative | `unmanifested_or_missing_path` | árvore diverge do manifesto |
@@ -308,7 +313,7 @@ Os nomes abaixo são o contrato mínimo de fixtures/builders e testes. Cada test
 
 ### C2 Attestation Diff Contract
 
-Entre C1 e o working tree de C2, o único path alterável é `todos/completed/process/TODO-uninotas-canonical-foundation-transition.md`. Dentro dele, o guard permite somente: campos de `Delivery Status Canon`; a row desta entrega em `Promotion Evidence`; colunas `Status`/`Notes` da `Completion Evidence Matrix`; campos status/findings/evidence dos gates já declarados; campos de `TODO Closeout Disposition`; e valores de `Post-Push Attestation (Two-Phase)`. Headings, IDs, scope, decisões, DoD/VAL text, plans, commands, canonical docs, manifest, validator, ledger e tests são byte-frozen contra C1.
+Entre C1 e o working tree de C2, o único path alterável é `todos/completed/process/TODO-uninotas-canonical-foundation-transition.md`. Dentro dele, o guard permite somente: campos de `Delivery Status Canon`; a row desta entrega em `Promotion Evidence`; colunas `Status`/`Notes` da `Completion Evidence Matrix`; campos status/findings/evidence dos gates já declarados; campos de `TODO Closeout Disposition`; e, em `Post-Push Attestation`, somente C1 delivery-tree commit/verificação e a descrição fixa do handoff C2. `C0 pre-move commit` e `C0 remote verification` são preenchidos em C1 e ficam estruturalmente byte-frozen, fora da allowlist C2, pois C0 é `LEDGER_GENESIS` e lifecycle baseline. Headings, IDs, scope, decisões, DoD/VAL text, plans, commands, canonical docs, manifest, validator, ledger e tests também são byte-frozen contra C1.
 
 | Case ID | Fixture | Expected assertion |
 | --- | --- | --- |
@@ -316,6 +321,7 @@ Entre C1 e o working tree de C2, o único path alterável é `todos/completed/pr
 | `ATTEST-NEG-01` | `second_path_changed` | `C2 attestation may change only the completed TODO` |
 | `ATTEST-NEG-02` | `todo_semantic_section_changed` | `C2 attestation changed non-evidence contract content` |
 | `ATTEST-NEG-03` | `unknown_evidence_field_or_row_changed` | `C2 attestation field is not allowlisted` |
+| `ATTEST-NEG-04` | `c0_genesis_or_verification_changed` | `C2 attestation cannot change frozen C0 ledger genesis evidence` |
 
 ## External Dependency Readiness
 
@@ -378,7 +384,11 @@ O mesmo JSON terá um `baseline_capability_catalog` histórico e imutável, auto
 
 `deterministic/capability_identity_ledger.json` é o oracle de enforcement independente da projeção mutável acima. Ele contém registros normalizados append-only: baseline usa `capability_id`, `origin=baseline`, `baseline_owner`; capability nova usa `capability_id`, `origin=new`, `origin_transition_id`. O seed inicial completo — as nove rows baseline mais `fiscal_document_read` como primeiro registro `origin=new` ligado a `fiscal-document-read-001` — é ancorado por `FROZEN_INITIAL_CAPABILITY_IDENTITY_DIGEST` em `validate_foundation.py`, seguindo o padrão fail-closed já usado pelo frozen legacy ledger.
 
-O validator full-tree usa `LEDGER_GENESIS=C0_PRE_MOVE`, o primeiro commit publicado que contém o ledger, registrado no completed TODO já em C1 e reafirmado em C2. Antes de C0, o frozen initial digest ancora as dez identidades. Depois de C0, o validator exige repositório não shallow, nenhum replace/graft, genesis resolvível e ancestor de `HEAD`, e percorre first-parent `LEDGER_GENESIS..HEAD` mais genesis, carregando cada versão do ledger; a união por `capability_id` deve existir byte-semantically imutável no ledger corrente. Histórico ausente, truncado, shallow, non-descendant ou com replacement é no-go, nunca fallback para o registry atual. `origin/main` deve permanecer em ancestralidade fast-forward com genesis; force-push/non-fast-forward está fora do trust boundary automatizado e exige rebaseline manual explicitamente aprovado, nunca aceitação silenciosa. Validadores puros recebem snapshots históricos explícitos; testes usam repositório Git temporário real. Assim, apagar coordenadamente registry+membership+transition+ledger falha contra o digest inicial ou a ancestralidade completa/protegida, sem duplicar o inventário de arquivos de TD-06.
+`capability_id` é único no ledger e os conjuntos `origin=baseline`/`origin=new` são disjuntos. Cada row `origin=new` corresponde bijetivamente a exatamente uma transition sequence 1 `origin=new` com o mesmo `capability_id` e `transition_id=origin_transition_id`; toda cadeia cuja primeira aresta é `origin=new` possui exatamente essa row. Transition ausente, transition de outra capability, ID duplicado ou conflito baseline/new é inválido antes de qualquer persistência histórica.
+
+O validator full-tree usa `LEDGER_GENESIS=C0_PRE_MOVE`, o primeiro commit publicado que contém o ledger, preenchido e congelado no completed TODO em C1. Antes de C0, o frozen initial digest ancora as dez identidades. Depois de C0, o validator exige repositório não shallow, nenhum replace/graft, genesis resolvível e ancestor de `HEAD`, e percorre first-parent `LEDGER_GENESIS..HEAD` mais genesis, carregando cada versão do ledger; a união por `capability_id` deve existir byte-semantically imutável no ledger corrente. Histórico ausente, truncado, shallow, non-descendant ou com replacement é no-go, nunca fallback para o registry atual.
+
+A garantia automatizada é deliberadamente limitada à linhagem first-parent observável desde C0. Uma reescrita remota alternativa que preserve C0 mas remova descendentes confiáveis não pode ser detectada sem âncora fora da branch; ela é risco residual explícito `RISK-HIST-01`, não promessa fail-closed. Antes de cada delivery, os gates registram evidência disponível de proteção/non-fast-forward do remote; ausência dessa proteção não é convertida em falsa prova e exige aceitação humana no `APROVADO` ou rebaseline independente futuro. Validadores puros recebem snapshots históricos explícitos; testes usam repositório Git temporário real e incluem uma limitação documentada para dois descendentes alternativos do mesmo genesis. Assim, o digest protege sempre o seed inicial e o histórico protege identidades posteriores somente dentro da linhagem confiável observável.
 
 Os IDs de capability são estáveis entre predecessor e successor: `note_read_model`, `integration_error_read_model` e `operational_workflow` têm `origin=transferred` e não mudam durante a transferência. `fiscal_document_read` tem `origin=new`, sem predecessor. Para cada módulo, `owned_capabilities ∩ planned_capabilities = ∅`. A cadeia de cada capability tem `sequence` inteira, única e contígua iniciando em `1`; a aresta `n+1` deve ter `predecessor=successor` da aresta `n`; nenhum fork, ciclo, alias, gap ou módulo ausente do `module_catalog` é válido. Toda aresta não terminal deve estar `completed`; somente a aresta terminal (maior `sequence`) governa ownership/planned atuais. Arestas concluídas anteriores preservam proveniência, mas não exigem que seus successors continuem owners. O conjunto governado de capabilities é exatamente a união do `baseline_capability_catalog` com IDs cuja cadeia começa em `origin=new`; owned/planned/transitions são estados/referências desse universo, não sua autoridade de identidade. `capability_transitions` registra somente capability nova planejada ou transferência real/histórica: uma capability baseline estável sem transição é válida exatamente quando aparece uma única vez em `owned_capabilities` do `baseline_owner` ativo `current_runtime` e zero vezes em `planned_capabilities`; não se inventa aresta histórica para ela.
 
@@ -527,7 +537,7 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-summary`
 - **Decision review status:** `not_run`
-- **Decision review evidence / resolution:** `R8G encontrou delivery versus lifecycle baselines, history trust/completeness e sequencing/enforcement C1→C2; integrados, nova rodada R8H obrigatória`
+- **Decision review evidence / resolution:** `R8H encontrou o limite de detecção de rewrite alternativo pós-C0; a garantia foi estreitada honestamente para o seed congelado + linhagem first-parent observável, com RISK-HIST-01 explícito; nova rodada R8I obrigatória`
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -604,7 +614,7 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 
 - **Strategy:** `test-first`
 - **Why:** o validator é o harness arquitetural; cada semântica precisa de mutação negativa antes do cutover.
-- **Fail-first target(s):** identidade/core scope UniNotas, source split, context-not-tenant, runtime-authority/lifecycle separation, módulo/catálogo ausente ou duplicado, membership duplicado, remoção/rename/alias simples ou coordenada de capability baseline/new contra digest/histórico, capability current sem baseline ou `origin=new`, módulo ativo vazio ou com cardinalidade incompatível, sequence gap, fork/ciclo, predecessor desconhecido ou nulo em transferência, chain edge inválida, interseção owned/planned, target com owned capability, aresta terminal planned sem exatamente um owner atual ou successor planejado, planned membership órfã, terminal completed sem owner successor, transferência planned sem owner predecessor, dupla autoridade pelo mesmo ID, successor planejado duplicado, planned membership residual, owner incompatível com aresta terminal, ownership baseline estável respaldado pelo catálogo/ledger sem transição sintética, capability nova legítima e ownerless enquanto planned, append de identidade nova, predecessor retirado legítimo, segundo hop planned/completed, manifesto único, CNPJ válido, credenciais, provider ID/URL privada em contexto formalizado e limites permitidos sem falso positivo.
+- **Fail-first target(s):** identidade/core scope UniNotas, source split, context-not-tenant, runtime-authority/lifecycle separation, módulo/catálogo ausente ou duplicado, membership duplicado, remoção/rename/alias simples ou coordenada de capability baseline/new contra digest/histórico, capability current sem baseline ou `origin=new`, bijeção exata entre cada ledger record `origin=new` e uma única transição sequence 1 `origin=new` da mesma capability (`CAP-NEG-38..42`), módulo ativo vazio ou com cardinalidade incompatível, sequence gap, fork/ciclo, predecessor desconhecido ou nulo em transferência, chain edge inválida, interseção owned/planned, target com owned capability, aresta terminal planned sem exatamente um owner atual ou successor planejado, planned membership órfã, terminal completed sem owner successor, transferência planned sem owner predecessor, dupla autoridade pelo mesmo ID, successor planejado duplicado, planned membership residual, owner incompatível com aresta terminal, ownership baseline estável respaldado pelo catálogo/ledger sem transição sintética, capability nova legítima e ownerless enquanto planned, append de identidade nova, predecessor retirado legítimo, segundo hop planned/completed, limitação documentada de rewrite alternativo que preserva C0 (`CAP-LIMIT-01`/`RISK-HIST-01`), manifesto único, CNPJ válido, credenciais, provider ID/URL privada em contexto formalizado e limites permitidos sem falso positivo.
 - **`D-T01` evidence layer:** validadores puros + fixtures mínimas são a camada primária para semântica de registry, decisões e privacidade.
 - **`D-T02` compatibility layer:** poucos testes full-tree comprovam manifesto, links, symlinks, legado e composição real da Foundation.
 - **`D-T03` topology/exclusion:** nenhum banco, API, browser, container ou dado fiscal real é necessário; `CAP-NEG-36` usa repositório Git temporário real para provar append-only history, sem mock de Git.
@@ -732,6 +742,7 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 
 - [ ] O writer/filter exato das falhas no PostgreSQL permanece investigação posterior, explicitamente não bloqueia este cutover e não será inventado aqui.
 - [ ] Permissões por contexto, identidade opaca da nota e DANFE continuam decisões dos próximos TODOs.
+- [ ] `RISK-HIST-01` Uma reescrita alternativa de `main` que preserve C0 mas apague descendentes não é detectável somente pela branch reescrita. O seed inicial continua protegido por digest; identidades pós-seed dependem da linhagem first-parent observável e de governança externa non-fast-forward. O `APROVADO` deste TODO aceita esse limite até existir âncora externa independente; qualquer rewrite conhecido exige parar e rebaseline humano.
 
 ### Diagnostic Review Finding Resolution
 
@@ -807,12 +818,16 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 | `ARCH-R8G-02` / `CRIT-R8G-03` | architecture + critique R8G | Integrated | trust boundary exige non-shallow/no-replace, genesis C0 ancestor, first-parent completo e main não reescrita; `CAP-POS-10`/`NEG-37` cobrem completude |
 | `CRIT-R8G-01` | formal critique R8G | Integrated | completion/authority/closeout rodam somente no working tree C2 depois de C1 publicado; push C2/active scan ficam no handoff externo |
 | `CRIT-R8G-02` | formal critique R8G | Integrated | `validate_attestation_diff.py` compara C2 contra C1, limita um path/campos allowlisted e possui matriz `ATTEST-*` |
+| `ARCH-R8H-01` / `CRIT-R8H-04` | architecture + critique R8H | Integrated with explicit residual risk | garantia automatizada cobre sempre o seed congelado e identidades posteriores somente na linhagem first-parent observável; rewrite alternativo preservando C0 é `RISK-HIST-01`, aceito somente pelo `APROVADO` humano |
+| `CRIT-R8H-01` | formal critique R8H | Integrated | C0 OID e verificação remota são preenchidos em C1 e ficam fora da allowlist C2; `ATTEST-NEG-04` rejeita sua mutação |
+| `CRIT-R8H-02` | formal critique R8H | Integrated | interface real do Delphi diff guard permanece independente; helper project-owned alimenta somente profile/lifecycle/revisão humana, sem integração inventada |
+| `CRIT-R8H-03` | formal critique R8H | Integrated | ledger `origin=new` e transição sequence 1 `origin=new` formam bijeção por capability; `CAP-NEG-38..42` cobrem ausência, mismatch, duplicata e conflito de origem |
 
 ## Additional Architectural Opinions
 
 - **Needed:** `yes`
 - **Why ambiguity remains:** o validator pode ser evoluído por manifesto único ou por inventário gerado; revisão independente deve desafiar a opção recomendada.
-- **Opinion count:** `12`
+- **Opinion count:** `13`
 - **Package mode:** `bounded-summary`
 - **Internal reviewer mandate:** `required — fresh internal no-context reviewer after baseline freeze`
 - **Required lenses:** `correctness|performance|elegance|structural-soundness|operational-fit`
@@ -831,6 +846,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 | `uninotas_architecture_opinion_r8e` | manter arquitetura e adicionar baseline capability catalog | strong positive | strong positive | mixed até persistir identidade baseline | Integrated / Rerun required | merge R8E válido; IDs baseline e lane/path-set integrados, baseline R8F obrigatória |
 | `uninotas_architecture_opinion_r8f` | manter arquitetura e adicionar oracle independente digest+Git history | strong positive | strong positive | mixed até fechar coordinated erasure | Integrated / Rerun required | merge R8F válido; oracle/path/attestation/privacy integrados, baseline R8G obrigatória |
 | `uninotas_architecture_opinion_r8g` | manter arquitetura; separar delivery/lifecycle path evidence e explicitar history trust | strong positive | strong positive | mixed até fechar closeout/trust boundary | Integrated / Rerun required | merge R8G válido; baselines/guards/ancestry integrados, baseline R8H obrigatória |
+| `uninotas_architecture_opinion_r8h` | manter a arquitetura, mas estreitar a garantia histórica ao seed congelado + linhagem first-parent observável | strong positive | strong positive | mixed até explicitar o limite de rewrite alternativo | Integrated / Rerun required | merge R8H válido; RISK-HIST-01, C0 frozen, interface real dos guards e bijeção ledger/transição integrados; baseline R8I obrigatória |
 
 ## Audit Trigger Matrix
 
@@ -865,8 +881,8 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Audit session / round evidence:** `n/a until run`
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
 - **Critique status:** `not_run`
-- **Findings summary:** `R8G apontou net delivery versus lifecycle move, trust boundary/completude Git e guard sequencing/boundary C2; todos foram integrados e exigem crítica R8H`.
-- **Evidence / reference:** merge derivado `uninotas-r8g-critique-merge.json`; nova crítica obrigatória após freeze R8H.
+- **Findings summary:** `R8H apontou C0 mutável em C2, integração inexistente com o Delphi diff guard, ausência de bijeção exata ledger↔transição e garantia histórica ampla demais; todos foram integrados e exigem crítica R8I`.
+- **Evidence / reference:** merges derivados `uninotas-r8h-architecture-merge.json` e `uninotas-r8h-critique-merge.json`; nova crítica obrigatória após freeze R8I.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Assumption Code Coherence
@@ -884,7 +900,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 ## Approval
 
 - **Approved by:** `pending explicit APROVADO`
-- **Approval scope:** `pending`
+- **Approval scope:** `pending — must explicitly include TD-01..TD-07, D-T01..D-T05, DOD-01..DOD-14/VAL-01..VAL-09 and acceptance of RISK-HIST-01`
 - **Execution not authorized by approval:** `backend, frontend, database, runtime, secrets, API calls, worktrees`
 - **Renewed approval required when:** TD-01..TD-07, mapeamento D-01..D-11, scope, module topology, validation semantics ou risco material mudar.
 
@@ -1049,7 +1065,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Disposition:** `keep-active`
 - **Disposition reason:** planejamento e aprovação ainda não concluídos.
 - **Post-commit/push status:** `pending`
-- **Next path/status action:** revisar a baseline R8H, executar guards pré-aprovação e solicitar `APROVADO` explícito.
+- **Next path/status action:** publicar a baseline R8I, executar as revisões/guards pré-aprovação e solicitar `APROVADO` explícito com aceite de `RISK-HIST-01`.
 
 ## Module Consolidation Gate
 
