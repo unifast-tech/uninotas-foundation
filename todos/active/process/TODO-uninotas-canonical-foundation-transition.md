@@ -91,7 +91,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 | Scope Item | Local Branch/Commit | PR to lane threshold | PR to `stage` | PR to `main` | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Foundation UniNotas cutover | `main@a5c7ec1` | `n/a — main-only authority` | `n/a` | `origin/main@a5c7ec1` | R6 review baseline published |
+| Foundation UniNotas cutover | `main@df07f51` | `n/a — main-only authority` | `n/a` | `origin/main@df07f51` | R8 pre-review baseline published |
 
 ## Diff Expectation Contract
 
@@ -441,11 +441,11 @@ O novo arquivo `decisions/uninotas-foundation-decisions.md` preservará os IDs e
 - **Why this decision:** a revisão altera decisões canônicas e precisa de pacote imutável.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `main`
-- **Baseline commit:** `a5c7ec1ae52d5423027b51cc8e133201f204cd94`
+- **Baseline commit:** `df07f5191a07922a0f74665f2f9590f3afef35be`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `not_run`
-- **Findings summary:** R7 foi integrado e a dependência Delphi foi resolvida; falta publicar a baseline R8 imutável que será submetida às revisões pré-aprovação.
-- **Evidence / reference:** baseline anterior `origin/main@a5c7ec1`; resolução externa Delphi `6dc5bd4` + `0e54e2a`; novo commit Foundation pendente.
+- **Gate status:** `findings_integrated`
+- **Findings summary:** R7 foi integrado, a dependência Delphi foi resolvida e a baseline R8 imutável foi publicada para as revisões pré-aprovação.
+- **Evidence / reference:** `origin/main@df07f51`; resolução externa Delphi `6dc5bd4` + `0e54e2a`.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
