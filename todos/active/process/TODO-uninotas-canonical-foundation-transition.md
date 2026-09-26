@@ -91,7 +91,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 | Scope Item | Local Branch/Commit | PR to lane threshold | PR to `stage` | PR to `main` | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Foundation UniNotas cutover | `main@949d8ed` | `n/a — main-only authority` | `n/a` | `origin/main@949d8ed` | R8I material review-baseline evidence only; not delivery promotion |
+| Foundation UniNotas cutover | `main@b47aca2` | `n/a — main-only authority` | `n/a` | `origin/main@b47aca2` | R8J material review-baseline evidence only; not delivery promotion |
 
 ## Diff Expectation Contract
 
@@ -332,7 +332,7 @@ Entre C1 e o working tree de C2, o único path alterável é `todos/completed/pr
 | Dependency | Why It Matters | Status | Last Verified | Verification Method | Adjustment / Workaround |
 | --- | --- | --- | --- | --- | --- |
 | Smart Notas OpenAPI | fundamenta a arquitetura-alvo | healthy | 2026-09-25 | fingerprint e probes redigidos no ledger | nenhuma chamada nesta entrega |
-| Git remote Foundation | necessário para baseline de revisão | healthy | 2026-09-25 | `main`/`origin/main@949d8ed`; baseline material R8I publicada; guard main-only instalado e Git for Windows é o writer válido | nenhum ajuste |
+| Git remote Foundation | necessário para baseline de revisão | healthy | 2026-09-25 | `main`/`origin/main@b47aca2`; baseline material R8J publicada; guard main-only instalado e Git for Windows é o writer válido | nenhum ajuste |
 | `DEP-CLOSEOUT-01` Delphi standalone closeout support | impede falso `go` e stale active TODO no closeout | healthy/resolved | 2026-09-25 | TODO Delphi concluído em `6dc5bd4`/`0e54e2a`; comando individual retornou `path_state=active`; `--all-active --repo uninotas-foundation` retornou `todo_count=2`, ambos paths ativos reais e zero violações | consumir a correção já publicada e repetir os dois comandos antes do closeout |
 
 ## Profile Scope & Handoffs (Required Before `APROVADO`)
@@ -562,11 +562,11 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 - **Why this decision:** a revisão altera decisões canônicas e precisa de pacote imutável.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `main`
-- **Baseline commit:** `949d8ed261fa4d73c9993f4e3b14af4fdd9df83f`
+- **Baseline commit:** `b47aca2acb58756e04e3393204071ae07e7508e6`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `findings_integrated`
-- **Findings summary:** os achados R8H foram integrados e a baseline material R8I imutável foi publicada somente como evidência de revisão.
-- **Evidence / reference:** `origin/main@949d8ed`; merges derivados `uninotas-r8h-architecture-merge.json` e `uninotas-r8h-critique-merge.json`.
+- **Findings summary:** os achados R8I foram integrados e a baseline material R8J imutável foi publicada somente como evidência de revisão.
+- **Evidence / reference:** `origin/main@b47aca2`; merges derivados `uninotas-r8i-architecture-merge.json` e `uninotas-r8i-critique-merge.json`.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
@@ -578,8 +578,8 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 - **Material sections compared:** `template canonical set`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md`
 - **Gate status:** `not_run`
-- **Findings summary:** baseline material R8I publicada; arquitetura/crítica R8I e o guard de drift ainda não foram concluídos.
-- **Evidence / reference:** freeze `origin/main@949d8ed261fa4d73c9993f4e3b14af4fdd9df83f`; este SHA deve ser exatamente o consumido pelo drift guard após convergência.
+- **Findings summary:** baseline material R8J publicada; arquitetura/crítica R8J e o guard de drift ainda não foram concluídos.
+- **Evidence / reference:** freeze `origin/main@b47aca2acb58756e04e3393204071ae07e7508e6`; este SHA deve ser exatamente o consumido pelo drift guard após convergência.
 - **Waiver authority / reference:** `n/a`
 
 ## Questions To Close
