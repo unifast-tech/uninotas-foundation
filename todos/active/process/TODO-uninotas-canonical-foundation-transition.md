@@ -493,6 +493,12 @@ O novo arquivo `decisions/uninotas-foundation-decisions.md` preservará os IDs e
 6. Executar a suíte Foundation, validator, PACED readiness e guards de entrega.
 7. Submeter diff consolidado às revisões independentes exigidas e promover decisões estáveis.
 
+## Frontend / Consumer Matrix
+
+| Producer Surface In This TODO | Consumer | Delivery State | Evidence / Waiver |
+| --- | --- | --- | --- |
+| `none — documentação canônica e harness determinístico somente` | `n/a` | `not_triggered — nenhum endpoint, job, payload, schema runtime, projection, webhook ou read model executável será criado/alterado` | limites de Scope/Out of Scope; os producers e consumers planejados pertencem aos TODOs futuros NestJS/React e exigirão matrizes próprias, portanto não há ausência de consumer a dispensar nesta entrega |
+
 ### Test Strategy
 
 - **Strategy:** `test-first`
