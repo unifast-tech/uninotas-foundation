@@ -42,7 +42,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `none`
-- **Next exact step:** executar arquitetura/crítica R8V sobre a baseline material imutável e repetir os guards pré-aprovação.
+- **Next exact step:** solicitar `APROVADO` explícito para TD-01..TD-07, D-T01..D-T05, DOD-01..DOD-15/VAL-01..VAL-10 e aceite de `RISK-HIST-01`; somente depois iniciar implementação.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -802,8 +802,8 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 - **Decision review lifecycle:** `after diagnosis is closed and before APROVADO`
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-summary`
-- **Decision review status:** `running`
-- **Decision review evidence / resolution:** `R8U convergiu limpa; o diff expectation guard posterior exigiu apenas restaurar o literal canônico Comparison mode=working_tree, sem mudar o candidate-tree contract, portanto baseline/revisão R8V é obrigatória`
+- **Decision review status:** `no_material_findings`
+- **Decision review evidence / resolution:** `R8V recomenda aprovação: Comparison mode=working_tree é compatível com o guard Delphi e não enfraquece candidate-tree authority; zero achados arquiteturais, condicionado aos gates e ao aceite de RISK-HIST-01`
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -833,9 +833,9 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 - **Baseline source:** `Gate: Review Baseline Freeze -> Baseline commit`
 - **Material sections compared:** `template canonical set`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md`
-- **Gate status:** `not_run`
-- **Findings summary:** baseline material R8V publicada; arquitetura/crítica R8V e o novo drift guard ainda não foram concluídos.
-- **Evidence / reference:** freeze `origin/main@1b8a5e935767192c3e4a2b8b00528774927937bc`; este SHA deve ser consumido pelo drift guard após convergência.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** arquitetura/crítica R8V convergiram sem achados; a correção working_tree não alterou a autoridade candidate-tree e o drift guard final deve confirmar zero seção material divergente.
+- **Evidence / reference:** freeze `origin/main@1b8a5e935767192c3e4a2b8b00528774927937bc`; rerun final do `review_scope_drift_guard.py` registrado antes da solicitação de aprovação.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: History Trust Evidence
@@ -1165,12 +1165,14 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 | `ARCH-R8U-CLEAN` | formal architecture review R8U | Accepted / Ready with RISK-HIST-01 | zero achados; phase/base partitions, durable CAS resume, C0_POST, clean scans e typed state machine considerados coerentes e prontos |
 | `CRIT-R8U-CLEAN` | formal critique R8U | Accepted / No material findings | zero bloqueios novos; recomenda concluir drift/coherence/authority sobre `ce3c5f4` e solicitar aprovação explícita antes de implementar |
 | `GUARD-R8U-01` | deterministic diff expectation guard | Integrated / Rerun required | `Comparison mode` restaurado ao enum canônico `working_tree`; candidate-tree authority permanece explicitada no enumerator/binding contract; baseline R8V obrigatória |
+| `ARCH-R8V-CLEAN` | formal architecture review R8V | Accepted / Ready with RISK-HIST-01 | zero achados; working_tree Delphi + candidate-tree binding considerados compatíveis, elegantes e estruturalmente sólidos |
+| `CRIT-R8V-CLEAN` | formal critique R8V | Accepted / No material findings | zero bloqueios novos; recomenda concluir drift/structure/authority e solicitar aprovação explícita |
 
 ## Additional Architectural Opinions
 
 - **Needed:** `yes`
 - **Why ambiguity remains:** o validator pode ser evoluído por manifesto único ou por inventário gerado; revisão independente deve desafiar a opção recomendada.
-- **Opinion count:** `26`
+- **Opinion count:** `27`
 - **Package mode:** `bounded-summary`
 - **Internal reviewer mandate:** `required — fresh internal no-context reviewer after baseline freeze`
 - **Required lenses:** `correctness|performance|elegance|structural-soundness|operational-fit`
@@ -1203,6 +1205,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 | `uninotas_architecture_opinion_r8s` | adotar Option A; arquitetura pronta com ledger monotônico, CAS, proof bridge e handoff tipado | strong positive | strong positive | strong positive | Accepted / Clean | merge R8S válido; crítica paralela exigiu operational handoff entry point/phase schemas/closed consumer IDs e baseline R8T |
 | `uninotas_architecture_opinion_r8t` | adotar Option A após particionar consumers/bases e ligar scan aos bytes publicados | strong positive | mixed | mixed até corrigir phase/path binding | Integrated / Rerun required | merges R8T válidos; partitions, durable resume, C0_POST e clean scan binding integrados, baseline R8U obrigatória |
 | `uninotas_architecture_opinion_r8u` | adotar Option A e avançar para aprovação explícita condicionada a RISK-HIST-01/gates | strong positive | strong positive | strong positive | Accepted / Clean | merge R8U válido; zero achados arquiteturais e crítica paralela sem bloqueio material |
+| `uninotas_architecture_opinion_r8v` | adotar Option A; working_tree guard e candidate-tree authority são compatíveis | strong positive | strong positive | strong positive | Accepted / Clean | merges R8V válidos; zero achados e APROVADO recomendado condicionado aos gates/RISK-HIST-01 |
 
 ## Audit Trigger Matrix
 
@@ -1236,9 +1239,9 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Canonical multi-lane audit protocol:** `n/a for planning critique; audit-protocol-triple-review required additively before Completed`
 - **Audit session / round evidence:** `n/a until run`
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
-- **Critique status:** `running`
-- **Findings summary:** `R8U não identificou bloqueio material; guard determinístico posterior encontrou somente enum inválido no campo Comparison mode, corrigido para working_tree e sujeito a rerun R8V`.
-- **Evidence / reference:** merges R8U limpos + `todo_diff_expectation_guard.py` no-go `DIFF-CONTRACT-COMPARISON-MODE-INVALID`; nova crítica após freeze R8V.
+- **Critique status:** `no_material_findings`
+- **Findings summary:** `R8V não identificou bloqueio material novo; working_tree é a interface canônica do guard Delphi e os wrappers de igualdade/write-tree preservam o binding ao candidate`.
+- **Evidence / reference:** merges derivados `uninotas-r8v-architecture-merge.json` e `uninotas-r8v-critique-merge.json`; baseline material `1b8a5e935767192c3e4a2b8b00528774927937bc`.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Assumption Code Coherence
@@ -1423,7 +1426,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Disposition:** `keep-active`
 - **Disposition reason:** planejamento e aprovação ainda não concluídos.
 - **Post-commit/push status:** `pending`
-- **Next path/status action:** executar revisões R8V/guards finais e solicitar `APROVADO` explícito com aceite de `RISK-HIST-01`.
+- **Next path/status action:** aguardar `APROVADO` explícito cobrindo o contrato integral e o aceite de `RISK-HIST-01`; então iniciar implementação test-first.
 
 ## Module Consolidation Gate
 
