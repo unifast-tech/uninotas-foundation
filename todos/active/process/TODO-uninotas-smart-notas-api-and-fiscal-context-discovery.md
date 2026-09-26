@@ -308,10 +308,11 @@ These are planning requirements, not executed race evidence. The later React tac
 
 ## 4. Current Order
 
-1. Execute the separately approved canonical Current/Target correction without asserting an unknown PostgreSQL writer/filter.
-2. Before the error-adapter implementation TODO, confirm which external component writes PostgreSQL integration errors and the exact rule that excludes successes from the target error boundary.
-3. Validate deterministic error-to-note correlation fields against redacted failure rows; keep all ambiguous failures unlinked.
-4. Define `OperationalCase` grouping and existing-treatment migration rules, then create the separate API-note and error/case delivery slices.
+1. Execute the tactical backend read slice at `todos/active/features/TODO-uninotas-smart-notas-read-backend.md` after its explicit `APROVADO`; it owns only Smart Notas list/detail by selected fiscal context.
+2. Keep DANFE/XML, React context/cache, integration-error ingestion/correlation, and `OperationalCase` as separate tactical slices.
+3. Before the error-adapter implementation TODO, confirm which external component writes PostgreSQL integration errors and the exact rule that excludes successes from the target error boundary.
+4. Validate deterministic error-to-note correlation fields against redacted failure rows; keep all ambiguous failures unlinked.
+5. Define `OperationalCase` grouping and existing-treatment migration rules before its own implementation TODO.
 
 ## 5. Explicitly Out of Scope
 
@@ -328,4 +329,4 @@ These are planning requirements, not executed race evidence. The later React tac
 
 ## 7. Next Exact Step
 
-- Complete planning/approval of `TODO-uninotas-canonical-foundation-transition.md`; after that cutover, investigate the error-only PostgreSQL writer/filter boundary before authorizing the error-adapter slice.
+- Complete planning/approval of `todos/active/features/TODO-uninotas-smart-notas-read-backend.md`; this ledger remains the no-code authority for unresolved provider/error-boundary questions.
