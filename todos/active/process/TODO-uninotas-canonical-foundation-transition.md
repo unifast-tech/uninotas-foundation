@@ -42,7 +42,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `none`
-- **Next exact step:** publicar as correções R8Q como baseline R8R imutável, executar arquitetura/crítica R8R sem contexto e concluir os guards pré-aprovação.
+- **Next exact step:** executar arquitetura/crítica R8R sem contexto sobre a baseline material imutável e concluir os guards pré-aprovação.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -91,7 +91,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 | Scope Item | Local Branch/Commit | PR to lane threshold | PR to `stage` | PR to `main` | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Foundation UniNotas cutover | `main@53ac1dd` | `n/a — main-only authority` | `n/a` | `origin/main@53ac1dd` | R8Q material review-baseline evidence only; not delivery promotion |
+| Foundation UniNotas cutover | `main@ea96bbc` | `n/a — main-only authority` | `n/a` | `origin/main@ea96bbc` | R8R material review-baseline evidence only; not delivery promotion |
 
 ## Diff Expectation Contract
 
@@ -464,7 +464,7 @@ Todo o restante é byte-frozen. Sobre o candidate C1R rodam, nesta ordem: recove
 | Dependency | Why It Matters | Status | Last Verified | Verification Method | Adjustment / Workaround |
 | --- | --- | --- | --- | --- | --- |
 | Smart Notas OpenAPI | fundamenta a arquitetura-alvo | healthy | 2026-09-25 | fingerprint e probes redigidos no ledger | nenhuma chamada nesta entrega |
-| Git remote Foundation | necessário para baseline de revisão | healthy | 2026-09-25 | `main`/`origin/main@53ac1dd`; baseline material R8Q publicada; guard main-only instalado e Git for Windows é o writer válido | nenhum ajuste |
+| Git remote Foundation | necessário para baseline de revisão | healthy | 2026-09-25 | `main`/`origin/main@ea96bbc`; baseline material R8R publicada; guard main-only instalado e Git for Windows é o writer válido | nenhum ajuste |
 | `DEP-CLOSEOUT-01` Delphi standalone closeout support | impede falso `go` e stale active TODO no closeout | healthy/resolved | 2026-09-25 | TODO Delphi concluído em `6dc5bd4`/`0e54e2a`; comando individual retornou `path_state=active`; `--all-active --repo uninotas-foundation` retornou `todo_count=2`, ambos paths ativos reais e zero violações | consumir a correção já publicada e repetir os dois comandos antes do closeout |
 | `DEP-CLOSEOUT-STATES-02` Delphi completed/recovery compatibility | final candidate e C1R dependem dos guards atuais sem alteração Delphi | healthy/resolved by pre-approval synthetic probe | 2026-09-25 | exact-shape temp TODOs: completed conditional e active/Blocked recovery retornaram `go` nos três guards reais (`todo_completion_guard --require-delivery`, `todo_authority_guard --require-delivery-gates`, `todo_closeout_guard --repo`); artifacts `artifacts/tmp/r8n-*-probe*.txt` | CI matrix reduzida ao schema canônico e Completion Evidence agora possui 34 bindings literais; repetir nas fixtures source-owned e entrega real |
 
@@ -699,11 +699,11 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 - **Why this decision:** a revisão altera decisões canônicas e precisa de pacote imutável.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `main`
-- **Baseline commit:** `53ac1dde8769112b812509b90e82ceb32e316097`
+- **Baseline commit:** `ea96bbc6c541583f7763a3d3e7e09b26d262528a`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `findings_integrated`
-- **Findings summary:** os achados R8P foram integrados e a baseline material R8Q imutável foi publicada somente como evidência de revisão.
-- **Evidence / reference:** `origin/main@53ac1dd`; merges derivados `uninotas-r8p-architecture-merge.json` e `uninotas-r8p-critique-merge.json`; dual-set, remote-tip real e consumer binding R8P integrados.
+- **Findings summary:** os achados R8Q foram integrados e a baseline material R8R imutável foi publicada somente como evidência de revisão.
+- **Evidence / reference:** `origin/main@ea96bbc`; merges derivados `uninotas-r8q-architecture-merge.json` e `uninotas-r8q-critique-merge.json`; fresh remote activation e local-unpublished-diverged integrados.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
@@ -715,8 +715,8 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 - **Material sections compared:** `template canonical set`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md`
 - **Gate status:** `not_run`
-- **Findings summary:** baseline material R8Q publicada; arquitetura/crítica R8Q e o guard de drift ainda não foram concluídos.
-- **Evidence / reference:** freeze `origin/main@53ac1dde8769112b812509b90e82ceb32e316097`; este SHA deve ser exatamente o consumido pelo drift guard após convergência.
+- **Findings summary:** baseline material R8R publicada; arquitetura/crítica R8R e o guard de drift ainda não foram concluídos.
+- **Evidence / reference:** freeze `origin/main@ea96bbc6c541583f7763a3d3e7e09b26d262528a`; este SHA deve ser exatamente o consumido pelo drift guard após convergência.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: History Trust Evidence
@@ -1280,7 +1280,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Disposition:** `keep-active`
 - **Disposition reason:** planejamento e aprovação ainda não concluídos.
 - **Post-commit/push status:** `pending`
-- **Next path/status action:** publicar as correções R8Q como baseline R8R, executar as revisões/guards pré-aprovação e solicitar `APROVADO` explícito com aceite de `RISK-HIST-01`.
+- **Next path/status action:** executar as revisões R8R e os guards pré-aprovação, então solicitar `APROVADO` explícito com aceite de `RISK-HIST-01`.
 
 ## Module Consolidation Gate
 
