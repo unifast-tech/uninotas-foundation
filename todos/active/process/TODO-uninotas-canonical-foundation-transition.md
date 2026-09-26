@@ -42,7 +42,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `none`
-- **Next exact step:** executar arquitetura/crítica R8S sem contexto sobre a baseline material imutável e concluir os guards pré-aprovação.
+- **Next exact step:** publicar as correções R8S como baseline R8T imutável, executar arquitetura/crítica R8T sem contexto e concluir os guards pré-aprovação.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -150,12 +150,14 @@ Esta tabela autoriza a união rotulada de `delivery` e `lifecycle`; ausência do
 | `uninotas-foundation` | `deterministic/capability_identity_ledger.json` | `A` | oracle append-only de identidade, independente da projeção mutável do registry |
 | `uninotas-foundation` | `deterministic/enumerate_change_paths.py` | `A` | única implementação executável do canonical path set pós-approval |
 | `uninotas-foundation` | `deterministic/validate_closeout_diff.py` | `A` | guard C0-relative que restringe o candidate C1 ao move atômico e células/links finais allowlisted |
+| `uninotas-foundation` | `deterministic/closeout_handoff.py` | `A` | entry point fechado para CAS promotion, evidence por fase e activation/recovery handoff real |
 | `uninotas-foundation` | `deterministic/validate_foundation.py` | `M` | validador evolutivo fail-closed |
 | `uninotas-foundation` | `deterministic/tests/test_registry_semantics.py` | `A` | semântica de registry/ledger/history |
 | `uninotas-foundation` | `deterministic/tests/test_privacy_predicate.py` | `A` | predicado de privacidade isolado |
 | `uninotas-foundation` | `deterministic/tests/test_validate_foundation.py` | `M` | contratos full-tree preservados |
 | `uninotas-foundation` | `deterministic/tests/test_enumerate_change_paths.py` | `A` | delivery/lifecycle path sets |
 | `uninotas-foundation` | `deterministic/tests/test_validate_closeout_diff.py` | `A` | move atômico e allowlist final C0→C1 |
+| `uninotas-foundation` | `deterministic/tests/test_closeout_handoff.py` | `A` | bare-remote CAS e validação strict do handoff production/recovery |
 
 ### Not Expected Changed Paths
 
@@ -204,7 +206,7 @@ Esta tabela autoriza a união rotulada de `delivery` e `lifecycle`; ausência do
 - [ ] `VAL-06` Consumir a correção Delphi standalone já publicada: executar os dois comandos de closeout deste contrato e verificar semanticamente `path_state=active` no path individual e `todo_count>=1` no scan ativo; exit code/`go` isolado não basta.
 - [ ] `VAL-07` Executar a fixture Git `CLOSEOUT-POS-02`, que prepara C0/candidate C1 com evidence já concluída e invoca closeout-diff/structure/authority/completion/closeout reais sem alterar o candidate após validação; outputs da entrega real pertencem ao handoff externo.
 - [ ] `VAL-08` Executar `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_enumerate_change_paths.py` cobrindo untracked, staged D/A, rename reconhecido como R, source criado após delivery baseline/movido antes de C1 e `--candidate-tree` independente do working tree, com expectativas distintas para delivery e lifecycle.
-- [ ] `VAL-09` Executar `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_closeout_diff.py`, cobrindo dual-set, staged/tree binding, phased review bridge, focused C1/C1R review, handoff schema, expected-value lease contra sibling e avanço compatível, remote activation/scan e recovery stale; execução real vira activation evidence externa.
+- [ ] `VAL-09` Executar `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_closeout_diff.py uninotas-foundation/deterministic/tests/test_closeout_handoff.py`, cobrindo dual-set/bridge e o entry point real de CAS promotion + activation/recovery strict; fixtures alteram cada observação, consumer binding, C0/C1/C1R phase evidence e remote/scan boundary.
 - [ ] `VAL-10` Executar fixtures History Trust para C0/C1 precommit, avanço de bare remote entre commit/push, C1 post-push com avanço antes da ativação, parent/ancestry, proteção indisponível e proibição de persistir OID próprio; observações reais ficam no candidate/handoff conforme sua disponibilidade temporal.
 
 ## Completion Evidence Matrix (Required Before Delivery Claim)
@@ -243,7 +245,7 @@ Esta tabela autoriza a união rotulada de `delivery` e `lifecycle`; ausência do
 | `VAL-06` | Validation Steps | closeout sem false-go | guard | individual + `--all-active` | local | planned | `VAL-06` Consumir a correção Delphi standalone já publicada: executar os dois comandos de closeout deste contrato e verificar semanticamente `path_state=active` no path individual e `todo_count>=1` no scan ativo; exit code/`go` isolado não basta. |
 | `VAL-07` | Validation Steps | real-guard fixture | test+guard | `CLOSEOUT-POS-02` integration test | local | planned | `VAL-07` Executar a fixture Git `CLOSEOUT-POS-02`, que prepara C0/candidate C1 com evidence já concluída e invoca closeout-diff/structure/authority/completion/closeout reais sem alterar o candidate após validação; outputs da entrega real pertencem ao handoff externo. |
 | `VAL-08` | Validation Steps | path-set endpoints/untracked | test | `test_enumerate_change_paths.py` | local | planned | `VAL-08` Executar `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_enumerate_change_paths.py` cobrindo untracked, staged D/A, rename reconhecido como R, source criado após delivery baseline/movido antes de C1 e `--candidate-tree` independente do working tree, com expectativas distintas para delivery e lifecycle. |
-| `VAL-09` | Validation Steps | closeout/recovery/tree binding | test | `test_validate_closeout_diff.py` integration test | local | planned | `VAL-09` Executar `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_closeout_diff.py`, cobrindo dual-set, staged/tree binding, phased review bridge, focused C1/C1R review, handoff schema, expected-value lease contra sibling e avanço compatível, remote activation/scan e recovery stale; execução real vira activation evidence externa. |
+| `VAL-09` | Validation Steps | closeout/recovery/tree binding | test | closeout diff + handoff integration tests | local | planned | `VAL-09` Executar `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_closeout_diff.py uninotas-foundation/deterministic/tests/test_closeout_handoff.py`, cobrindo dual-set/bridge e o entry point real de CAS promotion + activation/recovery strict; fixtures alteram cada observação, consumer binding, C0/C1/C1R phase evidence e remote/scan boundary. |
 | `VAL-10` | Validation Steps | temporal History Trust fixtures | git+test | temp Git fixtures | local | planned | `VAL-10` Executar fixtures History Trust para C0/C1 precommit, avanço de bare remote entre commit/push, C1 post-push com avanço antes da ativação, parent/ancestry, proteção indisponível e proibição de persistir OID próprio; observações reais ficam no candidate/handoff conforme sua disponibilidade temporal. |
 
 ### DOD-06 Validator Case Matrix
@@ -400,15 +402,75 @@ Se o remoto avançar depois do commit local de C0 ou C1 e antes/durante o CAS pu
 
 ### External Handoff Schema
 
-O handoff é um artifact externo/ignorado validado por fixture, nunca persistido no candidate que referencia. Schema mínimo `uninotas-closeout-handoff-v1`:
+`deterministic/closeout_handoff.py` é o único entry point operacional para publicar C0/C1/C1R e fechar activation/recovery. Outputs ficam obrigatoriamente sob `uninotas-foundation/artifacts/tmp/`, devem passar `git check-ignore`, usam JSON UTF-8 strict sem chaves desconhecidas e nunca são persistidos no candidate que referenciam. O helper usa gravação atômica temp→rename e falha sem output de sucesso quando qualquer precondição muda.
 
-- `c0`: `{commit_oid, candidate_tree_oid, commit_tree_oid, tree_equal:true, parent_oid, base_remote_oid, delivery_scope_set:[...], phase_commit_delta_set:[...]}`;
-- `c1`: `{commit_oid, candidate_tree_oid, commit_tree_oid, tree_equal:true, parent_oid:C0, phase_commit_delta_set:[exact five paths]}`;
+Interfaces fechadas:
+
+- `promote --phase c0|c1|c1r --repo <repo> --expected-remote <OID> --new-commit <OID> --candidate-tree <OID> --consumer-bindings <ignored-json> [--base-evidence <ignored-json>] [--proof-bridge <ignored-json>] --output <ignored-json>`: revalida tree/parent/fast-forward/IDs, remote fresh, conjunto exato de consumers e executa o expected-value lease push. Emite phase evidence somente após fresh post-push remote/local checks.
+- `activate --phase c1 --repo <repo> --c0-evidence <json> --c1-evidence <json> --delphi-root <path> --output <ignored-json>`: valida schemas/bindings, observa remote C1, executa o Delphi active scan com `scanned_head_oid=C1`, reobserva remote e emite `uninotas-closeout-handoff-v1` production somente se tudo permanecer coerente.
+- `activate --phase c1r --repo <repo> --c0-evidence <json> --failed-c1-evidence <json> --c1r-evidence <json> --failure-tuple <json> --delphi-root <path> --output <ignored-json>`: valida reverse bridge/lease/bindings, executa exact two-TODO scan ligado a C1R, reobserva remote e emite handoff recovery com `recovery_effective:true` e `production_ready_effective:false`.
+
+Antes de cada `promote`, o operador executa o Git write authority guard. A suíte usa bare remotes reais e o mesmo entry point; monkeypatch de push/remote/scan não satisfaz a lane de integração.
+
+Schema production `uninotas-closeout-handoff-v1`:
+
+- `c0` e `c1`: `{commit_oid, candidate_tree_oid, commit_tree_oid, tree_equal:true, parent_oid, delivery_scope_set:[...], phase_commit_delta_set:[...]}`;
 - `proof_bridge`: `{validator:"validate_closeout_diff.py", base_commit_oid:C0, base_tree_oid, candidate_tree_oid:C1_TREE, exact_delta_set:[...], outcome:"go"}`;
-- `consumer_bindings`: uma row por guard/review requerido `{consumer_id, consumer_class, phase, bound_candidate_tree_oid, exact_path_set:[...], scope, outcome}`; reviews C0 carregadas usam `scope=implementation_content`, enquanto `REVIEW-C1-01` usa `phase=C1`/tree C1;
-- `remote_promotion`: `{expected_pre_push_oid:C0, lease_expected_oid:C0, lease_result:"success", post_push_remote_main_oid:C1, actual_remote_main_oid:C1}`;
+- `consumer_bindings`: conjunto exato/único da matriz normativa abaixo;
+- `remote_promotions`: `{c0:{fresh_pre_push_oid, expected_lease_oid, lease_result:"success", parent_and_fast_forward:true, post_push_remote_main_oid:C0, local_head_oid:C0, local_tracking_oid:C0}, c1:{fresh_pre_push_oid:C0, expected_lease_oid:C0, lease_result:"success", parent_and_fast_forward:true, post_push_remote_main_oid:C1, local_head_oid:C1, local_tracking_oid:C1}}`;
 - `post_c1_active_scan`: `{scanned_head_oid:C1, outcome:"go", todo_count:1, active_paths:[exact discovery path], stale_transition_path:false}`;
-- `production_ready_effective:true` somente quando todos os OIDs, trees, sets, bindings, lease, remote observations e scan anteriores são coerentes.
+- `actual_remote_main_oid:C1` observado após o scan; `production_ready_effective:true` somente quando todos os campos anteriores são coerentes.
+
+Schema recovery usa `handoff_kind:"recovery"` e inclui `failed_c1`, `c1r` tree equality, reverse proof bridge, failure tuple, bindings C1R, `remote_promotions.c1r` com lease/fresh post-push C1R, `post_c1r_active_scan:{scanned_head_oid:C1R,todo_count:2,active_paths:[exact canonical transition, exact discovery],stale_completed_path:false}`, segunda observação `actual_remote_main_oid:C1R`, `recovery_effective:true` e `production_ready_effective:false`.
+
+#### Required Consumer Binding Matrix
+
+Cada ID aparece exatamente uma vez; ausente, duplicado, inesperado, phase/class/scope diferente ou outcome fora da coluna é no-go. `exact_path_set_source` resolve para a lista materializada no handoff, não somente para um label.
+
+| consumer_id | phase | consumer_class | scope | exact_path_set_source | allowed outcome |
+| --- | --- | --- | --- | --- | --- |
+| `foundation-validator-c0` | C0 | worktree-proxy | implementation_content | `DELIVERY_SCOPE_SET` | `go` |
+| `semantic-suite-c0` | C0 | worktree-proxy | implementation_content | `DELIVERY_SCOPE_SET` | `go` |
+| `foundation-suite-c0` | C0 | worktree-proxy | implementation_content | `DELIVERY_SCOPE_SET` | `go` |
+| `change-set-suite-c0` | C0 | worktree-proxy | implementation_content | `DELIVERY_SCOPE_SET` | `go` |
+| `closeout-handoff-suite-c0` | C0 | worktree-proxy | implementation_content | `DELIVERY_SCOPE_SET` | `go` |
+| `paced-readiness-c0` | C0 | worktree-proxy | implementation_content | `DELIVERY_SCOPE_SET` | `go` |
+| `diff-expectation-c0` | C0 | worktree-proxy | implementation_content | `DELIVERY_SCOPE_SET` | `go` |
+| `profile-scope-c0` | C0 | worktree-proxy | implementation_content | `DELIVERY_SCOPE_SET` | `go` |
+| `todo-authority-c0` | C0 | worktree-proxy | implementation_content | `DELIVERY_SCOPE_SET` | `go` |
+| `privacy-review-c0` | C0 | implementation-human-review | implementation_content | `DELIVERY_SCOPE_SET` | `no_material_findings` |
+| `architecture-adherence-c0` | C0 | implementation-human-review | implementation_content | `DELIVERY_SCOPE_SET` | `no_material_findings` |
+| `security-review-c0` | C0 | implementation-human-review | implementation_content | `DELIVERY_SCOPE_SET` | `no_material_findings` |
+| `test-quality-c0` | C0 | implementation-human-review | implementation_content | `DELIVERY_SCOPE_SET` | `no_material_findings` |
+| `final-review-c0` | C0 | implementation-human-review | implementation_content | `DELIVERY_SCOPE_SET` | `no_material_findings` |
+| `verification-debt-c0` | C0 | implementation-human-review | implementation_content | `DELIVERY_SCOPE_SET` | `no_material_findings` |
+| `triple-correctness-c0` | C0 | implementation-human-review | implementation_content | `DELIVERY_SCOPE_SET` | `no_material_findings` |
+| `triple-security-c0` | C0 | implementation-human-review | implementation_content | `DELIVERY_SCOPE_SET` | `no_material_findings` |
+| `triple-test-quality-c0` | C0 | implementation-human-review | implementation_content | `DELIVERY_SCOPE_SET` | `no_material_findings` |
+| `performance-concurrency-c0` | C0 | implementation-human-review | implementation_content | `DELIVERY_SCOPE_SET` | `no_material_findings` |
+| `closeout-proof-bridge-c1` | C1 | tree-native | closeout_transform | `PHASE_COMMIT_DELTA_SET` | `go` |
+| `todo-structure-c1` | C1 | worktree-proxy | closeout_transform | `PHASE_COMMIT_DELTA_SET` | `go` |
+| `foundation-validator-c1` | C1 | worktree-proxy | closeout_transform | `PHASE_COMMIT_DELTA_SET` | `go` |
+| `diff-expectation-c1` | C1 | worktree-proxy | closeout_transform | `PHASE_COMMIT_DELTA_SET` | `go` |
+| `delivery-path-set-c1` | C1 | tree-native | closeout_transform | `PHASE_COMMIT_DELTA_SET` | `go` |
+| `lifecycle-path-set-c1` | C1 | tree-native | closeout_transform | `PHASE_COMMIT_DELTA_SET` | `go` |
+| `status-evidence-c1` | C1 | worktree-proxy | closeout_transform | `PHASE_COMMIT_DELTA_SET` | `go` |
+| `profile-scope-c1` | C1 | worktree-proxy | closeout_transform | `PHASE_COMMIT_DELTA_SET` | `go` |
+| `diff-check-c1` | C1 | worktree-proxy | closeout_transform | `PHASE_COMMIT_DELTA_SET` | `go` |
+| `todo-authority-c1` | C1 | worktree-proxy | closeout_transform | `PHASE_COMMIT_DELTA_SET` | `go` |
+| `todo-completion-c1` | C1 | worktree-proxy | closeout_transform | `PHASE_COMMIT_DELTA_SET` | `go` |
+| `todo-closeout-c1` | C1 | worktree-proxy | closeout_transform | `PHASE_COMMIT_DELTA_SET` | `go` |
+| `closeout-integrity-review-c1` | C1 | closeout-human-review | closeout_transform | `PHASE_COMMIT_DELTA_SET` | `no_material_findings` |
+| `recovery-proof-bridge-c1r` | C1R | tree-native | recovery_transform | `PHASE_COMMIT_DELTA_SET` | `go` |
+| `todo-structure-c1r` | C1R | worktree-proxy | recovery_transform | `PHASE_COMMIT_DELTA_SET` | `go` |
+| `foundation-validator-c1r` | C1R | worktree-proxy | recovery_transform | `PHASE_COMMIT_DELTA_SET` | `go` |
+| `diff-expectation-c1r` | C1R | worktree-proxy | recovery_transform | `PHASE_COMMIT_DELTA_SET` | `go` |
+| `profile-scope-c1r` | C1R | worktree-proxy | recovery_transform | `PHASE_COMMIT_DELTA_SET` | `go` |
+| `diff-check-c1r` | C1R | worktree-proxy | recovery_transform | `PHASE_COMMIT_DELTA_SET` | `go` |
+| `todo-authority-c1r` | C1R | worktree-proxy | recovery_transform | `PHASE_COMMIT_DELTA_SET` | `go` |
+| `todo-completion-c1r` | C1R | worktree-proxy | recovery_transform | `PHASE_COMMIT_DELTA_SET` | `go` |
+| `todo-closeout-c1r` | C1R | worktree-proxy | recovery_transform | `PHASE_COMMIT_DELTA_SET` | `go` |
+| `recovery-integrity-review-c1r` | C1R | closeout-human-review | recovery_transform | `PHASE_COMMIT_DELTA_SET` | `no_material_findings` |
 
 | Case ID | Fixture | Expected assertion |
 | --- | --- | --- |
@@ -416,6 +478,11 @@ O handoff é um artifact externo/ignorado validado por fixture, nunca persistido
 | `HANDOFF-NEG-01` | `stale_consumer_binding_in_handoff` | consumer bound to tree different from its phase/proof bridge is rejected |
 | `HANDOFF-NEG-02` | `handoff_commit_tree_mismatch` | commit tree unequal to recorded candidate tree blocks Production-Ready |
 | `HANDOFF-NEG-03` | `missing_required_consumer_or_exact_path_set` | untyped output list or incomplete binding cannot satisfy the schema |
+| `HANDOFF-NEG-04` | `unknown_duplicate_or_wrong_phase_consumer` | strict consumer catalog rejects extra/duplicate/misclassified bindings |
+| `HANDOFF-NEG-05` | `missing_or_contradictory_c0_cas_evidence` | production handoff requires complete C0 fresh-pre/lease/post-push/local evidence |
+| `HANDOFF-POS-02` | `complete_c1r_recovery_handoff` | C1R reverse bridge, lease, two remote observations and exact two-TODO scan produce recovery-effective only |
+| `HANDOFF-NEG-06` | `remote_advances_after_c1r_push_before_or_after_scan` | either C1R remote observation mismatch blocks recovery-effective |
+| `HANDOFF-NEG-07` | `c1r_scan_bound_to_different_head_or_worktree` | recovery scan must bind to committed C1R tree and exact active set |
 
 ### Atomic Final Closeout Diff Contract
 
@@ -463,7 +530,7 @@ No caso 1, a transformação C1→C1R é fechada por campo:
 | TODO Closeout Disposition | `move-completed` | `blocked`; reason `published C1 failed external activation`; post status `FAILED_C1 observed; C1R recovery pending`; next action `publish/verify C1R then reconcile blocker` |
 | manifest + two backlinks | completed path | somente troca completed→active |
 
-Todo o restante é byte-frozen. Sobre o candidate C1R rodam, nesta ordem: recovery boundary, deterministic TODO validator no active path, Foundation validator, diff expectation, profile scope, diff check, `todo_authority_guard.py --require-delivery-gates`, `todo_completion_guard.py --require-delivery` e `todo_closeout_guard.py --repo uninotas-foundation`, cada consumer vinculado ao mesmo candidate tree. Antes do commit e do push, reobservar via `ls-remote` que o tip remoto real ainda é `FAILED_C1`; `origin/main` local é somente check adicional. Divergência antes do commit proíbe criar C1R; divergência detectada entre commit e push proíbe publicação e exige reconciliação explícita do commit local não publicado. Após publicar/verificar, o scan deve retornar exatamente dois TODOs ativos (esta transição + discovery). A causa é então corrigida sob o mesmo scope ou exige renewed approval se material. Recovery não é attestation de sucesso nem pode mascarar o failure tuple.
+Todo o restante é byte-frozen. Sobre o candidate C1R rodam recovery boundary, structure/Foundation/diff/profile/authority/completion/closeout e `REVIEW-C1R-01`, cada qual com o consumer ID C1R exato e o mesmo tree. `closeout_handoff.py promote --phase c1r` revalida FAILED_C1/parent/tree/bindings e executa CAS; `activate --phase c1r` exige post-push remote C1R, scan com `scanned_head_oid=C1R` e exact two-TODO active set, seguida de nova observação remote C1R. Só então emite recovery handoff strict com `recovery_effective:true` e `production_ready_effective:false`. Qualquer divergência antes/depois do push ou scan exige reconciliação; recovery nunca mascara o failure tuple.
 
 | Case ID | Fixture | Expected assertion |
 | --- | --- | --- |
@@ -712,7 +779,7 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-summary`
 - **Decision review status:** `running`
-- **Decision review evidence / resolution:** `R8R manteve Option A e exigiu monotonicidade ledger, atomic expected-ref CAS, binding faseado C0→C1 e handoff tipado; integrados, portanto baseline/revisão R8S é obrigatória`
+- **Decision review evidence / resolution:** `R8S considerou a arquitetura pronta, mas a crítica exigiu entry point executável do handoff real, C0 CAS evidence, C1R recovery handoff e consumer IDs fechados; integrados, portanto baseline/revisão R8T é obrigatória`
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -836,7 +903,7 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 | Foundation pure semantic suite | registry/privacy; CAP/GUARD em memória, zero full-tree scan | `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_registry_semantics.py uninotas-foundation/deterministic/tests/test_privacy_predicate.py` | Local-Implemented | planned | command output + duração + scan counter=0 | falha se qualquer fixture copiar/varrer a árvore |
 | Foundation full-tree compatibility | manifesto, symlink/legado e registry↔módulos; três scans allowlisted | `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_foundation.py` | Local-Implemented | planned | command output + duração + scan counter<=3 | somente três testes nomeados varrem a árvore uma vez cada |
 | Foundation change-set helper | delivery/lifecycle, D/A, R, untracked e source pós-baseline em Git temporário | `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_enumerate_change_paths.py` | Local-Implemented | planned | command output | helper único; mode-specific expectations |
-| Foundation atomic closeout guard | C0→C1, recovery/divergence, dual-set, tree/review proof bridge, handoff schema e atomic CAS promotion em Git temporário | `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_closeout_diff.py` | Local-Implemented | planned | command output | rejeita self-reference, semantic drift, stale bindings, invalid bridge/handoff, commit-tree divergence e sibling/compatible remote races antes do push/ativação |
+| Foundation atomic closeout/handoff | C0→C1/C1R, dual-set, proof bridge, strict consumer/schema e real atomic CAS/activation em Git temporário | `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_closeout_diff.py uninotas-foundation/deterministic/tests/test_closeout_handoff.py` | Local-Implemented | planned | command output | usa bare remote/entry point real e rejeita stale bindings, invalid phase evidence, tree divergence e remote races antes/depois do push/scan |
 | Foundation core-validator performance | subprocess/blob reads, scan count e wall-clock advisory | executar pure/full-tree sequencialmente e medir history/change-set/closeout | Local-Implemented | planned | hard counters + advisory timings | hard: scans<=3, history calls<=k+2, zero helper full-tree |
 | Foundation validator | árvore canônica completa | `python3 -B uninotas-foundation/deterministic/validate_foundation.py --root uninotas-foundation` | Local-Implemented | planned | command output | deve eliminar mismatch |
 | PACED readiness | alias/artefatos continuam inicializáveis | `'/mnt/c/Program Files/Git/bin/bash.exe' -lc 'cd /c/Unifast/MonitorDeNotas && bash delphi-ai/verify_context.sh'` | Local-Implemented | planned | command output | runner Git Bash; limitação CRLF WSL isolada |
@@ -1059,12 +1126,18 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 | `CRIT-R8R-02` | formal critique R8R | Integrated | reviews de implementation content ligam-se a C0 e passam a C1 somente via proof bridge; `REVIEW-C1-01`/`REVIEW-C1R-01` focados ligam-se aos candidates finais |
 | `CRIT-R8R-03` | formal critique R8R | Integrated | `uninotas-closeout-handoff-v1` preserva trees, exact sets, bridge, typed consumer bindings, CAS/remote observations e scan; `HANDOFF-POS-01`/`NEG-01..03` |
 | `STATE-R8R-01` | formal review R8R | Integrated | current-action avança da baseline R8R já publicada para integração/freeze R8S |
+| `ARCH-R8S-CLEAN` | formal architecture review R8S | Accepted / Ready with RISK-HIST-01 | Option A, ledger monotônico, CAS, proof bridge e handoff foram considerados prontos para aprovação explícita; nenhum achado arquitetural |
+| `CRIT-R8S-01` | formal critique R8S | Integrated | `deterministic/closeout_handoff.py` vira único entry point real para promote/activate, strict unknown-field rejection, fresh observations, Delphi scan e outputs ignorados |
+| `CRIT-R8S-02` | formal critique R8S | Integrated | schema phase-aware preserva C0 fresh-pre/lease/post-push/local/parent/fast-forward evidence além de C1 |
+| `CRIT-R8S-03` | formal critique R8S | Integrated | C1R possui recovery handoff strict com reverse bridge, CAS, duas observações remotas, scan bound C1R/exact two-TODO e recovery-effective only |
+| `CRIT-R8S-04` | formal critique R8S | Integrated | Required Consumer Binding Matrix congela IDs únicos/exatos, phase/class/scope/path source/outcome; casos rejeitam ausência/duplicata/extra/misclassification |
+| `STATE-R8S-01` | formal review R8S | Integrated | current-action avança da baseline R8S já publicada para integração/freeze R8T |
 
 ## Additional Architectural Opinions
 
 - **Needed:** `yes`
 - **Why ambiguity remains:** o validator pode ser evoluído por manifesto único ou por inventário gerado; revisão independente deve desafiar a opção recomendada.
-- **Opinion count:** `23`
+- **Opinion count:** `24`
 - **Package mode:** `bounded-summary`
 - **Internal reviewer mandate:** `required — fresh internal no-context reviewer after baseline freeze`
 - **Required lenses:** `correctness|performance|elegance|structural-soundness|operational-fit`
@@ -1094,6 +1167,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 | `uninotas_architecture_opinion_r8p` | manter Option A, separando cumulative delivery scope do commit delta de C0 | strong positive | mixed | mixed até corrigir binding | Integrated / Rerun required | merges R8P válidos; dual-set, remote-tip e consumer binding integrados, baseline R8Q obrigatória |
 | `uninotas_architecture_opinion_r8q` | adotar Option A com dual-set, binding por consumer e recovery baseado no remote tip real | strong positive | strong positive | strong positive | Accepted / Clean | merge R8Q válido; zero achados arquiteturais, crítica paralela exigiu remote activation/pre-push race contract e baseline R8R |
 | `uninotas_architecture_opinion_r8r` | adotar Option A após fechar monotonicidade do identity ledger | strong positive | strong positive | mixed até enforcement monotônico | Integrated / Rerun required | merges R8R válidos; monotonic ledger, atomic CAS, phased reviews e typed handoff integrados, baseline R8S obrigatória |
+| `uninotas_architecture_opinion_r8s` | adotar Option A; arquitetura pronta com ledger monotônico, CAS, proof bridge e handoff tipado | strong positive | strong positive | strong positive | Accepted / Clean | merge R8S válido; crítica paralela exigiu operational handoff entry point/phase schemas/closed consumer IDs e baseline R8T |
 
 ## Audit Trigger Matrix
 
@@ -1128,8 +1202,8 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Audit session / round evidence:** `n/a until run`
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
 - **Critique status:** `running`
-- **Findings summary:** `R8R apontou histórico ledger não monotônico, race entre ls-remote/push, reviews C0 invalidadas em C1 e handoff não tipado; monotonicidade, exact CAS, proof bridge/focused review e schema v1 foram integrados e exigem crítica R8S`.
-- **Evidence / reference:** merges derivados `uninotas-r8r-architecture-merge.json` e `uninotas-r8r-critique-merge.json`; `CAP-NEG-52/53`, `REMOTE-NEG-04`, `TREE-POS-03`/`NEG-07..08` e `HANDOFF-POS-01`/`NEG-01..03`; nova crítica obrigatória após freeze R8S.
+- **Findings summary:** `R8S apontou ausência de gate executável do handoff real, C0 CAS incompleto no schema, C1R sem activation tuple equivalente e consumer set aberto; entry point, schemas por fase/recovery e catálogo fechado foram integrados e exigem crítica R8T`.
+- **Evidence / reference:** merges derivados `uninotas-r8s-architecture-merge.json` e `uninotas-r8s-critique-merge.json`; `closeout_handoff.py`, Required Consumer Binding Matrix e `HANDOFF-POS-02`/`NEG-04..07`; nova crítica obrigatória após freeze R8T.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Assumption Code Coherence
@@ -1306,7 +1380,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **C1 remote verification:** `external handoff must prove HEAD==origin/main==C1, post_push_remote_main_oid=C1 before scan and fresh actual_remote_main_oid=C1 immediately before activation tuple`
 - **Post-C1 active scan:** `external handoff bound to scanned_head_oid=C1; must report go, todo_count=1, exact active_paths=[todos/active/process/TODO-uninotas-smart-notas-api-and-fiscal-context-discovery.md], and stale_transition_path=false`
 - **Production-Ready evidence:** `pending external uninotas-closeout-handoff-v1 artifact containing C0/C1 candidate+commit tree equality, exact path sets, proof_bridge, typed consumer_bindings, expected-value lease result, post-push/activation remote OIDs, scanned_head_oid=C1, exact semantic scan and production_ready_effective:true`
-- **Failed-C1 recovery:** `if C1 was pushed and any external predicate fails, publish verified C1R restoring active/Blocked truth and exact two-TODO active set before further work; retain failure tuple externally`
+- **Failed-C1 recovery:** `if C1 was pushed and any external predicate fails, closeout_handoff promote/activate c1r must emit strict recovery handoff with C1R tree/CAS/two remote observations/scanned_head_oid/exact two-TODO set, recovery_effective:true and production_ready_effective:false; retain failure tuple externally`
 - **Unpublished C0/C1 divergence:** `if exact expected-value lease rejects or fresh remote tip differs after local commit, retain external local-unpublished-diverged tuple, do not retry/unconditionally force-push or use C1R, and require authority reconciliation/rebaseline plus renewed APROVADO`
 
 ## TODO Closeout Disposition
@@ -1314,7 +1388,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Disposition:** `keep-active`
 - **Disposition reason:** planejamento e aprovação ainda não concluídos.
 - **Post-commit/push status:** `pending`
-- **Next path/status action:** executar as revisões R8S e os guards pré-aprovação, então solicitar `APROVADO` explícito com aceite de `RISK-HIST-01`.
+- **Next path/status action:** publicar as correções R8S como baseline R8T, executar as revisões/guards pré-aprovação e solicitar `APROVADO` explícito com aceite de `RISK-HIST-01`.
 
 ## Module Consolidation Gate
 
@@ -1339,6 +1413,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - After `APROVADO`, before implementation: `python3 delphi-ai/tools/todo_authority_guard.py uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md`
 - Pure semantic lane: `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_registry_semantics.py uninotas-foundation/deterministic/tests/test_privacy_predicate.py`
 - Change-set helper lane: `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_enumerate_change_paths.py`
+- Closeout/handoff lane: `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_closeout_diff.py uninotas-foundation/deterministic/tests/test_closeout_handoff.py`
 - `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_foundation.py`
 - `python3 -B uninotas-foundation/deterministic/validate_foundation.py --root uninotas-foundation`
 - `'/mnt/c/Program Files/Git/bin/bash.exe' -lc 'cd /c/Unifast/MonitorDeNotas && bash delphi-ai/verify_context.sh'`
@@ -1358,6 +1433,11 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - Pre-move closeout after `DEP-CLOSEOUT-01`: `python3 delphi-ai/tools/todo_closeout_guard.py uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md --repo uninotas-foundation` (must report `path_state=active`, not only `go`).
 - Git commit authority: `python3 delphi-ai/tools/git_write_authority_guard.py --repo uninotas-foundation --action git-commit --authority-surface foundation_documentation`
 - Git push authority: `python3 delphi-ai/tools/git_write_authority_guard.py --repo uninotas-foundation --action git-push --authority-surface foundation_documentation`
+- C0 CAS promotion/evidence: `python3 uninotas-foundation/deterministic/closeout_handoff.py promote --phase c0 --repo uninotas-foundation --expected-remote <BASE_REMOTE_OID> --new-commit <C0> --candidate-tree <C0_TREE> --consumer-bindings <IGNORED_C0_BINDINGS_JSON> --output uninotas-foundation/artifacts/tmp/uninotas-c0-promotion.json`
+- C1 CAS promotion/evidence: `python3 uninotas-foundation/deterministic/closeout_handoff.py promote --phase c1 --repo uninotas-foundation --expected-remote <C0> --new-commit <C1> --candidate-tree <C1_TREE> --consumer-bindings <IGNORED_C1_BINDINGS_JSON> --base-evidence uninotas-foundation/artifacts/tmp/uninotas-c0-promotion.json --proof-bridge <IGNORED_C1_BRIDGE_JSON> --output uninotas-foundation/artifacts/tmp/uninotas-c1-promotion.json`
+- C1 production activation: `python3 uninotas-foundation/deterministic/closeout_handoff.py activate --phase c1 --repo uninotas-foundation --c0-evidence uninotas-foundation/artifacts/tmp/uninotas-c0-promotion.json --c1-evidence uninotas-foundation/artifacts/tmp/uninotas-c1-promotion.json --delphi-root delphi-ai --output uninotas-foundation/artifacts/tmp/uninotas-closeout-handoff-v1.json`
+- C1R CAS promotion/evidence: `python3 uninotas-foundation/deterministic/closeout_handoff.py promote --phase c1r --repo uninotas-foundation --expected-remote <FAILED_C1> --new-commit <C1R> --candidate-tree <C1R_TREE> --consumer-bindings <IGNORED_C1R_BINDINGS_JSON> --base-evidence <IGNORED_FAILED_C1_EVIDENCE_JSON> --proof-bridge <IGNORED_C1R_BRIDGE_JSON> --output uninotas-foundation/artifacts/tmp/uninotas-c1r-promotion.json`
+- C1R recovery activation: `python3 uninotas-foundation/deterministic/closeout_handoff.py activate --phase c1r --repo uninotas-foundation --c0-evidence uninotas-foundation/artifacts/tmp/uninotas-c0-promotion.json --failed-c1-evidence <IGNORED_FAILED_C1_EVIDENCE_JSON> --c1r-evidence uninotas-foundation/artifacts/tmp/uninotas-c1r-promotion.json --failure-tuple <IGNORED_FAILURE_TUPLE_JSON> --delphi-root delphi-ai --output uninotas-foundation/artifacts/tmp/uninotas-recovery-handoff-v1.json`
 - Post-commit/push active scan: `python3 delphi-ai/tools/todo_closeout_guard.py --all-active --repo uninotas-foundation` (must report the real nonzero active TODO count, not only `go`).
 - History trust remote observation: `git -C uninotas-foundation ls-remote --exit-code origin refs/heads/main`
 - History trust precommit base: `git -C uninotas-foundation merge-base --is-ancestor <REMOTE_MAIN_OID> <BASE_HEAD_OID>` (exit 0 obrigatório; congelar `BASE_HEAD_OID`).
@@ -1374,13 +1454,13 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 ### Final-tree closeout (Required Order)
 
 1. Com implementação pronta e o TODO ainda ativo, observar remote OID, exigir `BASE_HEAD==BASE_REMOTE_OID`, congelar ambos, exigir índice vazio, stagear somente o delta C0 completo e capturar o candidate tree OID. Provar separadamente cumulative delivery scope versus `0fe906c` e phase delta versus BASE_HEAD; executar History Trust, guards, `REVIEW-PRIV-01` e todos os audits/reviews de implementação sobre esse C0 OID conforme o binding faseado.
-2. Imediatamente antes do commit, repetir remote/base, cumulative/delta allowlists, index/worktree equality, tree OID e validade das attestations. Criar C0 local e exigir `tree(C0)=captured tree`, `parent(C0)=BASE_HEAD==BASE_REMOTE_OID` e fast-forward proof; publicar somente pelo expected-value lease exato. Lease rejection entra em local-unpublished-diverged e proíbe retry/C1R. No sucesso, observar remote tip=C0, provar `HEAD==origin/main==C0` e registrar evidência para C1.
+2. Imediatamente antes do commit, repetir remote/base, cumulative/delta allowlists, index/worktree equality, tree OID e validade das attestations. Criar C0 local e exigir `tree(C0)=captured tree`, `parent(C0)=BASE_HEAD==BASE_REMOTE_OID`; após Git push authority guard, executar exclusivamente `closeout_handoff.py promote --phase c0`, que faz fast-forward/CAS, observa pós-push e emite o C0 phase evidence consumido por C1. Lease rejection entra em local-unpublished-diverged e proíbe retry/C1R.
 3. Em checkout limpo de C0, repetir Foundation validator sob a exceção bootstrap fechada, executar closeout guard no path ativo e confirmar `path_state=active`. C0 vira `LEDGER_GENESIS` e baseline de `mode=lifecycle`.
 4. Observar via `ls-remote` que remote tip, `origin/main` e HEAD são C0, congelar base HEAD=C0 e preparar o move active→completed, manifesto/backlinks finais, C0 OID/verificação e stage condicional; stagear exatamente os cinco paths, exigir index/worktree equality e capturar C1 candidate tree OID. Nenhum fato do futuro C1 é persistido.
 5. Executar, contra o mesmo staged tree OID, `C1 atomic closeout boundary` como proof bridge C0→C1, `C1 completed-path structure`, Foundation validator, `C1 completed-path diff gate`, `mode=delivery`, `mode=lifecycle`, status views, profile scope, diff check, `C1 delivery authority`, `C1 completion` e `C1 closeout`; executar `REVIEW-C1-01` focado e vinculado ao candidate, carregar somente attestations C0 de implementation content via bridge e revalidar allowlist/equality/tree OID/fresh remote=C0 imediatamente antes do commit.
-6. Criar C1 local e exigir `tree(C1)=captured tree`, `parent(C1)=C0` e fast-forward proof; publicar somente pelo expected-value lease exato contra C0. Lease rejection entra em local-unpublished-diverged e proíbe retry/C1R. No sucesso, obter fresh `post_push_remote_main_oid`, exigir `post_push_remote_main_oid==HEAD==origin/main==C1`, registrar `scanned_head_oid=C1` e executar `--all-active`. O resultado deve ser `todo_count=1`, exact discovery path e stale transition ausente; bare `go` não satisfaz. Imediatamente antes do tuple, reobservar fresh `actual_remote_main_oid==C1`.
-7. No sucesso, o handoff externo emite e valida `uninotas-closeout-handoff-v1` com a cadeia completa definida acima; lista não tipada de outputs não satisfaz. Remote/tree/binding/path mismatch proíbe `production_ready_effective:true`. Não existe C2 no caminho verde nem persistência do próprio SHA.
-8. Se C1 falhar externamente, reportar o tuple. Somente com fresh `ls-remote tip==origin/main==HEAD==FAILED_C1` e tree limpo, preparar C1R, stagear exatamente cinco reverse paths, capturar tree OID, executar recovery proof bridge + consumers vinculados e `REVIEW-C1R-01` focado. Exigir parent FAILED_C1, fast-forward proof e publicar somente pelo expected-value lease exato contra FAILED_C1; rejeição proíbe retry/unconditional force e exige reconciliação. Depois do push válido, exigir exact two-TODO scan. Qualquer divergência exige reconciliação + `APROVADO` renovado.
+6. Criar C1 local e exigir `tree(C1)=captured tree` e `parent(C1)=C0`; após Git push authority guard, executar exclusivamente `closeout_handoff.py promote --phase c1` com C0 phase evidence, proof bridge e exact C1 bindings. Lease rejection entra em local-unpublished-diverged e proíbe retry/C1R.
+7. Executar `closeout_handoff.py activate --phase c1`, que revalida strict schemas/bindings, observa post-push remote, liga/executa o Delphi scan a C1, reobserva remote e emite `uninotas-closeout-handoff-v1`. Lista não tipada ou mismatch proíbe `production_ready_effective:true`. Não existe C2 nem persistência do próprio SHA.
+8. Se C1 falhar externamente, reportar o tuple. Somente com fresh remote/local/HEAD FAILED_C1 e tree limpo, preparar C1R, stagear cinco reverse paths, capturar tree, executar recovery bridge + exact C1R consumers e `REVIEW-C1R-01`. Após Git push authority guard, usar exclusivamente `closeout_handoff.py promote --phase c1r`; depois executar `activate --phase c1r`, que exige duas observações C1R e scan ligado a C1R com exact two-TODO set antes de `recovery_effective:true`. Qualquer lease/remote/tree/scan mismatch exige reconciliação + `APROVADO` renovado.
 
 ## Files Expected (Compatibility Note)
 
