@@ -50,5 +50,5 @@ todos/ephemeral/.gitignore
 todos/ephemeral/.gitkeep
 todos/promotion_lane/.gitkeep
 artifacts/feature-briefs/uninotas-smart-notas-central.md
-todos/active/process/TODO-uninotas-canonical-foundation-transition.md
+todos/completed/process/TODO-uninotas-canonical-foundation-transition.md
 todos/active/process/TODO-uninotas-smart-notas-api-and-fiscal-context-discovery.md

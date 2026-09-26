@@ -14,7 +14,7 @@
 
 - Produce an evidence-backed recommendation for integrating Smart Notas into UniNotas, including API coverage, credential lifecycle, account-context semantics, source ownership, security boundaries, and story-sized implementation handoffs.
 
-The canonical UniNotas/source-split transition TODO at `todos/active/process/TODO-uninotas-canonical-foundation-transition.md` is a prerequisite for any implementation handoff; this discovery ledger preserves its decisions and grants no runtime authority.
+The canonical UniNotas/source-split transition TODO at `todos/completed/process/TODO-uninotas-canonical-foundation-transition.md` is a prerequisite for any implementation handoff; this discovery ledger preserves its decisions and grants no runtime authority.
 
 ## 2. Confirmed Baseline
 

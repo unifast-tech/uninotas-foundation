@@ -3,7 +3,7 @@
 ## Artifact Identity
 
 - **Artifact type:** `tactical_execution_contract`
-- **Lifecycle state:** `Active — planning`
+- **Lifecycle state:** `Completed — conditional Production-Ready candidate`
 - **Created:** `2026-09-25`
 - **Owner:** `Delphi / Strategic CTO-Tech-Lead`, sob autoridade humana do usuário
 
@@ -40,9 +40,9 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 ## Delivery Status Canon (Required)
 
-- **Current delivery stage:** `Local-Implemented`
-- **Qualifiers:** `none`
-- **Next exact step:** validate final independent reviews, then promote C0 to main by CAS
+- **Current delivery stage:** `Production-Ready`
+- **Qualifiers:** `Provisional`
+- **Next exact step:** external C1 remote verification + semantic active scan handoff
 
 ## Provisional Notes
 
@@ -121,7 +121,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 | Scope Item | Local Branch/Commit | PR to lane threshold | PR to `stage` | PR to `main` | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Foundation UniNotas cutover | `main@1b8a5e9` | `n/a — main-only authority` | `n/a` | `origin/main@1b8a5e9` | R8V material review-baseline evidence only; not delivery promotion |
+| Foundation UniNotas cutover | `main@66facbc9bfef41b8f5935097c8ab99c0457d8726` | `n/a — main-only authority` | `n/a` | `origin/main@66facbc9bfef41b8f5935097c8ab99c0457d8726` | C1 conditional; external activation pending |
 
 ## Diff Expectation Contract
 
@@ -1478,7 +1478,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 ## Post-Push Attestation (Atomic Final Closeout)
 
 - **C0 active implementation/genesis commit:** `eee5070fc35695de56275017a6a50d21712c6b08`
-- **C0 remote verification:** `pending delivery — typed C0 promotion + C0_POST clean validator/active-path/exact-two-active evidence persisted externally and C0 facts persisted in C1`
+- **C0 remote verification:** `fresh remote/origin/main/base HEAD all observed as 66facbc9bfef41b8f5935097c8ab99c0457d8726`
 - **C1 atomic completed-tree commit:** `external handoff after local commit/push; never persisted into itself`
 - **C1 parent/ancestry verification:** `external handoff must prove parent(C1)=C0 and C0 ancestor of C1`
 - **C1 remote verification:** `external handoff must prove HEAD==origin/main==C1, post_push_remote_main_oid=C1 before scan and fresh actual_remote_main_oid=C1 immediately before activation tuple`
@@ -1489,10 +1489,10 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 
 ## TODO Closeout Disposition
 
-- **Disposition:** `keep-active`
-- **Disposition reason:** implementation locally complete; independent delivery gates and C0 publication remain.
-- **Post-commit/push status:** `pending`
-- **Next path/status action:** finish independent reviews, publish/verify C0, then form atomic C1
+- **Disposition:** `move-completed`
+- **Disposition reason:** candidate C1 guards green; Production-Ready remains conditional on external handoff
+- **Post-commit/push status:** `C0 verified; C1 external verification pending`
+- **Next path/status action:** external C1 verification + active scan handoff
 
 ## Module Consolidation Gate
 
