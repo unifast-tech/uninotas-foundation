@@ -42,7 +42,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `none`
-- **Next exact step:** executar arquitetura/crítica R8U sem contexto sobre a baseline material imutável e concluir os guards pré-aprovação.
+- **Next exact step:** publicar a correção de compatibilidade do diff guard como baseline R8V, executar arquitetura/crítica R8V e repetir os guards pré-aprovação.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -98,7 +98,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 - **Contract status:** `required`
 - **Policy:** `strict; unclassified or forbidden paths block delivery`
 - **User validation:** `required on deviation`
-- **Comparison mode:** `working_tree bootstrap; candidate_tree authoritative after capture`
+- **Comparison mode:** `working_tree`
 - **Canonical path-set enumerator:** uma implementação, dois baselines explícitos. `--mode delivery --baseline 0fe906c1e496a1d38f1603cf188c224711011c32 --candidate-tree <OID>` produz o net path set global; como o TODO ativo nasceu depois desse baseline e não existe em C1, somente o destino completed aparece no resultado final. `--mode lifecycle --baseline <C0_PRE_MOVE> --candidate-tree <OID>` compara o candidate C1 com o commit pre-move publicado onde o path ativo existe e deve emitir source ativo D + destination completed A. O helper usa `git diff --no-renames --name-only <baseline> <candidate-tree>`, normaliza paths relativos e aplica C-sort; `lifecycle` exige baseline ancestor com source ativo presente. Antes do helper/capture existir, apenas o preflight delivery usa o bootstrap equivalente `bash -lc '{ git -C uninotas-foundation diff --no-renames --name-only 0fe906c1e496a1d38f1603cf188c224711011c32 --; git -C uninotas-foundation ls-files --others --exclude-standard; } | LC_ALL=C sort -u'`; depois da criação/capture, fallback inline é proibido.
 - **Status/rename evidence view:** a view delivery usa `git diff --name-status --find-renames 0fe906c...`; a view lifecycle repete contra `C0_PRE_MOVE`. Nenhuma define path authority; servem somente para tipos de mudança/rename, e apenas a lifecycle pode provar o move active→completed.
 - **Gate interface:** o Delphi `todo_diff_expectation_guard.py` não aceita input do helper; ele permanece um gate independente e classifica o working-tree delivery diff contra `0fe906c` com sua implementação existente (`--find-renames` + untracked). O helper project-owned alimenta profile scope, lifecycle move evidence e revisão humana; não há alegação de integração inexistente. Ambos usam a mesma Expected Changed Paths como allowlist, mas somente `mode=lifecycle` prova o source ativo criado após baseline. No-go em qualquer gate bloqueia entrega.
@@ -803,7 +803,7 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-summary`
 - **Decision review status:** `running`
-- **Decision review evidence / resolution:** `R8T manteve Option A e exigiu phase partitions/path bases, clean production scan, durable intent/resume e C0 post-publish gates; integrados, portanto baseline/revisão R8U é obrigatória`
+- **Decision review evidence / resolution:** `R8U convergiu limpa; o diff expectation guard posterior exigiu apenas restaurar o literal canônico Comparison mode=working_tree, sem mudar o candidate-tree contract, portanto baseline/revisão R8V é obrigatória`
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -834,8 +834,8 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 - **Material sections compared:** `template canonical set`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md`
 - **Gate status:** `not_run`
-- **Findings summary:** baseline material R8U publicada; arquitetura/crítica R8U e o guard de drift ainda não foram concluídos.
-- **Evidence / reference:** freeze `origin/main@ce3c5f4e183a865eee4f98805c992a3f7e5350c6`; este SHA deve ser exatamente o consumido pelo drift guard após convergência.
+- **Findings summary:** a baseline R8U passou com zero drift, mas a correção material de compatibilidade do campo `Comparison mode` exige freeze R8V e novo guard.
+- **Evidence / reference:** `todo_diff_expectation_guard.py: DIFF-CONTRACT-COMPARISON-MODE-INVALID em R8U; correção para o literal suportado working_tree, sem alterar a autoridade candidate-tree pós-capture`.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: History Trust Evidence
@@ -1162,12 +1162,15 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 | `CRIT-R8T-01` | formal critique R8T | Integrated | durable intent sincronizado precede CAS; strict resume adota somente expected/new remote com provenance explícita; crash/write fixtures cobrem C0/C1/C1R |
 | `CRIT-R8T-03` | formal critique R8T | Integrated | `verify --phase c0` emite C0_POST evidence com clean tree, Foundation validator, active path e exact two-TODO scan; C1/final exigem o artifact |
 | `STATE-R8T-01` | formal review R8T | Integrated | current-action avança da baseline R8T já publicada para integração/freeze R8U |
+| `ARCH-R8U-CLEAN` | formal architecture review R8U | Accepted / Ready with RISK-HIST-01 | zero achados; phase/base partitions, durable CAS resume, C0_POST, clean scans e typed state machine considerados coerentes e prontos |
+| `CRIT-R8U-CLEAN` | formal critique R8U | Accepted / No material findings | zero bloqueios novos; recomenda concluir drift/coherence/authority sobre `ce3c5f4` e solicitar aprovação explícita antes de implementar |
+| `GUARD-R8U-01` | deterministic diff expectation guard | Integrated / Rerun required | `Comparison mode` restaurado ao enum canônico `working_tree`; candidate-tree authority permanece explicitada no enumerator/binding contract; baseline R8V obrigatória |
 
 ## Additional Architectural Opinions
 
 - **Needed:** `yes`
 - **Why ambiguity remains:** o validator pode ser evoluído por manifesto único ou por inventário gerado; revisão independente deve desafiar a opção recomendada.
-- **Opinion count:** `25`
+- **Opinion count:** `26`
 - **Package mode:** `bounded-summary`
 - **Internal reviewer mandate:** `required — fresh internal no-context reviewer after baseline freeze`
 - **Required lenses:** `correctness|performance|elegance|structural-soundness|operational-fit`
@@ -1199,6 +1202,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 | `uninotas_architecture_opinion_r8r` | adotar Option A após fechar monotonicidade do identity ledger | strong positive | strong positive | mixed até enforcement monotônico | Integrated / Rerun required | merges R8R válidos; monotonic ledger, atomic CAS, phased reviews e typed handoff integrados, baseline R8S obrigatória |
 | `uninotas_architecture_opinion_r8s` | adotar Option A; arquitetura pronta com ledger monotônico, CAS, proof bridge e handoff tipado | strong positive | strong positive | strong positive | Accepted / Clean | merge R8S válido; crítica paralela exigiu operational handoff entry point/phase schemas/closed consumer IDs e baseline R8T |
 | `uninotas_architecture_opinion_r8t` | adotar Option A após particionar consumers/bases e ligar scan aos bytes publicados | strong positive | mixed | mixed até corrigir phase/path binding | Integrated / Rerun required | merges R8T válidos; partitions, durable resume, C0_POST e clean scan binding integrados, baseline R8U obrigatória |
+| `uninotas_architecture_opinion_r8u` | adotar Option A e avançar para aprovação explícita condicionada a RISK-HIST-01/gates | strong positive | strong positive | strong positive | Accepted / Clean | merge R8U válido; zero achados arquiteturais e crítica paralela sem bloqueio material |
 
 ## Audit Trigger Matrix
 
@@ -1233,8 +1237,8 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Audit session / round evidence:** `n/a until run`
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
 - **Critique status:** `running`
-- **Findings summary:** `R8T apontou consumer phases/bases inconsistentes, scan production não ligado aos bytes, janela push→evidence sem resume e gates C0_POST fora da cadeia; partitions, binding subject/scope, clean scans, durable intent/resume e C0_POST foram integrados e exigem crítica R8U`.
-- **Evidence / reference:** merges derivados `uninotas-r8t-architecture-merge.json` e `uninotas-r8t-critique-merge.json`; `HANDOFF-POS-03..05`/`NEG-08..11`, phase sets e C0_POST contract; nova crítica obrigatória após freeze R8U.
+- **Findings summary:** `R8U não identificou bloqueio material; guard determinístico posterior encontrou somente enum inválido no campo Comparison mode, corrigido para working_tree e sujeito a rerun R8V`.
+- **Evidence / reference:** merges R8U limpos + `todo_diff_expectation_guard.py` no-go `DIFF-CONTRACT-COMPARISON-MODE-INVALID`; nova crítica após freeze R8V.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Assumption Code Coherence
@@ -1244,9 +1248,9 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Trigger stage:** `after critique convergence and before APROVADO`
 - **Guard scope:** `none — fatos/decisões substituíram as hipóteses vivas; o guard ainda confirma coerência dos anchors`
 - **Guard command:** `python3 delphi-ai/tools/assumption_code_coherence_guard.py --todo uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md`
-- **Gate status:** `not_run`
-- **Findings summary:** `pending`
-- **Evidence / reference:** `pending`
+- **Gate status:** `no_material_findings`
+- **Findings summary:** `zero live assumptions; fatos/decisões e anchors não apresentam divergência a reconciliar`.
+- **Evidence / reference:** `assumption_code_coherence_guard.py sobre baseline R8U; primeira execução confirmou Live assumptions checked: 0 e exigiu somente a atualização canônica deste status antes do rerun final`.
 - **Waiver authority / reference:** `n/a`
 
 ## Approval
@@ -1419,7 +1423,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Disposition:** `keep-active`
 - **Disposition reason:** planejamento e aprovação ainda não concluídos.
 - **Post-commit/push status:** `pending`
-- **Next path/status action:** executar as revisões R8U e os guards pré-aprovação, então solicitar `APROVADO` explícito com aceite de `RISK-HIST-01`.
+- **Next path/status action:** publicar a baseline R8V, executar revisões/guards finais e solicitar `APROVADO` explícito com aceite de `RISK-HIST-01`.
 
 ## Module Consolidation Gate
 
