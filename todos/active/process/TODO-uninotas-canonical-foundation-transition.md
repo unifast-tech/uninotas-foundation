@@ -91,7 +91,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 | Scope Item | Local Branch/Commit | PR to lane threshold | PR to `stage` | PR to `main` | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Foundation UniNotas cutover | `main@ef890c0` | `n/a — main-only authority` | `n/a` | `origin/main@ef890c0` | R8L material review-baseline evidence only; not delivery promotion |
+| Foundation UniNotas cutover | `main@dc4a4fd` | `n/a — main-only authority` | `n/a` | `origin/main@dc4a4fd` | R8M material review-baseline evidence only; not delivery promotion |
 
 ## Diff Expectation Contract
 
@@ -373,7 +373,7 @@ Os quatro critérios tardios possuem estados exatos; não existe status intermed
 | Dependency | Why It Matters | Status | Last Verified | Verification Method | Adjustment / Workaround |
 | --- | --- | --- | --- | --- | --- |
 | Smart Notas OpenAPI | fundamenta a arquitetura-alvo | healthy | 2026-09-25 | fingerprint e probes redigidos no ledger | nenhuma chamada nesta entrega |
-| Git remote Foundation | necessário para baseline de revisão | healthy | 2026-09-25 | `main`/`origin/main@ef890c0`; baseline material R8L publicada; guard main-only instalado e Git for Windows é o writer válido | nenhum ajuste |
+| Git remote Foundation | necessário para baseline de revisão | healthy | 2026-09-25 | `main`/`origin/main@dc4a4fd`; baseline material R8M publicada; guard main-only instalado e Git for Windows é o writer válido | nenhum ajuste |
 | `DEP-CLOSEOUT-01` Delphi standalone closeout support | impede falso `go` e stale active TODO no closeout | healthy/resolved | 2026-09-25 | TODO Delphi concluído em `6dc5bd4`/`0e54e2a`; comando individual retornou `path_state=active`; `--all-active --repo uninotas-foundation` retornou `todo_count=2`, ambos paths ativos reais e zero violações | consumir a correção já publicada e repetir os dois comandos antes do closeout |
 
 ## Profile Scope & Handoffs (Required Before `APROVADO`)
@@ -605,11 +605,11 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 - **Why this decision:** a revisão altera decisões canônicas e precisa de pacote imutável.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `main`
-- **Baseline commit:** `ef890c0f41d1aa5745876065820692b84a74caa2`
+- **Baseline commit:** `dc4a4fd5f2e76e25074b817aacae23cba2c60ebd`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `findings_integrated`
-- **Findings summary:** os achados R8K foram integrados e a baseline material R8L imutável foi publicada somente como evidência de revisão.
-- **Evidence / reference:** `origin/main@ef890c0`; merges derivados `uninotas-r8k-architecture-merge.json` e `uninotas-r8k-critique-merge.json`.
+- **Findings summary:** os achados R8L foram integrados e a baseline material R8M imutável foi publicada somente como evidência de revisão.
+- **Evidence / reference:** `origin/main@dc4a4fd`; merges derivados `uninotas-r8l-architecture-merge.json` e `uninotas-r8l-critique-merge.json`.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
@@ -621,8 +621,8 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 - **Material sections compared:** `template canonical set`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md`
 - **Gate status:** `not_run`
-- **Findings summary:** baseline material R8L publicada; arquitetura/crítica R8L e o guard de drift ainda não foram concluídos.
-- **Evidence / reference:** freeze `origin/main@ef890c0f41d1aa5745876065820692b84a74caa2`; este SHA deve ser exatamente o consumido pelo drift guard após convergência.
+- **Findings summary:** baseline material R8M publicada; arquitetura/crítica R8M e o guard de drift ainda não foram concluídos.
+- **Evidence / reference:** freeze `origin/main@dc4a4fd5f2e76e25074b817aacae23cba2c60ebd`; este SHA deve ser exatamente o consumido pelo drift guard após convergência.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: History Trust Evidence
