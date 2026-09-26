@@ -42,7 +42,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `none`
-- **Next exact step:** integrar os achados R8B, publicar uma baseline renovada, repetir arquitetura/crítica sem contexto e concluir os guards pré-aprovação.
+- **Next exact step:** executar arquitetura/crítica R8C sem contexto sobre a baseline renovada e concluir os guards pré-aprovação.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -91,7 +91,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 | Scope Item | Local Branch/Commit | PR to lane threshold | PR to `stage` | PR to `main` | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Foundation UniNotas cutover | `main@c2d949c` | `n/a — main-only authority` | `n/a` | `origin/main@c2d949c` | R8 pre-review baseline published |
+| Foundation UniNotas cutover | `main@3bfdeab` | `n/a — main-only authority` | `n/a` | `origin/main@3bfdeab` | R8C pre-review baseline published |
 
 ## Diff Expectation Contract
 
@@ -258,7 +258,7 @@ Os nomes abaixo são o contrato mínimo de fixtures/builders e testes. Cada test
 | Dependency | Why It Matters | Status | Last Verified | Verification Method | Adjustment / Workaround |
 | --- | --- | --- | --- | --- | --- |
 | Smart Notas OpenAPI | fundamenta a arquitetura-alvo | healthy | 2026-09-25 | fingerprint e probes redigidos no ledger | nenhuma chamada nesta entrega |
-| Git remote Foundation | necessário para baseline de revisão | healthy | 2026-09-25 | `main`/`origin/main@0c0cc48`; baseline material R8B `c2d949c` alcançável; guard main-only instalado e Git for Windows é o writer válido | renovar baseline após integrar R8B |
+| Git remote Foundation | necessário para baseline de revisão | healthy | 2026-09-25 | `main`/`origin/main@3bfdeab`; baseline material R8C publicada; guard main-only instalado e Git for Windows é o writer válido | nenhum ajuste |
 | `DEP-CLOSEOUT-01` Delphi standalone closeout support | impede falso `go` e stale active TODO no closeout | healthy/resolved | 2026-09-25 | TODO Delphi concluído em `6dc5bd4`/`0e54e2a`; comando individual retornou `path_state=active`; `--all-active --repo uninotas-foundation` retornou `todo_count=2`, ambos paths ativos reais e zero violações | consumir a correção já publicada e repetir os dois comandos antes do closeout |
 
 ## Profile Scope & Handoffs (Required Before `APROVADO`)
@@ -444,11 +444,11 @@ O novo arquivo `decisions/uninotas-foundation-decisions.md` preservará os IDs e
 - **Why this decision:** a revisão altera decisões canônicas e precisa de pacote imutável.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `main`
-- **Baseline commit:** `c2d949ce075744f650e251868d493979333c2f34`
+- **Baseline commit:** `3bfdeab4e10161f1032a881ecf86223625b0f98a`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `not_run`
-- **Findings summary:** R8B foi integrado; as seções materiais mudaram e exigem uma nova baseline imutável antes da R8C.
-- **Evidence / reference:** baseline R8B anterior `origin/main@c2d949c`; merges derivados `uninotas-r8b-architecture-merge.json` e `uninotas-r8b-critique-merge.json`; novo commit pendente.
+- **Gate status:** `findings_integrated`
+- **Findings summary:** os achados R8B foram integrados e a baseline R8C imutável foi publicada para repetição das revisões pré-aprovação.
+- **Evidence / reference:** `origin/main@3bfdeab`; merges derivados `uninotas-r8b-architecture-merge.json` e `uninotas-r8b-critique-merge.json`.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
