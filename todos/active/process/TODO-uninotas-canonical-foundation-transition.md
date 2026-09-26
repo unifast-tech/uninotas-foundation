@@ -42,7 +42,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `none`
-- **Next exact step:** publicar as correções R8L como baseline R8M, executar arquitetura/crítica R8M sem contexto e concluir os guards pré-aprovação.
+- **Next exact step:** publicar as correções R8M como baseline R8N, executar arquitetura/crítica R8N sem contexto e concluir os guards pré-aprovação.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -183,16 +183,16 @@ Esta tabela autoriza a união rotulada de `delivery` e `lifecycle`; ausência do
 - [ ] `DOD-03` Unifast/Prosperar são contextos fiscais explícitos e não tenants.
 - [ ] `DOD-04` Registry e módulos distinguem `current_runtime` de `target_planned`, preservam identidades no `baseline_capability_catalog` confrontado com o identity ledger independente e registram precedência, predecessor/sucessor e condição de promoção/retirada, sem declarar código futuro como implementado.
 - [ ] `DOD-05` Notas/documentos, falhas de integração e casos operacionais têm owners canônicos distintos.
-- [ ] `DOD-06` Validator e suíte rejeitam regressões de identidade, decisão/link canônico obsoleto, ownership, tenancy, privacidade, symlink, legado e publicação, além de quebra da bijeção módulo/catálogo ou ledger-origin-new/transition, ID/path/transition/membership/ledger duplicado, conflito baseline/new, alteração do conjunto baseline após genesis, substituição de C0 por descendente, descendant com genesis pending/ausente, remoção/rename/alias coordenada do seed inicial contra digest canônico ou de identidade posterior dentro da linhagem first-parent observável, histórico shallow/truncado/non-descendant/replaced ou sem genesis, capability current direta sem origem, módulo retired ainda ativo/capable ou com documento/manifest entry publicado, módulo ativo vazio ou incompatível com sua cardinalidade runtime, sequence gap, fork, ciclo, predecessor desconhecido/nulo em transferência, chain edge ou origin inválida, aresta não terminal planned, interseção `owned_capabilities ∩ planned_capabilities`, target com `owned_capabilities`, aresta terminal planned sem exatamente um owner atual/predecessor ou successor membership, planned membership órfã sem aresta terminal correspondente, capability transferida/planned ou terminal completed sem o owner exigido, dupla autoridade runtime, successor planejado duplicado e planned membership obsoleto após promoção; reescrita alternativa descendente de C0 pertence explicitamente a `RISK-HIST-01`. Fixtures positivas cobrem estado inicial, bootstrap pre-C0, checkout limpo de C0, C1 com C0 exato, ownership current estável, append de capability nova, ancestralidade completa, histórico longo com custo proporcional somente às versões do ledger, promoção parcial/final, tombstone retired, predecessor retirado e segundo hop.
+- [ ] `DOD-06` Validator e suíte rejeitam regressões de identidade, decisão/link canônico obsoleto, ownership, tenancy, privacidade, symlink, legado e publicação, além de quebra da bijeção módulo/catálogo ou ledger-origin-new/transition, ID/path/transition/membership/ledger duplicado, conflito baseline/new, alteração do conjunto baseline após genesis, binding LEDGER_GENESIS ausente/duplicada/malformada/conflitante ou substituída por descendente, descendant com genesis pending/ausente, remoção/rename/alias coordenada do seed inicial contra digest canônico ou de identidade posterior dentro da linhagem first-parent observável, histórico shallow/truncado/non-descendant/replaced ou sem genesis, capability current direta sem origem, módulo retired ainda ativo/capable ou com documento/manifest entry publicado, módulo ativo vazio ou incompatível com sua cardinalidade runtime, sequence gap, fork, ciclo, predecessor desconhecido/nulo em transferência, chain edge ou origin inválida, aresta não terminal planned, interseção `owned_capabilities ∩ planned_capabilities`, target com `owned_capabilities`, aresta terminal planned sem exatamente um owner atual/predecessor ou successor membership, planned membership órfã sem aresta terminal correspondente, capability transferida/planned ou terminal completed sem o owner exigido, dupla autoridade runtime, successor planejado duplicado e planned membership obsoleto após promoção; reescrita alternativa descendente de C0 pertence explicitamente a `RISK-HIST-01`. Fixtures positivas cobrem estado inicial, bootstrap pre-C0, checkout limpo de C0, C1 com C0 exato, ownership current estável, append de capability nova, ancestralidade completa, histórico longo com custo proporcional somente às versões do ledger, promoção parcial/final, tombstone retired, predecessor retirado e segundo hop.
 - [ ] `DOD-07` Os artefatos atuais pertencem ao manifesto e a validação Foundation passa sem `frozen lifecycle tree mismatch`.
 - [ ] `DOD-08` Nenhum segredo, valor real de CNPJ/identificador do provedor, payload/resposta privada ou URL capturada de documento foi persistido; CNPJ válido é coberto deterministicamente e identificador/URL contextual por regra precisa mais revisão de diff.
 - [ ] `DOD-09` O roadmap aponta para o TODO NestJS de leitura como próximo slice, sem lhe conceder autoridade antecipada.
 - [ ] `DOD-10` O arquivo/índice canônico de decisões migra para UniNotas sem links obsoletos nem reutilização semântica de IDs: D-01..D-05 preservam sua proveniência/handling e D-06..D-11 recebem somente autoridades novas.
 - [ ] `DOD-11` Antes de qualquer claim `Local-Implemented`/closeout, o `todo_closeout_guard.py` corrigido reconhece este path como `active` e o scan `--all-active --repo uninotas-foundation` encontra os TODOs ativos reais; falso `go` com `path_state=other` ou `todo_count=0` bloqueia entrega.
-- [ ] `DOD-12` C0 publicado mantém o TODO ativo e toda implementação/audits verdes. O candidate C1 move atomicamente o TODO para completed, atualiza manifesto/backlinks, grava C0 OID/verificação e contém todos os critérios repository-verifiable concluídos; completion/authority/closeout guards aceitam esse estado exato antes do commit. Não existe completed intermediário ou evidência prospectiva de C1.
+- [ ] `DOD-12` O harness implementa e testa o modelo C0 ativo → candidate C1 atômico → handoff externo, sem completed intermediário, evidência prospectiva ou guard que exija seu próprio output como input; `CLOSEOUT-POS-01/02` executam a state machine e os guards Delphi reais em repositório temporário antes de C0.
 - [ ] `DOD-13` `deterministic/enumerate_change_paths.py` é o helper project-owned único para profile/lifecycle/human review: mode delivery representa o net diff contra `0fe906c`; mode lifecycle representa C0..C1 e emite os dois endpoints do move. O Delphi diff guard continua independente e obrigatório, sem interface de input inventada.
-- [ ] `DOD-14` `validate_closeout_diff.py --base C0` exige o move atômico final, exatamente cinco paths e somente células/links allowlisted; nenhum C1 OID/prova prospectiva pode ser persistido no próprio candidate.
-- [ ] `DOD-15` O candidate C1 registra no `Gate: History Trust Evidence` os facts C0 já observados e a prova precommit de que `origin/main==C0==base HEAD`; proteção non-fast-forward ausente usa o aceite explícito de `RISK-HIST-01`. Verificação do OID real de C1 permanece obrigação exclusiva do handoff externo e não integra este critério repository-verifiable.
+- [ ] `DOD-14` `validate_closeout_diff.py` e sua suíte exigem move atômico, exatamente cinco paths e somente células/links allowlisted; nenhum OID/prova prospectiva pode ser persistido pelo commit que cria esse OID.
+- [ ] `DOD-15` O harness implementa/testa History Trust sem autorreferência: facts de C0 podem entrar em C1; C1 precommit usa `origin/main==C0==base HEAD`; facts dependentes do OID C1 ficam no handoff externo; ausência de proteção exige aceite de `RISK-HIST-01`.
 
 ## Validation Steps
 
@@ -202,10 +202,10 @@ Esta tabela autoriza a união rotulada de `delivery` e `lifecycle`; ausência do
 - [ ] `VAL-04` Executar da raiz do workspace `python3 delphi-ai/tools/todo_diff_expectation_guard.py uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md --repo-root uninotas-foundation`, além dos guards Delphi de autoridade, conclusão e cutover definidos neste TODO.
 - [ ] `VAL-05` Executar independentemente o Delphi diff-expectation guard, o helper `mode=delivery`, profile scope alimentado pelo helper, diff check e status/rename view; revisão humana confirma que cada path observado na modalidade aplicável possui row autorizada, sem alegar que o Delphi guard consome output externo.
 - [ ] `VAL-06` Após o TODO Delphi separado reparar o guard standalone, executar os dois comandos de closeout deste contrato e verificar semanticamente `path_state=active` no path individual e `todo_count>=1` no scan ativo; exit code/`go` isolado não basta.
-- [ ] `VAL-07` Executar toda a sequência repository-verifiable até o candidate C1: guards pre-C0; criar/publicar/verificar C0 e revalidar seu checkout limpo; preparar o move atômico; executar closeout-diff/structure/Foundation/diff/profile/authority/completion/closeout sobre o mesmo candidate. A formação/publicação/verificação do OID C1 pertence ao handoff externo e não integra este checkbox.
+- [ ] `VAL-07` Executar a fixture Git `CLOSEOUT-POS-02`, que prepara C0/candidate C1 com evidence já concluída e invoca closeout-diff/structure/authority/completion/closeout reais sem alterar o candidate após validação; outputs da entrega real pertencem ao handoff externo.
 - [ ] `VAL-08` Executar `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_enumerate_change_paths.py` cobrindo untracked, staged D/A, rename reconhecido como R e source criado após delivery baseline/movido antes de C1, com expectativas distintas para delivery e lifecycle.
-- [ ] `VAL-09` Executar `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_closeout_diff.py` e `python3 uninotas-foundation/deterministic/validate_closeout_diff.py --repo uninotas-foundation --base <C0> --todo todos/completed/process/TODO-uninotas-canonical-foundation-transition.md` antes dos completion guards do candidate C1.
-- [ ] `VAL-10` Para C0, capturar e verificar precommit/post-commit/pre-push remote/base/parent/ancestry e persistir os facts observados no candidate C1. Para C1, antes do commit, capturar `origin/main`, exigir `origin/main==C0==base HEAD` e registrar proteção disponível/`unavailable — accepted only by explicit RISK-HIST-01 approval`. Parent/ancestry/push do OID C1 são verificados somente no handoff externo.
+- [ ] `VAL-09` Executar `python3 -B -m unittest uninotas-foundation/deterministic/tests/test_validate_closeout_diff.py`, incluindo positivos/negativos do closeout atômico, autorreferência, recovery e scan semântico; a execução sobre o candidate real é activation evidence externa.
+- [ ] `VAL-10` Executar fixtures History Trust para C0 pre/post-commit, C1 precommit e C1 post-commit externo, cobrindo parent/ancestry, proteção indisponível e proibição de persistir OID próprio; observações da entrega real ficam no candidate/handoff conforme sua disponibilidade temporal.
 
 ## Completion Evidence Matrix (Required Before Delivery Claim)
 
@@ -305,6 +305,11 @@ Os nomes abaixo são o contrato mínimo de fixtures/builders e testes. Cada test
 | `CAP-POS-15` | positive+canonicalization | `ledger_formatting_and_key_order_change` | whitespace/key-order JSON diferentes produzem a mesma representação/digest canônicos |
 | `CAP-NEG-45` | negative+git-history | `descendant_with_pending_or_missing_genesis` | `ledger genesis must be recorded after the clean C0 bootstrap commit` |
 | `CAP-NEG-46` | negative+canonicalization | `seed_semantic_field_mutation` | `frozen initial capability identity digest mismatch` para qualquer campo semântico alterado |
+| `CAP-NEG-47` | negative+genesis-binding | `ledger_genesis_field_missing` | `canonical LEDGER_GENESIS field is missing` |
+| `CAP-NEG-48` | negative+genesis-binding | `ledger_genesis_field_duplicate` | `canonical LEDGER_GENESIS field must occur exactly once` |
+| `CAP-NEG-49` | negative+genesis-binding | `ledger_genesis_oid_malformed` | `canonical LEDGER_GENESIS must be pending bootstrap or lowercase 40-hex OID` |
+| `CAP-NEG-50` | negative+genesis-binding | `active_and_completed_todo_both_publish_genesis` | `exactly one canonical lifecycle TODO path may publish LEDGER_GENESIS` |
+| `CAP-NEG-51` | negative+genesis-binding | `ledger_genesis_descendant_substitution` | `recorded LEDGER_GENESIS differs from earliest first-parent ledger introduction commit` |
 | `GUARD-ID-01` | negative | `legacy_identity_or_decision_link` | identidade/índice canônico legado é rejeitado |
 | `GUARD-TENANCY-01` | negative | `fiscal_context_as_tenant` | contexto fiscal tratado como tenancy é rejeitado |
 | `GUARD-PUB-01` | negative | `unmanifested_or_missing_path` | árvore diverge do manifesto |
@@ -337,29 +342,32 @@ O completed TODO de C1 deve ser semanticamente idêntico ao active TODO de C0, e
 - `Artifact Identity -> Lifecycle state` muda para `Completed — conditional Production-Ready candidate`;
 - `Delivery Status Canon` muda para `Current delivery stage: Production-Ready`, qualifier fixa `conditional — effective only after external HEAD==origin/main==C1 verification and semantic post-C1 scan todo_count=1/exact discovery path/no stale transition; failed publication or scan mismatch invalidates closeout`, e next step fixa `external C1 verification + semantic active scan handoff`;
 - na row desta entrega em `Promotion Evidence`, somente `Local Branch/Commit`, `PR to main` e `Current Status`; scope/thresholds ficam congelados e nenhum campo tenta registrar o próprio C1 SHA;
-- somente tokens de checkbox e `Status`/`Notes` das rows de Completion Evidence ainda abertas em C0; texto, IDs, criteria/evidence-command cells ficam congelados;
+- checkboxes, toda `Completion Evidence Matrix` e seus outputs já estão completos em C0 e ficam byte-frozen em C1; nenhum resultado dos guards finais é escrito de volta no TODO;
 - History Trust recebe evidência observada de C0 e a verificação precommit de que `origin/main==C0` é o base HEAD congelado do candidate C1; fatos sobre o OID/push de C1 ficam exclusivamente no handoff externo;
 - `TODO Closeout Disposition` muda para `move-completed`, razão fixa `candidate C1 guards green; Production-Ready remains conditional on external handoff`, post status `C0 verified; C1 external verification pending` e next action `external C1 verification + active scan handoff`;
 - `Post-Push Attestation` registra somente C0 OID/verificação e a descrição fixa do handoff externo de C1.
 
-Os quatro critérios tardios possuem estados exatos; não existe status intermediário implícito:
+Os critérios de closeout descrevem o harness/state machine implementado e testado, não tentam armazenar a execução final que os próprios guards produzem. Seus estados exatos são:
 
 | Criterion | C0 active | Candidate C1 completed | External handoff (not persisted in C1) |
 | --- | --- | --- | --- |
-| `DOD-12` | checkbox open; evidence `planned` | checkbox checked; evidence `passed` com outputs do closeout-diff + guards sobre o candidate | ativa a qualifier somente após C1 remoto + scan semântico |
-| `DOD-15` | checkbox open; evidence `planned` | checkbox checked; evidence `passed` com C0 observed facts + `origin/main==C0==base HEAD` precommit | prova `parent(C1)=C0` e ancestry do OID real |
-| `VAL-07` | checkbox open; evidence `planned` | checkbox checked; evidence `passed` com a sequência repository-verifiable completa até o working tree candidate | cria/publica/verifica C1; não reabre o checkbox |
-| `VAL-10` | checkbox open; evidence `planned` | checkbox checked; evidence `passed` para C0 full protocol + C1 precommit base check | executa C1 post-commit/pre-push/remote checks |
+| `DOD-12` | checked/passed com `CLOSEOUT-POS-01/02` | byte-frozen; nenhum output final embutido | executa a state machine real e conserva outputs externos |
+| `DOD-15` | checked/passed com fixtures temporais History Trust | byte-frozen; C0 observed fields pertencem ao gate, não à evidence row | prova `parent(C1)=C0` e ancestry do OID real |
+| `VAL-07` | checked/passed com fixture que invoca os guards Delphi reais | byte-frozen | executa a mesma sequência sobre a entrega real |
+| `VAL-10` | checked/passed com fixtures C0/C1 pre/post-commit | byte-frozen | executa C1 post-commit/pre-push/remote checks |
 
-`DOD-14` e `VAL-09` também são checked/passed no candidate após `validate_closeout_diff.py`. Todos os demais DOD/VAL já estão checked/passed em C0. `CLOSEOUT-POS-02` deve invocar os `todo_authority_guard.py`, `todo_completion_guard.py --require-delivery` e `todo_closeout_guard.py` reais contra exatamente esse candidate: nenhum guard wrapper ou mock pode substituir o comportamento Delphi. Qualquer row `planned`, checkbox aberto, placeholder ou texto `pending` na Completion Evidence Matrix do candidate é no-go.
+`DOD-14` e `VAL-09` também estão checked/passed em C0 por testes positivos/negativos do guard. Todos os DOD/VAL e evidence rows ficam concluídos antes de formar C0. `CLOSEOUT-POS-02` invoca `todo_authority_guard.py`, `todo_completion_guard.py --require-delivery` e `todo_closeout_guard.py` reais contra um candidate fixture já completo: nenhum wrapper/mock substitui Delphi. A suíte deve provar que nenhuma criterion/evidence row cita como input obrigatório o output do mesmo guard que a fiscaliza (`CLOSEOUT-NEG-08`).
 
-`validate_closeout_diff.py --base C0` valida paths, move e células antes de qualquer completion guard. Deterministic validation, Foundation validator, diff/profile gates, authority, completion e closeout rodam sobre esse mesmo working tree candidate. Todos os critérios repository-verifiable tornam-se completos antes de formar C1. Após o commit local, o handoff prova que o parent de C1 é exatamente C0, que C0/origin observado é ancestor de C1, publica C1 e confirma `HEAD==origin/main==C1` mais active scan go. Esses fatos dependentes do OID novo nunca são pré-preenchidos dentro do próprio commit. Falha invalida o closeout/claim; não há C2 nem commit autorreferente.
+`validate_closeout_diff.py --base C0` valida paths, move e células antes de qualquer completion guard. Deterministic validation, Foundation validator, diff/profile gates, authority, completion e closeout rodam sobre esse mesmo working tree candidate e seus outputs são anexados ao handoff externo, não ao candidate. Após o commit local, o handoff prova que o parent de C1 é exatamente C0, que C0/origin observado é ancestor de C1, publica C1 e confirma `HEAD==origin/main==C1` mais scan semântico. Esses fatos dependentes do OID novo nunca são pré-preenchidos dentro do próprio commit.
+
+O caminho de sucesso não possui C2. Se C1 já foi publicado mas qualquer verificação `parent/ancestry/HEAD==origin` ou scan semântico falhar, `Production-Ready` não entra em vigor e um corrective commit `C1R` é obrigatório antes de outro trabalho: `validate_closeout_diff.py --mode recovery --base <FAILED_C1>` exige exatamente os mesmos cinco paths em sentido reverso, restaura o TODO em `active/`, manifesto/backlinks, stage `Local-Implemented`, qualifier/work state/disposition `Blocked` e registra somente o failure result/C1 OID já observados. Authority, completion, Foundation, diff e closeout guards rodam sobre o recovery candidate; após publicar C1R, o scan deve retornar exatamente dois TODOs ativos (esta transição + discovery). A causa é então corrigida sob o mesmo scope ou exige renewed approval se material, e um novo candidate final repete o protocolo. Recovery não é attestation de sucesso nem pode mascarar o failure tuple.
 
 | Case ID | Fixture | Expected assertion |
 | --- | --- | --- |
 | `CLOSEOUT-POS-01` | `atomic_move_and_allowed_cells` | C0 active → candidate C1 completed com cinco paths/células exatos é aceito |
 | `CLOSEOUT-POS-02` | `completed_path_guard_sequence` | fixture Git temporária executa closeout-diff, structure, authority, completion e closeout sobre o mesmo candidate C1 |
 | `CLOSEOUT-POS-03` | `post_c1_semantic_active_scan` | handoff fixture exige `todo_count=1`, active path igual ao TODO discovery e zero stale canonical-transition path |
+| `CLOSEOUT-POS-04` | `failed_c1_recovery_to_active` | C1R reverte exatamente cinco paths, persiste failure já observado e restaura active set exato de dois TODOs |
 | `CLOSEOUT-NEG-01` | `incomplete_todo_moved_to_completed` | `completed path requires all repository-verifiable criteria complete` |
 | `CLOSEOUT-NEG-02` | `unexpected_sixth_path_or_backlink_edit` | `final closeout changed a non-allowlisted path or backlink content` |
 | `CLOSEOUT-NEG-03` | `todo_semantic_text_changed` | `final closeout changed frozen contract content` |
@@ -367,6 +375,9 @@ Os quatro critérios tardios possuem estados exatos; não existe status intermed
 | `CLOSEOUT-NEG-05` | `self_commit_or_prospective_oid_persisted` | `final closeout cannot persist facts that depend on the uncreated C1 OID` |
 | `CLOSEOUT-NEG-06` | `delivery_or_closeout_value_outside_state_machine` | `final closeout used a non-contract stage or disposition transition` |
 | `CLOSEOUT-NEG-07` | `post_c1_false_go_zero_or_wrong_active_set` | `post-C1 active scan semantic result does not match the exact remaining active TODO set` |
+| `CLOSEOUT-NEG-08` | `criterion_requires_its_enforcing_guard_output` | `completion criterion cannot require its own enforcing guard result as input evidence` |
+| `CLOSEOUT-NEG-09` | `failed_published_c1_without_recovery` | `failed external closeout verification requires corrective active-state recovery` |
+| `CLOSEOUT-NEG-10` | `recovery_hides_failure_or_changes_scope` | `closeout recovery may only restore lifecycle truth and observed failure evidence` |
 
 ## External Dependency Readiness
 
@@ -434,6 +445,8 @@ A representação canônica versionada `capability-identity-ledger-v1` governa d
 `capability_id` é único no ledger e os conjuntos `origin=baseline`/`origin=new` são disjuntos. Cada row `origin=new` corresponde bijetivamente a exatamente uma transition sequence 1 `origin=new` com o mesmo `capability_id` e `transition_id=origin_transition_id`; toda cadeia cuja primeira aresta é `origin=new` possui exatamente essa row. Transition ausente, transition de outra capability, ID duplicado ou conflito baseline/new é inválido antes de qualquer persistência histórica.
 
 O validator full-tree usa `LEDGER_GENESIS=C0_PRE_MOVE`, o primeiro commit publicado que contém o ledger, preenchido e congelado no completed TODO em C1. Em todo HEAD posterior, ele deriva independentemente o primeiro commit da ancestry first-parent que introduziu `deterministic/capability_identity_ledger.json` e exige igualdade exata com o C0 registrado; apontar o campo para um descendente resolvível é no-go. Uma exceção bootstrap fechada aceita genesis pending somente em dois estados: (a) candidate pre-C0 com TODO ativo, HEAD sem ledger histórico e working tree contendo exatamente o seed canônico; ou (b) checkout limpo cujo `HEAD` é ele próprio o primeiro commit que introduziu o ledger e ainda contém exatamente o seed. Qualquer descendant de C0 com genesis pending/ausente falha; C1 deve registrar o OID exato de C0. Antes e durante esse bootstrap, o frozen initial digest ancora as dez identidades. Depois de C0, o validator exige repositório não shallow, nenhum replace/graft, genesis resolvível e ancestor de `HEAD`. Uma única consulta `git log --first-parent --reverse --format=%H -- <ledger-path>` enumera apenas commits que mudaram o ledger; o validator carrega exatamente essas versões, incluindo C0, e a união por `capability_id` deve existir semanticamente imutável sob `capability-identity-ledger-v1` no ledger corrente. O conjunto de rows `origin=baseline` e sua projeção no `baseline_capability_catalog` permanecem exatamente os de C0; toda identidade aparecida pela primeira vez depois de C0 deve ser `origin=new`. Histórico ausente, truncado, shallow, non-descendant, com replacement, C0 substituído por descendente ou baseline retroativo é no-go, nunca fallback para o registry atual.
+
+A única binding machine-readable de `LEDGER_GENESIS` é o campo Markdown exato `**C0 active implementation/genesis commit:**` sob o heading único `## Post-Push Attestation (Atomic Final Closeout)`, no único path lifecycle existente deste TODO: active antes do move ou completed depois dele. O valor bootstrap literal é `pending delivery — persisted in C1 after observation`; fora dos dois estados bootstrap fechados, o valor deve começar por exatamente um OID lowercase `^[0-9a-f]{40}$` seguido apenas de descrição fixa allowlisted. Campo/heading ausente, duplicado, malformado, divergente, ou presença simultânea dos paths active/completed é no-go. O atomic-closeout guard permite a troca do literal pelo OID C0 observado uma única vez em C1; recovery preserva esse OID. Nenhum outro C0 mencionado em tabelas/prosa é fonte para o validator.
 
 O custo histórico é proporcional ao número `k` de versões do ledger, não ao número total de commits: uma chamada `git log` encontra os OIDs relevantes e no máximo uma leitura `git show` por versão, com orçamento observável `git_calls <= k + 2`. `CAP-POS-11` constrói repositório temporário com 200 commits não relacionados e cinco mudanças após C0, exige seis versões visitadas e prova que commits alheios não ampliam leituras do ledger.
 
@@ -590,7 +603,7 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-summary`
 - **Decision review status:** `not_run`
-- **Decision review evidence / resolution:** `R8L arquitetura considerou Option A pronta com RISK-HIST-01; crítica exigiu estados tardios exatos e scan semântico pós-C1, integrados; nova rodada R8M obrigatória`
+- **Decision review evidence / resolution:** `R8M arquitetura considerou Option A pronta com RISK-HIST-01; crítica encontrou self-reference de evidence, recovery ausente e genesis sem binding única; integrados, nova rodada R8N obrigatória`
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -683,7 +696,7 @@ Após extração, chaves são normalizadas por Unicode NFKC, separação de came
 
 - **Strategy:** `test-first`
 - **Why:** o validator é o harness arquitetural; cada semântica precisa de mutação negativa antes do cutover.
-- **Fail-first target(s):** identidade/core scope UniNotas, source split, context-not-tenant, runtime-authority/lifecycle separation, módulo/catálogo ausente ou duplicado, membership duplicado, remoção/rename/alias simples ou coordenada de capability baseline/new contra digest/histórico, capability current sem baseline ou `origin=new`, bijeção exata entre cada ledger record `origin=new` e uma única transição sequence 1 `origin=new` da mesma capability (`CAP-NEG-38..42`), substituição do genesis registrado por descendente (`CAP-NEG-43`), append pós-C0 reclassificado como baseline (`CAP-NEG-44`), bootstrap pre-C0/C0/C1 e descendant pending inválido (`CAP-POS-12..14`/`CAP-NEG-45`), canonicalização/digest semântico (`CAP-POS-15`/`CAP-NEG-46`), histórico longo com leituras limitadas às versões do ledger (`CAP-POS-11`), módulo ativo vazio ou com cardinalidade incompatível, sequence gap, fork/ciclo, predecessor desconhecido ou nulo em transferência, chain edge inválida, interseção owned/planned, target com owned capability, aresta terminal planned sem exatamente um owner atual ou successor planejado, planned membership órfã, terminal completed sem owner successor, transferência planned sem owner predecessor, dupla autoridade pelo mesmo ID, successor planejado duplicado, planned membership residual, owner incompatível com aresta terminal, ownership baseline estável respaldado pelo catálogo/ledger sem transição sintética, capability nova legítima e ownerless enquanto planned, append de identidade nova, predecessor retirado legítimo, segundo hop planned/completed, limitação documentada de rewrite alternativo que preserva C0 (`CAP-LIMIT-01`/`RISK-HIST-01`), manifesto único, CNPJ válido, credenciais, provider ID/URL privada em contexto formalizado e limites permitidos sem falso positivo.
+- **Fail-first target(s):** identidade/core scope UniNotas, source split, context-not-tenant, runtime-authority/lifecycle separation, módulo/catálogo ausente ou duplicado, membership duplicado, remoção/rename/alias simples ou coordenada de capability baseline/new contra digest/histórico, capability current sem baseline ou `origin=new`, bijeção exata entre cada ledger record `origin=new` e uma única transição sequence 1 `origin=new` da mesma capability (`CAP-NEG-38..42`), substituição do genesis registrado por descendente (`CAP-NEG-43`), append pós-C0 reclassificado como baseline (`CAP-NEG-44`), bootstrap pre-C0/C0/C1 e descendant pending inválido (`CAP-POS-12..14`/`CAP-NEG-45`), canonicalização/digest semântico (`CAP-POS-15`/`CAP-NEG-46`), binding genesis única/exata (`CAP-NEG-47..51`), histórico longo com leituras limitadas às versões do ledger (`CAP-POS-11`), módulo ativo vazio ou com cardinalidade incompatível, sequence gap, fork/ciclo, predecessor desconhecido ou nulo em transferência, chain edge inválida, interseção owned/planned, target com owned capability, aresta terminal planned sem exatamente um owner atual ou successor planejado, planned membership órfã, terminal completed sem owner successor, transferência planned sem owner predecessor, dupla autoridade pelo mesmo ID, successor planejado duplicado, planned membership residual, owner incompatível com aresta terminal, ownership baseline estável respaldado pelo catálogo/ledger sem transição sintética, capability nova legítima e ownerless enquanto planned, append de identidade nova, predecessor retirado legítimo, segundo hop planned/completed, limitação documentada de rewrite alternativo que preserva C0 (`CAP-LIMIT-01`/`RISK-HIST-01`), manifesto único, CNPJ válido, credenciais, provider ID/URL privada em contexto formalizado e limites permitidos sem falso positivo.
 - **`D-T01` evidence layer:** validadores puros + fixtures mínimas são a camada primária para semântica de registry, decisões e privacidade.
 - **`D-T02` compatibility layer:** poucos testes full-tree comprovam manifesto, links, symlinks, legado e composição real da Foundation.
 - **`D-T03` topology/exclusion:** nenhum banco, API, browser, container ou dado fiscal real é necessário; `CAP-NEG-36` usa repositório Git temporário real para provar append-only history, sem mock de Git.
@@ -911,12 +924,17 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 | `CRIT-R8L-01` | formal critique R8L | Integrated | phase table fixa C0/candidate C1/handoff para DOD-12/15 e VAL-07/10; candidate exige todos checkboxes checked/rows passed e `CLOSEOUT-POS-02` invoca guards Delphi reais |
 | `CRIT-R8L-02` | formal critique R8L | Integrated | pós-C1 exige `todo_count=1`, exact discovery TODO membership e ausência do stale transition path; `CLOSEOUT-POS-03`/`NEG-07` cobrem false-go |
 | `CRIT-R8L-03` | formal critique R8L | Integrated | current-action avança de baseline R8L já publicada para integração/freeze R8M, sem repetir freeze concluído |
+| `RISK-HIST-01-R8M` | formal architecture review R8M | Accepted residual | arquitetura novamente considerada pronta; aceite humano e History Trust permanecem obrigatórios |
+| `CRIT-R8M-01` | formal critique R8M | Integrated | todos critérios/evidence concluem em C0 por fixtures; candidate C1 congela matriz, final guards geram somente handoff externo; `CLOSEOUT-NEG-08` proíbe self-referential evidence |
+| `CRIT-R8M-02` | formal critique R8M | Integrated | failure após C1 publicado exige C1R reverso para active/Blocked com exact two-TODO scan antes de retry; success path continua sem C2 |
+| `CRIT-R8M-03` | formal critique R8M | Integrated | current-action avança de baseline R8M já publicada para integração/freeze R8N |
+| `CRIT-R8M-04` | formal critique R8M | Integrated | LEDGER_GENESIS possui heading/field/path/grammar/bootstrap/uniqueness únicos e `CAP-NEG-47..51` |
 
 ## Additional Architectural Opinions
 
 - **Needed:** `yes`
 - **Why ambiguity remains:** o validator pode ser evoluído por manifesto único ou por inventário gerado; revisão independente deve desafiar a opção recomendada.
-- **Opinion count:** `17`
+- **Opinion count:** `18`
 - **Package mode:** `bounded-summary`
 - **Internal reviewer mandate:** `required — fresh internal no-context reviewer after baseline freeze`
 - **Required lenses:** `correctness|performance|elegance|structural-soundness|operational-fit`
@@ -940,6 +958,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 | `uninotas_architecture_opinion_r8j` | manter Option A e definir state machine executável para bootstrap C0 e attestation C2 | strong positive | strong positive | mixed até fechar lifecycle boundaries | Integrated / Rerun required | merges R8J válidos; bootstrap/state table/cell allowlist/conditional stage/history gate/digest integrados, baseline R8K obrigatória |
 | `uninotas_architecture_opinion_r8k` | manter Option A, mas substituir C0/C1/C2 por C0 ativo + C1 final atômico + handoff externo | strong positive | mixed | mixed até remover estados impossíveis | Integrated / Rerun required | merges R8K válidos; closeout atômico, history ordering, exact test paths e performance determinística integrados, baseline R8L obrigatória |
 | `uninotas_architecture_opinion_r8l` | adotar Option A; arquitetura pronta com aceite explícito do risco residual | strong positive | strong positive | strong positive | Accepted / Ready with RISK-HIST-01 | merge R8L válido; crítica paralela exigiu apenas estados tardios/scan semântico, baseline R8M obrigatória |
+| `uninotas_architecture_opinion_r8m` | adotar Option A e preservar closeout atômico/scan semântico | strong positive | strong positive | strong positive | Accepted / Ready with RISK-HIST-01 | merge R8M válido; crítica paralela exigiu evidence não autorreferente, recovery e binding genesis, baseline R8N obrigatória |
 
 ## Audit Trigger Matrix
 
@@ -974,8 +993,8 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Audit session / round evidence:** `n/a until run`
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
 - **Critique status:** `not_run`
-- **Findings summary:** `R8L arquitetura retornou ready com RISK-HIST-01; crítica apontou estados tardios não enumerados, scan pós-C1 reduzido a bare go e current-action stale; todos foram integrados e exigem crítica R8M`.
-- **Evidence / reference:** merges derivados `uninotas-r8l-architecture-merge.json` e `uninotas-r8l-critique-merge.json`; nova crítica obrigatória após freeze R8M.
+- **Findings summary:** `R8M arquitetura retornou ready com RISK-HIST-01; crítica apontou evidence final autorreferente, ausência de recovery pós-push, current-action stale e LEDGER_GENESIS sem binding única; todos foram integrados e exigem crítica R8N`.
+- **Evidence / reference:** merges derivados `uninotas-r8m-architecture-merge.json` e `uninotas-r8m-critique-merge.json`; nova crítica obrigatória após freeze R8N.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Assumption Code Coherence
@@ -1152,13 +1171,14 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **C1 remote verification:** `external handoff must prove HEAD==origin/main==C1`
 - **Post-C1 active scan:** `external handoff; must report go, todo_count=1, exact active_paths=[todos/active/process/TODO-uninotas-smart-notas-api-and-fiscal-context-discovery.md], and stale_transition_path=false`
 - **Production-Ready evidence:** `pending external tuple {c0_genesis_commit, final_closeout_commit: C1, parent_is_c0: true, head_equals_origin: true, post_c1_active_scan: {outcome: go, todo_count: 1, active_paths: [todos/active/process/TODO-uninotas-smart-notas-api-and-fiscal-context-discovery.md], stale_transition_path: false}, production_ready_effective: true}`
+- **Failed-C1 recovery:** `if C1 was pushed and any external predicate fails, publish verified C1R restoring active/Blocked truth and exact two-TODO active set before further work; retain failure tuple externally`
 
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
 - **Disposition reason:** planejamento e aprovação ainda não concluídos.
 - **Post-commit/push status:** `pending`
-- **Next path/status action:** publicar a baseline R8M, executar as revisões/guards pré-aprovação e solicitar `APROVADO` explícito com aceite de `RISK-HIST-01`.
+- **Next path/status action:** publicar a baseline R8N, executar as revisões/guards pré-aprovação e solicitar `APROVADO` explícito com aceite de `RISK-HIST-01`.
 
 ## Module Consolidation Gate
 
@@ -1192,6 +1212,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - Audit package start: `python3 delphi-ai/skills/audit-protocol-triple-review/scripts/triple_audit_session.py start --package uninotas-foundation/artifacts/analysis/uninotas-canonical-foundation-transition-delivery-package.md --todo uninotas-foundation/todos/active/process/TODO-uninotas-canonical-foundation-transition.md --extra-lane cutover-integrity --run-root uninotas-foundation/artifacts/tmp/uninotas-canonical-foundation-transition-audit`
 - Final delivery authority/completion: run on the same uncommitted candidate C1 tree against the completed path, after atomic-closeout diff validation.
 - C1 atomic closeout boundary: `python3 uninotas-foundation/deterministic/validate_closeout_diff.py --repo uninotas-foundation --base <C0> --todo todos/completed/process/TODO-uninotas-canonical-foundation-transition.md`
+- Failed-C1 recovery boundary: `python3 uninotas-foundation/deterministic/validate_closeout_diff.py --mode recovery --repo uninotas-foundation --base <FAILED_C1> --todo todos/active/process/TODO-uninotas-canonical-foundation-transition.md`
 - C1 completed-path structure: `python3 delphi-ai/tools/todo_deterministic_validator.py --todo uninotas-foundation/todos/completed/process/TODO-uninotas-canonical-foundation-transition.md`
 - C1 completed-path diff gate: `python3 delphi-ai/tools/todo_diff_expectation_guard.py uninotas-foundation/todos/completed/process/TODO-uninotas-canonical-foundation-transition.md --repo-root uninotas-foundation`
 - C1 delivery authority: `python3 delphi-ai/tools/todo_authority_guard.py uninotas-foundation/todos/completed/process/TODO-uninotas-canonical-foundation-transition.md --require-delivery-gates`
@@ -1213,7 +1234,8 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 4. Confirmar `origin/main==C0`, congelar base HEAD=C0 e preparar em um único working tree o move active→completed, manifesto/backlinks finais, C0 OID/verificação, todos os critérios/evidence repository-verifiable e a stage condicional; nenhum fato do futuro C1 é persistido.
 5. Executar, nessa ordem, `C1 atomic closeout boundary`, `C1 completed-path structure`, Foundation validator, `C1 completed-path diff gate`, `mode=delivery`, `mode=lifecycle`, status views, profile scope, diff check, `C1 delivery authority`, `C1 completion` e `C1 closeout` sobre o mesmo candidate.
 6. Criar C1 local; no handoff externo, provar `parent(C1)=C0` e C0 ancestor de C1, publicar, provar `HEAD==origin/main==C1` e executar `--all-active`. O resultado deve ser semanticamente `todo_count=1`, exact active path igual ao TODO discovery e stale canonical-transition path ausente; exit code/`go` isolado não satisfaz.
-7. O handoff externo reporta `{c0_genesis_commit: C0, final_closeout_commit: C1, parent_is_c0: true, head_equals_origin: true, post_c1_active_scan: {outcome: go, todo_count: 1, active_paths: [todos/active/process/TODO-uninotas-smart-notas-api-and-fiscal-context-discovery.md], stale_transition_path: false}, production_ready_effective: true}`. Não existe C2 nem persistência do próprio SHA.
+7. No sucesso, o handoff externo reporta `{c0_genesis_commit: C0, final_closeout_commit: C1, parent_is_c0: true, head_equals_origin: true, final_guard_outputs: [...], post_c1_active_scan: {outcome: go, todo_count: 1, active_paths: [todos/active/process/TODO-uninotas-smart-notas-api-and-fiscal-context-discovery.md], stale_transition_path: false}, production_ready_effective: true}`. Não existe C2 no caminho verde nem persistência do próprio SHA.
+8. Se C1 foi publicado e qualquer verificação falhar, reportar o failure tuple, preparar C1R com `Failed-C1 recovery boundary`, executar guards sobre o TODO active/Blocked, publicar/verificar C1R e exigir scan `{todo_count: 2, active_paths: [canonical transition TODO, discovery TODO]}` antes de corrigir/repetir. É proibido deixar main com completed condicional inválido.
 
 ## Files Expected (Compatibility Note)
 
