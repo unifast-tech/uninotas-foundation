@@ -42,7 +42,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `none`
-- **Next exact step:** integrar os achados R8C, publicar a baseline R8D, repetir arquitetura/crítica sem contexto e concluir os guards pré-aprovação.
+- **Next exact step:** executar arquitetura/crítica R8D sem contexto sobre a baseline renovada e concluir os guards pré-aprovação.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -91,7 +91,7 @@ Estabelecer na Foundation a identidade UniNotas, a topologia `FastPay (Routerfy)
 
 | Scope Item | Local Branch/Commit | PR to lane threshold | PR to `stage` | PR to `main` | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Foundation UniNotas cutover | `main@3bfdeab` | `n/a — main-only authority` | `n/a` | `origin/main@3bfdeab` | R8C pre-review baseline published |
+| Foundation UniNotas cutover | `main@618df49` | `n/a — main-only authority` | `n/a` | `origin/main@618df49` | R8D pre-review baseline published |
 
 ## Diff Expectation Contract
 
@@ -267,7 +267,7 @@ Os nomes abaixo são o contrato mínimo de fixtures/builders e testes. Cada test
 | Dependency | Why It Matters | Status | Last Verified | Verification Method | Adjustment / Workaround |
 | --- | --- | --- | --- | --- | --- |
 | Smart Notas OpenAPI | fundamenta a arquitetura-alvo | healthy | 2026-09-25 | fingerprint e probes redigidos no ledger | nenhuma chamada nesta entrega |
-| Git remote Foundation | necessário para baseline de revisão | healthy | 2026-09-25 | `main`/`origin/main@108552a`; baseline material R8C `3bfdeab` alcançável; guard main-only instalado e Git for Windows é o writer válido | publicar baseline R8D após integração |
+| Git remote Foundation | necessário para baseline de revisão | healthy | 2026-09-25 | `main`/`origin/main@618df49`; baseline material R8D publicada; guard main-only instalado e Git for Windows é o writer válido | nenhum ajuste |
 | `DEP-CLOSEOUT-01` Delphi standalone closeout support | impede falso `go` e stale active TODO no closeout | healthy/resolved | 2026-09-25 | TODO Delphi concluído em `6dc5bd4`/`0e54e2a`; comando individual retornou `path_state=active`; `--all-active --repo uninotas-foundation` retornou `todo_count=2`, ambos paths ativos reais e zero violações | consumir a correção já publicada e repetir os dois comandos antes do closeout |
 
 ## Profile Scope & Handoffs (Required Before `APROVADO`)
@@ -464,11 +464,11 @@ O scanner opera sobre o texto governado publicado pelo manifesto e sobre fixture
 - **Why this decision:** a revisão altera decisões canônicas e precisa de pacote imutável.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `main`
-- **Baseline commit:** `3bfdeab4e10161f1032a881ecf86223625b0f98a`
+- **Baseline commit:** `618df49d7cecf875ab56e01634e33d643cbed820`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `not_run`
-- **Findings summary:** R8C foi integrado; as seções materiais mudaram e exigem uma nova baseline R8D imutável.
-- **Evidence / reference:** baseline R8C anterior `origin/main@3bfdeab`; merges derivados `uninotas-r8c-architecture-merge.json` e `uninotas-r8c-critique-merge.json`; novo commit pendente.
+- **Gate status:** `findings_integrated`
+- **Findings summary:** os achados R8C foram integrados e a baseline R8D imutável foi publicada para repetição das revisões pré-aprovação.
+- **Evidence / reference:** `origin/main@618df49`; merges derivados `uninotas-r8c-architecture-merge.json` e `uninotas-r8c-critique-merge.json`.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
@@ -933,7 +933,7 @@ Os pareceres executados sobre a branch indevida são diagnóstico útil, mas nã
 - **Disposition:** `keep-active`
 - **Disposition reason:** planejamento e aprovação ainda não concluídos.
 - **Post-commit/push status:** `pending`
-- **Next path/status action:** publicar/revisar a baseline R8D pós-integração dos achados R8C, executar guards pré-aprovação e solicitar `APROVADO` explícito.
+- **Next path/status action:** revisar a baseline R8D, executar guards pré-aprovação e solicitar `APROVADO` explícito.
 
 ## Module Consolidation Gate
 
