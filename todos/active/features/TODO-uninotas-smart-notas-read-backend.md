@@ -396,7 +396,7 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 
 ## Decision Baseline (Frozen Before Implementation)
 
-- [ ] `D-01..D-13` serão recongeladas após corrigir o RLS da rodada 5 e publicar novo baseline; implementação continua proibida até revisões, `preflight-go` e `APROVADO`.
+- [ ] `D-01..D-13` serão recongeladas após separar a prova dos budgets por ator e por contexto exigida na rodada 6; implementação continua proibida até novo baseline publicado, revisões, `preflight-go` e `APROVADO`.
 
 ## Architecture Change Governance
 
@@ -442,7 +442,7 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set`
 - **Decision review status:** `not_run`
-- **Decision review evidence / resolution:** `round 5 over 24d1212 confirmed decoder resolved and returned NO-GO only for objective RLS saturation/abort/fairness proof; integrated; rerun pending`.
+- **Decision review evidence / resolution:** `round 6 over b116b46 returned GO with no material findings, but the paired critique found that Stage F did not independently force the actor limiter; FU/FC split integrated and refreshed-baseline rerun required`.
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -456,11 +456,11 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Why this decision:** contrato público/segredos/contextos exigem review a partir de baseline autoritativo reproduzível.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `pending round-6 baseline; predecessor 24d1212bb62078df5fa77265306eec02cbe208c9`
+- **Baseline commit:** `pending round-7 baseline; predecessor b116b46a3dce900c7f221c78ce929aae41949e7c`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `not_run`
-- **Findings summary:** round 5 exigiu stage-specific RLS com saturation, abort/timeout, fairness e envelope pcv-1 completo; novo freeze pendente.
-- **Evidence / reference:** predecessor `24d1212` permanece publicado; refresh pendente.
+- **Findings summary:** round 6 confirmou pcv-1 e L/S/A/R, mas exigiu forçar os limiters de ator e contexto independentemente; novo freeze pendente após o split FU/FC.
+- **Evidence / reference:** predecessor `b116b46a3dce900c7f221c78ce929aae41949e7c` permanece publicado; refresh pendente.
 - **Waiver authority / reference:** `n/a`.
 - **Pre-freeze packet-prep rule:** review rows below are `prepared-pre-freeze`, not passed.
 
@@ -557,7 +557,7 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 
 ## Plan Review Gate
 
-- **Status:** `reconverged-first-party; refreshed-baseline independent gates pending`.
+- **Status:** `round-6 rate-budget finding integrated; refreshed-baseline independent gates pending`.
 
 ### Review Sections
 
@@ -682,9 +682,9 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Package mode:** `bounded-file-set`.
 - **Internal reviewer mandate:** `required — fresh no-context reviewer after review baseline freeze`.
 - **Required lenses:** `correctness|performance|elegance|structural-soundness|operational-fit`.
-- **Review result:** `round 5 NO-GO RLS finding integrated; round 6 pending refreshed baseline`.
-- **Material findings:** garantir saturação observada, abort/timeout não zero, fairness quantitativa e recovery sem restart; decoder e demais decisões confirmados.
-- **Evidence:** formal fresh no-context `architecture_opinion` over `24d1212`; routing guard `gpt-5.6-sol/xhigh` returned `go`; no files edited by reviewer.
+- **Review result:** `round 6 GO over b116b46; refreshed-baseline rerun required after paired-critique FU/FC change`.
+- **Material findings:** none from architecture R6; paired critique's independent-rate-budget finding was integrated by splitting actor and context substages.
+- **Evidence:** formal fresh no-context `architecture_opinion` over `b116b46`; routing guard `gpt-5.6-sol/xhigh` returned `go`; no files edited by reviewer.
 
 ## Audit Trigger Matrix
 
@@ -717,8 +717,8 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Internal reviewer mandate:** `required after freeze`.
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`.
 - **Critique status:** `not_run`
-- **Findings summary:** `round 5 NO-GO: pcv-1 envelope/hash names and deterministic saturation/abort/fairness/recovery assertions; integrated, round 6 required`.
-- **Evidence / reference:** `formal fresh critique over 24d1212; routing guard gpt-5.6-sol/xhigh returned go; reviewer made no changes`.
+- **Findings summary:** `round 6 NO-GO R6-RLS-RATE-BUDGET-01: context ceiling could mask a missing actor limiter; FU forces actor budget with context non-binding and FC forces each context budget with user non-binding; rerun required`.
+- **Evidence / reference:** `formal fresh critique over b116b46; routing guard gpt-5.6-sol/xhigh returned go; reviewer made no changes`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Assumption Code Coherence
@@ -854,10 +854,11 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Workload model:** 20 atores sintéticos em ordem round-robin alternam `unifast|prosperar` e lista|detalhe; credenciais/IDs são fixtures falsas; nenhum socket alcança host não-loopback. O clock/rate state e o stub são controláveis pelo harness, mas Nest/stub permanecem no mesmo processo até terminar recovery.
 - **Stage L — accepted load:** stub 100 ms, concurrency `5` por `5s`, `maxConcurrency=8`, budgets `user=120/context=600`; exige somente `200`, p95 `<=500 ms`, p99 `<=1000 ms`, throughput `>=5 req/s`, zero erro inesperado e peak upstream `<=8`.
 - **Stage S — semaphore saturation:** rate state limpo por avanço do clock, stub 100 ms, concurrency `20` por `1s`, mesmos budgets altos; exige `SmartNotasOcupado > 0`, `LimiteDeConsultaExcedido = 0`, peak upstream exatamente `8`, zero fila e current concurrency `0` ao final.
-- **Stage F — rate/fairness:** rate state limpo, `maxConcurrency=64`, budgets default `user=30/context=120`, 20 atores enviam número idêntico de requests em round-robin; exige `LimiteDeConsultaExcedido > 0`, pelo menos um aceite por ator, diferença máxima de aceites `<=1` entre atores equivalentes e `<=1` entre contextos, nenhuma chamada upstream após o budget e nenhum `SmartNotasOcupado`.
+- **Stage FU — actor budget isolated:** rate state limpo, `maxConcurrency=64`, budgets `user=30/context=600`; um ator envia 35 requests sequenciais dentro da mesma janela, alternando contexto e list/detail. Exige exatamente 30 aceites, exatamente 5 `LimiteDeConsultaExcedido`, exatamente 30 chamadas upstream, zero chamada upstream para as cinco requests posteriores ao limite, zero `SmartNotasOcupado` e contador de contexto abaixo de 600; assim o budget de contexto não pode mascarar a prova do limiter por ator.
+- **Stage FC — context budget and fairness isolated:** rate state limpo, `maxConcurrency=64`, budgets `user=120/context=120`; os 20 atores, dez por contexto, enviam exatamente 13 requests cada em round-robin, alternando list/detail. Exige exatamente 120 aceites e 10 `LimiteDeConsultaExcedido` em cada contexto, exatamente 240 chamadas upstream no total, pelo menos um aceite por ator, diferença máxima de aceites `<=1` entre atores equivalentes e zero entre contextos, zero chamada upstream para as 20 requests rejeitadas, zero `SmartNotasOcupado` e contador de cada ator abaixo de 120; assim o budget por ator não pode mascarar a prova dos dois limiters de contexto.
 - **Stage A — abort/timeout:** rate state limpo, stub 2000 ms, `maxConcurrency=8`; lança oito requests, desconecta deterministicamente quatro clientes após 50 ms e deixa quatro atingirem `timeout=1000 ms`. Exige `client_aborted >=4`, quatro `SmartNotasTimeout`, stub observa cancelamento dos oito upstream requests, slots/current concurrency retornam a zero em até 250 ms após o último abort e nenhuma escrita em socket fechado.
 - **Stage R — recovery sem restart:** ainda no mesmo Nest/stub, clock avança além da janela, stub volta a 100 ms e concurrency `2` por `5s`; exige somente `200`, current concurrency zero ao final e latência/throughput dos thresholds de load. Restart-resilience smoke é separado e não substitui R.
-- **Global acceptance:** statuses fora dos previstos falham; processo/memória permanecem vivos; todo threshold acima vira assertion pass/fail, não mera métrica registrada.
+- **Global acceptance:** statuses fora dos previstos falham; processo/memória permanecem vivos; FU e FC registram contagens aceitas/rejeitadas/upstream por ator e contexto; todo threshold acima vira assertion pass/fail, não mera métrica registrada.
 - **Evidence capture:** o teste escreve `foundation_documentation/artifacts/tmp/smart-notas-read-rls/rls-pcv1.json` com o envelope obrigatório: `policy_schema_version=pcv-1`, `schema_version`, `lane_id=RLS`, `todo_id`, `run_id`, `environment_id`, `executor_id`, `reviewer_id`, `recorded_at_utc`, `evidence_type`, `sample_profile_id=RLS-SP-H`, `acceptance_rule_id=RLS-A1`, `result_summary`, `artifact_payload={stage_profile_observed,thresholds,metrics_summary,status_counts,unexpected_error_rate,peak_and_current_concurrency,abort_and_timeout_counts,fairness,recovery,git_baselines}` e `artifact_sha256`.
 - **Hash rule:** `artifact_sha256` é SHA-256 do JSON completo sem esse campo, UTF-8, chaves ordenadas recursivamente, arrays na ordem declarada e sem whitespace insignificante; o evidence object do TODO registra também `evidence_type,environment_id,run_id,artifact_uri,artifact_schema_version,artifact_sha256,sample_profile_id,acceptance_rule_id,result_summary,reviewer_id`.
 - **Raw artifacts:** traces/contadores auxiliares ficam no mesmo diretório tmp; o JSON canônico, não prosa, satisfaz o gate.
@@ -941,13 +942,14 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 | `R5-RLS-PCV-01` | critique R5 | `medium` | `release-blocker` | envelope/evidence/hash pcv-1 exatos | `integrated-pending-rerun` | RLS evidence capture/hash rule |
 | `R5-RLS-ABORT-01` | critique R5 | `medium` | `release-blocker` | injetar disconnect/timeout e provar cancel/slot release | `integrated-pending-rerun` | Stage A assertions |
 | `R5-RLS-HARNESS-01` | architecture R5 | `medium` | `release-blocker` | saturação garantida, fairness/no-starvation e recovery sem restart | `integrated-pending-rerun` | Stages S/F/R |
+| `R6-RLS-RATE-BUDGET-01` | critique R6 | `medium` | `release-blocker` | forçar actor limiter e context limiter em substages independentes com contagens exatas | `integrated-pending-rerun` | Stages FU/FC |
 
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
 - **Disposition reason:** decisão humana resolvida; reconvergência/revisões/preflight e aprovação ainda pendentes.
 - **Post-commit/push status:** `pending`
-- **Next path/status action:** publicar o baseline reconvergido, repetir opinion/critique, executar guards pré-approval e então solicitar `APROVADO`.
+- **Next path/status action:** publicar o baseline FU/FC reconvergido, repetir opinion/critique, executar guards pré-approval e então solicitar `APROVADO`.
 
 ## Module Consolidation Gate
 
