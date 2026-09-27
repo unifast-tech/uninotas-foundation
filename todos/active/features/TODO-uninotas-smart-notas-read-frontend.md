@@ -35,12 +35,12 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** integrar `ARCH-R2-01..02` e `CRIT-07..11`, publicar um único checkpoint candidato e repetir os reviews afetados antes de solicitar `APROVADO` de implementação.
+- **Next exact step:** finalizar os metadados do checkpoint revisado, executar guards pré-aprovação e solicitar `APROVADO` para implementação.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
-- **Work state:** `review`
-- **Why this state now:** o contrato está em refinamento pré-aprovação e nenhum arquivo de produto frontend foi alterado.
+- **Work state:** `awaiting-approval`
+- **Why this state now:** plano convergiu sem findings na R4; nenhum arquivo de produto frontend foi alterado e os guards pré-aprovação são o último gate.
 - **Exit condition:** Plan Review, guards pré-aprovação e aprovação humana explícita concluídos.
 
 ## Provisional Notes
@@ -84,7 +84,7 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 | Scope Item | Local Branch/Commit | PR to lane threshold | PR to `stage` | PR to `main` | Current Status |
 | --- | --- | --- | --- | --- | --- |
 | React Smart Notas | `delphi-and-foundation@working-tree` | `n/a` | `n/a` | `n/a` | `Pending` |
-| Foundation | `main@ed43003` | `n/a` | `n/a` | `pending refreshed review checkpoint` | `planning review` |
+| Foundation | `main@db851c8` | `n/a` | `n/a` | `final gate metadata pending` | `reviewed planning` |
 
 ## Diff Expectation Contract
 
@@ -231,7 +231,7 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 
 ## Decision Baseline (Frozen Before Implementation)
 
-- [ ] `D-01..D-07` precisam de novo freeze após integração dos findings independentes; implementação continua proibida até reviews convergirem e `APROVADO`.
+- [x] `D-01..D-07` congeladas no plano material `db851c8`, aprovado pelas revisões R4 sem findings; implementação continua proibida até `APROVADO` humano.
 
 ## Architecture Change Governance
 
@@ -271,8 +271,8 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 - **Decision review lifecycle:** `after baseline freeze and before APROVADO`
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set`
-- **Decision review status:** `changes_required_before_approval`
-- **Decision review evidence / resolution:** R1/R2 integradas; R3 em `c97faa5` retornou `ARCH-R3-01..03`, agora integradas abaixo; rerun final obrigatório sobre checkpoint refrescado.
+- **Decision review status:** `no_material_findings`
+- **Decision review evidence / resolution:** R4 fresh/no-context sobre `db851c8` retornou `ready_for_APROVADO` e zero findings; arquitetura route-scoped, cache/session, parser, privacy e evidence consideradas coerentes.
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -288,9 +288,9 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 - **Baseline branch:** `uninotas-foundation:main`
 - **Baseline commit:** `ed43003e1a3f620b2990158ce662fd7927602796`
 - **Baseline push reference:** `origin/main@ed43003e1a3f620b2990158ce662fd7927602796`
-- **Gate status:** `material_findings_under_resolution`
-- **Findings summary:** primeiro freeze publicado em `983ac0c`; plano auto-revisado publicado em `ed43003`; reviews independentes encontraram privacidade, teste mutável, cancelamento/cache e data. Este TODO integra as correções e exige novo checkpoint/review.
-- **Evidence / reference:** `uninotas-foundation:main@ed43003e1a3f620b2990158ce662fd7927602796`; `origin/main` confirmado no mesmo SHA em 2026-09-27; dispatches em `artifacts/tmp/uninotas-frontend-review/`.
+- **Gate status:** `findings_integrated`
+- **Findings summary:** R1..R3 geraram findings todos integrados; R4 aprovou o plano material `db851c8` sem findings.
+- **Evidence / reference:** `uninotas-foundation:main@db851c8`; `origin/main@db851c8` publicado em 2026-09-27; dispatches/resultados em `artifacts/tmp/uninotas-frontend-review/`.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
@@ -308,7 +308,7 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 
 ## Questions To Close
 
-- [ ] `none — D-01..D-07 expressam as recomendações técnicas propostas para aprovação`.
+- [x] `none — D-01..D-07 estão fechadas e prontas para aprovação humana`.
 
 ## Package-First Assessment
 
@@ -507,25 +507,25 @@ TTL boundaries use the injected clock and the age of the last successful respons
 
 | Finding | Severity | Disposition | Contract change | State |
 | --- | --- | --- | --- | --- |
-| `ARCH-03` + `CRIT-02` | `high security/privacy` | `Integrated` | somente contexto/datas/status/página ficam na URL; documento/compra são efêmeros; allowlist e mascaramento explícitos | `pending refreshed review` |
-| `TEST-01` + `CRIT-01` | `high tests/safety` | `Integrated` | smoke legado obrigatório é mockado/read-only; `fluxo.mjs` é mutável, opcional e fail-closed; path autorizado no diff | `pending refreshed review` |
-| `ARCH-04` + `CRIT-04` | `medium architecture` | `Integrated` | state machine por chave/geração; refresh compartilha request idêntico; abort não vira erro | `pending refreshed review` |
-| `TEST-02` + `CRIT-06` | `medium tests` | `Integrated` | relógio injetável, limites exatos, request counts, 21ª chave, promoção LRU, logout/401 e late completion | `pending refreshed review` |
-| `ARCH-05` | `medium correctness` | `Integrated` | calendário `America/Sao_Paulo`, default de 30 datas, diferença máxima de 365 dias, parser separado do legado | `pending refreshed review` |
-| `CRIT-03` | `medium performance` | `Integrated` | SSE corrigido para `/api/v1/realtime/eventos?token=...`; lista/resumo/produtos/SSE só em `/erros`, nunca no detalhe | `pending refreshed review` |
-| `CRIT-05` | `medium adherence` | `Integrated` | rota canônica de Geral permanece `/` em todo o pacote | `pending refreshed review` |
-| `ARCH-R2-01` | `medium privacy tests` | `Integrated` | matriz de sinks permite o valor sensível somente no input/request/cache key fiscal e o proíbe em todos os demais destinos | `pending refreshed review` |
-| `ARCH-R2-02` | `medium structural` | `Integrated` | dependências dev-only e config ESLint React Hooks entram no diff; harness deixa de atribuir validação de effects ao `tsc` | `pending refreshed review` |
-| `CRIT-07` | `high bounded evidence` | `Integrated` | pacote de review passa a incluir contract spec, controller e configuration citados por `A-01..03` | `pending refreshed review` |
-| `CRIT-08` | `medium governance` | `Integrated` | um novo SHA será publicado e usado por freeze, dispatch e guards antes do pedido de aprovação | `pending refreshed checkpoint` |
-| `CRIT-09` | `medium correctness` | `Integrated` | truth table fecha defaults, inválidos, duplicados, sensíveis, replace/fetch e cache identity | `pending refreshed review` |
-| `CRIT-10` | `medium correctness/performance` | `Integrated` | 10 min vira hard visible maximum com scheduler único por chave subscribed e sem retry automático | `pending refreshed review` |
-| `CRIT-11` | `medium security/tests` | `Integrated` | normalização runtime + fixture canário; chave curta/malformada totalmente redatada | `pending refreshed review` |
-| `CRIT-10-REOPENED` + `ARCH-R3-02` | `medium cache lifecycle` | `Integrated` | todo successful entry subscribed recebe timer; sucesso rearma; detach/eviction/logout cancelam; expiry é network-silent | `pending refreshed review` |
-| `CRIT-12` | `medium navigation state` | `Integrated` | provider guarda somente o último href canônico não sensível de Geral e o limpa com a sessão | `pending refreshed review` |
-| `CRIT-13` | `medium filter contract` | `Integrated` | normalizador efêmero fecha documento/compra, validação acessível, key/request canônicas e reset único de página | `pending refreshed review` |
-| `ARCH-R3-01` | `high privacy coherence` | `Integrated` | `purchaseId` integral fica apenas no DTO/cache em memória e renderiza mascarado; fixture usa o mesmo id do filtro | `pending refreshed review` |
-| `ARCH-R3-03` | `medium test evidence` | `Integrated` | e2e obrigatório intercepta GET/PATCH e prova resolver/reabrir sem banco; runner real continua opcional/fail-closed | `pending refreshed review` |
+| `ARCH-03` + `CRIT-02` | `high security/privacy` | `Integrated` | somente contexto/datas/status/página ficam na URL; documento/compra são efêmeros; allowlist e mascaramento explícitos | `resolved; R4 no findings` |
+| `TEST-01` + `CRIT-01` | `high tests/safety` | `Integrated` | smoke legado obrigatório é mockado/read-only; `fluxo.mjs` é mutável, opcional e fail-closed; path autorizado no diff | `resolved; R4 no findings` |
+| `ARCH-04` + `CRIT-04` | `medium architecture` | `Integrated` | state machine por chave/geração; refresh compartilha request idêntico; abort não vira erro | `resolved; R4 no findings` |
+| `TEST-02` + `CRIT-06` | `medium tests` | `Integrated` | relógio injetável, limites exatos, request counts, 21ª chave, promoção LRU, logout/401 e late completion | `resolved; R4 no findings` |
+| `ARCH-05` | `medium correctness` | `Integrated` | calendário `America/Sao_Paulo`, default de 30 datas, diferença máxima de 365 dias, parser separado do legado | `resolved; R4 no findings` |
+| `CRIT-03` | `medium performance` | `Integrated` | SSE corrigido para `/api/v1/realtime/eventos?token=...`; lista/resumo/produtos/SSE só em `/erros`, nunca no detalhe | `resolved; R4 no findings` |
+| `CRIT-05` | `medium adherence` | `Integrated` | rota canônica de Geral permanece `/` em todo o pacote | `resolved; R4 no findings` |
+| `ARCH-R2-01` | `medium privacy tests` | `Integrated` | matriz de sinks permite o valor sensível somente no input/request/cache key fiscal e o proíbe em todos os demais destinos | `resolved; R4 no findings` |
+| `ARCH-R2-02` | `medium structural` | `Integrated` | dependências dev-only e config ESLint React Hooks entram no diff; harness deixa de atribuir validação de effects ao `tsc` | `resolved; R4 no findings` |
+| `CRIT-07` | `high bounded evidence` | `Integrated` | pacote de review passa a incluir contract spec, controller e configuration citados por `A-01..03` | `resolved; R4 no findings` |
+| `CRIT-08` | `medium governance` | `Integrated` | checkpoint material `db851c8` publicado; freeze/guards finalizados antes do pedido | `resolved by gate checkpoint` |
+| `CRIT-09` | `medium correctness` | `Integrated` | truth table fecha defaults, inválidos, duplicados, sensíveis, replace/fetch e cache identity | `resolved; R4 no findings` |
+| `CRIT-10` | `medium correctness/performance` | `Integrated` | 10 min vira hard visible maximum com scheduler único por chave subscribed e sem retry automático | `resolved; superseded by complete lifecycle` |
+| `CRIT-11` | `medium security/tests` | `Integrated` | normalização runtime + fixture canário; chave curta/malformada totalmente redatada | `resolved; R4 no findings` |
+| `CRIT-10-REOPENED` + `ARCH-R3-02` | `medium cache lifecycle` | `Integrated` | todo successful entry subscribed recebe timer; sucesso rearma; detach/eviction/logout cancelam; expiry é network-silent | `resolved; R4 no findings` |
+| `CRIT-12` | `medium navigation state` | `Integrated` | provider guarda somente o último href canônico não sensível de Geral e o limpa com a sessão | `resolved; R4 no findings` |
+| `CRIT-13` | `medium filter contract` | `Integrated` | normalizador efêmero fecha documento/compra, validação acessível, key/request canônicas e reset único de página | `resolved; R4 no findings` |
+| `ARCH-R3-01` | `high privacy coherence` | `Integrated` | `purchaseId` integral fica apenas no DTO/cache em memória e renderiza mascarado; fixture usa o mesmo id do filtro | `resolved; R4 no findings` |
+| `ARCH-R3-03` | `medium test evidence` | `Integrated` | e2e obrigatório intercepta GET/PATCH e prova resolver/reabrir sem banco; runner real continua opcional/fail-closed | `resolved; R4 no findings` |
 
 ### Failure Modes & Edge Cases
 
@@ -561,7 +561,7 @@ TTL boundaries use the injected clock and the age of the last successful respons
 
 - **Canonical method:** `wf-docker-audit-escalation-method`
 - **Guard command:** `python3 delphi-ai/tools/audit_escalation_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-frontend.md`
-- **Latest TEACH evidence / artifact:** reviews independentes sobre `ed43003`; correções em integração antes do rerun.
+- **Latest TEACH evidence / artifact:** audit floor `go`; architecture/critique R4 em `db851c8` sem findings.
 
 | Trigger | Value | Notes |
 | --- | --- | --- |
@@ -588,12 +588,31 @@ TTL boundaries use the injected clock and the age of the last successful respons
 
 | Source | Why It Applies Now | Must Preserve | Must Avoid | Execution Impact |
 | --- | --- | --- | --- | --- |
-| `rule-react-react-architecture-always-on` | React UI/state/effects/a11y | render puro, ownership único, estados/a11y explícitos, lint real de Hooks | mutação em render, estado duplicado, effect sem cleanup/suppression | ESLint React Hooks + adherence review + browser races |
-| `wf-react-change-ui-boundary-method` | rotas/componentes/hooks | comportamento observável, normalizador/adapter isolado | type-cast de JSON cru, acoplamento da UI ao provider/segredo | seguir passos e evidence lanes |
-| `rule-vite-vite-build-runtime-always-on` | build/env/assets | manifest/scripts e env público restrito | tratar proxy/preview como produção ou expor segredo | build reproduzível; nenhuma env fiscal no cliente |
-| `wf-vite-change-build-runtime-boundary-method` | bundle/runtime boundary | separação dev proxy/produção | claim de deploy neste TODO | validar apenas build local |
-| `frontend-race-condition-validation` | cache/races/logout | chave completa, cancelamento, stale controlado, limpeza | last-response-wins e cache cross-session | FRC requerido antes de Local-Implemented |
-| `test-creation-standard` | e2e behavior-defining | assertions observáveis e fixtures determinísticas | teste que apenas espelha implementação | teste fail-first e audit obrigatório |
+| `delphi-ai/skills/rule-react-react-architecture-always-on/SKILL.md` | React UI/state/effects/a11y | render puro, ownership único, estados/a11y explícitos, lint real de Hooks | mutação em render, estado duplicado, effect sem cleanup/suppression | ESLint React Hooks + adherence review + browser races |
+| `delphi-ai/skills/wf-react-change-ui-boundary-method/SKILL.md` | rotas/componentes/hooks | comportamento observável, normalizador/adapter isolado | type-cast de JSON cru, acoplamento da UI ao provider/segredo | seguir passos e evidence lanes |
+| `delphi-ai/skills/rule-vite-vite-build-runtime-always-on/SKILL.md` | build/env/assets | manifest/scripts e env público restrito | tratar proxy/preview como produção ou expor segredo | build reproduzível; nenhuma env fiscal no cliente |
+| `delphi-ai/skills/wf-vite-change-build-runtime-boundary-method/SKILL.md` | bundle/runtime boundary | separação dev proxy/produção | claim de deploy neste TODO | validar apenas build local |
+| `delphi-ai/skills/package-first-verification/SKILL.md` | dependência dev-only de lint | query interna antes do pacote host | adicionar estado/cache externo | resultados zero; somente lint tooling admitido |
+| `delphi-ai/skills/frontend-race-condition-validation/SKILL.md` | cache/races/logout | chave completa, cancelamento, stale controlado, limpeza | last-response-wins e cache cross-session | FRC requerido antes de Local-Implemented |
+| `delphi-ai/skills/test-creation-standard/SKILL.md` | e2e behavior-defining | assertions observáveis e fixtures determinísticas | teste que apenas espelha implementação | teste fail-first e audit obrigatório |
+
+## Agent Routing Preflight
+
+- **Client surface:** `codex`
+- **Current governed action:** `implementation`
+- **Selected role:** `routine-executor`
+- **Selected model:** `gpt-5.6-terra`
+- **Selected effort:** `medium`
+- **Proof mode:** `declared`
+- **Exception reason:** `n/a`
+- **Subagent / delegation authorization:** `pending explicit APROVADO for one routine executor`
+- **Execution topology:** `primary-checkout-single-writer`
+- **Worktree authorization:** `not-authorized`
+- **Worktree authorization reference:** `n/a — worktrees/auxiliary checkouts remain forbidden`
+- **Writer scheduling policy:** `single-writer-serialized`
+- **Guard outcome:** `go`
+- **Guard evidence:** `routine-executor/gpt-5.6-terra/medium; principal checkout only; one product-code writer; rerun after APROVADO before implementation`.
+- **Waiver / exception reference:** `n/a`
 
 ## Security Risk Assessment
 
@@ -622,8 +641,8 @@ TTL boundaries use the injected clock and the age of the last successful respons
 
 - **Critique decision:** `required`
 - **Why this decision:** medium, cross-module, rota pública autenticada e critical journey.
-- **Critique status:** `changes_required_before_approval`
-- **Evidence / reference:** R1/R2 integradas; R3 em `c97faa5` confirmou `CRIT-01..09/11` e retornou `CRIT-10-REOPENED`, `CRIT-12..13`, agora integrados e aguardando checkpoint/rerun final.
+- **Critique status:** `no_material_findings`
+- **Evidence / reference:** crítica R4 fresh/no-context sobre `db851c8` retornou `READY_FOR_APROVADO` e zero findings; confirmou resolução de `CRIT-01..13`.
 
 ## Gate: Assumption Code Coherence
 
