@@ -130,7 +130,6 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 | `MonitorNotes` | `backend/src/config/configuration.spec.ts` | `M` | provar parsing/validação da configuração |
 | `MonitorNotes` | `backend/src/common/filters/all-exceptions.filter.ts` | `M` | substituir URL crua por template de rota sanitizado em resposta/log |
 | `MonitorNotes` | `backend/src/common/filters/all-exceptions.filter.spec.ts` | `A|M` | provar ausência de query, `noteId`, documento e `idCompra` em erro/log |
-| `MonitorNotes` | `backend/test/smart-notas-read/**` | `A|M` | stub/harness local de load, spike, stress e recovery sem atingir o provedor real |
 | `MonitorNotes` | `backend/.env.example` | `M` | documentar nomes e semântica sem segredo |
 | `MonitorNotes` | `backend/README.md` | `M` | documentar endpoints e configuração operacional |
 | `uninotas-foundation` | `modules/fiscal-notes-and-documents.md` | `M` | promover contrato da capacidade entregue |
@@ -184,13 +183,13 @@ Resposta `200`:
 
 | Campo | Tipo / nullability | Regra |
 | --- | --- | --- |
-| `items` | `FiscalNoteSummary[]` | array sempre presente; vazio é sucesso somente após `200` válido do provedor |
-| `page` | integer `>=1` | página reportada pelo provedor |
-| `perPage` | integer `>=0` | não é controlável pelo consumidor |
-| `total` | integer `>=0` | total provider-scoped |
-| `totalPages` | integer `>=0` | nunca combinado entre emissores |
+| `items` | `FiscalNoteSummary[]` | sempre presente, máximo 1000; vazio somente após `200` válido |
+| `page` | safe integer `1..10000` | página reportada pelo provedor |
+| `perPage` | safe integer `1..1000` | não é controlável pelo consumidor; `items.length <= perPage` |
+| `total` | safe integer `0..9007199254740991` | total provider-scoped |
+| `totalPages` | safe integer `0..10000` | nunca combinado entre emissores |
 
-`FiscalNoteSummary` sempre contém todas as chaves abaixo; campos provider-derived ausentes/inválidos tornam-se `null`, exceto os invariantes cuja ausência invalida a resposta:
+`FiscalNoteSummary` sempre contém todas as chaves abaixo. Somente campo declarado nullable e realmente ausente ou `null` normaliza para `null`; valor presente vazio, com tipo/formato/range inválido, invalida toda a resposta. Invariantes ausentes também invalidam:
 
 | Campo | Tipo | Nullability / semântica |
 | --- | --- | --- |
@@ -202,6 +201,15 @@ Resposta `200`:
 | `scheduledIssueDate`, `paymentDate` | `YYYY-MM-DD` | nullable; datas `DD/MM/YYYY` são normalizadas sem timezone |
 | `competence` | string | nullable; preserva datetime sem inventar offset |
 | `unitValue`, `totalValue` | decimal string | nullable; forma canônica sem binary float |
+
+Decoder bounds congelados:
+
+- `providerStatus`: string trimada 1..64; vocabulário aberto. `providerIdInterno`: regex/bound do contrato `noteId`.
+- `fiscalNumber|accessKey|purchaseId`: string 1..128; `environment|model|purpose|platform`: 1..64; `product`: 1..500.
+- `scheduledIssueDate|paymentDate|issueDate`: `DD/MM/YYYY` válido na entrada e `YYYY-MM-DD` válido na saída; `competence`: string ISO-like 1..64, sem inventar timezone.
+- `unitValue|totalValue|quantity`: decimal não negativo canônico, até 15 dígitos inteiros e 6 fracionários; exponent, `NaN`, infinito, sinal negativo e binary float são rejeitados.
+- `referencedAccessKey`: string 1..128; `operationNature`: string 1..255. Limites são contados em Unicode code points após trim; strings vazias são malformadas, não `null`.
+- Pagination usa `Number.isSafeInteger`, os bounds da tabela e coerência `items.length <= perPage`; propriedades provider extras são ignoradas dentro do adapter, mas nunca propagadas.
 
 ### `GET /api/v1/notas/:noteId`
 
@@ -245,6 +253,19 @@ Resposta `200`:
 - O envelope continua `{statusCode,erro,mensagem,caminho,timestamp}`. Validação Nest das duas rotas é remapeada explicitamente para `ConsultaDeNotasInvalida`; `mensagem` é estável/sanitizada e `caminho` usa o template registrado como `/api/v1/notas/:noteId` ou o fallback fixo `/api/*`, nunca URL/query/path real do cliente.
 - Resposta provider maior que 2 MiB é `SmartNotasContratoInvalido`. Nenhum erro vira lista vazia, fallback PostgreSQL ou mensagem/payload cru.
 - Campos legitimamente ausentes/nulláveis tornam-se `null`; campo presente com tipo, formato ou range inválido invalida toda a resposta como `SmartNotasContratoInvalido`. Somente `providerStatus` não vazio admite vocabulário futuro literal.
+
+Precedência total / first-signal rule:
+
+1. Roteamento e `JwtAuthGuard` globais: autenticação ausente/expirada/inativa após a janela canônica produz `401` antes de pipes, flag, HMAC ou budgets.
+2. `ValidationPipe`: query e forma/tamanho externo do `noteId` produzem `400` antes da flag. Rotas não encontradas usam o `404` atual com caminho público fixo `/api/*`.
+3. Flag: request autenticada e sintaticamente válida recebe `503/SmartNotasDesabilitado` antes de verificar MAC ou consumir rate budget.
+4. Detalhe habilitado verifica versão/MAC/payload/`providerIdInterno`; falha produz `400` antes de budgets ou semaphore.
+5. Rate: precheck atômico síncrono dos budgets do ator e contexto; se qualquer um esgotou, nenhum contador é incrementado e retorna `429`. Caso contrário, ambos incrementam juntos antes do semaphore.
+6. Concorrência: semaphore cheio retorna `503/SmartNotasOcupado`; não há fila nem chamada upstream.
+7. I/O: client disconnect e timeout competem por abort reason, e o primeiro sinal observado vence. Disconnect fecha sem resposta; timeout com socket aberto retorna `504`. Todo caminho libera slot em `finally`.
+8. Provider: `3xx` destino inválido; `401/403`; detail `404`; `429`; `5xx/rede`; demais status/decoder seguem o catálogo, nessa ordem.
+
+Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + flag off; `noteId` sintaticamente inválido + flag off; MAC inválido + flag off/on; rate esgotado + semaphore cheio; disconnect antes/depois do timer; timeout antes/depois do disconnect; redirect e status/provider body inválido.
 
 ### Capacity and observability contract
 
@@ -375,7 +396,7 @@ Resposta `200`:
 
 ## Decision Baseline (Frozen Before Implementation)
 
-- [ ] `D-01..D-13` serão recongeladas após integrar a terceira rodada de findings e publicar novo baseline; implementação continua proibida até revisões, `preflight-go` e `APROVADO`.
+- [ ] `D-01..D-13` serão recongeladas após corrigir decoder/precedência/RLS da rodada 4 e publicar novo baseline; implementação continua proibida até revisões, `preflight-go` e `APROVADO`.
 
 ## Architecture Change Governance
 
@@ -421,7 +442,7 @@ Resposta `200`:
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set`
 - **Decision review status:** `not_run`
-- **Decision review evidence / resolution:** `round 3 over e2caa58 returned NO-GO; destination, strict decoder, full error redaction, auth-cache, providerId validation, deterministic harness and RLS findings integrated; rerun pending next baseline`.
+- **Decision review evidence / resolution:** `round 4 over 0bdfe35 returned NO-GO only for decoder contradiction; corrected with finite decoder matrix; rerun pending next baseline`.
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -435,11 +456,11 @@ Resposta `200`:
 - **Why this decision:** contrato público/segredos/contextos exigem review a partir de baseline autoritativo reproduzível.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `pending next refreshed baseline; predecessor e2caa585fcdd9ed2ed546bd313b834e2213ea07b`
+- **Baseline commit:** `pending round-5 baseline; predecessor 0bdfe35a5a86630f9e2972d7fcc7c9fe76b7cd86`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `not_run`
-- **Findings summary:** rounds formais sobre `e2caa58` exigiram nova reconvergência material; novo commit/push precisa preceder o rerun.
-- **Evidence / reference:** predecessor `e2caa58` permanece publicado; refresh seguinte pendente.
+- **Findings summary:** round 4 exigiu decoder matrix, total error precedence e runner RLS canônico; novo commit/push precede round 5.
+- **Evidence / reference:** predecessor `0bdfe35` permanece publicado; refresh pendente.
 - **Waiver authority / reference:** `n/a`.
 - **Pre-freeze packet-prep rule:** review rows below are `prepared-pre-freeze`, not passed.
 
@@ -521,7 +542,7 @@ Resposta `200`:
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | backend Jest | lógica/contrato mudam | lista/detalhe/DTO strict/status/bounds/error/config/HMAC/origin/rate/capacity/privacy/redaction | fixtures provider determinísticas + URL/stack/PII canaries + fake timers/abort | `npm test -- --runInBand` | `Local-Implemented` | `planned` | pending | sem dados reais |
 | backend app/guard | acesso muda | quatro perfis acessam; sem JWT falha; cache aquecido permite até 30s e nega após expiração | Nest testing app com guards reais, fake timers e adapter fake | `npm test -- --runInBand` | `Local-Implemented` | `planned` | pending | não aceitar teste só de metadata |
-| backend local RLS | pressão/capacidade | bursts mistos provam rate/fairness/semaphore/recovery sem exceder stub | Nest local + upstream stub; tokens sintéticos; nenhuma rede Smart Notas | staged `runtime_load_probe.sh` + métricas do stub | `Local-Implemented` | `planned` | pending | RLS-E1 abaixo |
+| backend local RLS | pressão/capacidade | bursts mistos provam rate/fairness/semaphore/recovery sem exceder stub | Nest local + upstream stub; atores sintéticos; somente loopback | Jest mixed-workload runner + JSON `pcv-1` | `Local-Implemented` | `planned` | pending | RLS-E1 abaixo |
 | backend build | novo módulo/DTO | compilação Nest/TS | Node 22 + deps atuais | `npm run build` | `Local-Implemented` | `planned` | pending | runner Windows |
 | backend lint | novos arquivos TS | regras estáticas/formatação | deps atuais | `npm run lint` | `Local-Implemented` | `planned` | pending | inspecionar rewrites |
 | Smart Notas read probe | integração real | `/empresa` binding + lista/detalhe direto em ambos contextos | env local preenchido; flag opt-in; janela curta | probe opt-in redatado | `Local-Implemented` | `planned` | pending | sem persistir payload/identificador |
@@ -661,9 +682,9 @@ Resposta `200`:
 - **Package mode:** `bounded-file-set`.
 - **Internal reviewer mandate:** `required — fresh no-context reviewer after review baseline freeze`.
 - **Required lenses:** `correctness|performance|elegance|structural-soundness|operational-fit`.
-- **Review result:** `round 3 NO-GO findings integrated; round 4 pending refreshed baseline`.
-- **Material findings:** RLS obrigatório, origin/redirect/pairing, strict malformed handling, filtro global fail-closed, cache de identidade, providerId encoding e harness estrutural determinístico.
-- **Evidence:** formal fresh no-context `architecture_opinion` over `e2caa58`; routing guard `gpt-5.6-sol/xhigh` returned `go`; no files edited by reviewer.
+- **Review result:** `round 4 NO-GO finding integrated; round 5 pending refreshed baseline`.
+- **Material findings:** única lacuna arquitetural R4 foi a contradição null-vs-malformed; corrigida com decoder matrix e bounds finitos.
+- **Evidence:** formal fresh no-context `architecture_opinion` over `0bdfe35`; routing guard `gpt-5.6-sol/xhigh` returned `go`; no files edited by reviewer.
 
 ## Audit Trigger Matrix
 
@@ -696,8 +717,8 @@ Resposta `200`:
 - **Internal reviewer mandate:** `required after freeze`.
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`.
 - **Critique status:** `not_run`
-- **Findings summary:** `round 3 NO-GO: privacy/no-store/access audit, pinned origin, rate fairness, 30s cache semantics, exhaustive errors, full decision adherence and named cutover owner; integrated, round 4 required`.
-- **Evidence / reference:** `formal fresh critique over e2caa58; routing guard gpt-5.6-sol/xhigh returned go; reviewer made no changes`.
+- **Findings summary:** `round 4 NO-GO: decoder matrix, total error precedence, closed RLS reason code and mixed-workload canonical JSON runner; all integrated, round 5 required`.
+- **Evidence / reference:** `formal fresh critique over 0bdfe35; routing guard gpt-5.6-sol/xhigh returned go; reviewer made no changes`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Assumption Code Coherence
@@ -800,7 +821,7 @@ Resposta `200`:
 | `EPS` | `endpoint-performance-scrutiny` | `required` | `medium` | `EPS-DATA-PATH-CHANGED` | `before_local_implemented` | `EPS-E2` | `pending` | provider latency/quota | `none` |
 | `FRC` | `frontend-race-condition-validation` | `not_needed` | `low` | `FRC-RETRIGGERABLE-LIST` | `before_local_implemented` | `FRC-POLICY` | `not_applicable` | none in backend-only slice | `none` |
 | `BCI` | `backend-concurrency-idempotency-validation` | `not_needed` | `low` | `BCI-DUPLICATE-SUBMIT-OR-REPLAY` | `before_local_implemented` | `BCI-POLICY` | `not_applicable` | read-only, no shared mutation | `none` |
-| `RLS` | `runtime-load-stress-validation` | `required` | `medium` | `RLS-RUNTIME-PRESSURE-SURFACE` | `before_local_implemented` | `RLS-E1` | `pending` | multi-replica/provider quota unknown | `none` |
+| `RLS` | `runtime-load-stress-validation` | `required` | `medium` | `RLS-SLO-CLAIM` | `before_local_implemented` | `RLS-E1` | `pending` | multi-replica/provider quota unknown | `none` |
 
 ### EPS
 
@@ -829,10 +850,12 @@ Resposta `200`:
 - **Recorded at (UTC):** `2026-09-26T00:00:00Z`
 - **Executor ID:** `pending-routine-executor`
 - **Evidence object:** `pending RLS-E1 before Local-Implemented`.
-- **Workload model:** Nest local + stub HTTP local com atraso determinístico de 100 ms; 20 atores JWT sintéticos alternam `unifast|prosperar` e lista|detalhe; credenciais são fixtures falsas; processo reinicia antes do recovery stage.
-- **Stages:** `load 5:10s`, `spike 20:5s`, `stress 40:5s`, `recovery 2:5s`; teste separado com relógio controlado prova janelas/budgets default e fairness por ator/contexto.
+- **Runner:** Jest dedicado `src/fiscal-notes/__tests__/smart-notas-load.spec.ts` abre Nest em porta efêmera com os mesmos pipes/filtro/controller/service e guard test-only que mapeia `X-Test-Actor` para 20 atores; upstream stub local em outra porta; um driver Promise-worker dentro do teste alterna ator, contexto e list/detail. `runtime_load_probe.sh` não é o runner principal porque não rotaciona identidade/contexto nem gera o JSON `pcv-1` exigido.
+- **Workload model:** stub com atraso determinístico de 100 ms; 20 atores sintéticos alternam `unifast|prosperar` e lista|detalhe; credenciais/IDs são fixtures falsas; nenhum socket pode alcançar host não-loopback.
+- **Stages no mesmo processo:** `load 5:10s`, `spike 20:5s`, `stress 40:5s`; depois o clock injetável avança além da janela de rate e `recovery 2:5s` roda sem reiniciar Nest/stub. Um restart-resilience smoke separado não substitui recovery.
 - **Acceptance:** load aceito tem p95 `<=500 ms`, p99 `<=1000 ms`, throughput `>=5 req/s` e zero erro inesperado; spike/stress admitem somente `200|429|503` previstos, pico upstream `<= SMART_NOTAS_MAX_CONCURRENCY`, nenhum crescimento de fila, slots retornam a zero e recovery volta a `200`; memória/processo permanecem vivos.
-- **Evidence capture:** p50/p95/p99, throughput, status counts, unexpected-error rate, peak/current upstream concurrency, abort count, per-context/per-actor accepted/throttled counts e recovery outcome.
+- **Evidence capture:** o teste escreve em `foundation_documentation/artifacts/tmp/smart-notas-read-rls/rls-pcv1.json` um objeto canônico com `policy_schema_version=pcv-1`, lane/trigger/deadline/evidence rule, git baselines, stage profile, thresholds, metrics summary, status counts, unexpected-error rate, peak/current upstream concurrency, abort count, per-context/per-actor fairness, recovery e `evidence_sha256` calculado sobre JSON canonicalizado sem o próprio hash; artefatos brutos ficam no mesmo diretório tmp.
+- **Exact command:** no diretório backend, `RLS_OUTPUT_DIR=../foundation_documentation/artifacts/tmp/smart-notas-read-rls npm test -- --runInBand --runTestsByPath src/fiscal-notes/__tests__/smart-notas-load.spec.ts`.
 
 ## Verification Debt Assessment
 
@@ -905,6 +928,10 @@ Resposta `200`:
 | `R3-STRUCTURE-01` | architecture R3 | `medium` | `release-blocker` | AST/import/export/decorator assertions | `integrated-pending-rerun` | Architecture Protection Harness |
 | `R3-ADHERENCE-01` | critique R3 | `medium` | `release-blocker` | itemizar D-01..D-13 | `resolved` | Decision Adherence Validation |
 | `R3-CUTOVER-01` | critique R3 | `medium` | `follow-up-fast-follow` | abrir owner exato antes do closeout | `accepted` | planned `TODO-uninotas-smart-notas-read-cutover.md` |
+| `R4-CONTRACT-DECODER-01` | architecture + critique R4 | `high` | `release-blocker` | remover contradição e congelar bounds por campo | `integrated-pending-rerun` | decoder matrix + DOD-04/DOD-13 |
+| `R4-ERROR-PRECEDENCE-01` | critique R4 | `high` | `release-blocker` | ordenar auth/pipe/flag/HMAC/rate/semaphore/abort/provider | `integrated-pending-rerun` | Stable error catalog / first-signal rule |
+| `R4-RLS-GOV-01` | critique R4 | `medium` | `release-blocker` | usar reason code fechado `RLS-SLO-CLAIM` | `resolved` | pcv-1 RLS row |
+| `R4-RLS-HARNESS-01` | critique R4 | `medium` | `release-blocker` | mixed-workload runner + canonical hashed JSON + recovery sem restart | `integrated-pending-rerun` | RLS subsection/exact command |
 
 ## TODO Closeout Disposition
 
