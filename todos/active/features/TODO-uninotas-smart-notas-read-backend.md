@@ -442,7 +442,7 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set`
 - **Decision review status:** `not_run`
-- **Decision review evidence / resolution:** `round 7 over 810c560 returned GO with no material findings, but the paired critique required exact unchanged counter snapshots on rejected requests; integrated and refreshed-baseline rerun required`.
+- **Decision review evidence / resolution:** `round 9 over 9f03d52 returned GO; assumption evidence paths were then made concrete for the coherence guard without changing their semantics; focused refreshed-baseline rerun required`.
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -456,11 +456,11 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Why this decision:** contrato público/segredos/contextos exigem review a partir de baseline autoritativo reproduzível.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `pending round-9 baseline; predecessor 5d4c44a588a92b2ef6daf6027e307cfc6e65dcbf`
+- **Baseline commit:** `pending round-10 baseline; predecessor 9f03d52980629951c4b5a8987ebe0d9cc2131b5c`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `not_run`
-- **Findings summary:** snapshots atômicos estão integrados; a referência material ao SHA foi estabilizada para apontar ao campo deste gate e eliminar autorreferência no scope-drift; novo freeze pendente.
-- **Evidence / reference:** predecessor `5d4c44a588a92b2ef6daf6027e307cfc6e65dcbf` permanece publicado; refresh pendente.
+- **Findings summary:** round 9 convergiu; paths de evidência A-01..A-05 foram qualificados para resolver deterministicamente contra o checkout; novo freeze pendente.
+- **Evidence / reference:** predecessor `9f03d52980629951c4b5a8987ebe0d9cc2131b5c` permanece publicado; refresh pendente.
 - **Waiver authority / reference:** `n/a`.
 - **Pre-freeze packet-prep rule:** review rows below are `prepared-pre-freeze`, not passed.
 
@@ -473,7 +473,7 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Material sections compared:** `Context|Contract Boundary|Scope|Out of Scope|Definition of Done|Validation Steps|Execution Lane Tracking|Canonical Module Anchors|Decisions|Decision Baseline|Architecture Change Governance|Questions To Close|Assumptions Preview|Execution Plan|Flow Evidence Planning Matrix|Local CI-Equivalent Suite Matrix|Runtime / Rollout Notes|Security Risk Assessment|Performance & Concurrency Risk Assessment`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-backend.md`
 - **Gate status:** `not_run`
-- **Findings summary:** `pending`.
+- **Findings summary:** `pending refreshed baseline after evidence-path qualification`.
 - **Evidence / reference:** `pending`.
 - **Waiver authority / reference:** `n/a`.
 
@@ -485,11 +485,11 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 
 | Assumption ID | Assumption | Evidence | If False | Confidence | Handling |
 | --- | --- | --- | --- | --- | --- |
-| `A-01` | Node 22 oferece `fetch` estável sem pacote externo | `Dockerfile` usa `node:22-slim`; `package.json` target atual | reavaliar dependency/package-first | `High` | `Keep as Assumption` |
-| `A-02` | JWT global continuará protegendo o novo controller sem guard adicional | `src/app.module.ts`; `JwtAuthGuard` global | corrigir wiring antes de approval | `High` | `Keep as Assumption` |
-| `A-03` | Nenhum módulo Smart Notas/HTTP já existe no backend | `rg` e node capability audit em 2026-09-26 | reutilizar owner existente | `High` | `Keep as Assumption` |
-| `A-04` | Tokens/CNPJs dos dois contextos estão disponíveis localmente | somente nomes em `.env`; probes redatados no discovery | probe real fica bloqueado, implementação/testes mockados continuam | `High` | `Keep as Assumption` |
-| `A-05` | O endpoint oficial usado pelos probes permanece `https://app.smart-notas.com/api` | OpenAPI oficial server `/api` + docs/probes no mesmo host, fingerprint `cc2a415...` em 2026-09-26 | parar, rever allowlist e recongelar antes de transmitir credenciais | `High` | `Keep as Assumption` |
+| `A-01` | Node 22 oferece `fetch` estável sem pacote externo | `Dockerfile` usa `node:22-slim`; `backend/package.json`; bootstrap em `backend/src/main.ts` | reavaliar dependency/package-first | `High` | `Keep as Assumption` |
+| `A-02` | JWT global continuará protegendo o novo controller sem guard adicional | `backend/src/app.module.ts`; `backend/src/auth/guards/jwt-auth.guard.ts` | corrigir wiring antes de approval | `High` | `Keep as Assumption` |
+| `A-03` | Nenhum módulo Smart Notas/HTTP já existe no backend | inventário de imports/modules em `backend/src/app.module.ts` e `backend/src/logs/logs.module.ts`; node capability audit em 2026-09-26 | reutilizar owner existente | `High` | `Keep as Assumption` |
+| `A-04` | Tokens/CNPJs dos dois contextos estão disponíveis localmente | probes redatados em `foundation_documentation/todos/active/process/TODO-uninotas-smart-notas-api-and-fiscal-context-discovery.md`; boundary atual em `backend/src/config/configuration.ts`; valores permanecem somente no env ignorado | probe real fica bloqueado, implementação/testes mockados continuam | `High` | `Keep as Assumption` |
+| `A-05` | O endpoint oficial usado pelos probes permanece `https://app.smart-notas.com/api` | OpenAPI/probes registrados em `foundation_documentation/artifacts/feature-briefs/uninotas-smart-notas-central.md`; boundary de allowlist será implementada em `backend/src/config/configuration.ts`; fingerprint `cc2a415...` em 2026-09-26 | parar, rever allowlist e recongelar antes de transmitir credenciais | `High` | `Keep as Assumption` |
 
 ## Execution Plan
 
@@ -557,7 +557,7 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 
 ## Plan Review Gate
 
-- **Status:** `round-7 atomic-counter finding and stable freeze reference integrated; refreshed-baseline independent gates pending`.
+- **Status:** `round-9 no-material-findings; focused evidence-path revalidation pending`.
 
 ### Review Sections
 
@@ -682,9 +682,9 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Package mode:** `bounded-file-set`.
 - **Internal reviewer mandate:** `required — fresh no-context reviewer after review baseline freeze`.
 - **Required lenses:** `correctness|performance|elegance|structural-soundness|operational-fit`.
-- **Review result:** `round 7 GO over 810c560; refreshed-baseline rerun required after paired-critique counter-snapshot change`.
-- **Material findings:** none from architecture R7; paired critique's atomic-counter finding was integrated with exact unchanged snapshots in FU/FC.
-- **Evidence:** formal fresh no-context `architecture_opinion` over `810c560`; routing guard `gpt-5.6-sol/xhigh` returned `go`; no files edited by reviewer.
+- **Review result:** `round 9 GO over 9f03d52; focused round 10 pending after assumption evidence-path qualification`.
+- **Material findings:** none in round 9; A-01..A-05 semantics remain unchanged and only concrete anchors were added.
+- **Evidence:** formal fresh no-context `architecture_opinion` over `9f03d52`; routing guard `gpt-5.6-sol/xhigh` returned `go`; no files edited by reviewer.
 
 ## Audit Trigger Matrix
 
@@ -717,8 +717,8 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Internal reviewer mandate:** `required after freeze`.
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`.
 - **Critique status:** `not_run`
-- **Findings summary:** `round 7 NO-GO R7-RLS-ATOMIC-COUNTERS-01: rejeição por um budget ainda poderia incrementar o outro; FU/FC agora exigem snapshots exatos e inalterados; rerun required`.
-- **Evidence / reference:** `formal fresh critique over 810c560; routing guard gpt-5.6-sol/xhigh returned go; reviewer made no changes`.
+- **Findings summary:** `round 9 GO over 9f03d52; focused round 10 pending to verify concrete assumption anchors do not change plan semantics`.
+- **Evidence / reference:** `formal fresh critique over 9f03d52; routing guard gpt-5.6-sol/xhigh returned go; reviewer made no changes`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Assumption Code Coherence
@@ -923,27 +923,27 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 | Finding ID | Finding Source | Severity | Classification | Required Action | Status | Rationale / Follow-up Reference |
 | --- | --- | --- | --- | --- | --- | --- |
 | `PLAN-ACCESS-01` | critique + architecture opinion | `high` | `by-design/no-action` | decisão humana para `D-06` e testes da matriz | `resolved` | usuário autorizou todos os setores; D-06/DOD-10/VAL-08 |
-| `PLAN-SEC-01` | critique + architecture opinion | `high` | `release-blocker` | incluir redaction de path/query e esclarecer opacidade do `noteId` | `integrated-pending-rerun` | SCOPE-08/DOD-12/frozen contract |
-| `PLAN-ARCH-01` | critique + architecture opinion | `high` | `release-blocker` | separar implementação local de cutover/promoção canônica | `integrated-pending-rerun` | D-10 + Provisional Notes + out-of-scope |
-| `PLAN-CONTRACT-01` | critique | `high` | `release-blocker` | congelar DTOs, nullability, paginação, bounds e catálogo de erros | `integrated-pending-rerun` | Frozen Public HTTP Contract |
-| `R3-PRIVACY-01` | critique R3 | `high` | `release-blocker` | minimizar PII, no-store e auditoria actor-aware | `integrated-pending-rerun` | D-13/DOD-14/privacy contract |
-| `R3-DESTINATION-01` | architecture + critique R3 | `high` | `release-blocker` | fixar origin/base path, reject redirect e par token/CNPJ | `integrated-pending-rerun` | credential destination contract |
-| `R3-CAPACITY-01` | architecture + critique R3 | `high` | `release-blocker` | rate fairness + RLS local além de semaphore | `integrated-pending-rerun` | DOD-11/DOD-15/pcv RLS |
-| `R3-DECODER-01` | architecture R3 | `high` | `release-blocker` | separar null/ausente de presente malformado | `integrated-pending-rerun` | DOD-04/DOD-13 |
-| `R3-ERROR-01` | architecture + critique R3 | `high` | `release-blocker` | caminho/log fail-closed e catálogo exaustivo | `integrated-pending-rerun` | stable error catalog/DOD-12 |
-| `R3-AUTH-01` | architecture + critique R3 | `medium` | `release-blocker` | aceitar/provar janela JWT de 30s | `integrated-pending-rerun` | authorization contract/DOD-10 |
-| `R3-STRUCTURE-01` | architecture R3 | `medium` | `release-blocker` | AST/import/export/decorator assertions | `integrated-pending-rerun` | Architecture Protection Harness |
+| `PLAN-SEC-01` | critique + architecture opinion | `high` | `release-blocker` | incluir redaction de path/query e esclarecer opacidade do `noteId` | `resolved` | SCOPE-08/DOD-12/frozen contract |
+| `PLAN-ARCH-01` | critique + architecture opinion | `high` | `release-blocker` | separar implementação local de cutover/promoção canônica | `resolved` | D-10 + Provisional Notes + out-of-scope |
+| `PLAN-CONTRACT-01` | critique | `high` | `release-blocker` | congelar DTOs, nullability, paginação, bounds e catálogo de erros | `resolved` | Frozen Public HTTP Contract |
+| `R3-PRIVACY-01` | critique R3 | `high` | `release-blocker` | minimizar PII, no-store e auditoria actor-aware | `resolved` | D-13/DOD-14/privacy contract |
+| `R3-DESTINATION-01` | architecture + critique R3 | `high` | `release-blocker` | fixar origin/base path, reject redirect e par token/CNPJ | `resolved` | credential destination contract |
+| `R3-CAPACITY-01` | architecture + critique R3 | `high` | `release-blocker` | rate fairness + RLS local além de semaphore | `resolved` | DOD-11/DOD-15/pcv RLS |
+| `R3-DECODER-01` | architecture R3 | `high` | `release-blocker` | separar null/ausente de presente malformado | `resolved` | DOD-04/DOD-13 |
+| `R3-ERROR-01` | architecture + critique R3 | `high` | `release-blocker` | caminho/log fail-closed e catálogo exaustivo | `resolved` | stable error catalog/DOD-12 |
+| `R3-AUTH-01` | architecture + critique R3 | `medium` | `release-blocker` | aceitar/provar janela JWT de 30s | `resolved` | authorization contract/DOD-10 |
+| `R3-STRUCTURE-01` | architecture R3 | `medium` | `release-blocker` | AST/import/export/decorator assertions | `resolved` | Architecture Protection Harness |
 | `R3-ADHERENCE-01` | critique R3 | `medium` | `release-blocker` | itemizar D-01..D-13 | `resolved` | Decision Adherence Validation |
 | `R3-CUTOVER-01` | critique R3 | `medium` | `follow-up-fast-follow` | abrir owner exato antes do closeout | `accepted` | planned `TODO-uninotas-smart-notas-read-cutover.md` |
-| `R4-CONTRACT-DECODER-01` | architecture + critique R4 | `high` | `release-blocker` | remover contradição e congelar bounds por campo | `integrated-pending-rerun` | decoder matrix + DOD-04/DOD-13 |
-| `R4-ERROR-PRECEDENCE-01` | critique R4 | `high` | `release-blocker` | ordenar auth/pipe/flag/HMAC/rate/semaphore/abort/provider | `integrated-pending-rerun` | Stable error catalog / first-signal rule |
+| `R4-CONTRACT-DECODER-01` | architecture + critique R4 | `high` | `release-blocker` | remover contradição e congelar bounds por campo | `resolved` | decoder matrix + DOD-04/DOD-13 |
+| `R4-ERROR-PRECEDENCE-01` | critique R4 | `high` | `release-blocker` | ordenar auth/pipe/flag/HMAC/rate/semaphore/abort/provider | `resolved` | Stable error catalog / first-signal rule |
 | `R4-RLS-GOV-01` | critique R4 | `medium` | `release-blocker` | usar reason code fechado `RLS-SLO-CLAIM` | `resolved` | pcv-1 RLS row |
-| `R4-RLS-HARNESS-01` | critique R4 | `medium` | `release-blocker` | mixed-workload runner + canonical hashed JSON + recovery sem restart | `integrated-pending-rerun` | RLS subsection/exact command |
-| `R5-RLS-PCV-01` | critique R5 | `medium` | `release-blocker` | envelope/evidence/hash pcv-1 exatos | `integrated-pending-rerun` | RLS evidence capture/hash rule |
-| `R5-RLS-ABORT-01` | critique R5 | `medium` | `release-blocker` | injetar disconnect/timeout e provar cancel/slot release | `integrated-pending-rerun` | Stage A assertions |
-| `R5-RLS-HARNESS-01` | architecture R5 | `medium` | `release-blocker` | saturação garantida, fairness/no-starvation e recovery sem restart | `integrated-pending-rerun` | Stages S/F/R |
-| `R6-RLS-RATE-BUDGET-01` | critique R6 | `medium` | `release-blocker` | forçar actor limiter e context limiter em substages independentes com contagens exatas | `integrated-pending-rerun` | Stages FU/FC |
-| `R7-RLS-ATOMIC-COUNTERS-01` | critique R7 | `medium` | `release-blocker` | provar snapshots exatos e imutáveis do outro budget em cada rejeição | `integrated-pending-rerun` | Stages FU/FC + `rate_counter_snapshots` |
+| `R4-RLS-HARNESS-01` | critique R4 | `medium` | `release-blocker` | mixed-workload runner + canonical hashed JSON + recovery sem restart | `resolved` | RLS subsection/exact command |
+| `R5-RLS-PCV-01` | critique R5 | `medium` | `release-blocker` | envelope/evidence/hash pcv-1 exatos | `resolved` | RLS evidence capture/hash rule |
+| `R5-RLS-ABORT-01` | critique R5 | `medium` | `release-blocker` | injetar disconnect/timeout e provar cancel/slot release | `resolved` | Stage A assertions |
+| `R5-RLS-HARNESS-01` | architecture R5 | `medium` | `release-blocker` | saturação garantida, fairness/no-starvation e recovery sem restart | `resolved` | Stages S/FU/FC/R |
+| `R6-RLS-RATE-BUDGET-01` | critique R6 | `medium` | `release-blocker` | forçar actor limiter e context limiter em substages independentes com contagens exatas | `resolved` | Stages FU/FC |
+| `R7-RLS-ATOMIC-COUNTERS-01` | critique R7 | `medium` | `release-blocker` | provar snapshots exatos e imutáveis do outro budget em cada rejeição | `resolved` | Stages FU/FC + `rate_counter_snapshots` |
 
 ## TODO Closeout Disposition
 
