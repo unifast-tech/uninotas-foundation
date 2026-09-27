@@ -396,7 +396,7 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 
 ## Decision Baseline (Frozen Before Implementation)
 
-- [ ] `D-01..D-13` serão recongeladas após adicionar os snapshots atômicos de counters exigidos na rodada 7; implementação continua proibida até novo baseline publicado, revisões, `preflight-go` e `APROVADO`.
+- [x] `D-01..D-13` estão congeladas no commit autoritativo registrado em `Gate: Review Baseline Freeze`; implementação continua proibida até revisões, `preflight-go` e `APROVADO`.
 
 ## Architecture Change Governance
 
@@ -456,11 +456,11 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Why this decision:** contrato público/segredos/contextos exigem review a partir de baseline autoritativo reproduzível.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `pending round-8 baseline; predecessor 810c560a178cb6f341bff19c8a1e274c58bd9a05`
+- **Baseline commit:** `pending round-9 baseline; predecessor 5d4c44a588a92b2ef6daf6027e307cfc6e65dcbf`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `not_run`
-- **Findings summary:** round 7 confirmou o isolamento FU/FC, mas exigiu provar que uma rejeição por um budget não incrementa o outro; novo freeze pendente após snapshots exatos.
-- **Evidence / reference:** predecessor `810c560a178cb6f341bff19c8a1e274c58bd9a05` permanece publicado; refresh pendente.
+- **Findings summary:** snapshots atômicos estão integrados; a referência material ao SHA foi estabilizada para apontar ao campo deste gate e eliminar autorreferência no scope-drift; novo freeze pendente.
+- **Evidence / reference:** predecessor `5d4c44a588a92b2ef6daf6027e307cfc6e65dcbf` permanece publicado; refresh pendente.
 - **Waiver authority / reference:** `n/a`.
 - **Pre-freeze packet-prep rule:** review rows below are `prepared-pre-freeze`, not passed.
 
@@ -557,7 +557,7 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 
 ## Plan Review Gate
 
-- **Status:** `round-7 atomic-counter finding integrated; refreshed-baseline independent gates pending`.
+- **Status:** `round-7 atomic-counter finding and stable freeze reference integrated; refreshed-baseline independent gates pending`.
 
 ### Review Sections
 
