@@ -396,7 +396,7 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 
 ## Decision Baseline (Frozen Before Implementation)
 
-- [ ] `D-01..D-13` serão recongeladas após corrigir decoder/precedência/RLS da rodada 4 e publicar novo baseline; implementação continua proibida até revisões, `preflight-go` e `APROVADO`.
+- [ ] `D-01..D-13` serão recongeladas após corrigir o RLS da rodada 5 e publicar novo baseline; implementação continua proibida até revisões, `preflight-go` e `APROVADO`.
 
 ## Architecture Change Governance
 
@@ -442,7 +442,7 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set`
 - **Decision review status:** `not_run`
-- **Decision review evidence / resolution:** `round 4 over 0bdfe35 returned NO-GO only for decoder contradiction; corrected with finite decoder matrix; rerun pending next baseline`.
+- **Decision review evidence / resolution:** `round 5 over 24d1212 confirmed decoder resolved and returned NO-GO only for objective RLS saturation/abort/fairness proof; integrated; rerun pending`.
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -456,11 +456,11 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Why this decision:** contrato público/segredos/contextos exigem review a partir de baseline autoritativo reproduzível.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `pending round-5 baseline; predecessor 0bdfe35a5a86630f9e2972d7fcc7c9fe76b7cd86`
+- **Baseline commit:** `pending round-6 baseline; predecessor 24d1212bb62078df5fa77265306eec02cbe208c9`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `not_run`
-- **Findings summary:** round 4 exigiu decoder matrix, total error precedence e runner RLS canônico; novo commit/push precede round 5.
-- **Evidence / reference:** predecessor `0bdfe35` permanece publicado; refresh pendente.
+- **Findings summary:** round 5 exigiu stage-specific RLS com saturation, abort/timeout, fairness e envelope pcv-1 completo; novo freeze pendente.
+- **Evidence / reference:** predecessor `24d1212` permanece publicado; refresh pendente.
 - **Waiver authority / reference:** `n/a`.
 - **Pre-freeze packet-prep rule:** review rows below are `prepared-pre-freeze`, not passed.
 
@@ -682,9 +682,9 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Package mode:** `bounded-file-set`.
 - **Internal reviewer mandate:** `required — fresh no-context reviewer after review baseline freeze`.
 - **Required lenses:** `correctness|performance|elegance|structural-soundness|operational-fit`.
-- **Review result:** `round 4 NO-GO finding integrated; round 5 pending refreshed baseline`.
-- **Material findings:** única lacuna arquitetural R4 foi a contradição null-vs-malformed; corrigida com decoder matrix e bounds finitos.
-- **Evidence:** formal fresh no-context `architecture_opinion` over `0bdfe35`; routing guard `gpt-5.6-sol/xhigh` returned `go`; no files edited by reviewer.
+- **Review result:** `round 5 NO-GO RLS finding integrated; round 6 pending refreshed baseline`.
+- **Material findings:** garantir saturação observada, abort/timeout não zero, fairness quantitativa e recovery sem restart; decoder e demais decisões confirmados.
+- **Evidence:** formal fresh no-context `architecture_opinion` over `24d1212`; routing guard `gpt-5.6-sol/xhigh` returned `go`; no files edited by reviewer.
 
 ## Audit Trigger Matrix
 
@@ -717,8 +717,8 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Internal reviewer mandate:** `required after freeze`.
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`.
 - **Critique status:** `not_run`
-- **Findings summary:** `round 4 NO-GO: decoder matrix, total error precedence, closed RLS reason code and mixed-workload canonical JSON runner; all integrated, round 5 required`.
-- **Evidence / reference:** `formal fresh critique over 0bdfe35; routing guard gpt-5.6-sol/xhigh returned go; reviewer made no changes`.
+- **Findings summary:** `round 5 NO-GO: pcv-1 envelope/hash names and deterministic saturation/abort/fairness/recovery assertions; integrated, round 6 required`.
+- **Evidence / reference:** `formal fresh critique over 24d1212; routing guard gpt-5.6-sol/xhigh returned go; reviewer made no changes`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Assumption Code Coherence
@@ -851,10 +851,16 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Executor ID:** `pending-routine-executor`
 - **Evidence object:** `pending RLS-E1 before Local-Implemented`.
 - **Runner:** Jest dedicado `src/fiscal-notes/__tests__/smart-notas-load.spec.ts` abre Nest em porta efêmera com os mesmos pipes/filtro/controller/service e guard test-only que mapeia `X-Test-Actor` para 20 atores; upstream stub local em outra porta; um driver Promise-worker dentro do teste alterna ator, contexto e list/detail. `runtime_load_probe.sh` não é o runner principal porque não rotaciona identidade/contexto nem gera o JSON `pcv-1` exigido.
-- **Workload model:** stub com atraso determinístico de 100 ms; 20 atores sintéticos alternam `unifast|prosperar` e lista|detalhe; credenciais/IDs são fixtures falsas; nenhum socket pode alcançar host não-loopback.
-- **Stages no mesmo processo:** `load 5:10s`, `spike 20:5s`, `stress 40:5s`; depois o clock injetável avança além da janela de rate e `recovery 2:5s` roda sem reiniciar Nest/stub. Um restart-resilience smoke separado não substitui recovery.
-- **Acceptance:** load aceito tem p95 `<=500 ms`, p99 `<=1000 ms`, throughput `>=5 req/s` e zero erro inesperado; spike/stress admitem somente `200|429|503` previstos, pico upstream `<= SMART_NOTAS_MAX_CONCURRENCY`, nenhum crescimento de fila, slots retornam a zero e recovery volta a `200`; memória/processo permanecem vivos.
-- **Evidence capture:** o teste escreve em `foundation_documentation/artifacts/tmp/smart-notas-read-rls/rls-pcv1.json` um objeto canônico com `policy_schema_version=pcv-1`, lane/trigger/deadline/evidence rule, git baselines, stage profile, thresholds, metrics summary, status counts, unexpected-error rate, peak/current upstream concurrency, abort count, per-context/per-actor fairness, recovery e `evidence_sha256` calculado sobre JSON canonicalizado sem o próprio hash; artefatos brutos ficam no mesmo diretório tmp.
+- **Workload model:** 20 atores sintéticos em ordem round-robin alternam `unifast|prosperar` e lista|detalhe; credenciais/IDs são fixtures falsas; nenhum socket alcança host não-loopback. O clock/rate state e o stub são controláveis pelo harness, mas Nest/stub permanecem no mesmo processo até terminar recovery.
+- **Stage L — accepted load:** stub 100 ms, concurrency `5` por `5s`, `maxConcurrency=8`, budgets `user=120/context=600`; exige somente `200`, p95 `<=500 ms`, p99 `<=1000 ms`, throughput `>=5 req/s`, zero erro inesperado e peak upstream `<=8`.
+- **Stage S — semaphore saturation:** rate state limpo por avanço do clock, stub 100 ms, concurrency `20` por `1s`, mesmos budgets altos; exige `SmartNotasOcupado > 0`, `LimiteDeConsultaExcedido = 0`, peak upstream exatamente `8`, zero fila e current concurrency `0` ao final.
+- **Stage F — rate/fairness:** rate state limpo, `maxConcurrency=64`, budgets default `user=30/context=120`, 20 atores enviam número idêntico de requests em round-robin; exige `LimiteDeConsultaExcedido > 0`, pelo menos um aceite por ator, diferença máxima de aceites `<=1` entre atores equivalentes e `<=1` entre contextos, nenhuma chamada upstream após o budget e nenhum `SmartNotasOcupado`.
+- **Stage A — abort/timeout:** rate state limpo, stub 2000 ms, `maxConcurrency=8`; lança oito requests, desconecta deterministicamente quatro clientes após 50 ms e deixa quatro atingirem `timeout=1000 ms`. Exige `client_aborted >=4`, quatro `SmartNotasTimeout`, stub observa cancelamento dos oito upstream requests, slots/current concurrency retornam a zero em até 250 ms após o último abort e nenhuma escrita em socket fechado.
+- **Stage R — recovery sem restart:** ainda no mesmo Nest/stub, clock avança além da janela, stub volta a 100 ms e concurrency `2` por `5s`; exige somente `200`, current concurrency zero ao final e latência/throughput dos thresholds de load. Restart-resilience smoke é separado e não substitui R.
+- **Global acceptance:** statuses fora dos previstos falham; processo/memória permanecem vivos; todo threshold acima vira assertion pass/fail, não mera métrica registrada.
+- **Evidence capture:** o teste escreve `foundation_documentation/artifacts/tmp/smart-notas-read-rls/rls-pcv1.json` com o envelope obrigatório: `policy_schema_version=pcv-1`, `schema_version`, `lane_id=RLS`, `todo_id`, `run_id`, `environment_id`, `executor_id`, `reviewer_id`, `recorded_at_utc`, `evidence_type`, `sample_profile_id=RLS-SP-H`, `acceptance_rule_id=RLS-A1`, `result_summary`, `artifact_payload={stage_profile_observed,thresholds,metrics_summary,status_counts,unexpected_error_rate,peak_and_current_concurrency,abort_and_timeout_counts,fairness,recovery,git_baselines}` e `artifact_sha256`.
+- **Hash rule:** `artifact_sha256` é SHA-256 do JSON completo sem esse campo, UTF-8, chaves ordenadas recursivamente, arrays na ordem declarada e sem whitespace insignificante; o evidence object do TODO registra também `evidence_type,environment_id,run_id,artifact_uri,artifact_schema_version,artifact_sha256,sample_profile_id,acceptance_rule_id,result_summary,reviewer_id`.
+- **Raw artifacts:** traces/contadores auxiliares ficam no mesmo diretório tmp; o JSON canônico, não prosa, satisfaz o gate.
 - **Exact command:** no diretório backend, `RLS_OUTPUT_DIR=../foundation_documentation/artifacts/tmp/smart-notas-read-rls npm test -- --runInBand --runTestsByPath src/fiscal-notes/__tests__/smart-notas-load.spec.ts`.
 
 ## Verification Debt Assessment
@@ -932,6 +938,9 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 | `R4-ERROR-PRECEDENCE-01` | critique R4 | `high` | `release-blocker` | ordenar auth/pipe/flag/HMAC/rate/semaphore/abort/provider | `integrated-pending-rerun` | Stable error catalog / first-signal rule |
 | `R4-RLS-GOV-01` | critique R4 | `medium` | `release-blocker` | usar reason code fechado `RLS-SLO-CLAIM` | `resolved` | pcv-1 RLS row |
 | `R4-RLS-HARNESS-01` | critique R4 | `medium` | `release-blocker` | mixed-workload runner + canonical hashed JSON + recovery sem restart | `integrated-pending-rerun` | RLS subsection/exact command |
+| `R5-RLS-PCV-01` | critique R5 | `medium` | `release-blocker` | envelope/evidence/hash pcv-1 exatos | `integrated-pending-rerun` | RLS evidence capture/hash rule |
+| `R5-RLS-ABORT-01` | critique R5 | `medium` | `release-blocker` | injetar disconnect/timeout e provar cancel/slot release | `integrated-pending-rerun` | Stage A assertions |
+| `R5-RLS-HARNESS-01` | architecture R5 | `medium` | `release-blocker` | saturação garantida, fairness/no-starvation e recovery sem restart | `integrated-pending-rerun` | Stages S/F/R |
 
 ## TODO Closeout Disposition
 
