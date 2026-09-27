@@ -431,7 +431,7 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 | test | note application/adapter | Jest module/contract specs | context leak, fallback, raw shape, tampered `noteId` | `implement-in-this-todo` | DOD-01..06/VAL-02 |
 | test | app wiring/auth | Nest testing module + real global guards | qualquer perfil ativo bloqueado, usuário ausente/inativo aceito, módulo não registrado | `implement-in-this-todo` | DOD-10/VAL-08 |
 | test | exception filter | logger/response spies with canary URL | query, identifier ou PII em log/error | `implement-in-this-todo` | DOD-12/VAL-10 |
-| structural test | fiscal module imports/exports/decorators | Jest usando TypeScript compiler API: AST de imports/calls/decorators + whitelist de exports | qualquer import `prisma|logs` no módulo; `fetch|node:http` no controller; `@Public`; tipo wire exportado fora de `infrastructure` | `implement-in-this-todo` | DOD-06/VAL-02 |
+| structural test | fiscal module imports/exports/decorators | Jest usando TypeScript compiler API: AST de imports/calls/decorators + whitelist de exports | qualquer import `prisma-or-logs` no módulo; `fetch-or-node:http` no controller; `@Public`; tipo wire exportado fora de `infrastructure` | `implement-in-this-todo` | DOD-06/VAL-02 |
 | analyzer | NestJS surface | `node_capability_surface_audit.py` | manifest/scripts/capability drift | `already-enforced` | VAL-01 |
 | review | code/module diff | architecture adherence review | brittle shortcut/hidden dual-read | `implement-in-this-todo` | final review package |
 
@@ -442,7 +442,7 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set`
 - **Decision review status:** `not_run`
-- **Decision review evidence / resolution:** `round 9 over 9f03d52 returned GO; assumption evidence paths were then made concrete for the coherence guard without changing their semantics; focused refreshed-baseline rerun required`.
+- **Decision review evidence / resolution:** `round 10 over 146f1c3 returned GO; architecture harness cell delimiters were then normalized for deterministic parsing without semantic change; focused refreshed-baseline rerun required`.
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -456,11 +456,11 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Why this decision:** contrato público/segredos/contextos exigem review a partir de baseline autoritativo reproduzível.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `pending round-10 baseline; predecessor 9f03d52980629951c4b5a8987ebe0d9cc2131b5c`
+- **Baseline commit:** `pending round-11 baseline; predecessor 146f1c33e1f8068afda5bbc8cfe01ea32096df60`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `not_run`
-- **Findings summary:** round 9 convergiu; paths de evidência A-01..A-05 foram qualificados para resolver deterministicamente contra o checkout; novo freeze pendente.
-- **Evidence / reference:** predecessor `9f03d52980629951c4b5a8987ebe0d9cc2131b5c` permanece publicado; refresh pendente.
+- **Findings summary:** round 10 convergiu; delimiters internos da linha structural-test foram normalizados para o parser do authority guard sem mudar o harness; novo freeze pendente.
+- **Evidence / reference:** predecessor `146f1c33e1f8068afda5bbc8cfe01ea32096df60` permanece publicado; refresh pendente.
 - **Waiver authority / reference:** `n/a`.
 - **Pre-freeze packet-prep rule:** review rows below are `prepared-pre-freeze`, not passed.
 
@@ -473,7 +473,7 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Material sections compared:** `Context|Contract Boundary|Scope|Out of Scope|Definition of Done|Validation Steps|Execution Lane Tracking|Canonical Module Anchors|Decisions|Decision Baseline|Architecture Change Governance|Questions To Close|Assumptions Preview|Execution Plan|Flow Evidence Planning Matrix|Local CI-Equivalent Suite Matrix|Runtime / Rollout Notes|Security Risk Assessment|Performance & Concurrency Risk Assessment`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-backend.md`
 - **Gate status:** `not_run`
-- **Findings summary:** `pending refreshed baseline after evidence-path qualification`.
+- **Findings summary:** `pending refreshed baseline after harness table normalization`.
 - **Evidence / reference:** `pending`.
 - **Waiver authority / reference:** `n/a`.
 
@@ -557,7 +557,7 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 
 ## Plan Review Gate
 
-- **Status:** `round-9 no-material-findings; focused evidence-path revalidation pending`.
+- **Status:** `round-10 no-material-findings; focused harness-table revalidation pending`.
 
 ### Review Sections
 
@@ -682,9 +682,9 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Package mode:** `bounded-file-set`.
 - **Internal reviewer mandate:** `required — fresh no-context reviewer after review baseline freeze`.
 - **Required lenses:** `correctness|performance|elegance|structural-soundness|operational-fit`.
-- **Review result:** `round 9 GO over 9f03d52; focused round 10 pending after assumption evidence-path qualification`.
-- **Material findings:** none in round 9; A-01..A-05 semantics remain unchanged and only concrete anchors were added.
-- **Evidence:** formal fresh no-context `architecture_opinion` over `9f03d52`; routing guard `gpt-5.6-sol/xhigh` returned `go`; no files edited by reviewer.
+- **Review result:** `round 10 focused GO over 146f1c3; round 11 pending after parser-safe harness cell normalization`.
+- **Material findings:** none in round 10; harness meaning is unchanged.
+- **Evidence:** formal fresh no-context `architecture_opinion` over `146f1c3`; routing guard `gpt-5.6-sol/xhigh` returned `go`; no files edited by reviewer.
 
 ## Audit Trigger Matrix
 
@@ -717,8 +717,8 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Internal reviewer mandate:** `required after freeze`.
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`.
 - **Critique status:** `not_run`
-- **Findings summary:** `round 9 GO over 9f03d52; focused round 10 pending to verify concrete assumption anchors do not change plan semantics`.
-- **Evidence / reference:** `formal fresh critique over 9f03d52; routing guard gpt-5.6-sol/xhigh returned go; reviewer made no changes`.
+- **Findings summary:** `round 10 focused GO over 146f1c3; round 11 pending to verify parser-safe harness cell normalization has no semantic effect`.
+- **Evidence / reference:** `formal fresh critique over 146f1c3; routing guard gpt-5.6-sol/xhigh returned go; reviewer made no changes`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Assumption Code Coherence
@@ -728,9 +728,9 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Trigger stage:** `after critique convergence and before APROVADO`.
 - **Guard scope:** `A-01,A-02,A-03,A-04,A-05`.
 - **Guard command:** `python3 delphi-ai/tools/assumption_code_coherence_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-backend.md`.
-- **Gate status:** `not_run`
-- **Findings summary:** `pending`.
-- **Evidence / reference:** `pending`.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** A-01..A-05 citam pelo menos um anchor de código resolvível e nenhum path/evidence defect permanece.
+- **Evidence / reference:** focused architecture/critique R10 GO; `assumption_code_coherence_guard.py` deve retornar `Overall outcome: go` após este registro.
 - **Waiver authority / reference:** `n/a`.
 
 ## Approval
@@ -770,7 +770,8 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Worktree / auxiliary-checkout authorization:** `not-authorized`
 - **Worktree authorization evidence:** `n/a`
 - **Writer scheduling policy:** `single-writer-serialized`
-- **Guard outcome:** `pending post-approval routing guard`
+- **Guard outcome:** `go`
+- **Guard evidence:** `routine-executor/gpt-5.6-terra/medium; primary-checkout-single-writer; worktrees not-authorized; rerun after APROVADO before implementation`.
 - **Waiver / exception reference:** `n/a`
 
 ## Decision Adherence Validation
@@ -950,7 +951,7 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Disposition:** `keep-active`
 - **Disposition reason:** decisão humana resolvida; reconvergência/revisões/preflight e aprovação ainda pendentes.
 - **Post-commit/push status:** `pending`
-- **Next path/status action:** publicar o baseline FU/FC reconvergido, repetir opinion/critique, executar guards pré-approval e então solicitar `APROVADO`.
+- **Next path/status action:** executar `todo_authority_guard --pre-approval`; se `preflight-go`, publicar a evidência final e solicitar `APROVADO`.
 
 ## Module Consolidation Gate
 
