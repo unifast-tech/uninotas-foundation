@@ -35,7 +35,7 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** integrar os findings das revisões independentes, publicar um checkpoint refrescado e repetir os reviews afetados antes de solicitar `APROVADO` de implementação.
+- **Next exact step:** integrar `ARCH-R2-01..02` e `CRIT-07..11`, publicar um único checkpoint candidato e repetir os reviews afetados antes de solicitar `APROVADO` de implementação.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -69,7 +69,7 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 - Lista agregada “Todos”, merge de Unifast/Prosperar, polling, webhook ou cache persistente/localStorage/IndexedDB.
 - Alteração de endpoint/DTO NestJS, Prisma/PostgreSQL, writer/filter de erros, correlação, `OperationalCase` ou tratamento legado.
 - Docker, Railway, domínio, ingresso, segredo, ativação de `SMART_NOTAS_READ_ENABLED`, deploy ou promoção canônica.
-- Nova biblioteca de estado/cache ou pacote externo; a necessidade é pequena e específica ao host React atual.
+- Nova biblioteca de estado/cache ou pacote de runtime; somente o lint oficial/dev-only de React Hooks pode ser adicionado para tornar o gate de effects real.
 - Worktrees, checkouts auxiliares ou execução paralela de escritores.
 
 ## Execution Lane Tracking (Required)
@@ -107,7 +107,9 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 | `MonitorNotes` | `frontend/src/**` | `A,M,??` | UI, adapter, cache, rotas, estados e estilos do fluxo fiscal |
 | `MonitorNotes` | `frontend/e2e/notas.mjs` | `A,??` | navegador determinístico do fluxo novo |
 | `MonitorNotes` | `frontend/e2e/fluxo.mjs` | `M` | apontar o fluxo legado para `/erros` e exigir autorização explícita para mutação |
-| `MonitorNotes` | `frontend/package.json` | `M` | script do e2e fiscal, sem nova dependência |
+| `MonitorNotes` | `frontend/package.json` | `M` | scripts do e2e/lint e dependências dev-only do React Hooks lint |
+| `MonitorNotes` | `frontend/package-lock.json` | `M` | lockfile do lint dev-only de React Hooks aprovado no plano |
+| `MonitorNotes` | `frontend/eslint.config.js` | `A,??` | configuração flat restrita a TypeScript/React/Hooks e zero suppressions novas |
 | `MonitorNotes` | `frontend/README.md` | `M` | contrato operacional e comandos |
 | `MonitorNotes` | `uninotas-foundation` | `M` | gitlink documental governado |
 | `uninotas-foundation` | `todos/active/features/TODO-uninotas-smart-notas-read-frontend.md` | `A,M,??` | contrato e evidência da entrega |
@@ -122,7 +124,6 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 | `MonitorNotes` | `backend/**` | `any` | backend já entregue e fora deste corte |
 | `MonitorNotes` | `Dockerfile` | `any` | runtime fora do escopo |
 | `MonitorNotes` | `docker-compose.yml` | `any` | runtime fora do escopo |
-| `MonitorNotes` | `frontend/package-lock.json` | `any` | nenhuma dependência nova planejada |
 | `uninotas-foundation` | `project_constitution.md` | `any` | nenhuma mudança constitucional |
 | `uninotas-foundation` | `policies/scope_subscope_governance.md` | `any` | ownership não é promovido aqui |
 | `uninotas-foundation` | `deterministic/**` | `any` | guardas não mudam neste corte |
@@ -217,7 +218,7 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 - [x] `D-03` intervalo default são 30 datas de calendário incluindo hoje (`início = hoje - 29 dias`) no calendário `America/Sao_Paulo`, serializadas sem conversão de instante em `YYYY-MM-DD`; o backend aceita diferença máxima de 365 dias entre endpoints, equivalente a até 366 datas inclusivas. Ref: backend query contract + `ARCH-05`.
 - [x] `D-04` cache: 20 chaves com LRU real, fresh até 60 s inclusive e stale retido até 10 min inclusive; ausente ou >10 min carrega da API. Refresh ignora freshness, inicia request se não houver um idêntico em voo e compartilha o já ativo. Ref: SD-08/G-20 + `ARCH-04/TEST-02`.
 - [x] `D-05` cache key inclui usuário da sessão, contexto, datas, status, documento, idCompra e página; cada request guarda controller, promise, geração do request e geração da sessão. Logout/unmount aborta e limpa; resposta após substituição, eviction, troca de query, logout ou dispose não reinsere nem atualiza UI. Ref: race matrix + `ARCH-04`.
-- [x] `D-06` nenhuma biblioteca nova; adapter e cache host-specific usam React e Web APIs já disponíveis. Ref: package-first sem resultados.
+- [x] `D-06` nenhuma biblioteca de runtime/estado/cache; adapter e cache usam React e Web APIs. Admitir somente `eslint`, configuração TypeScript compatível e `eslint-plugin-react-hooks` como tooling dev-only, após package-first não encontrar owner interno, para que `npm run lint` valide regras/dependências de Hooks além do `tsc`. Ref: `ARCH-R2-02`.
 - [x] `D-07` erros de integração permanecem legados e não são mesclados em linhas/notas neste corte. Ref: ownership de módulos.
 
 ## Module Decision Baseline Snapshot
@@ -261,7 +262,7 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 | Harness Type | Surface | Command / Rule / Artifact | Regression It Must Catch | Adoption Timing | Evidence Plan / Follow-up |
 | --- | --- | --- | --- | --- | --- |
 | browser test | frontend | `npm run e2e:notas` | contexto, cache, stale e races | `implement-in-this-todo` | DOD-04..DOD-08 |
-| build/typecheck | frontend | `npm run lint && npm run build` | contrato/tipos/efeitos inválidos | `already-enforced` | VAL-01 |
+| lint + build/typecheck | frontend | `npm run lint && npm run build` | regras/dependências de Hooks, suppression nova, contrato/tipos/imports inválidos | `implement-in-this-todo` | VAL-01 + revisão de adherence |
 | audit | frontend | `frontend-race-condition-validation` | stale response/cleanup/dedupe | `implement-in-this-todo` | VAL-04 |
 
 ## Architecture Review Gates
@@ -271,7 +272,7 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set`
 - **Decision review status:** `changes_required_before_approval`
-- **Decision review evidence / resolution:** primeira revisão no checkpoint `ed43003` retornou `ARCH-03`, `TEST-01`, `ARCH-04`, `TEST-02` e `ARCH-05`; correções integradas abaixo e rerun obrigatório sobre checkpoint refrescado.
+- **Decision review evidence / resolution:** primeira revisão no checkpoint `ed43003` foi integrada; R2 em `7d97c7e` confirmou os loci anteriores e retornou `ARCH-R2-01..02`; ambos integrados abaixo e novo rerun obrigatório.
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -311,12 +312,12 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 
 ## Package-First Assessment
 
-- **Queries:** `query_packages.sh --search "react cache fiscal notes"`; `query_packages.sh --stack node`
+- **Queries:** `query_packages.sh --search "react cache fiscal notes"`; `query_packages.sh --stack node`; `query_packages.sh --search "eslint react hooks typescript"`
 - **Relevant packages found:** `none`
 - **READMEs read:** `frontend/README.md`
-- **Decision:** implementação host-specific sem nova dependência.
+- **Decision:** runtime/cache host-specific sem nova dependência; tooling dev-only oficial de ESLint/TypeScript/React Hooks admitido após ausência de owner interno.
 - **Tier:** `Local host application`
-- **Rationale:** cache curto e adapter são específicos ao contrato UniNotas; nenhuma capacidade proprietária foi encontrada.
+- **Rationale:** cache curto e adapter são específicos ao contrato UniNotas; o linter não é capacidade de produto, mas proteção estática necessária para effects/Hooks que o `tsc` não cobre.
 
 ## Frontend / Consumer Matrix
 
@@ -324,8 +325,9 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 | --- | --- | --- | --- |
 | `GET /api/v1/notas` | `/`, `ListaNotas`, cache/session provider | `consumer planned in this TODO` | tipos exatos + browser list/context/cache |
 | `GET /api/v1/notas/:noteId` | `/notas/:noteId`, `DetalheNota` | `consumer planned in this TODO` | rota opaca + browser detail/404 |
-| `GET /api/v1/eventos*` | `/erros`, `/eventos/:refId` | `existing consumer preserved` | e2e legado e route-scoped hooks |
-| `GET /api/v1/realtime/eventos?token=...` | somente shell/rota de erros | `existing consumer narrowed to legacy area` | scan estrutural + e2e; Geral/detalhe fiscal não abrem SSE |
+| `GET /api/v1/eventos`, `/eventos/resumo`, `/eventos/produtos` | somente `/erros` | `existing list consumers narrowed to error list` | e2e + route-scoped hooks; nenhuma chamada em detalhe fiscal/legado |
+| `GET /api/v1/eventos/:refId` | somente `/eventos/:refId` | `existing detail consumer preserved` | smoke legado read-only |
+| `GET /api/v1/realtime/eventos?token=...` | somente `/erros` | `existing consumer narrowed to error list` | scan estrutural + e2e; nenhuma outra rota abre SSE |
 | Smart Notas credentials/CNPJ | nenhum consumidor frontend | `consumer intentionally absent` | env/import/bundle scan; backend-only invariant |
 
 ### Fiscal UI Data & Privacy Allowlist
@@ -333,26 +335,51 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 | Data class | Frontend handling | URL / logging rule |
 | --- | --- | --- |
 | `noteId`, `fiscalContext`, status, número, compra, ambiente, modelo, finalidade, plataforma, produto, datas, competência, valores, natureza e quantidade | campos permitidos do DTO público; `noteId` é opaco e pode existir apenas no path de detalhe | não logar payload/identificadores; `noteId` não pode ser decodificado |
-| `accessKey`, `referencedAccessKey` | permitidas pelo DTO, porém renderizadas mascaradas, somente com os 8 últimos caracteres; sem ação de copiar valor integral neste corte | nunca incluir em query params, console, screenshot ou mensagem de erro |
-| filtro `documento` e filtro `idCompra` | estado controlado efêmero dentro do provider da sessão; entram apenas na query autenticada para o backend e na cache key em memória | proibidos em URL/history/referrer, local/session storage e logs; limpar no logout |
-| token, CNPJ configurado do emissor, `providerIdInterno`, payload cru | não fazem parte do modelo de UI | proibidos em DOM, URL, bundle, mocks, console, erro e cache |
+| `accessKey`, `referencedAccessKey` | somente valores com exatamente 44 dígitos podem ser renderizados mascarados (`••••••••` + 8 finais); ausente, curto ou malformado vira “Não disponível”; sem cópia integral | nunca incluir valor integral em query params, console, screenshot ou mensagem de erro |
+| filtro `documento` e filtro `idCompra` | estado controlado efêmero dentro do provider da sessão; o valor exato é permitido somente no próprio input autenticado, na cache/request key em memória e na query autenticada `/notas` | proibidos em URL/history/referrer, local/session storage, logs/console, screenshots, textos de status/erro, DOM não relacionado e qualquer request não fiscal; limpar no logout |
+| token Smart Notas, CNPJ configurado do emissor, `providerIdInterno`, payload cru | não fazem parte do modelo de UI | proibidos em DOM, URL, bundle, mocks, console, erro e cache; o JWT de sessão existente continua sob o contrato atual de autenticação |
 
-Mocks e screenshots usam somente identificadores sintéticos que não representem CPF/CNPJ real. Os testes inspecionam URL, DOM, console e requisições não fiscais para garantir ausência de credenciais, CNPJ configurado e valores exatos dos filtros sensíveis; a query autenticada `/notas` é a única requisição autorizada a conter `documento`/`idCompra`.
+O adapter faz normalização runtime por allowlist antes de qualquer escrita no cache: propriedades desconhecidas são descartadas; tipos/formas inválidos não são type-cast como DTO válido. Uma fixture adversarial inclui canários sintéticos em `providerIdInterno`, campo desconhecido, chave curta/malformada e payload aninhado; os testes provam que nenhum canário chega ao cache, DOM, console, erro ou screenshot. Mocks usam somente identificadores sintéticos que não representem CPF/CNPJ real.
+
+### Sensitive Value Allowed-Sink Matrix
+
+| Value | Allowed sinks | Forbidden sinks |
+| --- | --- | --- |
+| `documento` / `idCompra` digitado | input correspondente, request/cache key apenas em memória, query autenticada `GET /api/v1/notas` | URL/history/referrer, storage, outro DOM, status/erro, console/log, screenshot, request não fiscal |
+| chave de acesso válida | DTO normalizado/cache em memória; DOM apenas mascarado com 8 finais | valor integral em qualquer DOM, URL, storage, console/log, erro ou screenshot |
+| credencial Smart Notas / CNPJ configurado / `providerIdInterno` / campo desconhecido | nenhum sink frontend | todos os sinks client-side, inclusive cache e mocks persistidos |
+
+### Canonical Fiscal URL Truth Table
+
+O parser é puro, separado de `useFiltros` legado, recebe o “hoje” já calculado em `America/Sao_Paulo` e produz `{ query, canonicalSearch, needsReplace }`. A rota executa no máximo um `replace` e bloqueia todo fetch até `needsReplace=false`. A cache key nasce somente da query canônica mais os filtros efêmeros.
+
+| Input class | Canonical output | Fetch behavior |
+| --- | --- | --- |
+| parâmetros ausentes | `contexto=unifast`, `dataInicio=hoje-29`, `dataFim=hoje`, `pagina=1`; status omitido | um `replace`, depois uma request |
+| `contexto` desconhecido/duplicado | `contexto=unifast` único | um `replace`, nenhum fetch antes dele |
+| `status` fora do catálogo/duplicado | remover status | um `replace`, depois fetch sem status |
+| `pagina` ausente, não inteira ou fora de `1..10000` | `pagina=1` | um `replace`, depois fetch da página 1 |
+| uma/ambas datas ausentes, formato inválido ou data impossível | substituir o par inteiro pelo default de 30 datas | um `replace`, nenhum request inválido |
+| datas válidas invertidas | ordenar as duas pontas | um `replace`, depois fetch do intervalo ordenado |
+| datas válidas com diferença `>365` dias | preservar `dataFim` e definir `dataInicio=dataFim-365` | um `replace`, depois fetch; backend nunca recebe range inválido |
+| `documento`, `idCompra` ou chave desconhecida na URL | remover sem hidratar os inputs efêmeros | um `replace`; valores removidos nunca entram na request/cache |
+| URL já canônica | mesma URL e identidade estável | zero replace; exatamente a política de cache/request aplicável |
 
 ### Cache / Request Transition Contract
 
 | Trigger and current state | Visible result | Network behavior | Commit guard |
 | --- | --- | --- | --- |
 | navigation with entry age `<= 60s` | cached data, not revalidating | no request | access promotes key to MRU |
-| navigation with age `> 60s` and `<= 10min` | stale data + revalidating indicator | exactly one background request per key | matching request and session generations only |
+| navigation/subscription with age `> 60s` and `<= 10min` | stale data + revalidating indicator | exactly one background request per key | matching request and session generations only; one shared expiry timer per subscribed key |
 | navigation absent or age `> 10min` | loading without old data | exactly one request per key | expired entry is removed before fetch |
 | explicit refresh, no identical request active | current data retained + revalidating | exactly one new request even when fresh | new request generation owns completion |
 | explicit refresh, identical request active | current state retained; refresh control disabled/joins | no duplicate; share the active promise | active generation remains owner |
 | active query/context changes | new key state only | previous request is aborted when its last subscriber detaches | abort is not a UI error; old generation cannot commit |
 | LRU insert would create key 21 | current requested key retained | evict least-recently-used key and abort its active request | evicted generation cannot reinsert on late completion |
 | logout, automatic 401 or provider dispose | authenticated fiscal state disappears | abort every request and clear all 20 keys synchronously | increment session generation before abort/clear |
+| mounted stale entry crosses `600_001ms` after failed revalidation | remove fiscal data and show error-without-cache + Retry | no automatic retry/request storm | injected scheduler fires once; generation guard prevents revival |
 
-TTL boundaries use the injected clock and the age of the last successful response. Failed revalidation never advances success age; it preserves still-retained stale data with warning. A hard reload has no session-memory cache and therefore requests normally.
+TTL boundaries use the injected clock and the age of the last successful response. Ten minutes is a hard visible-data maximum, not only a lookup boundary. Failed revalidation never advances success age; it preserves data only until the hard limit and schedules a single expiry transition while subscribed. A hard reload has no session-memory cache and therefore requests normally.
 
 ## Assumptions Preview
 
@@ -370,22 +397,24 @@ TTL boundaries use the injected clock and the age of the last successful respons
 
 ### Ordered Steps
 
-1. Criar e2e fiscal fail-first com mocks dos envelopes backend e cenários de race/cache.
-2. Criar tipos/adapter fiscal e estender o cliente HTTP com `AbortSignal`, preservando `AbortError` como cancelamento e não como falha status 0.
-3. Criar provider/cache de sessão com relógio injetável e estado por chave (`promise`, controller, gerações), além de hook com dedupe, abort, TTL/stale/LRU e limpeza.
-4. Criar lista, filtros, contexto, paginação e estados acessíveis.
-5. Criar detalhe fiscal read-only e integrar rotas/navegação/cabeçalho; mover resumo/SSE/gatilho para o shell legado de erros para que `Geral` não consulte `/eventos` nem abra stream.
-6. Ajustar estilos responsivos e identidade UniNotas.
-7. Rodar auditorias/testes/build/browser; consolidar módulo e evidências.
+1. Configurar ESLint/TypeScript/React Hooks dev-only, sem alterar runtime, e tornar `npm run lint` complementar ao `tsc`.
+2. Criar e2e fiscal fail-first com mocks normais/adversariais dos envelopes backend e cenários de race/cache.
+3. Criar tipos/normalizador/adapter fiscal e estender o cliente HTTP com `AbortSignal`, preservando `AbortError` como cancelamento e não como falha status 0.
+4. Criar provider/cache de sessão com relógio/scheduler injetáveis e estado por chave (`promise`, controller, gerações), além de hook com dedupe, abort, TTL/stale/LRU e limpeza.
+5. Criar lista, filtros, contexto, paginação e estados acessíveis.
+6. Criar detalhe fiscal read-only e integrar rotas/navegação/cabeçalho; montar lista/resumo/produtos/SSE somente em `/erros`; manter `/eventos/:refId` apenas com seu fetch de detalhe, sem resumo/SSE/gatilho não consumido.
+7. Ajustar estilos responsivos e identidade UniNotas.
+8. Rodar auditorias/testes/build/browser; consolidar módulo e evidências.
 
 ### Test Strategy
 
 - **Strategy:** `test-first`
 - **Why:** cache e troca rápida de contexto têm falhas observáveis difíceis de provar por inspeção.
 - **Fail-first targets:** contexto correto, retorno `Geral -> Erros -> Geral`, resposta fora de ordem, stale failure, refresh, logout e detalhe.
-- **Deterministic temporal targets:** `60_000ms` ainda fresh, `60_001ms` revalida, `600_000ms` ainda stale, `600_001ms` expira; 21ª chave remove a LRU, leitura promove MRU, eviction aborta e late completion não reinsere.
+- **Deterministic temporal targets:** `60_000ms` ainda fresh, `60_001ms` revalida, `600_000ms` ainda stale, `600_001ms` expira inclusive enquanto montado após falha; 21ª chave remove a LRU, leitura promove MRU, eviction aborta e late completion não reinsere.
 - **Request-count targets:** duas montagens/consumidores da mesma chave fazem uma chamada; cliques repetidos durante refresh fazem uma chamada; troca rápida de contexto nunca permite que a resposta anterior apareça; logout manual e 401 automático resultam em cache vazio e zero commits tardios.
-- **Calendar parser targets:** virada de mês/ano, 29/02, timezone diferente do navegador, formato/data impossível, default de 30 datas, diferença de 365 dias aceita e 366 rejeitada, sem reutilizar conversão UTC do filtro legado.
+- **Calendar parser targets:** tabela canônica completa; virada de mês/ano, 29/02, timezone diferente do navegador, formato/data impossível, default de 30 datas, diferença de 365 dias preservada e diferença superior normalizada antes do fetch, sem reutilizar conversão UTC do filtro legado.
+- **Adversarial normalization targets:** campos desconhecidos/canários são removidos antes do cache; `providerIdInterno` nunca entra no modelo; chave válida é mascarada e chave curta/malformada é totalmente redatada.
 
 ### Pre-APROVADO RED Evidence Capture
 
@@ -411,9 +440,9 @@ TTL boundaries use the injected clock and the age of the last successful respons
 
 | Repository / CI Surface | Why In Scope | Behavior / Scenario Covered | Fixture / Seed / Runtime Preconditions | Local CI-Equivalent Command | Required Before | Status | Evidence Artifact / Command | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| frontend type/build | React/Vite mudam | tipos, bundle, imports | `npm ci` já disponível | `npm run lint && npm run build` | `Local-Implemented` | `planned` | command output | sem inferir deploy |
+| frontend lint/type/build | React/Vite mudam | Hooks/effects, zero suppression nova, tipos, bundle, imports | lockfile atualizado e instalação limpa | `npm ci && npm run lint && npm run build` | `Local-Implemented` | `planned` | command output | lint real + `tsc`; sem inferir deploy |
 | frontend fiscal browser | fluxo novo + smoke legado | lista/detalhe/contexto/cache/races/a11y; `/erros`/detalhe; ausência de rede legada em Geral | Chromium + mocks contratuais | `npm run e2e:notas` | `Local-Implemented` | `planned` | runner output/screens redatados | read-only e fail-closed |
-| frontend cache/provider harness | invariantes temporais | limites exatos fresh/stale/expired, request counts, 21ª chave, promoção LRU, eviction/late completion | relógio e transport injetáveis | script integrado a `npm run e2e:notas` ou comando dedicado sem nova dependência | `Local-Implemented` | `planned` | asserts determinísticos | sem espera de minutos reais |
+| frontend cache/provider harness | invariantes temporais | limites exatos fresh/stale/expired, request counts, 21ª chave, promoção LRU, eviction/late completion | relógio e transport injetáveis | script integrado a `npm run e2e:notas` ou comando dedicado sem dependência de runtime adicional | `Local-Implemented` | `planned` | asserts determinísticos | sem espera de minutos reais |
 | frontend legacy browser mutável | tratamento completo resolve/reabre | fixture semeada descartável + API local controlada + autorização explícita | `npm run e2e` com `AUTORIZAR_MUTACAO=1` | `not required for this TODO` | `optional` | não executar por padrão | runner deve falhar fechado; produção/Railway/ambiente compartilhado proibidos |
 | Foundation | docs/TODO | árvore/contratos | nenhum | `python3 deterministic/validate_foundation.py --root .` | `Local-Implemented` | `planned` | command output | executar no submodule |
 
@@ -439,7 +468,7 @@ TTL boundaries use the injected clock and the age of the last successful respons
   - **Severity:** `high`
   - **Evidence:** `frontend/src/App.tsx` monta `useResumo` e `useTempoReal` globalmente; `frontend/src/componentes/Cabecalho.tsx` exige `Resumo`.
   - **Why it matters now:** trocar apenas a rota raiz manteria consultas/SSE de `logs` na tela Geral, ocultando acoplamento e aumentando carga.
-  - **Option A (Recommended):** tornar o cabeçalho independente do resumo e encapsular resumo/SSE/gatilho em um shell legado montado apenas em `/erros` e `/eventos/:refId`.
+  - **Option A (Recommended):** tornar o cabeçalho independente do resumo e encapsular lista/resumo/produtos/SSE somente em `/erros`; `/eventos/:refId` preserva apenas seu fetch de detalhe.
     - **Effort:** `medium`; **Risk:** `low`; **Blast radius:** `module`; **Maintenance burden:** `low`; **Performance impact:** `improves`; **Elegance impact:** `improves`; **Structural soundness impact:** `improves`.
   - **Option B (Alternative):** manter hooks globais e ocultar indicadores em Geral.
     - **Effort:** `low`; **Risk:** `high`; **Blast radius:** `cross-module`; **Maintenance burden:** `high`; **Performance impact:** `regresses`; **Elegance impact:** `regresses`; **Structural soundness impact:** `regresses`.
@@ -467,8 +496,15 @@ TTL boundaries use the injected clock and the age of the last successful respons
 | `ARCH-04` + `CRIT-04` | `medium architecture` | `Integrated` | state machine por chave/geração; refresh compartilha request idêntico; abort não vira erro | `pending refreshed review` |
 | `TEST-02` + `CRIT-06` | `medium tests` | `Integrated` | relógio injetável, limites exatos, request counts, 21ª chave, promoção LRU, logout/401 e late completion | `pending refreshed review` |
 | `ARCH-05` | `medium correctness` | `Integrated` | calendário `America/Sao_Paulo`, default de 30 datas, diferença máxima de 365 dias, parser separado do legado | `pending refreshed review` |
-| `CRIT-03` | `medium performance` | `Integrated` | SSE corrigido para `/api/v1/realtime/eventos?token=...` e limitado ao shell de erros | `pending refreshed review` |
+| `CRIT-03` | `medium performance` | `Integrated` | SSE corrigido para `/api/v1/realtime/eventos?token=...`; lista/resumo/produtos/SSE só em `/erros`, nunca no detalhe | `pending refreshed review` |
 | `CRIT-05` | `medium adherence` | `Integrated` | rota canônica de Geral permanece `/` em todo o pacote | `pending refreshed review` |
+| `ARCH-R2-01` | `medium privacy tests` | `Integrated` | matriz de sinks permite o valor sensível somente no input/request/cache key fiscal e o proíbe em todos os demais destinos | `pending refreshed review` |
+| `ARCH-R2-02` | `medium structural` | `Integrated` | dependências dev-only e config ESLint React Hooks entram no diff; harness deixa de atribuir validação de effects ao `tsc` | `pending refreshed review` |
+| `CRIT-07` | `high bounded evidence` | `Integrated` | pacote de review passa a incluir contract spec, controller e configuration citados por `A-01..03` | `pending refreshed review` |
+| `CRIT-08` | `medium governance` | `Integrated` | um novo SHA será publicado e usado por freeze, dispatch e guards antes do pedido de aprovação | `pending refreshed checkpoint` |
+| `CRIT-09` | `medium correctness` | `Integrated` | truth table fecha defaults, inválidos, duplicados, sensíveis, replace/fetch e cache identity | `pending refreshed review` |
+| `CRIT-10` | `medium correctness/performance` | `Integrated` | 10 min vira hard visible maximum com scheduler único por chave subscribed e sem retry automático | `pending refreshed review` |
+| `CRIT-11` | `medium security/tests` | `Integrated` | normalização runtime + fixture canário; chave curta/malformada totalmente redatada | `pending refreshed review` |
 
 ### Failure Modes & Edge Cases
 
@@ -476,12 +512,13 @@ TTL boundaries use the injected clock and the age of the last successful respons
 - [ ] retorno rápido usa cache correto; falha de revalidação mantém dados com aviso e timestamp.
 - [ ] request idêntico em voo é compartilhado; refresh explícito não cria storm.
 - [ ] fresh/stale/expired respeitam exatamente `60_000/60_001ms` e `600_000/600_001ms`; 21ª chave, promoção por leitura e late completion pós-eviction são determinísticos.
+- [ ] stale montado após revalidação falha desaparece no hard limit sem nova request automática, timer duplicado ou retorno do dado expirado.
 - [ ] logout durante request aborta/ignora resultado e apaga cache.
 - [ ] 401 encerra sessão; 404 detalhe é vazio específico; 429 oferece retry explícito sem loop.
 - [ ] status fiscal desconhecido é exibido como texto seguro, não descartado.
-- [ ] URL inválida é normalizada sem loop e respeita limite de 365 dias.
-- [ ] `documento`/`idCompra` não aparecem em URL/history/storage/referrer/console; credenciais, CNPJ configurado e chaves integrais não aparecem no DOM ou mocks.
-- [ ] Geral não abre `/eventos`, `/eventos/resumo`, `/eventos/produtos` nem SSE; esses consumidores só vivem no shell legado.
+- [ ] cada classe da truth table produz URL/cache key canônicas com no máximo um `replace`, zero request pré-canonicalização e intervalo máximo de 365 dias entre endpoints.
+- [ ] `documento`/`idCompra` aparecem somente no input e request/cache key fiscal em memória, nunca em URL/history/storage/referrer/console/outro DOM; credenciais, CNPJ configurado e chaves integrais não aparecem no DOM ou mocks.
+- [ ] Geral não abre `/eventos*` nem SSE; `/eventos/:refId` abre somente seu fetch de detalhe; lista/resumo/produtos/SSE vivem apenas em `/erros`.
 
 ### Residual Unknowns / Risks
 
@@ -528,8 +565,8 @@ TTL boundaries use the injected clock and the age of the last successful respons
 
 | Source | Why It Applies Now | Must Preserve | Must Avoid | Execution Impact |
 | --- | --- | --- | --- | --- |
-| `rule-react-react-architecture-always-on` | React UI/state/effects/a11y | render puro, ownership único, estados/a11y explícitos | mutação em render, estado duplicado, effect sem cleanup | ingestão binding após aprovação; orientar componentes/hooks |
-| `wf-react-change-ui-boundary-method` | rotas/componentes/hooks | comportamento observável e adapter isolado | acoplamento da UI ao provider/segredo | seguir passos e evidence lanes |
+| `rule-react-react-architecture-always-on` | React UI/state/effects/a11y | render puro, ownership único, estados/a11y explícitos, lint real de Hooks | mutação em render, estado duplicado, effect sem cleanup/suppression | ESLint React Hooks + adherence review + browser races |
+| `wf-react-change-ui-boundary-method` | rotas/componentes/hooks | comportamento observável, normalizador/adapter isolado | type-cast de JSON cru, acoplamento da UI ao provider/segredo | seguir passos e evidence lanes |
 | `rule-vite-vite-build-runtime-always-on` | build/env/assets | manifest/scripts e env público restrito | tratar proxy/preview como produção ou expor segredo | build reproduzível; nenhuma env fiscal no cliente |
 | `wf-vite-change-build-runtime-boundary-method` | bundle/runtime boundary | separação dev proxy/produção | claim de deploy neste TODO | validar apenas build local |
 | `frontend-race-condition-validation` | cache/races/logout | chave completa, cancelamento, stale controlado, limpeza | last-response-wins e cache cross-session | FRC requerido antes de Local-Implemented |
@@ -563,7 +600,7 @@ TTL boundaries use the injected clock and the age of the last successful respons
 - **Critique decision:** `required`
 - **Why this decision:** medium, cross-module, rota pública autenticada e critical journey.
 - **Critique status:** `changes_required_before_approval`
-- **Evidence / reference:** crítica no checkpoint `ed43003` retornou `CRIT-01..CRIT-06`; todos roteados como `Integrated`, aguardando checkpoint e rerun independente.
+- **Evidence / reference:** R1 `CRIT-01..06` confirmados como resolvidos por R2; R2 em `7d97c7e` retornou `CRIT-07..11`, integrados e aguardando novo checkpoint/rerun.
 
 ## Gate: Assumption Code Coherence
 
