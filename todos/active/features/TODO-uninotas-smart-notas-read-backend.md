@@ -28,7 +28,7 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 ## Implementation Intent
 
 - **Current delivery:** candidato local do módulo NestJS `fiscal-notes` com lista e detalhe Smart Notas por contexto fiscal, normalização defensiva, configuração validada e testes; não promove ainda o owner canônico nem ativa produção.
-- **Planned next steps:** TODO de cutover/runtime para injetar segredos, habilitar a capacidade e promover ownership; TODO React para seletor/cache; TODO de DANFE/XML; TODO de falhas/casos operacionais.
+- **Planned next steps:** abrir `todos/active/features/TODO-uninotas-smart-notas-read-cutover.md` antes do closeout para injetar segredos, calibrar réplica×quota, comprovar sink de auditoria, habilitar/deployar, smoke/rollback, rotação HMAC e promover ownership; depois TODO React, DANFE/XML e falhas/casos.
 - **Anticipatory implementation authorized now:** `none`.
 - **Rationale:** o corte cria a menor fronteira funcional completa que respeita a autoridade Smart Notas e pode ser consumida sem acoplar o backend ao frontend ou ao PostgreSQL.
 
@@ -70,6 +70,7 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 - [ ] `SCOPE-08` Corrigir o filtro global para nunca devolver/logar query string nem valores de parâmetros dinâmicos; cobrir configuração, autorização, codec `noteId`, adapter, serviço, controller/wiring, limites de capacidade e erros com testes determinísticos.
 - [ ] `SCOPE-09` Consolidar o contrato candidato nas seções `target_planned` de `modules/fiscal-notes-and-documents.md` e `modules/runtime-and-deployment.md`, preservando o owner/runtime atual até TODO de cutover.
 - [ ] `SCOPE-10` Aplicar limite por instância de chamadas upstream, cancelamento por desconexão/timeout, zero retry e logs operacionais sanitizados com contexto, operação, outcome e duração, sem identificador fiscal ou PII.
+- [ ] `SCOPE-11` Fixar origin/base path Smart Notas, rejeitar redirect, aplicar rate budget por ator/contexto, excluir PII do DTO, emitir `Cache-Control: no-store` e auditoria read-only sanitizada.
 
 ## Out of Scope
 
@@ -129,6 +130,7 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 | `MonitorNotes` | `backend/src/config/configuration.spec.ts` | `M` | provar parsing/validação da configuração |
 | `MonitorNotes` | `backend/src/common/filters/all-exceptions.filter.ts` | `M` | substituir URL crua por template de rota sanitizado em resposta/log |
 | `MonitorNotes` | `backend/src/common/filters/all-exceptions.filter.spec.ts` | `A|M` | provar ausência de query, `noteId`, documento e `idCompra` em erro/log |
+| `MonitorNotes` | `backend/test/smart-notas-read/**` | `A|M` | stub/harness local de load, spike, stress e recovery sem atingir o provedor real |
 | `MonitorNotes` | `backend/.env.example` | `M` | documentar nomes e semântica sem segredo |
 | `MonitorNotes` | `backend/README.md` | `M` | documentar endpoints e configuração operacional |
 | `uninotas-foundation` | `modules/fiscal-notes-and-documents.md` | `M` | promover contrato da capacidade entregue |
@@ -165,8 +167,10 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 
 ### Authorization and activation
 
-- Ambos os endpoints exigem JWT ativo pelo guard global e permitem `ADMIN|GESTOR|ANALISTA|LEITOR`; o primeiro corte não diferencia setor, perfil ou emissor e não concede escrita fiscal.
+- Ambos os endpoints exigem JWT normal pelo guard global e permitem `ADMIN|GESTOR|ANALISTA|LEITOR`; o primeiro corte não diferencia setor, perfil ou emissor e não concede escrita fiscal.
+- A janela canônica atual é aceita explicitamente: desativação pode levar até 30 segundos para surtir efeito por causa do cache da `JwtStrategy`; testes cobrem acesso imediato após cache aquecido e negação após expiração. Mudança de perfil não altera acesso porque os quatro perfis são permitidos.
 - `SMART_NOTAS_READ_ENABLED=false` é o default seguro. Nesse estado, nenhuma chamada externa ocorre e as rotas respondem `503/SmartNotasDesabilitado`; o TODO de cutover injeta segredos e habilita a capacidade.
+- Respostas `200` usam `Cache-Control: no-store`. O primeiro contrato exclui PII por padrão: nome/documento/e-mail/telefone/endereço/inscrições do tomador e retorno bruto não são expostos.
 
 ### `GET /api/v1/notas`
 
@@ -197,14 +201,13 @@ Resposta `200`:
 | `environment`, `model`, `purpose`, `platform`, `product` | string | nullable |
 | `scheduledIssueDate`, `paymentDate` | `YYYY-MM-DD` | nullable; datas `DD/MM/YYYY` são normalizadas sem timezone |
 | `competence` | string | nullable; preserva datetime sem inventar offset |
-| `recipientName`, `recipientDocument`, `recipientEmail`, `recipientCity`, `recipientState`, `recipientCountry` | string | nullable |
 | `unitValue`, `totalValue` | decimal string | nullable; forma canônica sem binary float |
 
 ### `GET /api/v1/notas/:noteId`
 
 - Não aceita `contextoFiscal`, CNPJ ou identificador do provedor. O `noteId` determina o contexto confiável e dispara uma única chamada direta a `/notas/{idInterno}`; é proibido procurar a nota caminhando páginas da lista.
-- Resposta `200` contém todos os campos de `FiscalNoteSummary` e acrescenta, sempre presentes porém nullable: `issueDate: YYYY-MM-DD|null`, `neighborhood`, `postalCode`, `referencedAccessKey`, `street`, `addressNumber`, `addressComplement`, `stateRegistration`, `municipalRegistration`, `operationNature`, `phone` como `string|null`, e `quantity` como decimal string ou `null`.
-- `providerIdInterno`, `retorno` bruto e payload bruto não fazem parte do contrato público.
+- Resposta `200` contém todos os campos de `FiscalNoteSummary` e acrescenta, sempre presentes porém nullable: `issueDate: YYYY-MM-DD|null`, `referencedAccessKey: string|null`, `operationNature: string|null` e `quantity` como decimal string ou `null`.
+- `providerIdInterno`, nome/documento/e-mail/telefone/endereço/inscrições do tomador, `retorno` bruto e payload bruto não fazem parte do contrato público. Ampliar campos pessoais exige decisão própria no TODO do consumidor.
 
 ### Opaque `noteId` integrity contract
 
@@ -212,44 +215,63 @@ Resposta `200`:
 - MAC: HMAC-SHA-256 com `SMART_NOTAS_NOTE_ID_SECRET_BASE64`, decodificado para no mínimo 32 bytes; comparação usa `timingSafeEqual` após validar comprimentos.
 - “Opaco” significa que consumidores não podem construir, decodificar ou depender do conteúdo. HMAC garante integridade, não confidencialidade; por isso o valor também é redatado de logs/erros.
 - Somente `v1` e uma chave ativa são aceitos neste corte. Rotação invalida IDs anteriores, que são recuperáveis por nova listagem; rotação multi-chave pertence ao cutover/hardening.
+- `providerIdInterno` decodificado deve ser string no formato documentado `^SN-[A-Za-z0-9-]{1,124}$`; qualquer valor fora do bound invalida o token. O adapter ainda aplica `encodeURIComponent` e concatena exatamente um segmento, nunca uma URL fornecida pelo payload.
+
+### Credential destination and pairing
+
+- A base efetiva é fixada ao origin `https://app.smart-notas.com` e base path `/api`. `SMART_NOTAS_BASE_URL`, quando presente, deve ser exatamente esse valor canônico, sem userinfo, query, fragmento ou path alternativo; testes usam override de DI, não configuração de produção.
+- `fetch` usa `redirect: manual`; qualquer `3xx` é rejeitado sem seguir nem reenviar `Authorization`/CNPJ. Paths são construídos internamente a partir da base fixada.
+- Cada contexto é um objeto indivisível `{token,cnpj}` na configuração; não existem lookups independentes que possam cruzar token de um emissor com CNPJ do outro.
+- O probe opt-in chama `/empresa` para cada par, compara o CNPJ normalizado ao esperado e bloqueia cutover em mismatch antes de habilitar tráfego.
 
 ### Stable error catalog
 
-| HTTP | `erro` estável | Condição |
-| --- | --- | --- |
-| `400` | `ConsultaDeNotasInvalida` | query, intervalo, bound ou `noteId` estruturalmente inválido/adulterado |
-| `401` | contrato JWT atual | token UniNotas ausente/inválido/inativo |
-| `404` | `NotaFiscalNaoEncontrada` | Smart Notas devolve 404 no detalhe |
-| `502` | `SmartNotasCredencialRejeitada` | upstream 401/403 com configuração habilitada |
-| `502` | `SmartNotasContratoInvalido` | upstream 2xx com JSON/shape/tamanho inválido ou 400/422 inesperado após validação local |
-| `503` | `SmartNotasDesabilitado` | flag local desligada |
-| `503` | `SmartNotasOcupado` | limite concorrente por instância atingido; não enfileira |
-| `503` | `SmartNotasIndisponivel` | timeout, rede, upstream 429 ou 5xx |
+| HTTP | `erro` estável | `mensagem` estável | Condição |
+| --- | --- | --- | --- |
+| `400` | `ConsultaDeNotasInvalida` | `Parâmetros da consulta de notas são inválidos.` | query, intervalo, bound ou `noteId` estruturalmente inválido/adulterado |
+| `401` | contrato JWT atual | contrato JWT atual | token UniNotas ausente/inválido/inativo segundo a janela canônica |
+| `404` | `NotaFiscalNaoEncontrada` | `Nota fiscal não encontrada.` | Smart Notas devolve 404 no detalhe |
+| `429` | `LimiteDeConsultaExcedido` | `Limite temporário de consultas atingido.` | budget local por ator ou contexto; inclui `Retry-After`, sem chamada upstream |
+| `sem resposta` | `client_aborted` apenas em métrica/log | `n/a` | cliente desconectou; aborta upstream e não escreve no socket |
+| `502` | `SmartNotasDestinoInvalido` | `Destino configurado para o provedor é inválido.` | redirect upstream ou destino fora do allowlist |
+| `502` | `SmartNotasCredencialRejeitada` | `O provedor rejeitou a configuração fiscal.` | upstream 401/403 com configuração habilitada |
+| `502` | `SmartNotasContratoInvalido` | `O provedor retornou dados incompatíveis.` | status 2xx diferente de 200; 200 com JSON/shape/tamanho inválido; list 404; ou qualquer 4xx inesperado, inclusive 400/422 |
+| `503` | `SmartNotasDesabilitado` | `Consulta fiscal temporariamente desabilitada.` | flag local desligada |
+| `503` | `SmartNotasOcupado` | `Consultas fiscais temporariamente ocupadas.` | limite concorrente por instância; não enfileira |
+| `503` | `SmartNotasLimiteExterno` | `O provedor limitou temporariamente as consultas.` | upstream 429; não faz retry |
+| `503` | `SmartNotasIndisponivel` | `O provedor fiscal está temporariamente indisponível.` | rede ou upstream 5xx |
+| `504` | `SmartNotasTimeout` | `O provedor fiscal excedeu o tempo de resposta.` | timeout local; distinto de disconnect |
 
-- O envelope continua `{statusCode,erro,mensagem,caminho,timestamp}`; `mensagem` é estável/sanitizada e `caminho` usa template como `/api/v1/notas/:noteId`, nunca URL/query real.
+- O envelope continua `{statusCode,erro,mensagem,caminho,timestamp}`. Validação Nest das duas rotas é remapeada explicitamente para `ConsultaDeNotasInvalida`; `mensagem` é estável/sanitizada e `caminho` usa o template registrado como `/api/v1/notas/:noteId` ou o fallback fixo `/api/*`, nunca URL/query/path real do cliente.
 - Resposta provider maior que 2 MiB é `SmartNotasContratoInvalido`. Nenhum erro vira lista vazia, fallback PostgreSQL ou mensagem/payload cru.
+- Campos legitimamente ausentes/nulláveis tornam-se `null`; campo presente com tipo, formato ou range inválido invalida toda a resposta como `SmartNotasContratoInvalido`. Somente `providerStatus` não vazio admite vocabulário futuro literal.
 
 ### Capacity and observability contract
 
 - `SMART_NOTAS_TIMEOUT_MS`: default `10000`, range `1000..30000`; `SMART_NOTAS_MAX_CONCURRENCY`: default `8`, range `1..64`.
+- Budgets locais configuráveis e fail-closed: por ator `SMART_NOTAS_RATE_PER_USER_MINUTE=30` (range 1..120) e por contexto `SMART_NOTAS_RATE_PER_CONTEXT_MINUTE=120` (range 1..600), janelas fixas em memória, mapas com limpeza/bound; ambos são aplicados antes do semaphore. O TODO de cutover deve recalibrar `réplicas × budget` contra quota real.
 - Sem retry e sem fila local. O fetch é abortado no timeout ou desconexão do consumidor; o slot concorrente é liberado em `finally`.
-- Log estruturado mínimo pertence ao adapter: correlation ID local, operação `list|detail`, contexto fiscal, outcome normalizado, status HTTP upstream quando existir e duração; proíbe query, `noteId`, documento, `idCompra`, CNPJ, Authorization e payload.
+- Log operacional estruturado do adapter: correlation ID local, operação `list|detail`, contexto fiscal, outcome normalizado, status HTTP upstream quando existir e duração.
+- Evento de auditoria read-only pertence ao serviço de aplicação: actor ID interno, operação, contexto, outcome e correlation ID; não inclui query, `noteId`, documento, `idCompra`, CNPJ, Authorization, campos de nota ou payload. O cutover deve comprovar retenção/destino do sink antes de ativar produção.
+- O filtro global nunca loga `request.url`, exception message, stack ou erro Prisma cru; usa somente método, template/fallback, código estável, correlation ID e status. Testes incluem rota não encontrada, validação, provider exception, stack canário e Prisma default.
 
 ## Definition of Done
 
 - [ ] `DOD-01` Lista context-scoped retorna DTO paginado normalizado e nunca mistura Unifast/Prosperar.
 - [ ] `DOD-02` Detalhe resolve `noteId` assinado para um único contexto/`idInterno`, rejeita adulteração e não aceita CNPJ/token arbitrário.
 - [ ] `DOD-03` Com a capacidade habilitada, configuração exige base URL HTTPS, credenciais independentes, CNPJs válidos e segredo HMAC base64 de 32+ bytes; desabilitada por padrão, não exige credenciais e nunca chama o provedor.
-- [ ] `DOD-04` Provider status/nullabilidade/datas/decimais são mapeados defensivamente; payload bruto e retorno sensível não atravessam o contrato público.
+- [ ] `DOD-04` Ausência/null legítimo, datas e decimais são mapeados defensivamente; valor presente malformado falha como contrato inválido, status futuro não vazio é preservado e payload/PII/retorno bruto não atravessam o contrato público.
 - [ ] `DOD-05` Timeout/rede/401/403/5xx/shape inválido produzem falha explícita e sanitizada; 404 de detalhe permanece 404; nenhum caso cai para `logs`.
 - [ ] `DOD-06` Controller é fino, integração fica atrás de porta/token explícito e o módulo não importa Prisma.
 - [ ] `DOD-07` Testes unitários/integração e build/lint do backend passam no runner declarado.
 - [ ] `DOD-08` Probes read-only redatados comprovam lista e detalhe nos dois contextos sem persistir identificadores, payloads ou valores privados.
 - [ ] `DOD-09` Módulos canônicos registram o candidato local sem promover ownership: `events-and-classification` continua owner atual e `fiscal-notes-and-documents` continua `target_planned`.
-- [ ] `DOD-10` `ADMIN|GESTOR|ANALISTA|LEITOR` ativos passam pelos dois GETs; usuário ausente/inativo continua bloqueado pelo JWT e nenhuma rota fiscal de escrita existe.
-- [ ] `DOD-11` Uma request gera no máximo uma chamada Smart Notas; concorrência por instância é limitada, desconexão/timeout aborta o fetch, upstream `429` é explícito e nenhum retry/paginação implícita ocorre.
-- [ ] `DOD-12` Respostas e logs de exceção usam template de rota sanitizado e nunca incluem query, `noteId`, documento, `idCompra`, token, CNPJ ou payload do provedor.
-- [ ] `DOD-13` O contrato público abaixo é provado campo a campo, incluindo nullability, paginação, status desconhecido, bounds e catálogo estável de erros.
+- [ ] `DOD-10` `ADMIN|GESTOR|ANALISTA|LEITOR` passam pelos dois GETs; JWT ausente falha e a janela herdada de revogação de até 30 segundos é aceita/provada até a negação pós-expiração; nenhuma rota fiscal de escrita existe.
+- [ ] `DOD-11` Uma request gera no máximo uma chamada Smart Notas; budgets por ator/contexto e concorrência por instância são limitados, disconnect/timeout aborta, `429` local/upstream é explícito e nenhum retry/paginação implícita ocorre.
+- [ ] `DOD-12` Respostas e logs de exceção usam template/fallback fixo e nunca incluem URL/path/query real, stack/message cru, `noteId`, documento, `idCompra`, token, CNPJ, Prisma detail ou payload.
+- [ ] `DOD-13` O contrato público é provado campo a campo, incluindo nullability, malformed-vs-missing, paginação, status desconhecido, bounds e catálogo exaustivo/precedência de erros.
+- [ ] `DOD-14` Origin/base path são fixos, redirects não recebem credenciais, pares token/CNPJ são indivisíveis e verificados; DTOs excluem PII, respostas usam `no-store` e eventos de acesso registram ator/operação/contexto/outcome sem recurso sensível.
+- [ ] `DOD-15` Load/stress local contra upstream stub comprova budgets, fairness entre usuários/contextos, máximo concorrente, degradação controlada, abort e recuperação sem tráfego contra Smart Notas real.
 
 ## Validation Steps
 
@@ -263,15 +285,18 @@ Resposta `200`:
 - [ ] `VAL-08` Rodar teste de aplicação/guard para os quatro perfis nos dois GETs e negativas de autenticação, sem depender apenas de teste estrutural de metadata.
 - [ ] `VAL-09` Rodar testes de saturação/abort/timeout/429 e confirmar `one request -> at most one upstream call`.
 - [ ] `VAL-10` Rodar teste do filtro global com query/param canários e capturar logger/resposta para provar redaction.
+- [ ] `VAL-11` Rodar testes hostis de origin/userinfo/query/fragment/base path/redirect e provar que nenhuma credencial é transmitida ao destino rejeitado.
+- [ ] `VAL-12` Rodar teste de privacy contract/no-store/audit event e provar ausência de todos os campos pessoais excluídos.
+- [ ] `VAL-13` Rodar RLS-E1 contra stub local com estágios congelados abaixo; capturar p50/p95/p99, throughput, error rate, pico upstream concorrente, respostas controladas 429/503 e recuperação.
 
 ## Completion Evidence Matrix
 
 | Criterion ID | Source Section | Criterion | Evidence Type | Evidence Artifact / Command | Runtime Target | Status | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `DOD-01..07,DOD-10..13` | `Definition of Done` | contratos, isolamento, autorização, capacidade, redaction, arquitetura e testes | `code+test` | paths/testes e comandos acima | `backend local` | `planned` | evidência será itemizada antes do claim |
+| `DOD-01..07,DOD-10..15` | `Definition of Done` | contratos, isolamento, autorização, privacidade, capacidade/load, redaction, arquitetura e testes | `code+test` | paths/testes e comandos acima | `backend local` | `planned` | evidência será itemizada antes do claim |
 | `DOD-08` | `Definition of Done` | ambos os contextos respondem no adapter real | `runtime` | probe redatado sem dados privados | `Smart Notas read-only` | `planned` | sem mutações |
 | `DOD-09` | `Definition of Done` | consolidação target-planned sem cutover | `doc+review` | módulos âncora + registry invariants + validator | `foundation` | `planned` | owner atual preservado |
-| `VAL-01..10` | `Validation Steps` | validação completa do corte | `test+review` | comandos listados | `local/foundation` | `planned` | detalhar resultados na entrega |
+| `VAL-01..13` | `Validation Steps` | validação completa do corte | `test+review` | comandos listados | `local/foundation` | `planned` | detalhar resultados na entrega |
 
 ## External Dependency Readiness
 
@@ -283,7 +308,7 @@ Resposta `200`:
 
 ## Package-First Assessment
 
-- **Queries executed:** `query_packages.sh --search "smart notas"`, `--search "http client"`, `--stack node --all`.
+- **Queries executed:** `query_packages.sh --search "smart notas"`, `--search "http client"`, `--search "rate limit"`, `--search "semaphore"`, `--stack node --all`.
 - **Relevant proprietary packages found:** `none`.
 - **READMEs read:** `n/a`.
 - **Decision:** implementação host-local atrás de porta/adapter, usando `fetch` nativo do Node 22; nenhuma dependência nova.
@@ -335,8 +360,9 @@ Resposta `200`:
 - [x] `D-08` Não haverá cache/polling no backend; cache stale-while-revalidate pertence ao TODO React. Ref: SD-08/ST-04.
 - [x] `D-09` Controller fino -> serviço de aplicação -> porta -> adapter singleton; tipos wire do provedor não escapam da infraestrutura. Ref: NestJS architecture rule.
 - [x] `D-10` Este TODO termina em `Local-Implemented, Provisional`; não altera ownership canônico nem ativa/deploya a capacidade. Cutover atômico pertence a TODO posterior. Ref: registry `planned` + reviewer convergence.
-- [x] `D-11` A flag é false por default; quando habilitada, Joi exige credenciais/segredo e o adapter impõe timeout, concorrência sem fila, cancelamento, 2 MiB e zero retry. Ref: rollout/capacity findings.
+- [x] `D-11` A flag é false por default; quando habilitada, Joi exige pares indivisíveis de credenciais/segredo e o adapter impõe origin fixo/no-redirect, rate por ator/contexto, timeout, concorrência sem fila, cancelamento, 2 MiB e zero retry. Ref: rollout/capacity findings.
 - [x] `D-12` `noteId` HMAC é opaco-by-contract, não confidencial; filtro/logs redatam URL, query e parâmetros, e o contrato de erro é o catálogo congelado acima. Ref: security findings.
+- [x] `D-13` O primeiro DTO exclui PII de tomador, usa `Cache-Control: no-store` e gera auditoria read-only sanitizada; ampliação de campos depende do TODO consumidor. Ref: data minimization review.
 
 ## Module Decision Baseline Snapshot
 
@@ -349,7 +375,7 @@ Resposta `200`:
 
 ## Decision Baseline (Frozen Before Implementation)
 
-- [ ] `D-01..D-12` estão resolvidas e serão recongeladas após novo baseline/revisões; implementação continua proibida até `preflight-go` e `APROVADO`.
+- [ ] `D-01..D-13` serão recongeladas após integrar a terceira rodada de findings e publicar novo baseline; implementação continua proibida até revisões, `preflight-go` e `APROVADO`.
 
 ## Architecture Change Governance
 
@@ -384,7 +410,7 @@ Resposta `200`:
 | test | note application/adapter | Jest module/contract specs | context leak, fallback, raw shape, tampered `noteId` | `implement-in-this-todo` | DOD-01..06/VAL-02 |
 | test | app wiring/auth | Nest testing module + real global guards | qualquer perfil ativo bloqueado, usuário ausente/inativo aceito, módulo não registrado | `implement-in-this-todo` | DOD-10/VAL-08 |
 | test | exception filter | logger/response spies with canary URL | query, identifier ou PII em log/error | `implement-in-this-todo` | DOD-12/VAL-10 |
-| structural test | fiscal module imports | bounded import scan/Jest | Prisma/LogsModule, controller->fetch ou wire DTO escapando adapter | `implement-in-this-todo` | DOD-06/VAL-02 |
+| structural test | fiscal module imports/exports/decorators | Jest usando TypeScript compiler API: AST de imports/calls/decorators + whitelist de exports | qualquer import `prisma|logs` no módulo; `fetch|node:http` no controller; `@Public`; tipo wire exportado fora de `infrastructure` | `implement-in-this-todo` | DOD-06/VAL-02 |
 | analyzer | NestJS surface | `node_capability_surface_audit.py` | manifest/scripts/capability drift | `already-enforced` | VAL-01 |
 | review | code/module diff | architecture adherence review | brittle shortcut/hidden dual-read | `implement-in-this-todo` | final review package |
 
@@ -395,7 +421,7 @@ Resposta `200`:
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set`
 - **Decision review status:** `not_run`
-- **Decision review evidence / resolution:** `initial fresh opinion findings integrated into D-06/D-10/D-12 and the frozen HTTP contract; authoritative rerun pending refreshed baseline`.
+- **Decision review evidence / resolution:** `round 3 over e2caa58 returned NO-GO; destination, strict decoder, full error redaction, auth-cache, providerId validation, deterministic harness and RLS findings integrated; rerun pending next baseline`.
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -409,11 +435,11 @@ Resposta `200`:
 - **Why this decision:** contrato público/segredos/contextos exigem review a partir de baseline autoritativo reproduzível.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `pending refreshed baseline; predecessor 78825a4837ac91754bdd191e2db6a279ca78dfda`
+- **Baseline commit:** `pending next refreshed baseline; predecessor e2caa585fcdd9ed2ed546bd313b834e2213ea07b`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `not_run`
-- **Findings summary:** a decisão de acesso e a reconvergência material exigem novo commit/push antes das revisões autoritativas.
-- **Evidence / reference:** predecessor `78825a4` permanece publicado; refresh ainda pendente.
+- **Findings summary:** rounds formais sobre `e2caa58` exigiram nova reconvergência material; novo commit/push precisa preceder o rerun.
+- **Evidence / reference:** predecessor `e2caa58` permanece publicado; refresh seguinte pendente.
 - **Waiver authority / reference:** `n/a`.
 - **Pre-freeze packet-prep rule:** review rows below are `prepared-pre-freeze`, not passed.
 
@@ -442,6 +468,7 @@ Resposta `200`:
 | `A-02` | JWT global continuará protegendo o novo controller sem guard adicional | `src/app.module.ts`; `JwtAuthGuard` global | corrigir wiring antes de approval | `High` | `Keep as Assumption` |
 | `A-03` | Nenhum módulo Smart Notas/HTTP já existe no backend | `rg` e node capability audit em 2026-09-26 | reutilizar owner existente | `High` | `Keep as Assumption` |
 | `A-04` | Tokens/CNPJs dos dois contextos estão disponíveis localmente | somente nomes em `.env`; probes redatados no discovery | probe real fica bloqueado, implementação/testes mockados continuam | `High` | `Keep as Assumption` |
+| `A-05` | O endpoint oficial usado pelos probes permanece `https://app.smart-notas.com/api` | OpenAPI oficial server `/api` + docs/probes no mesmo host, fingerprint `cc2a415...` em 2026-09-26 | parar, rever allowlist e recongelar antes de transmitir credenciais | `High` | `Keep as Assumption` |
 
 ## Execution Plan
 
@@ -453,18 +480,18 @@ Resposta `200`:
 ### Ordered Steps
 
 1. Ingerir regras vinculantes e confirmar routing/authority após `APROVADO`.
-2. Criar testes fail-first para contrato público, configuração condicional, quatro perfis, `noteId`, normalização, contexto, catálogo de erros, redaction e limites de capacidade.
+2. Criar testes fail-first para contrato público mínimo/no-store, configuração/origin/redirect, quatro perfis e revogação cacheada, `noteId`, normalização strict, contexto, catálogo exaustivo de erros, auditoria/redaction e rate/concurrency.
 3. Implementar DTOs/erros, codec HMAC, porta, serviço de aplicação e teste estrutural sem Prisma/LogsModule.
 4. Implementar adapter `fetch` com semaphore fail-fast, timeout/request-abort, resposta máxima de 2 MiB, headers server-side, shape guards, observabilidade sanitizada e zero retry.
 5. Corrigir o filtro global para usar template de rota; registrar módulo/controller no AppModule e documentar flag/env/endpoints.
-6. Rodar testes/build/lint; com flag opt-in, repetir `/empresa` binding e probes lista/detalhe redatados nos dois contextos.
+6. Rodar testes/build/lint e RLS-E1 contra stub local; com flag opt-in, repetir `/empresa` binding e probes lista/detalhe redatados nos dois contextos.
 7. Consolidar apenas o candidato `target_planned`, rodar audits/guards e encerrar no máximo como `Local-Implemented, Provisional`, abrindo o handoff de cutover.
 
 ### Test Strategy
 
 - **Strategy:** `test-first`.
 - **Why:** contrato externo genérico e isolamento de contexto exigem falhas explícitas antes do adapter.
-- **Fail-first targets:** config disabled/enabled, quatro perfis, `noteId` adulterado, credencial errada por contexto, provider 400/401/403/404/422/429/5xx/timeout, oversize/shape inválido, decimal/data nullable, status desconhecido, saturation/abort, filtro com canários e ausência de Prisma/log fallback.
+- **Fail-first targets:** config disabled/enabled e hostile origin/redirect, quatro perfis + cache de revogação, `noteId` adulterado/segment injection, credencial cruzada, provider 3xx/qualquer 4xx/5xx/timeout, oversize/shape malformed-vs-null, status desconhecido, rate/fairness/saturation/abort, PII/no-store/audit, filtro/stack/Prisma canários e ausência de Prisma/log fallback.
 
 ### Pre-APROVADO RED Evidence Capture
 
@@ -483,8 +510,8 @@ Resposta `200`:
 
 | Producer Surface | Consumer | Contract Impact | Consumer Work In This TODO | Follow-up |
 | --- | --- | --- | --- | --- |
-| `GET /api/v1/notas` | React Geral | novo contrato paginado context-scoped | `none` | TODO React selector/cache |
-| `GET /api/v1/notas/:noteId` | React detalhe | novo DTO/erro estável | `none` | TODO React detalhe |
+| `GET /api/v1/notas` | React Geral | contrato paginado context-scoped, sem PII, `no-store` | `none` | TODO React selector/cache decide qualquer ampliação de campo |
+| `GET /api/v1/notas/:noteId` | React detalhe | DTO fiscal mínimo sem PII + erro estável | `none` | TODO React detalhe decide necessidade/masking de PII |
 | env Smart Notas | Railway/runtime | flag false por default + variáveis server-only | exemplo/config apenas | TODO cutover injeta segredos e ativa |
 | `note_read_model` | capability registry | candidato não altera owner atual | `none` | TODO cutover promove atomicamente |
 
@@ -492,8 +519,9 @@ Resposta `200`:
 
 | Repository / CI Surface | Why In Scope | Behavior / Scenario Covered | Preconditions | Local CI-Equivalent Command | Required Before | Status | Evidence | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| backend Jest | lógica/contrato mudam | lista/detalhe/DTO/nullability/status/bounds/error/config/HMAC/capacity/redaction | fixtures provider determinísticas + URL canaries + fake timers/abort | `npm test -- --runInBand` | `Local-Implemented` | `planned` | pending | sem dados reais |
-| backend app/guard | acesso muda | quatro perfis ativos acessam list/detail; sem JWT/inativo falha | Nest testing app com guards reais e adapter fake | `npm test -- --runInBand` | `Local-Implemented` | `planned` | pending | não aceitar teste só de metadata |
+| backend Jest | lógica/contrato mudam | lista/detalhe/DTO strict/status/bounds/error/config/HMAC/origin/rate/capacity/privacy/redaction | fixtures provider determinísticas + URL/stack/PII canaries + fake timers/abort | `npm test -- --runInBand` | `Local-Implemented` | `planned` | pending | sem dados reais |
+| backend app/guard | acesso muda | quatro perfis acessam; sem JWT falha; cache aquecido permite até 30s e nega após expiração | Nest testing app com guards reais, fake timers e adapter fake | `npm test -- --runInBand` | `Local-Implemented` | `planned` | pending | não aceitar teste só de metadata |
+| backend local RLS | pressão/capacidade | bursts mistos provam rate/fairness/semaphore/recovery sem exceder stub | Nest local + upstream stub; tokens sintéticos; nenhuma rede Smart Notas | staged `runtime_load_probe.sh` + métricas do stub | `Local-Implemented` | `planned` | pending | RLS-E1 abaixo |
 | backend build | novo módulo/DTO | compilação Nest/TS | Node 22 + deps atuais | `npm run build` | `Local-Implemented` | `planned` | pending | runner Windows |
 | backend lint | novos arquivos TS | regras estáticas/formatação | deps atuais | `npm run lint` | `Local-Implemented` | `planned` | pending | inspecionar rewrites |
 | Smart Notas read probe | integração real | `/empresa` binding + lista/detalhe direto em ambos contextos | env local preenchido; flag opt-in; janela curta | probe opt-in redatado | `Local-Implemented` | `planned` | pending | sem persistir payload/identificador |
@@ -503,6 +531,7 @@ Resposta `200`:
 
 - `SMART_NOTAS_READ_ENABLED=false` permite que a imagem inicialize sem credenciais e impede chamadas externas; quando true, Joi exige base URL, dois pares token/CNPJ, segredo HMAC, timeout e concorrência válidos.
 - Este TODO não liga a flag fora do probe local nem muda `backend/.env`. O deploy precisa receber segredos antes de o TODO de cutover habilitar a flag.
+- O cutover também precisa fixar replica count, recalibrar rate/context contra quota do provedor, validar o sink/retention de auditoria, rodar `/empresa`, staged smoke e rollback com flag false.
 - As rotas são aditivas e não consumidas pelo frontend atual; coexistem inativas com `/eventos`, sem promover ownership, até o cutover do consumidor.
 
 ## Plan Review Gate
@@ -513,9 +542,9 @@ Resposta `200`:
 
 - [x] Architecture — owner fiscal, porta explícita e source authority preservados.
 - [x] Code Quality — controller fino, decoder separado e erros tipados evitam espalhar condicionais.
-- [x] Tests — fail-first cobre contrato, wiring e falhas; live probe é complementar, não substitui fixtures.
-- [x] Performance — uma chamada provider por request, semaphore sem fila, response cap, abort/timeout e zero retry/cache/polling limitam amplificação.
-- [x] Security — segredo dedicado, context resolution server-side, input bounds e redaction do filtro/logs são obrigatórios.
+- [x] Tests — fail-first cobre contrato, wiring, privacidade, auth-cache, origin/redirect, rate/load e falhas; live probe é complementar.
+- [x] Performance — rate por ator/contexto, uma chamada, semaphore sem fila, response cap, abort/timeout, zero retry e RLS local limitam amplificação.
+- [x] Security — minimização de PII/no-store/audit, origin fixo, segredo dedicado, context resolution, bounds e redaction integral são obrigatórios.
 - [x] Elegance — módulo coeso sem dependency nova, Prisma ou dual-read.
 - [x] Structural Soundness — coexistência `/eventos` e `/notas` é explícita e sem fallback oculto.
 
@@ -552,10 +581,10 @@ Resposta `200`:
   - **Recommendation:** `A`, por preservar autoridade única, testabilidade e troca controlada do provedor.
 
 - **Issue ID:** `SEC-01`
-  - **Severity:** `medium`
+  - **Severity:** `high`
   - **Evidence:** `backend/src/config/configuration.ts:28-60`; `backend/src/common/filters/all-exceptions.filter.ts:39-58`; `fiscal-notes-and-documents.md:19-20`.
   - **Why it matters now:** credenciais/contextos e o `noteId` não podem ser controlados pelo consumidor nem aparecer em erros/logs.
-  - **Option A (Recommended):** configuração Joi fail-fast, resolver server-side, HMAC com segredo dedicado e exceções sanitizadas próprias.
+  - **Option A (Recommended):** origin fixo/no-redirect, pares indivisíveis, DTO sem PII/no-store/audit, HMAC dedicado e filtro/logs sem dados derivados do request/exception.
     - **Implementation effort:** `medium`
     - **Risk:** `low`
     - **Blast radius:** `module`
@@ -582,11 +611,11 @@ Resposta `200`:
   - **Recommendation:** `A`; key separation e sanitização explícita reduzem acoplamento e vazamento.
 
 - **Issue ID:** `PERF-01`
-  - **Severity:** `low`
+  - **Severity:** `high`
   - **Evidence:** OpenAPI não publica quotas/SLA; `Dockerfile:18-27` confirma Node 22 e build do backend; discovery API-02.
   - **Why it matters now:** retry/cache/polling prematuros podem amplificar tráfego em duas contas sem quota conhecida.
-  - **Option A (Recommended):** uma chamada por request, `AbortSignal`/timeout configurável, zero retry e EPS evidence.
-    - **Implementation effort:** `low`
+  - **Option A (Recommended):** rate fairness por ator/contexto, uma chamada, semaphore, `AbortSignal`/timeout, zero retry e EPS+RLS-E1 local.
+    - **Implementation effort:** `medium`
     - **Risk:** `low`
     - **Blast radius:** `module`
     - **Maintenance burden:** `low`
@@ -613,14 +642,14 @@ Resposta `200`:
 
 ### Failure Modes & Edge Cases
 
-- [x] Contexto ausente/inválido, CNPJ/token trocados, `noteId` adulterado, intervalo invertido/excessivo, caracteres inválidos no documento/idCompra.
-- [x] Timeout, abort, DNS, 401/403, 404, 422, 429/5xx e conteúdo não JSON/shape inesperado.
-- [x] Datas/provider fields nulos, decimal inválido, status desconhecido, page fora do range e lista vazia legítima.
-- [x] Logs/exception não podem revelar Authorization, CNPJ, provider payload ou decoded `noteId`.
+- [x] Contexto ausente/inválido, par CNPJ/token trocado, hostile origin/redirect, `noteId`/segment adulterado, intervalo/filtros fora do bound.
+- [x] Timeout versus disconnect, DNS, qualquer 3xx/4xx/5xx, rate local/upstream, saturation e resposta oversize/non-JSON.
+- [x] Campo ausente/null versus presente malformado, status desconhecido, page fora do range e lista vazia legítima.
+- [x] PII/no-store/audit; unmatched path, validation, exception stack e Prisma detail não podem vazar em resposta/log.
 
 ### Residual Unknowns / Risks
 
-- [x] Quotas/SLA continuam desconhecidos; mitigação deste corte é uma chamada por request, timeout e zero retry/polling.
+- [x] Quotas/SLA continuam desconhecidos; mitigação local é rate/concurrency/timeout/zero retry; cutover recalibra orçamento por réplica antes de ativar.
 - [x] Shape detail não é formalmente tipado no OpenAPI; live evidence existe, mas decoder permanece defensivo.
 - [x] Deploy secret injection é dependência de promoção, não autorização para mudar Railway neste TODO.
 
@@ -632,15 +661,15 @@ Resposta `200`:
 - **Package mode:** `bounded-file-set`.
 - **Internal reviewer mandate:** `required — fresh no-context reviewer after review baseline freeze`.
 - **Required lenses:** `correctness|performance|elegance|structural-soundness|operational-fit`.
-- **Review result:** `initial findings integrated; authoritative rerun pending refreshed baseline`.
-- **Material findings:** separar implementação local de promoção canônica/cutover; decidir `D-06`; impedir vazamento de path/query no filtro global; explicitar contrato HTTP, HMAC, erros, limites e rollout.
-- **Evidence:** fresh no-context architecture opinion over frozen baseline `78825a4`.
+- **Review result:** `round 3 NO-GO findings integrated; round 4 pending refreshed baseline`.
+- **Material findings:** RLS obrigatório, origin/redirect/pairing, strict malformed handling, filtro global fail-closed, cache de identidade, providerId encoding e harness estrutural determinístico.
+- **Evidence:** formal fresh no-context `architecture_opinion` over `e2caa58`; routing guard `gpt-5.6-sol/xhigh` returned `go`; no files edited by reviewer.
 
 ## Audit Trigger Matrix
 
 - **Canonical method:** `wf-docker-audit-escalation-method`
 - **Guard command:** `python3 delphi-ai/tools/audit_escalation_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-backend.md`
-- **Latest TEACH evidence / artifact:** post-freeze guard `Overall outcome: go`, fingerprint `d2c83af51108`, against baseline `78825a4`.
+- **Latest TEACH evidence / artifact:** post-freeze guard `Overall outcome: go`, fingerprint `fb7cb2900ae1`, after `e2caa58` reconvergence.
 
 | Trigger | Value | Notes |
 | --- | --- | --- |
@@ -667,16 +696,16 @@ Resposta `200`:
 - **Internal reviewer mandate:** `required after freeze`.
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`.
 - **Critique status:** `not_run`
-- **Findings summary:** `initial four high and medium findings integrated into contract, decisions, rollout, capacity, tests and cutover boundary; rerun required`.
-- **Evidence / reference:** `initial fresh critique over 78825a4; refreshed-baseline critique pending`.
+- **Findings summary:** `round 3 NO-GO: privacy/no-store/access audit, pinned origin, rate fairness, 30s cache semantics, exhaustive errors, full decision adherence and named cutover owner; integrated, round 4 required`.
+- **Evidence / reference:** `formal fresh critique over e2caa58; routing guard gpt-5.6-sol/xhigh returned go; reviewer made no changes`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Assumption Code Coherence
 
 - **Gate decision:** `required`
-- **Why this decision:** A-01..A-04 sustentam dependency, guard e wiring decisions.
+- **Why this decision:** A-01..A-05 sustentam dependency, guard, destination e wiring decisions.
 - **Trigger stage:** `after critique convergence and before APROVADO`.
-- **Guard scope:** `A-01,A-02,A-03,A-04`.
+- **Guard scope:** `A-01,A-02,A-03,A-04,A-05`.
 - **Guard command:** `python3 delphi-ai/tools/assumption_code_coherence_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-backend.md`.
 - **Gate status:** `not_run`
 - **Findings summary:** `pending`.
@@ -700,6 +729,9 @@ Resposta `200`:
 | `delphi-ai/workflows/nestjs/change-application-boundary-method.md` | novos endpoints | contrato/auth/error/test | input/config sem runtime validation | boundary implementation |
 | `delphi-ai/skills/package-first-verification/SKILL.md` | novo adapter/service | reuse check | duplicar package | host-local justified |
 | `delphi-ai/workflows/docker/performance-concurrency-validation-method.md` | endpoint externo | pcv-1 | evidência prose-only | EPS lane |
+| `delphi-ai/skills/endpoint-performance-scrutiny/SKILL.md` | list/detail externo | bounded list + direct lookup | page-walk/broad fetch | EPS-E2 |
+| `delphi-ai/skills/runtime-load-stress-validation/SKILL.md` | claims de rate/concurrency | RLS local com métricas | load real no provedor | RLS-E1 |
+| `delphi-ai/skills/security-adversarial-review/SKILL.md` | credenciais/JWT/PII | origin, authz, redaction, abuse | tráfego destrutivo/vazamento | post-implementation gate |
 
 > As fontes acima estão preparadas para preflight; a ingestão vinculante pós-`APROVADO` será registrada antes do código.
 
@@ -724,7 +756,19 @@ Resposta `200`:
 
 | Decision ID | Status | Evidence | Notes |
 | --- | --- | --- | --- |
-| `D-01..D-09` | `pending` | implementation/evidence pending | itemizar antes da entrega |
+| `D-01` | `pending` | implementation/evidence pending | list/detail only |
+| `D-02` | `pending` | implementation/evidence pending | trusted context resolution |
+| `D-03` | `pending` | implementation/evidence pending | Smart Notas-only/no fallback |
+| `D-04` | `pending` | implementation/evidence pending | HMAC noteId |
+| `D-05` | `pending` | implementation/evidence pending | query/bounds |
+| `D-06` | `pending` | implementation/evidence pending | all four profiles/both contexts |
+| `D-07` | `pending` | implementation/evidence pending | upstream failures |
+| `D-08` | `pending` | implementation/evidence pending | no backend cache/polling |
+| `D-09` | `pending` | implementation/evidence pending | NestJS boundary |
+| `D-10` | `pending` | implementation/evidence pending | local-only provisional/cutover split |
+| `D-11` | `pending` | implementation/evidence pending | origin/rate/concurrency/timeout |
+| `D-12` | `pending` | implementation/evidence pending | noteId/error/log redaction |
+| `D-13` | `pending` | implementation/evidence pending | privacy/no-store/access audit |
 
 ## Module Decision Consistency Validation
 
@@ -739,7 +783,7 @@ Resposta `200`:
 
 - **Risk level:** `high`.
 - **Why this risk level:** credenciais de dois emissores, dados fiscais/PII, novo contrato autenticado e `noteId` context-bound.
-- **Attack surface in scope:** JWT read endpoints, provider Authorization/CNPJ, input bounds, SSRF/base URL config, error/log sanitization, context spoofing e identifier tampering.
+- **Attack surface in scope:** JWT/cache de revogação, provider Authorization/CNPJ, allowlist/redirect, rate abuse, input bounds, error/log sanitization, context spoofing, identifier tampering e PII presente somente no payload upstream.
 - **Attack simulation decision:** `required`.
 - **Review evidence:** `pending security-adversarial review after implementation`.
 - **Residual security risk:** quotas/URL documents remain outside; credentials dependem de injeção segura no deploy.
@@ -753,10 +797,10 @@ Resposta `200`:
 
 | Lane ID | Lane | Trigger Result | Trigger Severity | Trigger Reason Code | Gate Deadline | Minimum Evidence Rule | State | Residual Risk | Uncertainty Reason Code |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `EPS` | `endpoint-performance-scrutiny` | `required` | `medium` | `EPS-DATA-PATH-CHANGED` | `before_local_implemented` | `EPS-E2` | `pending` | provider latency/quota | `U-QUERY-PATH-UNKNOWN` |
+| `EPS` | `endpoint-performance-scrutiny` | `required` | `medium` | `EPS-DATA-PATH-CHANGED` | `before_local_implemented` | `EPS-E2` | `pending` | provider latency/quota | `none` |
 | `FRC` | `frontend-race-condition-validation` | `not_needed` | `low` | `FRC-RETRIGGERABLE-LIST` | `before_local_implemented` | `FRC-POLICY` | `not_applicable` | none in backend-only slice | `none` |
 | `BCI` | `backend-concurrency-idempotency-validation` | `not_needed` | `low` | `BCI-DUPLICATE-SUBMIT-OR-REPLAY` | `before_local_implemented` | `BCI-POLICY` | `not_applicable` | read-only, no shared mutation | `none` |
-| `RLS` | `runtime-load-stress-validation` | `not_needed` | `low` | `RLS-SLO-CLAIM` | `before_production_ready` | `RLS-E1` | `not_applicable` | no SLO/load claim | `none` |
+| `RLS` | `runtime-load-stress-validation` | `required` | `medium` | `RLS-RUNTIME-PRESSURE-SURFACE` | `before_local_implemented` | `RLS-E1` | `pending` | multi-replica/provider quota unknown | `none` |
 
 ### EPS
 
@@ -781,10 +825,14 @@ Resposta `200`:
 
 ### RLS
 
-- **Trigger rationale:** sem fila/bulk/cache/index/SLO e sem autorização para load contra provedor externo.
+- **Trigger rationale:** o contrato faz claims explícitos de rate, fairness, concorrência, saturação, abort e recuperação; RLS roda somente contra upstream stub local, nunca contra Smart Notas.
 - **Recorded at (UTC):** `2026-09-26T00:00:00Z`
-- **Executor ID:** `n/a`
-- **Evidence object:** `n/a — trigger_result=not_needed`.
+- **Executor ID:** `pending-routine-executor`
+- **Evidence object:** `pending RLS-E1 before Local-Implemented`.
+- **Workload model:** Nest local + stub HTTP local com atraso determinístico de 100 ms; 20 atores JWT sintéticos alternam `unifast|prosperar` e lista|detalhe; credenciais são fixtures falsas; processo reinicia antes do recovery stage.
+- **Stages:** `load 5:10s`, `spike 20:5s`, `stress 40:5s`, `recovery 2:5s`; teste separado com relógio controlado prova janelas/budgets default e fairness por ator/contexto.
+- **Acceptance:** load aceito tem p95 `<=500 ms`, p99 `<=1000 ms`, throughput `>=5 req/s` e zero erro inesperado; spike/stress admitem somente `200|429|503` previstos, pico upstream `<= SMART_NOTAS_MAX_CONCURRENCY`, nenhum crescimento de fila, slots retornam a zero e recovery volta a `200`; memória/processo permanecem vivos.
+- **Evidence capture:** p50/p95/p99, throughput, status counts, unexpected-error rate, peak/current upstream concurrency, abort count, per-context/per-actor accepted/throttled counts e recovery outcome.
 
 ## Verification Debt Assessment
 
@@ -821,8 +869,8 @@ Resposta `200`:
 
 ## Independent Cutover Integrity Audit Gate
 
-- **Cutover audit decision:** `recommended`
-- **Why this decision:** nova rota canônica coexiste com `/eventos`; precisa provar separação, não fallback oculto.
+- **Cutover audit decision:** `required`
+- **Why this decision:** nova rota candidata coexiste com `/eventos`, o audit floor exige triple-review e o closeout precisa provar separação sem fallback/promoção implícita.
 - **Cutover signals in scope:** `canonical capability transition|legacy-path coexistence`.
 - **Package mode:** `bounded-file-set`.
 - **Cutover audit status:** `not_run`
@@ -848,6 +896,15 @@ Resposta `200`:
 | `PLAN-SEC-01` | critique + architecture opinion | `high` | `release-blocker` | incluir redaction de path/query e esclarecer opacidade do `noteId` | `integrated-pending-rerun` | SCOPE-08/DOD-12/frozen contract |
 | `PLAN-ARCH-01` | critique + architecture opinion | `high` | `release-blocker` | separar implementação local de cutover/promoção canônica | `integrated-pending-rerun` | D-10 + Provisional Notes + out-of-scope |
 | `PLAN-CONTRACT-01` | critique | `high` | `release-blocker` | congelar DTOs, nullability, paginação, bounds e catálogo de erros | `integrated-pending-rerun` | Frozen Public HTTP Contract |
+| `R3-PRIVACY-01` | critique R3 | `high` | `release-blocker` | minimizar PII, no-store e auditoria actor-aware | `integrated-pending-rerun` | D-13/DOD-14/privacy contract |
+| `R3-DESTINATION-01` | architecture + critique R3 | `high` | `release-blocker` | fixar origin/base path, reject redirect e par token/CNPJ | `integrated-pending-rerun` | credential destination contract |
+| `R3-CAPACITY-01` | architecture + critique R3 | `high` | `release-blocker` | rate fairness + RLS local além de semaphore | `integrated-pending-rerun` | DOD-11/DOD-15/pcv RLS |
+| `R3-DECODER-01` | architecture R3 | `high` | `release-blocker` | separar null/ausente de presente malformado | `integrated-pending-rerun` | DOD-04/DOD-13 |
+| `R3-ERROR-01` | architecture + critique R3 | `high` | `release-blocker` | caminho/log fail-closed e catálogo exaustivo | `integrated-pending-rerun` | stable error catalog/DOD-12 |
+| `R3-AUTH-01` | architecture + critique R3 | `medium` | `release-blocker` | aceitar/provar janela JWT de 30s | `integrated-pending-rerun` | authorization contract/DOD-10 |
+| `R3-STRUCTURE-01` | architecture R3 | `medium` | `release-blocker` | AST/import/export/decorator assertions | `integrated-pending-rerun` | Architecture Protection Harness |
+| `R3-ADHERENCE-01` | critique R3 | `medium` | `release-blocker` | itemizar D-01..D-13 | `resolved` | Decision Adherence Validation |
+| `R3-CUTOVER-01` | critique R3 | `medium` | `follow-up-fast-follow` | abrir owner exato antes do closeout | `accepted` | planned `TODO-uninotas-smart-notas-read-cutover.md` |
 
 ## TODO Closeout Disposition
 
