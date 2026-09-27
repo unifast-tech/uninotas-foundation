@@ -35,7 +35,7 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** congelar e publicar o baseline documental para executar o Plan Review antes de solicitar `APROVADO` de implementação.
+- **Next exact step:** integrar os findings das revisões independentes, publicar um checkpoint refrescado e repetir os reviews afetados antes de solicitar `APROVADO` de implementação.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -53,14 +53,14 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 
 - [ ] `SCOPE-01` Reorganizar a navegação autenticada com destinos textuais `Geral` e `Erros`, preservando Equipe, Senha e sessão.
 - [ ] `SCOPE-02` Tornar `/` a lista Smart Notas e preservar a lista legada de falhas em `/erros`; manter `/eventos/:refId` para detalhe/tratamento de erro.
-- [ ] `SCOPE-03` Expor seletor textual Unifast/Prosperar, sem opção agregada, persistindo o contexto na URL e preservando filtros compatíveis na troca.
-- [ ] `SCOPE-04` Consumir `GET /api/v1/notas` com contexto, intervalo, status, documento, idCompra e página; nunca enviar token, CNPJ ou inferir `noteId`.
+- [ ] `SCOPE-03` Expor seletor textual Unifast/Prosperar, sem opção agregada; persistir na URL apenas contexto, datas, status e página, mantendo `documento` e `idCompra` em estado efêmero da sessão autenticada.
+- [ ] `SCOPE-04` Consumir `GET /api/v1/notas` com contexto, intervalo, status, documento, idCompra e página; nunca enviar ao cliente credenciais/CNPJ configurado do emissor nem inferir `noteId`.
 - [ ] `SCOPE-05` Consumir `GET /api/v1/notas/:noteId` em `/notas/:noteId`, exibindo somente o DTO normalizado e tratando 404/indisponibilidade sem fallback para `logs`.
 - [ ] `SCOPE-06` Manter cache em memória acima das rotas, com no máximo 20 chaves, freshness de 60 segundos, retenção stale de 10 minutos e descarte LRU.
-- [ ] `SCOPE-07` Deduplicar requisições por chave, abortar/ignorar resposta obsoleta, isolar contexto/filtros/página na chave e limpar tudo sincronicamente no logout/unmount da sessão autenticada.
+- [ ] `SCOPE-07` Deduplicar requisições por chave, tratar abort como cancelamento não exibível, impedir commits tardios por geração de request/sessão, isolar contexto/filtros/página na chave e limpar tudo sincronicamente no logout/unmount da sessão autenticada.
 - [ ] `SCOPE-08` Exibir loading, vazio, stale/revalidando, erro sem cache, erro de revalidação com dados preservados, rate limit e sessão expirada com semântica acessível.
 - [ ] `SCOPE-09` Atualizar identidade visível para UniNotas e manter a origem/escopo fiscal textual, sem depender apenas de cor.
-- [ ] `SCOPE-10` Criar navegador determinístico com mocks para contexto, lista, detalhe, retorno rápido, resposta atrasada, stale failure, refresh explícito e logout; manter o e2e legado de erros.
+- [ ] `SCOPE-10` Criar navegador determinístico com mocks para contexto, lista, detalhe, retorno rápido, resposta atrasada, stale failure, refresh explícito, logout e smoke read-only de `/erros`/`/eventos/:refId`; preservar o runner legado mutável como ferramenta opcional e fail-closed.
 - [ ] `SCOPE-11` Atualizar README frontend e consolidar os resultados estáveis no módulo `fiscal-notes-and-documents` sem promover runtime ownership.
 
 ## Out of Scope
@@ -84,7 +84,7 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 | Scope Item | Local Branch/Commit | PR to lane threshold | PR to `stage` | PR to `main` | Current Status |
 | --- | --- | --- | --- | --- | --- |
 | React Smart Notas | `delphi-and-foundation@working-tree` | `n/a` | `n/a` | `n/a` | `Pending` |
-| Foundation | `main@5494057` | `n/a` | `n/a` | `pending baseline freeze` | `planning` |
+| Foundation | `main@ed43003` | `n/a` | `n/a` | `pending refreshed review checkpoint` | `planning review` |
 
 ## Diff Expectation Contract
 
@@ -106,6 +106,7 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 | --- | --- | --- | --- |
 | `MonitorNotes` | `frontend/src/**` | `A,M,??` | UI, adapter, cache, rotas, estados e estilos do fluxo fiscal |
 | `MonitorNotes` | `frontend/e2e/notas.mjs` | `A,??` | navegador determinístico do fluxo novo |
+| `MonitorNotes` | `frontend/e2e/fluxo.mjs` | `M` | apontar o fluxo legado para `/erros` e exigir autorização explícita para mutação |
 | `MonitorNotes` | `frontend/package.json` | `M` | script do e2e fiscal, sem nova dependência |
 | `MonitorNotes` | `frontend/README.md` | `M` | contrato operacional e comandos |
 | `MonitorNotes` | `uninotas-foundation` | `M` | gitlink documental governado |
@@ -141,20 +142,20 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 
 - [ ] `DOD-01` Usuário autenticado navega por `Geral` e `Erros`; o legado continua funcional em `/erros` e `/eventos/:refId`.
 - [ ] `DOD-02` Geral lista notas do contexto textual selecionado com filtros/paginação compatíveis e sem dados cruzados.
-- [ ] `DOD-03` Detalhe fiscal abre por `noteId` opaco e nunca expõe/decodifica `idInterno`, token ou CNPJ.
+- [ ] `DOD-03` Detalhe fiscal abre por `noteId` opaco, usa allowlist do DTO público, mascara chaves de acesso e nunca expõe/decodifica `idInterno`, token ou CNPJ configurado do emissor.
 - [ ] `DOD-04` Cache cumpre cap/TTL/stale/LRU, sobrevive a troca de rota, isola chaves e é eliminado no logout.
 - [ ] `DOD-05` Respostas atrasadas/abortadas não substituem o contexto ou a consulta ativa; chamadas idênticas em voo são deduplicadas.
 - [ ] `DOD-06` Estados loading, vazio, revalidando, stale-error, erro sem cache, 429 e sessão expirada são distinguíveis e acessíveis.
-- [ ] `DOD-07` Refresh explícito sempre chama a API; retorno rápido usa cache válido e stale revalida em segundo plano.
+- [ ] `DOD-07` Refresh explícito garante uma requisição upstream: inicia uma quando não há outra idêntica em voo e compartilha/desabilita enquanto ela está pendente; retorno rápido usa cache válido e stale revalida uma única vez em segundo plano.
 - [ ] `DOD-08` UI é responsiva, navegável por teclado e identifica contexto/status também por texto.
-- [ ] `DOD-09` Build/lint passam e o navegador determinístico cobre os fluxos novos sem quebrar o e2e legado.
+- [ ] `DOD-09` Build/lint passam; o navegador determinístico cobre os fluxos novos e as rotas legadas; o runner mutável legado aponta para `/erros` e falha fechado sem autoridade explícita.
 - [ ] `DOD-10` Documentação registra o candidato local sem ativar runtime, segredo ou capability ownership.
 
 ## Validation Steps
 
 - [ ] `VAL-01` Executar `npm run lint && npm run build` em `frontend/`.
 - [ ] `VAL-02` Executar e2e fiscal mockado com Chromium via script `npm run e2e:notas`.
-- [ ] `VAL-03` Executar e2e legado read-only aplicável ou registrar blocker objetivo quando o runtime local de erros não estiver disponível.
+- [ ] `VAL-03` Executar smoke legado read-only e mockado dentro de `npm run e2e:notas`; não executar o runner mutável `npm run e2e` sem fixture descartável, runtime local controlado e autoridade explícita (`AUTORIZAR_MUTACAO=1`).
 - [ ] `VAL-04` Executar auditoria React/Vite, validação de races frontend, revisão de acessibilidade e busca por segredo/PII/decodificação de `noteId`.
 - [ ] `VAL-05` Executar Foundation validator, guards de TODO e `git diff --check`.
 
@@ -166,7 +167,7 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 | `DOD-10` | `Definition of Done` | canon candidato sem promoção | `doc+guard` | módulo + Foundation validator | `local` | `planned` | ownership permanece target-planned |
 | `VAL-01` | `Validation Steps` | lint/build | `command` | `npm run lint && npm run build` | `local` | `planned` | owning manifest frontend |
 | `VAL-02` | `Validation Steps` | fluxo fiscal | `navigation/browser` | `npm run e2e:notas` | `local browser` | `planned` | cobre races/cache/contextos |
-| `VAL-03` | `Validation Steps` | não regressão legado | `navigation/browser` | `npm run e2e` ou blocker documentado | `local browser/API` | `planned` | depende de runtime legado |
+| `VAL-03` | `Validation Steps` | não regressão de rotas legadas | `navigation/browser` | smoke mockado `/erros` + `/eventos/:refId` em `npm run e2e:notas` | `local browser` | `planned` | runner mutável separado e opcional |
 | `VAL-04` | `Validation Steps` | arquitetura/races/a11y/segurança | `audit` | ferramentas Delphi + revisão | `local` | `planned` | obrigatório antes de closeout |
 | `VAL-05` | `Validation Steps` | governança/diff | `guard` | validator + guards + diff check | `local` | `planned` | obrigatório |
 
@@ -212,10 +213,10 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 ## Decisions (Resolved Before Freeze)
 
 - [x] `D-01` `/` é Geral Smart Notas; `/erros` preserva a fila legada; detalhes permanecem separados em `/notas/:noteId` e `/eventos/:refId`. Ref: feature brief ST-03/ST-04.
-- [x] `D-02` `contexto=unifast|prosperar` vive na URL, default `unifast`, sem agregado; troca mantém datas/status/documento/idCompra e volta à página 1. Ref: module invariant.
-- [x] `D-03` intervalo default são os últimos 30 dias corridos incluindo hoje, em `YYYY-MM-DD`, calculados localmente e materializados na URL; máximo 365 dias. Ref: backend query contract.
-- [x] `D-04` cache: 20 chaves LRU, fresh 60 s, stale retido 10 min; primeiro load/hard refresh consulta API, refresh explícito sempre consulta, stale revalida. Ref: SD-08/G-20.
-- [x] `D-05` cache key inclui usuário da sessão, contexto, datas, status, documento, idCompra e página; logout desmonta o provider, aborta requests e limpa entradas. Ref: race matrix da descoberta.
+- [x] `D-02` `contexto=unifast|prosperar`, datas, status e página vivem na URL; default `unifast`, sem agregado. `documento` (CPF/CNPJ do destinatário) e `idCompra` ficam somente no estado efêmero autenticado, nunca em URL/history/referrer; troca de contexto mantém esses filtros em memória e volta à página 1. Ref: module invariant + `ARCH-03/CRIT-02`.
+- [x] `D-03` intervalo default são 30 datas de calendário incluindo hoje (`início = hoje - 29 dias`) no calendário `America/Sao_Paulo`, serializadas sem conversão de instante em `YYYY-MM-DD`; o backend aceita diferença máxima de 365 dias entre endpoints, equivalente a até 366 datas inclusivas. Ref: backend query contract + `ARCH-05`.
+- [x] `D-04` cache: 20 chaves com LRU real, fresh até 60 s inclusive e stale retido até 10 min inclusive; ausente ou >10 min carrega da API. Refresh ignora freshness, inicia request se não houver um idêntico em voo e compartilha o já ativo. Ref: SD-08/G-20 + `ARCH-04/TEST-02`.
+- [x] `D-05` cache key inclui usuário da sessão, contexto, datas, status, documento, idCompra e página; cada request guarda controller, promise, geração do request e geração da sessão. Logout/unmount aborta e limpa; resposta após substituição, eviction, troca de query, logout ou dispose não reinsere nem atualiza UI. Ref: race matrix + `ARCH-04`.
 - [x] `D-06` nenhuma biblioteca nova; adapter e cache host-specific usam React e Web APIs já disponíveis. Ref: package-first sem resultados.
 - [x] `D-07` erros de integração permanecem legados e não são mesclados em linhas/notas neste corte. Ref: ownership de módulos.
 
@@ -229,7 +230,7 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 
 ## Decision Baseline (Frozen Before Implementation)
 
-- [x] `D-01..D-07` congeladas como baseline de planejamento; implementação continua proibida até review convergir e `APROVADO`.
+- [ ] `D-01..D-07` precisam de novo freeze após integração dos findings independentes; implementação continua proibida até reviews convergirem e `APROVADO`.
 
 ## Architecture Change Governance
 
@@ -269,8 +270,8 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 - **Decision review lifecycle:** `after baseline freeze and before APROVADO`
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set`
-- **Decision review status:** `not_run`
-- **Decision review evidence / resolution:** `pending baseline freeze`
+- **Decision review status:** `changes_required_before_approval`
+- **Decision review evidence / resolution:** primeira revisão no checkpoint `ed43003` retornou `ARCH-03`, `TEST-01`, `ARCH-04`, `TEST-02` e `ARCH-05`; correções integradas abaixo e rerun obrigatório sobre checkpoint refrescado.
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -284,11 +285,11 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 - **Why this decision:** TODO medium architecture-corrective deve ser revisado a partir de baseline imutável.
 - **Trigger stage:** `before first planning review`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `983ac0c2e0ff24e1ef5e58100bef0bb5b9ab1cbc`
-- **Baseline push reference:** `origin/main@983ac0c2e0ff24e1ef5e58100bef0bb5b9ab1cbc`
-- **Gate status:** `no_material_findings`
-- **Findings summary:** baseline documental commitado e publicado; revisões devem usar este checkpoint como origem.
-- **Evidence / reference:** `uninotas-foundation:main@983ac0c2e0ff24e1ef5e58100bef0bb5b9ab1cbc`; `origin/main` confirmado no mesmo SHA em 2026-09-27.
+- **Baseline commit:** `ed43003e1a3f620b2990158ce662fd7927602796`
+- **Baseline push reference:** `origin/main@ed43003e1a3f620b2990158ce662fd7927602796`
+- **Gate status:** `material_findings_under_resolution`
+- **Findings summary:** primeiro freeze publicado em `983ac0c`; plano auto-revisado publicado em `ed43003`; reviews independentes encontraram privacidade, teste mutável, cancelamento/cache e data. Este TODO integra as correções e exige novo checkpoint/review.
+- **Evidence / reference:** `uninotas-foundation:main@ed43003e1a3f620b2990158ce662fd7927602796`; `origin/main` confirmado no mesmo SHA em 2026-09-27; dispatches em `artifacts/tmp/uninotas-frontend-review/`.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
@@ -324,16 +325,42 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 | `GET /api/v1/notas` | `/`, `ListaNotas`, cache/session provider | `consumer planned in this TODO` | tipos exatos + browser list/context/cache |
 | `GET /api/v1/notas/:noteId` | `/notas/:noteId`, `DetalheNota` | `consumer planned in this TODO` | rota opaca + browser detail/404 |
 | `GET /api/v1/eventos*` | `/erros`, `/eventos/:refId` | `existing consumer preserved` | e2e legado e route-scoped hooks |
-| `GET /api/v1/eventos/stream` | somente shell/rota de erros | `existing consumer narrowed to legacy area` | scan estrutural + e2e; Geral não abre SSE |
+| `GET /api/v1/realtime/eventos?token=...` | somente shell/rota de erros | `existing consumer narrowed to legacy area` | scan estrutural + e2e; Geral/detalhe fiscal não abrem SSE |
 | Smart Notas credentials/CNPJ | nenhum consumidor frontend | `consumer intentionally absent` | env/import/bundle scan; backend-only invariant |
+
+### Fiscal UI Data & Privacy Allowlist
+
+| Data class | Frontend handling | URL / logging rule |
+| --- | --- | --- |
+| `noteId`, `fiscalContext`, status, número, compra, ambiente, modelo, finalidade, plataforma, produto, datas, competência, valores, natureza e quantidade | campos permitidos do DTO público; `noteId` é opaco e pode existir apenas no path de detalhe | não logar payload/identificadores; `noteId` não pode ser decodificado |
+| `accessKey`, `referencedAccessKey` | permitidas pelo DTO, porém renderizadas mascaradas, somente com os 8 últimos caracteres; sem ação de copiar valor integral neste corte | nunca incluir em query params, console, screenshot ou mensagem de erro |
+| filtro `documento` e filtro `idCompra` | estado controlado efêmero dentro do provider da sessão; entram apenas na query autenticada para o backend e na cache key em memória | proibidos em URL/history/referrer, local/session storage e logs; limpar no logout |
+| token, CNPJ configurado do emissor, `providerIdInterno`, payload cru | não fazem parte do modelo de UI | proibidos em DOM, URL, bundle, mocks, console, erro e cache |
+
+Mocks e screenshots usam somente identificadores sintéticos que não representem CPF/CNPJ real. Os testes inspecionam URL, DOM, console e requisições não fiscais para garantir ausência de credenciais, CNPJ configurado e valores exatos dos filtros sensíveis; a query autenticada `/notas` é a única requisição autorizada a conter `documento`/`idCompra`.
+
+### Cache / Request Transition Contract
+
+| Trigger and current state | Visible result | Network behavior | Commit guard |
+| --- | --- | --- | --- |
+| navigation with entry age `<= 60s` | cached data, not revalidating | no request | access promotes key to MRU |
+| navigation with age `> 60s` and `<= 10min` | stale data + revalidating indicator | exactly one background request per key | matching request and session generations only |
+| navigation absent or age `> 10min` | loading without old data | exactly one request per key | expired entry is removed before fetch |
+| explicit refresh, no identical request active | current data retained + revalidating | exactly one new request even when fresh | new request generation owns completion |
+| explicit refresh, identical request active | current state retained; refresh control disabled/joins | no duplicate; share the active promise | active generation remains owner |
+| active query/context changes | new key state only | previous request is aborted when its last subscriber detaches | abort is not a UI error; old generation cannot commit |
+| LRU insert would create key 21 | current requested key retained | evict least-recently-used key and abort its active request | evicted generation cannot reinsert on late completion |
+| logout, automatic 401 or provider dispose | authenticated fiscal state disappears | abort every request and clear all 20 keys synchronously | increment session generation before abort/clear |
+
+TTL boundaries use the injected clock and the age of the last successful response. Failed revalidation never advances success age; it preserves still-retained stale data with warning. A hard reload has no session-memory cache and therefore requests normally.
 
 ## Assumptions Preview
 
 | Assumption ID | Assumption | Evidence | If False | Confidence | Handling |
 | --- | --- | --- | --- | --- | --- |
-| `A-01` | DTO backend local é o contrato consumidor | testes `fiscal-notes.contract.spec.ts` | atualizar tipos e mocks antes de execução | `High` | `Keep as Assumption` |
-| `A-02` | todos os perfis ativos podem ler ambos contextos | decisão do usuário + backend guards | revisar UI/autorizações | `High` | `Keep as Assumption` |
-| `A-03` | cutover não ocorrerá dentro deste TODO | TODO separado ativo | reclassificar para cross-stack/devops | `High` | `Keep as Assumption` |
+| `A-01` | DTO backend local é o contrato consumidor | `backend/src/fiscal-notes/fiscal-notes.contract.spec.ts`; `backend/src/fiscal-notes/fiscal-notes.service.ts` | atualizar tipos e mocks antes de execução | `High` | `Keep as Assumption` |
+| `A-02` | todos os perfis ativos podem ler ambos contextos | `backend/src/fiscal-notes/fiscal-notes.controller.ts` declara os quatro perfis leitores sem restrição por contexto | revisar UI/autorizações | `High` | `Keep as Assumption` |
+| `A-03` | cutover não ocorrerá dentro deste TODO | `backend/src/config/configuration.ts` mantém `SMART_NOTAS_READ_ENABLED=false` por padrão | reclassificar para cross-stack/devops | `High` | `Keep as Assumption` |
 
 ## Execution Plan
 
@@ -344,8 +371,8 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 ### Ordered Steps
 
 1. Criar e2e fiscal fail-first com mocks dos envelopes backend e cenários de race/cache.
-2. Criar tipos/adapter fiscal sem alterar o cliente HTTP além de suporte a `AbortSignal` necessário.
-3. Criar provider/cache de sessão e hook com dedupe, abort, TTL/stale/LRU e limpeza.
+2. Criar tipos/adapter fiscal e estender o cliente HTTP com `AbortSignal`, preservando `AbortError` como cancelamento e não como falha status 0.
+3. Criar provider/cache de sessão com relógio injetável e estado por chave (`promise`, controller, gerações), além de hook com dedupe, abort, TTL/stale/LRU e limpeza.
 4. Criar lista, filtros, contexto, paginação e estados acessíveis.
 5. Criar detalhe fiscal read-only e integrar rotas/navegação/cabeçalho; mover resumo/SSE/gatilho para o shell legado de erros para que `Geral` não consulte `/eventos` nem abra stream.
 6. Ajustar estilos responsivos e identidade UniNotas.
@@ -356,6 +383,9 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 - **Strategy:** `test-first`
 - **Why:** cache e troca rápida de contexto têm falhas observáveis difíceis de provar por inspeção.
 - **Fail-first targets:** contexto correto, retorno `Geral -> Erros -> Geral`, resposta fora de ordem, stale failure, refresh, logout e detalhe.
+- **Deterministic temporal targets:** `60_000ms` ainda fresh, `60_001ms` revalida, `600_000ms` ainda stale, `600_001ms` expira; 21ª chave remove a LRU, leitura promove MRU, eviction aborta e late completion não reinsere.
+- **Request-count targets:** duas montagens/consumidores da mesma chave fazem uma chamada; cliques repetidos durante refresh fazem uma chamada; troca rápida de contexto nunca permite que a resposta anterior apareça; logout manual e 401 automático resultam em cache vazio e zero commits tardios.
+- **Calendar parser targets:** virada de mês/ano, 29/02, timezone diferente do navegador, formato/data impossível, default de 30 datas, diferença de 365 dias aceita e 366 rejeitada, sem reutilizar conversão UTC do filtro legado.
 
 ### Pre-APROVADO RED Evidence Capture
 
@@ -373,16 +403,18 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 | Criterion / Flow | Why Flow-Impacting | Platform Parity | Required Runtime Lane | Mutation Lane Required? | Backend Real-Data Required? | Planned Evidence | Non-Applicability Rationale |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Geral/contexto/filtros/detalhe | UI crítica | `web-only` | `Playwright readonly` | `no` | `no` | `e2e/notas.mjs` com mocks contratuais | `n/a` |
-| cache/stale/race/logout | estado assíncrono visível/privado | `web-only` | `Playwright readonly` | `no` | `no` | delays/falhas controlados no navegador | `n/a` |
-| Erros legado | navegação preservada | `web-only` | `Playwright readonly` | `no` | `yes` | `npm run e2e` quando runtime disponível | mutações legadas não são alteradas |
+| cache/stale/race/logout | estado assíncrono visível/privado | `web-only` | `Playwright readonly + focused deterministic harness` | `no` | `no` | relógio injetável, contagem exata de requests e delays/falhas controlados | `n/a` |
+| Erros legado — smoke obrigatório | navegação preservada | `web-only` | `Playwright mocked readonly` | `no` | `no` | `/erros` e `/eventos/:refId`, mais ausência de request/SSE legado em Geral | `n/a` |
+| Erros legado — tratamento completo opcional | resolve/reabre estado persistente | `web-only` | `Playwright controlled mutation` | `yes` | `yes` | `npm run e2e` somente com fixture descartável e `AUTORIZAR_MUTACAO=1` | indisponibilidade não bloqueia este corte; nenhuma execução remota/ambiente compartilhado é autorizada |
 
 ### Local CI-Equivalent Suite Matrix
 
 | Repository / CI Surface | Why In Scope | Behavior / Scenario Covered | Fixture / Seed / Runtime Preconditions | Local CI-Equivalent Command | Required Before | Status | Evidence Artifact / Command | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | frontend type/build | React/Vite mudam | tipos, bundle, imports | `npm ci` já disponível | `npm run lint && npm run build` | `Local-Implemented` | `planned` | command output | sem inferir deploy |
-| frontend fiscal browser | fluxo novo | lista/detalhe/contexto/cache/races/a11y | Chromium + mocks | `npm run e2e:notas` | `Local-Implemented` | `planned` | runner output/screens | read-only |
-| frontend legacy browser | rotas movidas | login/erros/detalhe/tratamento | API local + usuário de teste | `npm run e2e` | `Local-Implemented` | `planned` | runner output ou blocker | não usar produção |
+| frontend fiscal browser | fluxo novo + smoke legado | lista/detalhe/contexto/cache/races/a11y; `/erros`/detalhe; ausência de rede legada em Geral | Chromium + mocks contratuais | `npm run e2e:notas` | `Local-Implemented` | `planned` | runner output/screens redatados | read-only e fail-closed |
+| frontend cache/provider harness | invariantes temporais | limites exatos fresh/stale/expired, request counts, 21ª chave, promoção LRU, eviction/late completion | relógio e transport injetáveis | script integrado a `npm run e2e:notas` ou comando dedicado sem nova dependência | `Local-Implemented` | `planned` | asserts determinísticos | sem espera de minutos reais |
+| frontend legacy browser mutável | tratamento completo resolve/reabre | fixture semeada descartável + API local controlada + autorização explícita | `npm run e2e` com `AUTORIZAR_MUTACAO=1` | `not required for this TODO` | `optional` | não executar por padrão | runner deve falhar fechado; produção/Railway/ambiente compartilhado proibidos |
 | Foundation | docs/TODO | árvore/contratos | nenhum | `python3 deterministic/validate_foundation.py --root .` | `Local-Implemented` | `planned` | command output | executar no submodule |
 
 ### Runtime / Rollout Notes
@@ -426,15 +458,29 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
     - **Effort:** `low`; **Risk:** `high`; **Blast radius:** `module`; **Maintenance burden:** `high`; **Performance impact:** `regresses`; **Elegance impact:** `regresses`; **Structural soundness impact:** `regresses`.
   - **Recommendation:** `Integrate Option A`; garante uma única identidade para URL, request e cache.
 
+### Independent Review Finding Resolution
+
+| Finding | Severity | Disposition | Contract change | State |
+| --- | --- | --- | --- | --- |
+| `ARCH-03` + `CRIT-02` | `high security/privacy` | `Integrated` | somente contexto/datas/status/página ficam na URL; documento/compra são efêmeros; allowlist e mascaramento explícitos | `pending refreshed review` |
+| `TEST-01` + `CRIT-01` | `high tests/safety` | `Integrated` | smoke legado obrigatório é mockado/read-only; `fluxo.mjs` é mutável, opcional e fail-closed; path autorizado no diff | `pending refreshed review` |
+| `ARCH-04` + `CRIT-04` | `medium architecture` | `Integrated` | state machine por chave/geração; refresh compartilha request idêntico; abort não vira erro | `pending refreshed review` |
+| `TEST-02` + `CRIT-06` | `medium tests` | `Integrated` | relógio injetável, limites exatos, request counts, 21ª chave, promoção LRU, logout/401 e late completion | `pending refreshed review` |
+| `ARCH-05` | `medium correctness` | `Integrated` | calendário `America/Sao_Paulo`, default de 30 datas, diferença máxima de 365 dias, parser separado do legado | `pending refreshed review` |
+| `CRIT-03` | `medium performance` | `Integrated` | SSE corrigido para `/api/v1/realtime/eventos?token=...` e limitado ao shell de erros | `pending refreshed review` |
+| `CRIT-05` | `medium adherence` | `Integrated` | rota canônica de Geral permanece `/` em todo o pacote | `pending refreshed review` |
+
 ### Failure Modes & Edge Cases
 
 - [ ] resposta Unifast chega depois da troca para Prosperar; cache não pode atualizar a tela ativa.
 - [ ] retorno rápido usa cache correto; falha de revalidação mantém dados com aviso e timestamp.
 - [ ] request idêntico em voo é compartilhado; refresh explícito não cria storm.
+- [ ] fresh/stale/expired respeitam exatamente `60_000/60_001ms` e `600_000/600_001ms`; 21ª chave, promoção por leitura e late completion pós-eviction são determinísticos.
 - [ ] logout durante request aborta/ignora resultado e apaga cache.
 - [ ] 401 encerra sessão; 404 detalhe é vazio específico; 429 oferece retry explícito sem loop.
 - [ ] status fiscal desconhecido é exibido como texto seguro, não descartado.
 - [ ] URL inválida é normalizada sem loop e respeita limite de 365 dias.
+- [ ] `documento`/`idCompra` não aparecem em URL/history/storage/referrer/console; credenciais, CNPJ configurado e chaves integrais não aparecem no DOM ou mocks.
 - [ ] Geral não abre `/eventos`, `/eventos/resumo`, `/eventos/produtos` nem SSE; esses consumidores só vivem no shell legado.
 
 ### Residual Unknowns / Risks
@@ -455,7 +501,7 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 
 - **Canonical method:** `wf-docker-audit-escalation-method`
 - **Guard command:** `python3 delphi-ai/tools/audit_escalation_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-frontend.md`
-- **Latest TEACH evidence / artifact:** `pending baseline freeze`
+- **Latest TEACH evidence / artifact:** reviews independentes sobre `ed43003`; correções em integração antes do rerun.
 
 | Trigger | Value | Notes |
 | --- | --- | --- |
@@ -468,7 +514,7 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 | `touches_tests` | `yes` | novo e2e e ajuste do legado |
 | `critical_user_journey` | `yes` | fluxo central do UniNotas |
 | `release_or_promotion_critical` | `yes` | prazo de entrega e cutover dependente |
-| `high_severity_plan_review_issue` | `no` | ainda sem finding high |
+| `high_severity_plan_review_issue` | `yes` | findings high de privacidade e segurança do e2e integrados; rerun requerido |
 | `explicit_three_lane_request` | `no` | não solicitado |
 
 ## Approval
@@ -516,15 +562,15 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 
 - **Critique decision:** `required`
 - **Why this decision:** medium, cross-module, rota pública autenticada e critical journey.
-- **Critique status:** `not_run`
-- **Evidence / reference:** `pending baseline freeze`
+- **Critique status:** `changes_required_before_approval`
+- **Evidence / reference:** crítica no checkpoint `ed43003` retornou `CRIT-01..CRIT-06`; todos roteados como `Integrated`, aguardando checkpoint e rerun independente.
 
 ## Gate: Assumption Code Coherence
 
 - **Gate decision:** `required`
 - **Guard command:** `python3 delphi-ai/tools/assumption_code_coherence_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-frontend.md`
-- **Gate status:** `not_run`
-- **Evidence / reference:** `pending baseline freeze/review`
+- **Gate status:** `findings_integrated`
+- **Evidence / reference:** guard confirmou os três anchors de código após correção de paths em 2026-09-27; rerun final esperado `go`.
 
 ## Independent Test Quality Audit Gate
 
