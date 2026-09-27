@@ -36,12 +36,12 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** concluir a reconvergência técnica, atualizar/pushar o baseline, repetir as revisões e obter `preflight-go` antes de solicitar `APROVADO`.
+- **Next exact step:** solicitar `APROVADO`; após a resposta exata, ingerir regras, repetir routing/authority guards e iniciar a implementação test-first.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
 - **Work state:** `review`
-- **Why this state now:** `D-06` foi resolvida pelo usuário; os findings técnicos estão sendo incorporados e precisam de nova revisão independente.
+- **Why this state now:** contrato congelado, revisões independentes sem achados materiais e authority guard em `preflight-go`; aguarda somente aprovação humana explícita.
 - **Exit condition:** implementação e validação locais concluídas, seguida pelos gates de revisão e promoção aplicáveis.
 
 ## Provisional Notes
@@ -104,7 +104,7 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 | Scope Item | Local Branch/Commit | PR to lane threshold | PR to `stage` | PR to `main` | Current Status |
 | --- | --- | --- | --- | --- | --- |
 | Backend Smart Notas read | `delphi-and-foundation@pending` | `pending` | `n/a until lane discovery` | `n/a until lane discovery` | `planned` |
-| Foundation module/TODO | `main@pending` | `n/a — main-only authority` | `n/a` | `origin/main@pending` | `planning baseline pending` |
+| Foundation module/TODO | `main@7a1c7a2` | `n/a — main-only authority` | `n/a` | `origin/main@7a1c7a2` | `planning baseline published` |
 
 ## Diff Expectation Contract
 
@@ -441,8 +441,8 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Decision review lifecycle:** `after diagnosis is closed and before APROVADO`
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set`
-- **Decision review status:** `not_run`
-- **Decision review evidence / resolution:** `round 10 over 146f1c3 returned GO; architecture harness cell delimiters were then normalized for deterministic parsing without semantic change; focused refreshed-baseline rerun required`.
+- **Decision review status:** `no_material_findings`
+- **Decision review evidence / resolution:** `round 11 focused formal architecture_opinion over 7a1c7a2 returned GO with no material findings; harness row parses into six columns, semantics remain explicit and routing outcome/evidence are canonical; round 9 full-plan GO and round 10 anchor GO remain valid; reviewer made no changes`.
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -456,11 +456,11 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Why this decision:** contrato público/segredos/contextos exigem review a partir de baseline autoritativo reproduzível.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `pending round-11 baseline; predecessor 146f1c33e1f8068afda5bbc8cfe01ea32096df60`
+- **Baseline commit:** `7a1c7a2072df7d5c4862f4a72847adcde31a9e9e`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `not_run`
-- **Findings summary:** round 10 convergiu; delimiters internos da linha structural-test foram normalizados para o parser do authority guard sem mudar o harness; novo freeze pendente.
-- **Evidence / reference:** predecessor `146f1c33e1f8068afda5bbc8cfe01ea32096df60` permanece publicado; refresh pendente.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** baseline congelou a linha do harness com delimiters parser-safe e o resultado de roteamento canônico, sem mudança funcional.
+- **Evidence / reference:** commit/push `7a1c7a2072df7d5c4862f4a72847adcde31a9e9e`; `ls-remote refs/heads/main` retornou o mesmo SHA.
 - **Waiver authority / reference:** `n/a`.
 - **Pre-freeze packet-prep rule:** review rows below are `prepared-pre-freeze`, not passed.
 
@@ -472,9 +472,9 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Baseline source:** `Review Baseline Freeze -> Baseline commit`
 - **Material sections compared:** `Context|Contract Boundary|Scope|Out of Scope|Definition of Done|Validation Steps|Execution Lane Tracking|Canonical Module Anchors|Decisions|Decision Baseline|Architecture Change Governance|Questions To Close|Assumptions Preview|Execution Plan|Flow Evidence Planning Matrix|Local CI-Equivalent Suite Matrix|Runtime / Rollout Notes|Security Risk Assessment|Performance & Concurrency Risk Assessment`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-backend.md`
-- **Gate status:** `not_run`
-- **Findings summary:** `pending refreshed baseline after harness table normalization`.
-- **Evidence / reference:** `pending`.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** zero das 22 seções materiais divergiram do baseline final `7a1c7a2`.
+- **Evidence / reference:** `review_scope_drift_guard.py` retornou `Overall outcome: go` e `Changed material sections: 0` em 2026-09-27.
 - **Waiver authority / reference:** `n/a`.
 
 ## Questions To Close
@@ -557,7 +557,7 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 
 ## Plan Review Gate
 
-- **Status:** `round-10 no-material-findings; focused harness-table revalidation pending`.
+- **Status:** `no_material_findings`.
 
 ### Review Sections
 
@@ -682,9 +682,9 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Package mode:** `bounded-file-set`.
 - **Internal reviewer mandate:** `required — fresh no-context reviewer after review baseline freeze`.
 - **Required lenses:** `correctness|performance|elegance|structural-soundness|operational-fit`.
-- **Review result:** `round 10 focused GO over 146f1c3; round 11 pending after parser-safe harness cell normalization`.
-- **Material findings:** none in round 10; harness meaning is unchanged.
-- **Evidence:** formal fresh no-context `architecture_opinion` over `146f1c3`; routing guard `gpt-5.6-sol/xhigh` returned `go`; no files edited by reviewer.
+- **Review result:** `round 11 focused GO over 7a1c7a2; no material findings; rounds 9/10 remain valid`.
+- **Material findings:** none; parser-safe tokens preserve the Prisma/logs and direct-controller-HTTP prohibitions.
+- **Evidence:** formal fresh no-context `architecture_opinion` over `7a1c7a2`; harness parsed into six cells, routing guard/evidence canonical, scope-drift `go/0`; no files edited by reviewer.
 
 ## Audit Trigger Matrix
 
@@ -716,9 +716,9 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Critique isolation mode:** `fresh internal no-context reviewer`.
 - **Internal reviewer mandate:** `required after freeze`.
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`.
-- **Critique status:** `not_run`
-- **Findings summary:** `round 10 focused GO over 146f1c3; round 11 pending to verify parser-safe harness cell normalization has no semantic effect`.
-- **Evidence / reference:** `formal fresh critique over 146f1c3; routing guard gpt-5.6-sol/xhigh returned go; reviewer made no changes`.
+- **Critique status:** `no_material_findings`
+- **Findings summary:** `round 11 focused GO: harness parser-safe preserva as proibições, adoption timing é válido e routing outcome/evidence não implicam approval; nenhum bloqueio material`.
+- **Evidence / reference:** `formal fresh critique over 7a1c7a2; scope-drift go/0; assumption/audit/routing guards go; reviewer made no changes`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Assumption Code Coherence
@@ -739,6 +739,7 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Approval scope:** `list + detail backend Smart Notas, tests, docs/modules e configuração descritos neste TODO; inclui execução por routine executor subagent no principal checkout, single writer`.
 - **Execution not authorized by approval:** todos os itens de `Out of Scope`, especialmente frontend, documentos, banco, mutações, deploy e worktrees.
 - **Renewed approval required when:** contrato/escopo/autorização/persistência/dependency/runtime risk mudar materialmente.
+- **Pre-approval authority evidence:** `todo_authority_guard.py --pre-approval` retornou `Overall outcome: preflight-go`, zero violations, em 2026-09-27.
 
 ## Rules Acknowledgement / Ingestion
 
@@ -949,9 +950,9 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
-- **Disposition reason:** decisão humana resolvida; reconvergência/revisões/preflight e aprovação ainda pendentes.
-- **Post-commit/push status:** `pending`
-- **Next path/status action:** executar `todo_authority_guard --pre-approval`; se `preflight-go`, publicar a evidência final e solicitar `APROVADO`.
+- **Disposition reason:** contrato e gates pré-approval convergiram; execução permanece proibida até aprovação humana explícita.
+- **Post-commit/push status:** `baseline de planejamento 7a1c7a2 publicado; metadata final de revisão/preflight pronta para commit/push`.
+- **Next path/status action:** publicar a metadata final e solicitar `APROVADO`.
 
 ## Module Consolidation Gate
 
