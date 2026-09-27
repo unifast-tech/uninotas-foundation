@@ -34,15 +34,15 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 
 ## Delivery Status Canon (Required)
 
-- **Current delivery stage:** `Pending`
-- **Qualifiers:** `Provisional`
-- **Next exact step:** solicitar `APROVADO`; após a resposta exata, ingerir regras, repetir routing/authority guards e iniciar a implementação test-first.
+- **Current delivery stage:** `Local-Implemented`
+- **Qualifiers:** `Provisional; feature disabled; no deploy, activation or ownership promotion`
+- **Next exact step:** refinar e aprovar separadamente `TODO-uninotas-smart-notas-read-cutover.md` antes de qualquer ativação.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
 - **Work state:** `review`
-- **Why this state now:** contrato congelado, revisões independentes sem achados materiais e authority guard em `preflight-go`; aguarda somente aprovação humana explícita.
-- **Exit condition:** implementação e validação locais concluídas, seguida pelos gates de revisão e promoção aplicáveis.
+- **Why this state now:** implementação local, testes, build, lint, probes, RLS, revisões independentes e completion/authority convergiram; resta somente a movimentação de closeout enquanto o arquivo ainda está em `active/`.
+- **Exit condition:** mover este contrato para `completed/features/`; produção permanece exclusivamente no TODO de cutover.
 
 ## Provisional Notes
 
@@ -60,17 +60,17 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 
 ## Scope
 
-- [ ] `SCOPE-01` Criar módulo NestJS owner de notas fiscais com controller fino, serviço de aplicação, porta explícita e adapter Smart Notas substituível.
-- [ ] `SCOPE-02` Expor `GET /api/v1/notas` com contexto fiscal obrigatório, intervalo de datas obrigatório, filtros publicados pelo provedor e paginação de uma única conta por chamada.
-- [ ] `SCOPE-03` Expor `GET /api/v1/notas/:noteId` usando identificador opaco, assinado e context-bound; o consumidor não envia token, CNPJ ou `idInterno` cru como chave da rota.
-- [ ] `SCOPE-04` Resolver `unifast|prosperar` exclusivamente no backend para pares independentes de token/CNPJ configurados por ambiente.
-- [ ] `SCOPE-05` Normalizar lista/detalhe em DTOs explícitos, preservando status fiscal do provedor, nullabilidade, datas locais e valores decimais como strings.
-- [ ] `SCOPE-06` Mapear falhas e timeouts do provedor para erros estáveis, sanitizados e não vazios; falha Smart Notas nunca vira lista vazia nem consulta de sucesso ao PostgreSQL.
-- [ ] `SCOPE-07` Adicionar ativação segura por `SMART_NOTAS_READ_ENABLED=false`: credenciais são exigidas fail-fast apenas quando habilitada; documentar nomes/semântica em `.env.example` e README sem valores secretos.
-- [ ] `SCOPE-08` Corrigir o filtro global para nunca devolver/logar query string nem valores de parâmetros dinâmicos; cobrir configuração, autorização, codec `noteId`, adapter, serviço, controller/wiring, limites de capacidade e erros com testes determinísticos.
-- [ ] `SCOPE-09` Consolidar o contrato candidato nas seções `target_planned` de `modules/fiscal-notes-and-documents.md` e `modules/runtime-and-deployment.md`, preservando o owner/runtime atual até TODO de cutover.
-- [ ] `SCOPE-10` Aplicar limite por instância de chamadas upstream, cancelamento por desconexão/timeout, zero retry e logs operacionais sanitizados com contexto, operação, outcome e duração, sem identificador fiscal ou PII.
-- [ ] `SCOPE-11` Fixar origin/base path Smart Notas, rejeitar redirect, aplicar rate budget por ator/contexto, excluir PII do DTO, emitir `Cache-Control: no-store` e auditoria read-only sanitizada.
+- [x] `SCOPE-01` Criar módulo NestJS owner de notas fiscais com controller fino, serviço de aplicação, porta explícita e adapter Smart Notas substituível.
+- [x] `SCOPE-02` Expor `GET /api/v1/notas` com contexto fiscal obrigatório, intervalo de datas obrigatório, filtros publicados pelo provedor e paginação de uma única conta por chamada.
+- [x] `SCOPE-03` Expor `GET /api/v1/notas/:noteId` usando identificador opaco, assinado e context-bound; o consumidor não envia token, CNPJ ou `idInterno` cru como chave da rota.
+- [x] `SCOPE-04` Resolver `unifast` ou `prosperar` exclusivamente no backend para pares independentes de token/CNPJ configurados por ambiente.
+- [x] `SCOPE-05` Normalizar lista/detalhe em DTOs explícitos, preservando status fiscal do provedor, nullabilidade, datas locais e valores decimais como strings.
+- [x] `SCOPE-06` Mapear falhas e timeouts do provedor para erros estáveis, sanitizados e não vazios; falha Smart Notas nunca vira lista vazia nem consulta de sucesso ao PostgreSQL.
+- [x] `SCOPE-07` Adicionar ativação segura por `SMART_NOTAS_READ_ENABLED=false`: credenciais são exigidas fail-fast apenas quando habilitada; documentar nomes/semântica em `.env.example` e README sem valores secretos.
+- [x] `SCOPE-08` Corrigir o filtro global para nunca devolver/logar query string nem valores de parâmetros dinâmicos; cobrir configuração, autorização, codec `noteId`, adapter, serviço, controller/wiring, limites de capacidade e erros com testes determinísticos.
+- [x] `SCOPE-09` Consolidar o contrato candidato nas seções `target_planned` de `modules/fiscal-notes-and-documents.md` e `modules/runtime-and-deployment.md`, preservando o owner/runtime atual até TODO de cutover.
+- [x] `SCOPE-10` Aplicar limite por instância de chamadas upstream, cancelamento por desconexão/timeout, zero retry e logs operacionais sanitizados com contexto, operação, outcome e duração, sem identificador fiscal ou PII.
+- [x] `SCOPE-11` Fixar origin/base path Smart Notas, rejeitar redirect, aplicar rate budget por ator/contexto, excluir PII do DTO, emitir `Cache-Control: no-store` e auditoria read-only sanitizada.
 
 ## Out of Scope
 
@@ -103,7 +103,7 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 
 | Scope Item | Local Branch/Commit | PR to lane threshold | PR to `stage` | PR to `main` | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Backend Smart Notas read | `delphi-and-foundation@pending` | `pending` | `n/a until lane discovery` | `n/a until lane discovery` | `planned` |
+| Backend Smart Notas read | `delphi-and-foundation@working-tree` | `n/a — no commit/push authorized` | `n/a` | `n/a` | `Local-Implemented, Provisional` |
 | Foundation module/TODO | `main@7a1c7a2` | `n/a — main-only authority` | `n/a` | `origin/main@7a1c7a2` | `planning baseline published` |
 
 ## Diff Expectation Contract
@@ -124,18 +124,23 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 
 | Repository | Path glob | Change types | Reason |
 | --- | --- | --- | --- |
-| `MonitorNotes` | `backend/src/fiscal-notes/**` | `A|M` | módulo, DTOs, porta, adapter, codec e testes do corte read-only |
+| `MonitorNotes` | `backend/src/fiscal-notes/**` | `A,M,??` | módulo, DTOs, porta, adapter, codec e testes do corte read-only |
 | `MonitorNotes` | `backend/src/app.module.ts` | `M` | registrar o novo módulo |
 | `MonitorNotes` | `backend/src/config/configuration.ts` | `M` | resolver e validar configuração Smart Notas |
 | `MonitorNotes` | `backend/src/config/configuration.spec.ts` | `M` | provar parsing/validação da configuração |
 | `MonitorNotes` | `backend/src/common/filters/all-exceptions.filter.ts` | `M` | substituir URL crua por template de rota sanitizado em resposta/log |
-| `MonitorNotes` | `backend/src/common/filters/all-exceptions.filter.spec.ts` | `A|M` | provar ausência de query, `noteId`, documento e `idCompra` em erro/log |
+| `MonitorNotes` | `backend/src/common/filters/all-exceptions.filter.spec.ts` | `A,M,??` | provar ausência de query, `noteId`, documento e `idCompra` em erro/log |
 | `MonitorNotes` | `backend/.env.example` | `M` | documentar nomes e semântica sem segredo |
 | `MonitorNotes` | `backend/README.md` | `M` | documentar endpoints e configuração operacional |
+| `MonitorNotes` | `backend/eslint.config.mjs` | `A,??` | configuração flat mínima e significativa para tornar o lint declarado executável |
+| `MonitorNotes` | `backend/package.json` | `M` | adicionar dependências de desenvolvimento ESLint autorizadas após finding de delivery |
+| `MonitorNotes` | `backend/package-lock.json` | `M` | lockfile mecânico das dependências ESLint autorizadas |
+| `MonitorNotes` | `uninotas-foundation` | `M` | gitlink reflete somente as evidências Foundation autorizadas deste TODO |
 | `uninotas-foundation` | `modules/fiscal-notes-and-documents.md` | `M` | promover contrato da capacidade entregue |
 | `uninotas-foundation` | `modules/runtime-and-deployment.md` | `M` | registrar fronteira de configuração sem valores |
-| `uninotas-foundation` | `todos/active/features/TODO-uninotas-smart-notas-read-backend.md` | `A|M|D|R` | contrato e evidência da entrega |
-| `uninotas-foundation` | `todos/completed/features/TODO-uninotas-smart-notas-read-backend.md` | `A|R` | destino de closeout após gates |
+| `uninotas-foundation` | `todos/active/features/TODO-uninotas-smart-notas-read-backend.md` | `A,M,D,R` | contrato e evidência da entrega |
+| `uninotas-foundation` | `todos/active/features/TODO-uninotas-smart-notas-read-cutover.md` | `A,??` | materializar o owner de cutover exigido por R3-CUTOVER-01 antes do closeout, sem autorizar execução |
+| `uninotas-foundation` | `todos/completed/features/TODO-uninotas-smart-notas-read-backend.md` | `A,R,??` | destino de closeout após gates |
 | `uninotas-foundation` | `todos/active/process/TODO-uninotas-smart-notas-api-and-fiscal-context-discovery.md` | `M` | apontar handoff da descoberta para o TODO funcional |
 | `uninotas-foundation` | `artifacts/publication-manifest.txt` | `M` | publicar os paths governados do TODO |
 
@@ -145,17 +150,23 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 | --- | --- | --- | --- |
 | `MonitorNotes` | `frontend/**` | `any` | frontend pertence a TODO posterior |
 | `MonitorNotes` | `backend/prisma/**` | `any` | nenhuma persistência de nota neste corte |
-| `MonitorNotes` | `docker-compose.yml|Dockerfile|railway*` | `any` | runtime/deploy fora do escopo |
+| `MonitorNotes` | `docker-compose.yml` | `any` | runtime/deploy fora do escopo |
+| `MonitorNotes` | `Dockerfile` | `any` | runtime/deploy fora do escopo |
+| `MonitorNotes` | `railway*` | `any` | runtime/deploy fora do escopo |
 | `MonitorNotes` | `backend/.env` | `any` | segredo local não é alterado nem versionado |
-| `MonitorNotes` | `backend/package.json|backend/package-lock.json` | `any` | Node 22 `fetch` atende o adapter; dependência nova não é esperada |
-| `uninotas-foundation` | `project_constitution.md|project_mandate.md|system_roadmap.md` | `any` | canon estratégico já suporta o corte e não será reaberto pelo perfil operacional |
-| `uninotas-foundation` | `policies/scope_subscope_governance.md|deterministic/capability_identity_ledger.json|deterministic/validate_foundation.py` | `any` | ownership/cutover canônico permanece planejado e pertence ao TODO de ativação |
+| `uninotas-foundation` | `project_constitution.md` | `any` | canon estratégico já suporta o corte e não será reaberto pelo perfil operacional |
+| `uninotas-foundation` | `project_mandate.md` | `any` | canon estratégico já suporta o corte e não será reaberto pelo perfil operacional |
+| `uninotas-foundation` | `system_roadmap.md` | `any` | canon estratégico já suporta o corte e não será reaberto pelo perfil operacional |
+| `uninotas-foundation` | `policies/scope_subscope_governance.md` | `any` | ownership/cutover canônico permanece planejado e pertence ao TODO de ativação |
+| `uninotas-foundation` | `deterministic/capability_identity_ledger.json` | `any` | ownership/cutover canônico permanece planejado e pertence ao TODO de ativação |
+| `uninotas-foundation` | `deterministic/validate_foundation.py` | `any` | ownership/cutover canônico permanece planejado e pertence ao TODO de ativação |
 
 ### Diff Deviation Analysis
 
 | Diff item | Classification | Evidence / agent defense | Decision | User validation / renewed approval |
 | --- | --- | --- | --- | --- |
-| `none` | `not_triggered` | guard ainda não executado | `n/a` | `n/a` |
+| root `NUL` (`??`, 0 bytes, mtime 2026-09-26 18:07 BRT) | `noise; pre-existing unrelated` | diff guard pós-implementação classificou somente este path como unclassified; arquivo antecedia a execução aprovada de 2026-09-27 e não era lido/importado | `deleted after exact empty-file guard` | `authorized by user on 2026-09-27; resolved` |
+| `backend/eslint.config.mjs`, `backend/package.json`, `backend/package-lock.json` | `necessary/justifiable delivery expansion` | triple audit R1 provou que DOD-07/VAL-04 eram inexequíveis sem tooling; package-first encontrou zero pacote proprietário Node/ESLint | `add minimal official lint toolchain` | `authorized by user on 2026-09-27` |
 
 ## Bounded But Elastic Guardrails
 
@@ -278,46 +289,81 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 
 ## Definition of Done
 
-- [ ] `DOD-01` Lista context-scoped retorna DTO paginado normalizado e nunca mistura Unifast/Prosperar.
-- [ ] `DOD-02` Detalhe resolve `noteId` assinado para um único contexto/`idInterno`, rejeita adulteração e não aceita CNPJ/token arbitrário.
-- [ ] `DOD-03` Com a capacidade habilitada, configuração exige base URL HTTPS, credenciais independentes, CNPJs válidos e segredo HMAC base64 de 32+ bytes; desabilitada por padrão, não exige credenciais e nunca chama o provedor.
-- [ ] `DOD-04` Ausência/null legítimo, datas e decimais são mapeados defensivamente; valor presente malformado falha como contrato inválido, status futuro não vazio é preservado e payload/PII/retorno bruto não atravessam o contrato público.
-- [ ] `DOD-05` Timeout/rede/401/403/5xx/shape inválido produzem falha explícita e sanitizada; 404 de detalhe permanece 404; nenhum caso cai para `logs`.
-- [ ] `DOD-06` Controller é fino, integração fica atrás de porta/token explícito e o módulo não importa Prisma.
-- [ ] `DOD-07` Testes unitários/integração e build/lint do backend passam no runner declarado.
-- [ ] `DOD-08` Probes read-only redatados comprovam lista e detalhe nos dois contextos sem persistir identificadores, payloads ou valores privados.
-- [ ] `DOD-09` Módulos canônicos registram o candidato local sem promover ownership: `events-and-classification` continua owner atual e `fiscal-notes-and-documents` continua `target_planned`.
-- [ ] `DOD-10` `ADMIN|GESTOR|ANALISTA|LEITOR` passam pelos dois GETs; JWT ausente falha e a janela herdada de revogação de até 30 segundos é aceita/provada até a negação pós-expiração; nenhuma rota fiscal de escrita existe.
-- [ ] `DOD-11` Uma request gera no máximo uma chamada Smart Notas; budgets por ator/contexto e concorrência por instância são limitados, disconnect/timeout aborta, `429` local/upstream é explícito e nenhum retry/paginação implícita ocorre.
-- [ ] `DOD-12` Respostas e logs de exceção usam template/fallback fixo e nunca incluem URL/path/query real, stack/message cru, `noteId`, documento, `idCompra`, token, CNPJ, Prisma detail ou payload.
-- [ ] `DOD-13` O contrato público é provado campo a campo, incluindo nullability, malformed-vs-missing, paginação, status desconhecido, bounds e catálogo exaustivo/precedência de erros.
-- [ ] `DOD-14` Origin/base path são fixos, redirects não recebem credenciais, pares token/CNPJ são indivisíveis e verificados; DTOs excluem PII, respostas usam `no-store` e eventos de acesso registram ator/operação/contexto/outcome sem recurso sensível.
-- [ ] `DOD-15` Load/stress local contra upstream stub comprova budgets, fairness entre usuários/contextos, máximo concorrente, degradação controlada, abort e recuperação sem tráfego contra Smart Notas real.
+- [x] `DOD-01` Lista context-scoped retorna DTO paginado normalizado e nunca mistura Unifast/Prosperar.
+- [x] `DOD-02` Detalhe resolve `noteId` assinado para um único contexto/`idInterno`, rejeita adulteração e não aceita CNPJ/token arbitrário.
+- [x] `DOD-03` Com a capacidade habilitada, configuração exige base URL HTTPS, credenciais independentes, CNPJs válidos e segredo HMAC base64 de 32+ bytes; desabilitada por padrão, não exige credenciais e nunca chama o provedor.
+- [x] `DOD-04` Ausência/null legítimo, datas e decimais são mapeados defensivamente; valor presente malformado falha como contrato inválido, status futuro não vazio é preservado e payload/PII/retorno bruto não atravessam o contrato público.
+- [x] `DOD-05` Timeout/rede/401/403/5xx/shape inválido produzem falha explícita e sanitizada; 404 de detalhe permanece 404; nenhum caso cai para `logs`.
+- [x] `DOD-06` Controller é fino, integração fica atrás de porta/token explícito e o módulo não importa Prisma.
+- [x] `DOD-07` Testes unitários/integração e build/lint do backend passam no runner declarado.
+- [x] `DOD-08` Probes read-only redatados comprovam lista e detalhe nos dois contextos e não retêm identificadores, payloads ou valores privados.
+- [x] `DOD-09` Módulos canônicos registram o candidato local sem promover ownership: `events-and-classification` continua owner atual e `fiscal-notes-and-documents` continua `target_planned`.
+- [x] `DOD-10` `ADMIN`, `GESTOR`, `ANALISTA` e `LEITOR` passam pelos dois GETs; JWT ausente falha e a janela herdada de revogação de até 30 segundos é aceita/provada até a negação pós-expiração; nenhuma rota fiscal de escrita existe.
+- [x] `DOD-11` Uma request gera no máximo uma chamada Smart Notas; budgets por ator/contexto e concorrência por instância são limitados, disconnect/timeout aborta, `429` local/upstream é explícito e nenhum retry/paginação implícita ocorre.
+- [x] `DOD-12` Respostas e logs de exceção usam template/fallback fixo e nunca incluem URL/path/query real, stack/message cru, `noteId`, documento, `idCompra`, token, CNPJ, Prisma detail ou payload.
+- [x] `DOD-13` O contrato público é provado campo a campo, incluindo nullability, malformed-vs-missing, paginação, status desconhecido, bounds e catálogo exaustivo/precedência de erros.
+- [x] `DOD-14` Origin/base path são fixos, redirects não recebem credenciais, pares token/CNPJ são indivisíveis e verificados; DTOs excluem PII, respostas usam `no-store` e eventos de acesso registram ator/operação/contexto/outcome sem recurso sensível.
+- [x] `DOD-15` Load/stress local contra upstream stub comprova budgets, fairness entre usuários/contextos, máximo concorrente, degradação controlada, abort e recuperação sem tráfego contra Smart Notas real.
 
 ## Validation Steps
 
-- [ ] `VAL-01` Rodar `python3 delphi-ai/tools/node_capability_surface_audit.py --repo backend --expect nestjs --manifest package.json --require-script test --require-script build --require-script lint`.
-- [ ] `VAL-02` Rodar no backend via Node 22 do host Windows: `npm test -- --runInBand`.
-- [ ] `VAL-03` Rodar no backend via Node 22 do host Windows: `npm run build`.
-- [ ] `VAL-04` Rodar `npm run lint`, inspecionar qualquer rewrite e repetir testes/build se o lint alterar arquivos.
-- [ ] `VAL-05` Executar probe opt-in read-only e redatado para lista/detalhe em `unifast` e `prosperar`; registrar apenas status, shape e ausência de vazamento.
-- [ ] `VAL-06` Rodar `python3 foundation_documentation/deterministic/validate_foundation.py --root foundation_documentation` e o `verify_context` canônico do Windows Git Bash.
-- [ ] `VAL-07` Rodar guards de diff, autoridade, conclusão e closeout conforme o lifecycle deste TODO.
-- [ ] `VAL-08` Rodar teste de aplicação/guard para os quatro perfis nos dois GETs e negativas de autenticação, sem depender apenas de teste estrutural de metadata.
-- [ ] `VAL-09` Rodar testes de saturação/abort/timeout/429 e confirmar `one request -> at most one upstream call`.
-- [ ] `VAL-10` Rodar teste do filtro global com query/param canários e capturar logger/resposta para provar redaction.
-- [ ] `VAL-11` Rodar testes hostis de origin/userinfo/query/fragment/base path/redirect e provar que nenhuma credencial é transmitida ao destino rejeitado.
-- [ ] `VAL-12` Rodar teste de privacy contract/no-store/audit event e provar ausência de todos os campos pessoais excluídos.
-- [ ] `VAL-13` Rodar RLS-E1 contra stub local com estágios congelados abaixo; capturar p50/p95/p99, throughput, error rate, pico upstream concorrente, respostas controladas 429/503 e recuperação.
+- [x] `VAL-01` Rodar `python3 delphi-ai/tools/node_capability_surface_audit.py --repo backend --expect nestjs --manifest package.json --require-script test --require-script build --require-script lint`.
+- [x] `VAL-02` Rodar no backend via Node 22 do host Windows: `npm test -- --runInBand`.
+- [x] `VAL-03` Rodar no backend via Node 22 do host Windows: `npm run build`.
+- [x] `VAL-04` Rodar `npm run lint`, inspecionar qualquer rewrite e repetir testes/build se o lint alterar arquivos.
+- [x] `VAL-05` Executar probe opt-in read-only e redatado para lista/detalhe em `unifast` e `prosperar`; registrar apenas status, shape e ausência de vazamento.
+- [x] `VAL-06` Rodar `python3 foundation_documentation/deterministic/validate_foundation.py --root foundation_documentation` e o `verify_context` canônico do Windows Git Bash.
+- [x] `VAL-07` Rodar guards de diff, autoridade, conclusão e closeout conforme o lifecycle deste TODO.
+- [x] `VAL-08` Rodar teste de aplicação/guard para os quatro perfis nos dois GETs e negativas de autenticação, sem depender apenas de teste estrutural de metadata.
+- [x] `VAL-09` Rodar testes de saturação/abort/timeout/429 e confirmar `one request -> at most one upstream call`.
+- [x] `VAL-10` Rodar teste do filtro global com query/param canários e capturar logger/resposta para provar redaction.
+- [x] `VAL-11` Rodar testes hostis de origin/userinfo/query/fragment/base path/redirect e provar que nenhuma credencial é transmitida ao destino rejeitado.
+- [x] `VAL-12` Rodar teste de privacy contract/no-store/audit event e provar ausência de todos os campos pessoais excluídos.
+- [x] `VAL-13` Rodar RLS-E1 contra stub local com estágios congelados abaixo; capturar p50/p95/p99, throughput, error rate, pico upstream concorrente, respostas controladas 429/503 e recuperação.
 
 ## Completion Evidence Matrix
 
 | Criterion ID | Source Section | Criterion | Evidence Type | Evidence Artifact / Command | Runtime Target | Status | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `DOD-01..07,DOD-10..15` | `Definition of Done` | contratos, isolamento, autorização, privacidade, capacidade/load, redaction, arquitetura e testes | `code+test` | paths/testes e comandos acima | `backend local` | `planned` | evidência será itemizada antes do claim |
-| `DOD-08` | `Definition of Done` | ambos os contextos respondem no adapter real | `runtime` | probe redatado sem dados privados | `Smart Notas read-only` | `planned` | sem mutações |
-| `DOD-09` | `Definition of Done` | consolidação target-planned sem cutover | `doc+review` | módulos âncora + registry invariants + validator | `foundation` | `planned` | owner atual preservado |
-| `VAL-01..13` | `Validation Steps` | validação completa do corte | `test+review` | comandos listados | `local/foundation` | `planned` | detalhar resultados na entrega |
+| `SCOPE-01` | `Scope` | `SCOPE-01` Criar módulo NestJS owner de notas fiscais com controller fino, serviço de aplicação, porta explícita e adapter Smart Notas substituível. | `code+integration-test+review` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; `artifacts/tmp/smart-notas-read-review/package.md`; full Jest 223/223 | `NestJS local com guards reais e Smart Notas stub` | `passed` | implementação e contrato bounded inspecionados no checkout consolidado |
+| `SCOPE-02` | `Scope` | `SCOPE-02` Expor `GET /api/v1/notas` com contexto fiscal obrigatório, intervalo de datas obrigatório, filtros publicados pelo provedor e paginação de uma única conta por chamada. | `code+integration-test+review` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; `artifacts/tmp/smart-notas-read-review/package.md`; full Jest 223/223; route `GET /api/v1/notas` | `NestJS local com guards reais e Smart Notas stub` | `passed` | implementação e contrato bounded inspecionados no checkout consolidado |
+| `SCOPE-03` | `Scope` | `SCOPE-03` Expor `GET /api/v1/notas/:noteId` usando identificador opaco, assinado e context-bound; o consumidor não envia token, CNPJ ou `idInterno` cru como chave da rota. | `code+integration-test+review` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; `artifacts/tmp/smart-notas-read-review/package.md`; full Jest 223/223; route `GET /api/v1/notas/:noteId` | `NestJS local com guards reais e Smart Notas stub` | `passed` | implementação e contrato bounded inspecionados no checkout consolidado |
+| `SCOPE-04` | `Scope` | `SCOPE-04` Resolver `unifast` ou `prosperar` exclusivamente no backend para pares independentes de token/CNPJ configurados por ambiente. | `code+integration-test+review` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; `artifacts/tmp/smart-notas-read-review/package.md`; full Jest 223/223 | `NestJS local com guards reais e Smart Notas stub` | `passed` | implementação e contrato bounded inspecionados no checkout consolidado |
+| `SCOPE-05` | `Scope` | `SCOPE-05` Normalizar lista/detalhe em DTOs explícitos, preservando status fiscal do provedor, nullabilidade, datas locais e valores decimais como strings. | `code+integration-test+review` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; `artifacts/tmp/smart-notas-read-review/package.md`; full Jest 223/223 | `NestJS local com guards reais e Smart Notas stub` | `passed` | implementação e contrato bounded inspecionados no checkout consolidado |
+| `SCOPE-06` | `Scope` | `SCOPE-06` Mapear falhas e timeouts do provedor para erros estáveis, sanitizados e não vazios; falha Smart Notas nunca vira lista vazia nem consulta de sucesso ao PostgreSQL. | `code+integration-test+review` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; `artifacts/tmp/smart-notas-read-review/package.md`; full Jest 223/223 | `NestJS local com guards reais e Smart Notas stub` | `passed` | implementação e contrato bounded inspecionados no checkout consolidado |
+| `SCOPE-07` | `Scope` | `SCOPE-07` Adicionar ativação segura por `SMART_NOTAS_READ_ENABLED=false`: credenciais são exigidas fail-fast apenas quando habilitada; documentar nomes/semântica em `.env.example` e README sem valores secretos. | `code+integration-test+review` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; `artifacts/tmp/smart-notas-read-review/package.md`; full Jest 223/223 | `NestJS local com guards reais e Smart Notas stub` | `passed` | implementação e contrato bounded inspecionados no checkout consolidado |
+| `SCOPE-08` | `Scope` | `SCOPE-08` Corrigir o filtro global para nunca devolver/logar query string nem valores de parâmetros dinâmicos; cobrir configuração, autorização, codec `noteId`, adapter, serviço, controller/wiring, limites de capacidade e erros com testes determinísticos. | `code+integration-test+review` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; `artifacts/tmp/smart-notas-read-review/package.md`; full Jest 223/223 | `NestJS local com guards reais e Smart Notas stub` | `passed` | implementação e contrato bounded inspecionados no checkout consolidado |
+| `SCOPE-09` | `Scope` | `SCOPE-09` Consolidar o contrato candidato nas seções `target_planned` de `modules/fiscal-notes-and-documents.md` e `modules/runtime-and-deployment.md`, preservando o owner/runtime atual até TODO de cutover. | `code+integration-test+review` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; `artifacts/tmp/smart-notas-read-review/package.md`; full Jest 223/223 | `NestJS local com guards reais e Smart Notas stub` | `passed` | implementação e contrato bounded inspecionados no checkout consolidado |
+| `SCOPE-10` | `Scope` | `SCOPE-10` Aplicar limite por instância de chamadas upstream, cancelamento por desconexão/timeout, zero retry e logs operacionais sanitizados com contexto, operação, outcome e duração, sem identificador fiscal ou PII. | `code+integration-test+review` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; `artifacts/tmp/smart-notas-read-review/package.md`; full Jest 223/223 | `NestJS local com guards reais e Smart Notas stub` | `passed` | implementação e contrato bounded inspecionados no checkout consolidado |
+| `SCOPE-11` | `Scope` | `SCOPE-11` Fixar origin/base path Smart Notas, rejeitar redirect, aplicar rate budget por ator/contexto, excluir PII do DTO, emitir `Cache-Control: no-store` e auditoria read-only sanitizada. | `code+integration-test+review` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; `artifacts/tmp/smart-notas-read-review/package.md`; full Jest 223/223 | `NestJS local com guards reais e Smart Notas stub` | `passed` | implementação e contrato bounded inspecionados no checkout consolidado |
+| `DOD-01` | `Definition of Done` | `DOD-01` Lista context-scoped retorna DTO paginado normalizado e nunca mistura Unifast/Prosperar. | `integration-test+command+artifact` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; `npm test -- --runInBand && npm run build && npm run lint`; pacote final; RLS/probe quando aplicável | `NestJS local, loopback stub e Smart Notas read-only probe` | `passed` | 11 suites, 223 testes, build/lint verdes; evidência especializada registrada no pacote |
+| `DOD-02` | `Definition of Done` | `DOD-02` Detalhe resolve `noteId` assinado para um único contexto/`idInterno`, rejeita adulteração e não aceita CNPJ/token arbitrário. | `integration-test+command+artifact` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; `npm test -- --runInBand && npm run build && npm run lint`; pacote final; RLS/probe quando aplicável | `NestJS local, loopback stub e Smart Notas read-only probe` | `passed` | 11 suites, 223 testes, build/lint verdes; evidência especializada registrada no pacote |
+| `DOD-03` | `Definition of Done` | `DOD-03` Com a capacidade habilitada, configuração exige base URL HTTPS, credenciais independentes, CNPJs válidos e segredo HMAC base64 de 32+ bytes; desabilitada por padrão, não exige credenciais e nunca chama o provedor. | `integration-test+command+artifact` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; `npm test -- --runInBand && npm run build && npm run lint`; pacote final; RLS/probe quando aplicável | `NestJS local, loopback stub e Smart Notas read-only probe` | `passed` | 11 suites, 223 testes, build/lint verdes; evidência especializada registrada no pacote |
+| `DOD-04` | `Definition of Done` | `DOD-04` Ausência/null legítimo, datas e decimais são mapeados defensivamente; valor presente malformado falha como contrato inválido, status futuro não vazio é preservado e payload/PII/retorno bruto não atravessam o contrato público. | `integration-test+command+artifact` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; `npm test -- --runInBand && npm run build && npm run lint`; pacote final; RLS/probe quando aplicável | `NestJS local, loopback stub e Smart Notas read-only probe` | `passed` | 11 suites, 223 testes, build/lint verdes; evidência especializada registrada no pacote |
+| `DOD-05` | `Definition of Done` | `DOD-05` Timeout/rede/401/403/5xx/shape inválido produzem falha explícita e sanitizada; 404 de detalhe permanece 404; nenhum caso cai para `logs`. | `integration-test+command+artifact` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; `npm test -- --runInBand && npm run build && npm run lint`; pacote final; RLS/probe quando aplicável | `NestJS local, loopback stub e Smart Notas read-only probe` | `passed` | 11 suites, 223 testes, build/lint verdes; evidência especializada registrada no pacote |
+| `DOD-06` | `Definition of Done` | `DOD-06` Controller é fino, integração fica atrás de porta/token explícito e o módulo não importa Prisma. | `integration-test+command+artifact` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; `npm test -- --runInBand && npm run build && npm run lint`; pacote final; RLS/probe quando aplicável | `NestJS local, loopback stub e Smart Notas read-only probe` | `passed` | 11 suites, 223 testes, build/lint verdes; evidência especializada registrada no pacote |
+| `DOD-07` | `Definition of Done` | `DOD-07` Testes unitários/integração e build/lint do backend passam no runner declarado. | `integration-test+command+artifact` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; `npm test -- --runInBand && npm run build && npm run lint`; pacote final; RLS/probe quando aplicável | `NestJS local, loopback stub e Smart Notas read-only probe` | `passed` | 11 suites, 223 testes, build/lint verdes; evidência especializada registrada no pacote |
+| `DOD-08` | `Definition of Done` | `DOD-08` Probes read-only redatados comprovam lista e detalhe nos dois contextos e não retêm identificadores, payloads ou valores privados. | `integration-test+command+artifact` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; `npm test -- --runInBand && npm run build && npm run lint`; pacote final; RLS/probe quando aplicável | `NestJS local, loopback stub e Smart Notas read-only probe` | `passed` | probe read-only aprovado para ambos os contextos; nenhuma mutação ou retenção de dado privado |
+| `DOD-09` | `Definition of Done` | `DOD-09` Módulos canônicos registram o candidato local sem promover ownership: `events-and-classification` continua owner atual e `fiscal-notes-and-documents` continua `target_planned`. | `integration-test+command+artifact` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; `npm test -- --runInBand && npm run build && npm run lint`; pacote final; RLS/probe quando aplicável | `NestJS local, loopback stub e Smart Notas read-only probe` | `passed` | 11 suites, 223 testes, build/lint verdes; evidência especializada registrada no pacote |
+| `DOD-10` | `Definition of Done` | `DOD-10` `ADMIN`, `GESTOR`, `ANALISTA` e `LEITOR` passam pelos dois GETs; JWT ausente falha e a janela herdada de revogação de até 30 segundos é aceita/provada até a negação pós-expiração; nenhuma rota fiscal de escrita existe. | `integration-test+command+artifact` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; `npm test -- --runInBand && npm run build && npm run lint`; pacote final; RLS/probe quando aplicável; route `GET /api/v1/notas` e `GET /api/v1/notas/:noteId` | `NestJS local, loopback stub e Smart Notas read-only probe` | `passed` | 11 suites, 223 testes, build/lint verdes; evidência especializada registrada no pacote |
+| `DOD-11` | `Definition of Done` | `DOD-11` Uma request gera no máximo uma chamada Smart Notas; budgets por ator/contexto e concorrência por instância são limitados, disconnect/timeout aborta, `429` local/upstream é explícito e nenhum retry/paginação implícita ocorre. | `integration-test+command+artifact` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; `npm test -- --runInBand && npm run build && npm run lint`; pacote final; RLS/probe quando aplicável | `NestJS local, loopback stub e Smart Notas read-only probe` | `passed` | 11 suites, 223 testes, build/lint verdes; evidência especializada registrada no pacote |
+| `DOD-12` | `Definition of Done` | `DOD-12` Respostas e logs de exceção usam template/fallback fixo e nunca incluem URL/path/query real, stack/message cru, `noteId`, documento, `idCompra`, token, CNPJ, Prisma detail ou payload. | `integration-test+command+artifact` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; `npm test -- --runInBand && npm run build && npm run lint`; pacote final; RLS/probe quando aplicável | `NestJS local, loopback stub e Smart Notas read-only probe` | `passed` | 11 suites, 223 testes, build/lint verdes; evidência especializada registrada no pacote |
+| `DOD-13` | `Definition of Done` | `DOD-13` O contrato público é provado campo a campo, incluindo nullability, malformed-vs-missing, paginação, status desconhecido, bounds e catálogo exaustivo/precedência de erros. | `integration-test+command+artifact` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; `npm test -- --runInBand && npm run build && npm run lint`; pacote final; RLS/probe quando aplicável | `NestJS local, loopback stub e Smart Notas read-only probe` | `passed` | 11 suites, 223 testes, build/lint verdes; evidência especializada registrada no pacote |
+| `DOD-14` | `Definition of Done` | `DOD-14` Origin/base path são fixos, redirects não recebem credenciais, pares token/CNPJ são indivisíveis e verificados; DTOs excluem PII, respostas usam `no-store` e eventos de acesso registram ator/operação/contexto/outcome sem recurso sensível. | `integration-test+command+artifact` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; `npm test -- --runInBand && npm run build && npm run lint`; pacote final; RLS/probe quando aplicável | `NestJS local, loopback stub e Smart Notas read-only probe` | `passed` | 11 suites, 223 testes, build/lint verdes; evidência especializada registrada no pacote |
+| `DOD-15` | `Definition of Done` | `DOD-15` Load/stress local contra upstream stub comprova budgets, fairness entre usuários/contextos, máximo concorrente, degradação controlada, abort e recuperação sem tráfego contra Smart Notas real. | `integration-test+command+artifact` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; `npm test -- --runInBand && npm run build && npm run lint`; pacote final; RLS/probe quando aplicável | `NestJS local, loopback stub e Smart Notas read-only probe` | `passed` | 11 suites, 223 testes, build/lint verdes; evidência especializada registrada no pacote |
+| `VAL-01` | `Validation Steps` | `VAL-01` Rodar `python3 delphi-ai/tools/node_capability_surface_audit.py --repo backend --expect nestjs --manifest package.json --require-script test --require-script build --require-script lint`. | `integration-test+command+guard` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; comando exato desta etapa registrado no pacote final e executado em 2026-09-27 | `NestJS local/foundation/loopback conforme a etapa` | `passed` | exit 0 ou artefato passed; nenhum segredo retido |
+| `VAL-02` | `Validation Steps` | `VAL-02` Rodar no backend via Node 22 do host Windows: `npm test -- --runInBand`. | `integration-test+command+guard` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; comando exato desta etapa registrado no pacote final e executado em 2026-09-27 | `NestJS local/foundation/loopback conforme a etapa` | `passed` | exit 0 ou artefato passed; nenhum segredo retido |
+| `VAL-03` | `Validation Steps` | `VAL-03` Rodar no backend via Node 22 do host Windows: `npm run build`. | `integration-test+command+guard` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; comando exato desta etapa registrado no pacote final e executado em 2026-09-27 | `NestJS local/foundation/loopback conforme a etapa` | `passed` | exit 0 ou artefato passed; nenhum segredo retido |
+| `VAL-04` | `Validation Steps` | `VAL-04` Rodar `npm run lint`, inspecionar qualquer rewrite e repetir testes/build se o lint alterar arquivos. | `integration-test+command+guard` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; comando exato desta etapa registrado no pacote final e executado em 2026-09-27 | `NestJS local/foundation/loopback conforme a etapa` | `passed` | exit 0 ou artefato passed; nenhum segredo retido |
+| `VAL-05` | `Validation Steps` | `VAL-05` Executar probe opt-in read-only e redatado para lista/detalhe em `unifast` e `prosperar`; registrar apenas status, shape e ausência de vazamento. | `integration-test+command+guard` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; comando exato desta etapa registrado no pacote final e executado em 2026-09-27 | `NestJS local/foundation/loopback conforme a etapa` | `passed` | exit 0 ou artefato passed; nenhum segredo retido |
+| `VAL-06` | `Validation Steps` | `VAL-06` Rodar `python3 foundation_documentation/deterministic/validate_foundation.py --root foundation_documentation` e o `verify_context` canônico do Windows Git Bash. | `integration-test+command+guard` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; comando exato desta etapa registrado no pacote final e executado em 2026-09-27 | `NestJS local/foundation/loopback conforme a etapa` | `passed` | exit 0 ou artefato passed; nenhum segredo retido |
+| `VAL-07` | `Validation Steps` | `VAL-07` Rodar guards de diff, autoridade, conclusão e closeout conforme o lifecycle deste TODO. | `guard` | `todo_diff_expectation_guard.py`; `todo_authority_guard.py --require-delivery-gates`; `todo_completion_guard.py --require-delivery`; `todo_closeout_guard.py --repo .` executados em 2026-09-27 | `principal checkout + foundation` | `passed` | diff/authority/readiness/closeout verdes; completion reexecutado após reconciliação atômica desta linha |
+| `VAL-08` | `Validation Steps` | `VAL-08` Rodar teste de aplicação/guard para os quatro perfis nos dois GETs e negativas de autenticação, sem depender apenas de teste estrutural de metadata. | `integration-test+command+guard` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; comando exato desta etapa registrado no pacote final e executado em 2026-09-27 | `NestJS local/foundation/loopback conforme a etapa` | `passed` | exit 0 ou artefato passed; nenhum segredo retido |
+| `VAL-09` | `Validation Steps` | `VAL-09` Rodar testes de saturação/abort/timeout/429 e confirmar `one request -> at most one upstream call`. | `integration-test+command+guard` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; comando exato desta etapa registrado no pacote final e executado em 2026-09-27 | `NestJS local/foundation/loopback conforme a etapa` | `passed` | exit 0 ou artefato passed; nenhum segredo retido |
+| `VAL-10` | `Validation Steps` | `VAL-10` Rodar teste do filtro global com query/param canários e capturar logger/resposta para provar redaction. | `integration-test+command+guard` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; comando exato desta etapa registrado no pacote final e executado em 2026-09-27 | `NestJS local/foundation/loopback conforme a etapa` | `passed` | exit 0 ou artefato passed; nenhum segredo retido |
+| `VAL-11` | `Validation Steps` | `VAL-11` Rodar testes hostis de origin/userinfo/query/fragment/base path/redirect e provar que nenhuma credencial é transmitida ao destino rejeitado. | `integration-test+command+guard` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; comando exato desta etapa registrado no pacote final e executado em 2026-09-27 | `NestJS local/foundation/loopback conforme a etapa` | `passed` | exit 0 ou artefato passed; nenhum segredo retido |
+| `VAL-12` | `Validation Steps` | `VAL-12` Rodar teste de privacy contract/no-store/audit event e provar ausência de todos os campos pessoais excluídos. | `integration-test+command+guard` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; comando exato desta etapa registrado no pacote final e executado em 2026-09-27 | `NestJS local/foundation/loopback conforme a etapa` | `passed` | exit 0 ou artefato passed; nenhum segredo retido |
+| `VAL-13` | `Validation Steps` | `VAL-13` Rodar RLS-E1 contra stub local com estágios congelados abaixo; capturar p50/p95/p99, throughput, error rate, pico upstream concorrente, respostas controladas 429/503 e recuperação. | `integration-test+command+guard` | integration test `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`; comando exato desta etapa registrado no pacote final e executado em 2026-09-27 | `NestJS local/foundation/loopback conforme a etapa` | `passed` | exit 0 ou artefato passed; nenhum segredo retido |
 
 ## External Dependency Readiness
 
@@ -329,7 +375,8 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 
 ## Package-First Assessment
 
-- **Queries executed:** `query_packages.sh --search "smart notas"`, `--search "http client"`, `--search "rate limit"`, `--search "semaphore"`, `--stack node --all`.
+- **Queries executed:** `query_packages.sh --search "smart notas"`, `--search "http client"`, `--search "rate limit"`, `--search "semaphore"`; pós-finding de lint: `--search "eslint"`, `--search "lint"`, `--stack node --all`.
+- **Lint package result:** zero pacote proprietário encontrado; adoção externa autorizada de `eslint`, `@eslint/js`, `typescript-eslint` e `globals`, sem fork/wrapper local.
 - **Relevant proprietary packages found:** `none`.
 - **READMEs read:** `n/a`.
 - **Decision:** implementação host-local atrás de porta/adapter, usando `fetch` nativo do Node 22; nenhuma dependência nova.
@@ -447,8 +494,8 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
 - **Adherence review package:** `bounded-file-set`
-- **Adherence review status:** `not_run`
-- **Adherence review evidence / resolution:** `pending implementation`
+- **Adherence review status:** `no_material_findings`
+- **Adherence review evidence / resolution:** fresh no-context confirmation `artifacts/tmp/smart-notas-read-review/architecture-confirmation.result.json`; os dois achados medium anteriores foram corrigidos: decode ocorre dentro do boundary instrumentado antes do success log e o harness percorre recursivamente os nove arquivos TypeScript de produção, sem Prisma/logs.
 
 ## Gate: Review Baseline Freeze
 
@@ -538,15 +585,14 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 
 ### Local CI-Equivalent Suite Matrix
 
-| Repository / CI Surface | Why In Scope | Behavior / Scenario Covered | Preconditions | Local CI-Equivalent Command | Required Before | Status | Evidence | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| backend Jest | lógica/contrato mudam | lista/detalhe/DTO strict/status/bounds/error/config/HMAC/origin/rate/capacity/privacy/redaction | fixtures provider determinísticas + URL/stack/PII canaries + fake timers/abort | `npm test -- --runInBand` | `Local-Implemented` | `planned` | pending | sem dados reais |
-| backend app/guard | acesso muda | quatro perfis acessam; sem JWT falha; cache aquecido permite até 30s e nega após expiração | Nest testing app com guards reais, fake timers e adapter fake | `npm test -- --runInBand` | `Local-Implemented` | `planned` | pending | não aceitar teste só de metadata |
-| backend local RLS | pressão/capacidade | bursts mistos provam rate/fairness/semaphore/recovery sem exceder stub | Nest local + upstream stub; atores sintéticos; somente loopback | Jest mixed-workload runner + JSON `pcv-1` | `Local-Implemented` | `planned` | pending | RLS-E1 abaixo |
-| backend build | novo módulo/DTO | compilação Nest/TS | Node 22 + deps atuais | `npm run build` | `Local-Implemented` | `planned` | pending | runner Windows |
-| backend lint | novos arquivos TS | regras estáticas/formatação | deps atuais | `npm run lint` | `Local-Implemented` | `planned` | pending | inspecionar rewrites |
-| Smart Notas read probe | integração real | `/empresa` binding + lista/detalhe direto em ambos contextos | env local preenchido; flag opt-in; janela curta | probe opt-in redatado | `Local-Implemented` | `planned` | pending | sem persistir payload/identificador |
-| Foundation validator | docs/TODO | coerência/publicação/privacidade | baseline main | validator + verify_context | `promotion` | `planned` | pending | Windows Git Bash para readiness |
+| Repository / CI Surface | Why In Scope | Local CI-Equivalent Command | Required Before | Status | Evidence Artifact / Command | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| backend Jest | lógica/contrato/auth mudam; cobre lista/detalhe, decoder, catálogo, HMAC, config, privacy, limites e redaction com fixtures determinísticas | `npm test -- --runInBand` | `Local-Implemented` | `passed` | 11 suites passed, 223 tests passed, 1 probe opt-in skipped por design | inclui production config single-source + blank disabled env + canonical feature flag + AST guards de wiring/source authority, numeric env parity matrix, query/noteId matrices, guards reais e JWT missing/invalid/expired/inactive/cache |
+| backend local RLS | pressão/capacidade; cobre rate/fairness/semaphore/error-disposal/abort/recovery somente loopback | `RLS_OUTPUT_DIR=../foundation_documentation/artifacts/tmp/smart-notas-read-rls npm test -- --runInBand --runTestsByPath src/fiscal-notes/__tests__/smart-notas-load.spec.ts` | `Local-Implemented` | `passed` | `rls-pcv1.json`, run `9f56824b-4dc3-4223-8366-37cf6cd1fcd8`, hash `fd17814ead040e7826df0c147c19185b0af72ab9ad80a5f15d95234a69be1284` | estágios L/S/FU/FC/E/A/R, zero falhas imprevistas |
+| backend build | novo módulo/DTO/wiring TypeScript | `npm run build` | `Local-Implemented` | `passed` | Nest build exit 0 no Node 22.22.2 Windows | executado após remediações R1 |
+| backend lint | novos arquivos TS exigem o gate declarado pelo manifest | `npm run lint` | `Local-Implemented` | `passed` | ESLint 10 flat config, exit 0 | tooling oficial autorizado; sem rewrite |
+| Smart Notas read probe | integração real dos dois pares; `/empresa`, lista e detalhe sem output privado | `cmd.exe /d /s /c "set SMART_NOTAS_PROBE_ENABLED=true&& set SMART_NOTAS_TIMEOUT_MS=30000&& npm test -- --runInBand --runTestsByPath src/fiscal-notes/__tests__/smart-notas-live.probe.spec.ts"` | `Local-Implemented` | `passed` | 1 suite/1 test passed em 14.203 s | nenhum payload/identificador persistido |
+| Foundation validator/readiness | docs/TODO/publication e aliases PACED mudam | `python3 foundation_documentation/deterministic/validate_foundation.py --root foundation_documentation` + Windows Git Bash `delphi-ai/verify_context.sh` | `Local-Implemented` | `passed` | Foundation validation passed; `Environment Verified: PACED-Ready` | CRLF exige o runner Git Bash canônico |
 
 ### Runtime / Rollout Notes
 
@@ -735,8 +781,9 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 
 ## Approval
 
-- **Approved by:** `pending explicit APROVADO`.
+- **Approved by:** `usuário — resposta exata APROVADO em 2026-09-27`.
 - **Approval scope:** `list + detail backend Smart Notas, tests, docs/modules e configuração descritos neste TODO; inclui execução por routine executor subagent no principal checkout, single writer`.
+- **Renewed approval:** usuário respondeu `Autorizo` em 2026-09-27 para (a) configuração/dependências mínimas ESLint e mudanças em package/lock, (b) apagar exclusivamente o `NUL` vazio preexistente e (c) aceitar a cobertura final exaustiva como disposição da evidência fail-first histórica ausente; nenhuma ativação/deploy foi autorizada.
 - **Execution not authorized by approval:** todos os itens de `Out of Scope`, especialmente frontend, documentos, banco, mutações, deploy e worktrees.
 - **Renewed approval required when:** contrato/escopo/autorização/persistência/dependency/runtime risk mudar materialmente.
 - **Pre-approval authority evidence:** `todo_authority_guard.py --pre-approval` retornou `Overall outcome: preflight-go`, zero violations, em 2026-09-27.
@@ -755,7 +802,7 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 | `delphi-ai/skills/runtime-load-stress-validation/SKILL.md` | claims de rate/concurrency | RLS local com métricas | load real no provedor | RLS-E1 |
 | `delphi-ai/skills/security-adversarial-review/SKILL.md` | credenciais/JWT/PII | origin, authz, redaction, abuse | tráfego destrutivo/vazamento | post-implementation gate |
 
-> As fontes acima estão preparadas para preflight; a ingestão vinculante pós-`APROVADO` será registrada antes do código.
+> Ingestão vinculante pós-`APROVADO` concluída em 2026-09-27 antes do código; `verify_context` retornou PACED-Ready e o Node capability audit confirmou NestJS com scripts `test|build|lint`.
 
 ## Agent Routing Preflight
 
@@ -766,7 +813,7 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Selected effort:** `medium`
 - **Proof mode:** `declared`
 - **Exception reason:** `n/a`
-- **Subagent / delegation authorization:** `pending explicit APROVADO of this TODO scope`
+- **Subagent / delegation authorization:** `authorized by explicit APROVADO on 2026-09-27 for one routine executor in the principal checkout`
 - **Execution topology:** `primary-checkout-single-writer`
 - **Worktree / auxiliary-checkout authorization:** `not-authorized`
 - **Worktree authorization evidence:** `n/a`
@@ -779,28 +826,28 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 
 | Decision ID | Status | Evidence | Notes |
 | --- | --- | --- | --- |
-| `D-01` | `pending` | implementation/evidence pending | list/detail only |
-| `D-02` | `pending` | implementation/evidence pending | trusted context resolution |
-| `D-03` | `pending` | implementation/evidence pending | Smart Notas-only/no fallback |
-| `D-04` | `pending` | implementation/evidence pending | HMAC noteId |
-| `D-05` | `pending` | implementation/evidence pending | query/bounds |
-| `D-06` | `pending` | implementation/evidence pending | all four profiles/both contexts |
-| `D-07` | `pending` | implementation/evidence pending | upstream failures |
-| `D-08` | `pending` | implementation/evidence pending | no backend cache/polling |
-| `D-09` | `pending` | implementation/evidence pending | NestJS boundary |
-| `D-10` | `pending` | implementation/evidence pending | local-only provisional/cutover split |
-| `D-11` | `pending` | implementation/evidence pending | origin/rate/concurrency/timeout |
-| `D-12` | `pending` | implementation/evidence pending | noteId/error/log redaction |
-| `D-13` | `pending` | implementation/evidence pending | privacy/no-store/access audit |
+| `D-01` | `Adherent` | controller/service/adapter specs + full suite | exatamente list/detail read-only |
+| `D-02` | `Adherent` | DTO validation + config context pairs | contexto confiável resolvido no backend |
+| `D-03` | `Adherent` | AST/source scans e cutover audit R1 | Smart Notas-only; nenhum Prisma/logs fallback |
+| `D-04` | `Adherent` | codec/contract specs | HMAC canônico, context-bound e tamper-resistant |
+| `D-05` | `Adherent` | DTO/contract/adapter matrices | query, paginação e bounds congelados |
+| `D-06` | `Adherent` | application spec com guards reais | quatro perfis nos dois GETs/contextos |
+| `D-07` | `Adherent` | adapter + filter exhaustive matrices | falhas explícitas e sanitizadas |
+| `D-08` | `Adherent` | estrutura/source scan | sem backend cache/polling/page-walk |
+| `D-09` | `Adherent` | structure spec e module spec | boundary NestJS por porta/token |
+| `D-10` | `Adherent` | módulos target-planned + TODO cutover Pending | local-only; sem activation/ownership promotion |
+| `D-11` | `Adherent` | config/adapter/RLS L/S/FU/FC/E/A/R | origin/rate/concurrency/timeout/error disposal |
+| `D-12` | `Adherent` | filter/adapter/service log canaries | noteId/error/log redaction provados |
+| `D-13` | `Adherent` | application/privacy/audit tests | PII excluída, no-store e auditoria actor-aware |
 
 ## Module Decision Consistency Validation
 
 | Module Decision Ref | Planned Handling | Delivery Status | Evidence | Notes |
 | --- | --- | --- | --- | --- |
-| `fiscal-notes-and-documents#authority` | `Preserve` | `pending` | pending | 1:1 delivery check |
-| `fiscal-notes-and-documents#documents` | `Out of Scope` | `pending` | pending | nenhum PDF/XML |
-| `identity-and-team#protected-reads` | `Preserve` | `pending` | pending | JWT global |
-| `runtime-and-deployment#config` | `Preserve` | `pending` | pending | sem segredo/docs only |
+| `fiscal-notes-and-documents#authority` | `Preserve` | `Adherent` | module target-planned + cutover audit R1 | owner atual não promovido |
+| `fiscal-notes-and-documents#documents` | `Out of Scope` | `Adherent` | diff/source scan | nenhum PDF/XML |
+| `identity-and-team#protected-reads` | `Preserve` | `Adherent` | application spec com JwtAuthGuard/RolesGuard reais | JWT global preservado |
+| `runtime-and-deployment#config` | `Preserve` | `Adherent` | `.env.example`, config specs, module target-planned | sem segredo e sem topology/deploy change |
 
 ## Security Risk Assessment
 
@@ -808,7 +855,7 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Why this risk level:** credenciais de dois emissores, dados fiscais/PII, novo contrato autenticado e `noteId` context-bound.
 - **Attack surface in scope:** JWT/cache de revogação, provider Authorization/CNPJ, allowlist/redirect, rate abuse, input bounds, error/log sanitization, context spoofing, identifier tampering e PII presente somente no payload upstream.
 - **Attack simulation decision:** `required`.
-- **Review evidence:** `pending security-adversarial review after implementation`.
+- **Review evidence:** `artifacts/tmp/smart-notas-read-review/security-review.md`; zero finding material após allowlist, HMAC, redaction, rate/concurrency e PII review.
 - **Residual security risk:** quotas/URL documents remain outside; credentials dependem de injeção segura no deploy.
 
 ## Performance & Concurrency Risk Assessment
@@ -816,21 +863,21 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Policy schema version:** `pcv-1`
 - **Global sensitivity level:** `medium`
 - **Why this level:** cada chamada de lista/detalhe adiciona I/O externo; não há writes, cache, bulk ou polling.
-- **Current delivery stage at review time:** `Pending`
+- **Current delivery stage at review time:** `implementation and local CI-equivalent complete; independent confirmation in progress`
 
 | Lane ID | Lane | Trigger Result | Trigger Severity | Trigger Reason Code | Gate Deadline | Minimum Evidence Rule | State | Residual Risk | Uncertainty Reason Code |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `EPS` | `endpoint-performance-scrutiny` | `required` | `medium` | `EPS-DATA-PATH-CHANGED` | `before_local_implemented` | `EPS-E2` | `pending` | provider latency/quota | `none` |
+| `EPS` | `endpoint-performance-scrutiny` | `required` | `medium` | `EPS-DATA-PATH-CHANGED` | `before_local_implemented` | `EPS-E2` | `passed` | provider latency/quota remains for cutover | `none` |
 | `FRC` | `frontend-race-condition-validation` | `not_needed` | `low` | `FRC-RETRIGGERABLE-LIST` | `before_local_implemented` | `FRC-POLICY` | `not_applicable` | none in backend-only slice | `none` |
 | `BCI` | `backend-concurrency-idempotency-validation` | `not_needed` | `low` | `BCI-DUPLICATE-SUBMIT-OR-REPLAY` | `before_local_implemented` | `BCI-POLICY` | `not_applicable` | read-only, no shared mutation | `none` |
-| `RLS` | `runtime-load-stress-validation` | `required` | `medium` | `RLS-SLO-CLAIM` | `before_local_implemented` | `RLS-E1` | `pending` | multi-replica/provider quota unknown | `none` |
+| `RLS` | `runtime-load-stress-validation` | `required` | `medium` | `RLS-SLO-CLAIM` | `before_local_implemented` | `RLS-E1` | `passed` | multi-replica/provider quota deferred to cutover | `none` |
 
 ### EPS
 
 - **Trigger rationale:** novo data path HTTP externo para endpoints list/detail; requer touched-path audit e evidência forte de timeout/uma chamada por request.
 - **Recorded at (UTC):** `2026-09-26T00:00:00Z`
-- **Executor ID:** `pending-routine-executor`
-- **Evidence object:** `pending implementation; JSON pcv-1 required before Local-Implemented`.
+- **Executor ID:** `codex-operational-coder`
+- **Evidence object:** `artifacts/tmp/smart-notas-read-eps/eps-pcv1.json`, canonical hash `353252b5c9cbba775d016c15a919f5853d30a60a586875f1554880a8b5e3c51d`, result passed.
 
 ### FRC
 
@@ -850,29 +897,30 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 
 - **Trigger rationale:** o contrato faz claims explícitos de rate, fairness, concorrência, saturação, abort e recuperação; RLS roda somente contra upstream stub local, nunca contra Smart Notas.
 - **Recorded at (UTC):** `2026-09-26T00:00:00Z`
-- **Executor ID:** `pending-routine-executor`
-- **Evidence object:** `pending RLS-E1 before Local-Implemented`.
+- **Executor ID:** `codex-operational-coder`
+- **Evidence object:** `artifacts/tmp/smart-notas-read-rls/rls-pcv1.json`; run `9f56824b-4dc3-4223-8366-37cf6cd1fcd8`; hash `fd17814ead040e7826df0c147c19185b0af72ab9ad80a5f15d95234a69be1284`; result passed.
 - **Runner:** Jest dedicado `src/fiscal-notes/__tests__/smart-notas-load.spec.ts` abre Nest em porta efêmera com os mesmos pipes/filtro/controller/service e guard test-only que mapeia `X-Test-Actor` para 20 atores; upstream stub local em outra porta; um driver Promise-worker dentro do teste alterna ator, contexto e list/detail. `runtime_load_probe.sh` não é o runner principal porque não rotaciona identidade/contexto nem gera o JSON `pcv-1` exigido.
 - **Workload model:** 20 atores sintéticos em ordem round-robin alternam `unifast|prosperar` e lista|detalhe; credenciais/IDs são fixtures falsas; nenhum socket alcança host não-loopback. O clock/rate state e o stub são controláveis pelo harness, mas Nest/stub permanecem no mesmo processo até terminar recovery.
 - **Stage L — accepted load:** stub 100 ms, concurrency `5` por `5s`, `maxConcurrency=8`, budgets `user=120/context=600`; exige somente `200`, p95 `<=500 ms`, p99 `<=1000 ms`, throughput `>=5 req/s`, zero erro inesperado e peak upstream `<=8`.
 - **Stage S — semaphore saturation:** rate state limpo por avanço do clock, stub 100 ms, concurrency `20` por `1s`, mesmos budgets altos; exige `SmartNotasOcupado > 0`, `LimiteDeConsultaExcedido = 0`, peak upstream exatamente `8`, zero fila e current concurrency `0` ao final.
 - **Stage FU — actor budget isolated:** rate state limpo, `maxConcurrency=64`, budgets `user=30/context=600`; um ator envia 35 requests sequenciais dentro da mesma janela, alternando contexto e list/detail. Exige exatamente 30 aceites, exatamente 5 `LimiteDeConsultaExcedido`, exatamente 30 chamadas upstream, zero chamada upstream para as cinco requests posteriores ao limite e zero `SmartNotasOcupado`. O snapshot depois do 30º aceite é `actor=30, unifast=15, prosperar=15`; cada uma das cinco rejeições deve preservar exatamente esse snapshot, provando a atualização atômica e que o budget de contexto não mascara o limiter por ator.
 - **Stage FC — context budget and fairness isolated:** rate state limpo, `maxConcurrency=64`, budgets `user=120/context=120`; os 20 atores, dez por contexto, enviam exatamente 13 requests cada em round-robin, alternando list/detail. Exige exatamente 120 aceites e 10 `LimiteDeConsultaExcedido` em cada contexto, exatamente 240 chamadas upstream no total, zero chamada upstream para as 20 requests rejeitadas e zero `SmartNotasOcupado`. O snapshot depois do 12º round é `unifast=120, prosperar=120` e cada um dos 20 atores tem exatamente `12`; a 13ª request de cada ator deve preservar todos esses counters sem incrementá-los, provando atomicidade, fairness/no-starvation e que o budget por ator não mascara os limiters de contexto.
+- **Stage E — provider error disposal:** rate state limpo, `maxConcurrency=8`; quatro batches de oito requests recebem respectivamente `3xx`, `429`, `5xx` e `200` com `Content-Length` acima de 2 MiB mantendo o body aberto. Exige códigos estáveis exatos, cancelamento/fechamento upstream dos 32 bodies, peak `8`, `active=0` e nenhum restart antes dos estágios seguintes.
 - **Stage A — abort/timeout:** rate state limpo, stub 2000 ms, `maxConcurrency=8`; lança oito requests, desconecta deterministicamente quatro clientes após 50 ms e deixa quatro atingirem `timeout=1000 ms`. Exige `client_aborted >=4`, quatro `SmartNotasTimeout`, stub observa cancelamento dos oito upstream requests, slots/current concurrency retornam a zero em até 250 ms após o último abort e nenhuma escrita em socket fechado.
 - **Stage R — recovery sem restart:** ainda no mesmo Nest/stub, clock avança além da janela, stub volta a 100 ms e concurrency `2` por `5s`; exige somente `200`, current concurrency zero ao final e latência/throughput dos thresholds de load. Restart-resilience smoke é separado e não substitui R.
 - **Global acceptance:** statuses fora dos previstos falham; processo/memória permanecem vivos; FU e FC registram contagens aceitas/rejeitadas/upstream e snapshots before/after de counters por ator e contexto; todo threshold acima vira assertion pass/fail, não mera métrica registrada.
-- **Evidence capture:** o teste escreve `foundation_documentation/artifacts/tmp/smart-notas-read-rls/rls-pcv1.json` com o envelope obrigatório: `policy_schema_version=pcv-1`, `schema_version`, `lane_id=RLS`, `todo_id`, `run_id`, `environment_id`, `executor_id`, `reviewer_id`, `recorded_at_utc`, `evidence_type`, `sample_profile_id=RLS-SP-H`, `acceptance_rule_id=RLS-A1`, `result_summary`, `artifact_payload={stage_profile_observed,thresholds,metrics_summary,status_counts,unexpected_error_rate,peak_and_current_concurrency,abort_and_timeout_counts,fairness,rate_counter_snapshots,recovery,git_baselines}` e `artifact_sha256`.
+- **Evidence capture:** o teste escreve `foundation_documentation/artifacts/tmp/smart-notas-read-rls/rls-pcv1.json` com o envelope obrigatório: `policy_schema_version=pcv-1`, `schema_version`, `lane_id=RLS`, `todo_id`, `run_id`, `environment_id`, `executor_id`, `reviewer_id`, `recorded_at_utc`, `evidence_type`, `sample_profile_id=RLS-SP-H`, `acceptance_rule_id=RLS-A1`, `result_summary`, `artifact_payload={stage_profile_observed,thresholds,metrics_summary,status_counts,unexpected_error_rate,peak_and_current_concurrency,provider_error_disposal,abort_and_timeout_counts,fairness,rate_counter_snapshots,recovery,git_baselines}` e `artifact_sha256`.
 - **Hash rule:** `artifact_sha256` é SHA-256 do JSON completo sem esse campo, UTF-8, chaves ordenadas recursivamente, arrays na ordem declarada e sem whitespace insignificante; o evidence object do TODO registra também `evidence_type,environment_id,run_id,artifact_uri,artifact_schema_version,artifact_sha256,sample_profile_id,acceptance_rule_id,result_summary,reviewer_id`.
 - **Raw artifacts:** traces/contadores auxiliares ficam no mesmo diretório tmp; o JSON canônico, não prosa, satisfaz o gate.
 - **Exact command:** no diretório backend, `RLS_OUTPUT_DIR=../foundation_documentation/artifacts/tmp/smart-notas-read-rls npm test -- --runInBand --runTestsByPath src/fiscal-notes/__tests__/smart-notas-load.spec.ts`.
 
 ## Verification Debt Assessment
 
-- **Audit outcome:** `pending`.
-- **Why this outcome:** TODO medium e provider contract parcialmente genérico exigem audit antes de Completed.
-- **Inline code TODO debt:** `pending`.
-- **Evidence / audit artifact:** `pending`.
-- **Accepted residual debt:** `none approved`.
+- **Audit outcome:** `low — resolved decisions explicit; no hidden closure debt`.
+- **Why this outcome:** o lint oficial está executável e verde; o `NUL` vazio foi removido após guarda exato; a proveniência fail-first histórica ausente foi explicitamente aceita pelo usuário em favor da cobertura final exaustiva, sem fabricar evidência retroativa.
+- **Inline code TODO debt:** `accepted`; o único match nos paths de produto é o identificador literal `todo_id` do artefato RLS, não comentário de dívida.
+- **Evidence / audit artifact:** helper `verification_debt_audit.sh` + classificação manual bounded em `artifacts/tmp/smart-notas-read-review/verification-debt.md`.
+- **Accepted residual debt:** ausência do artefato histórico fail-first, aceita pelo usuário em 2026-09-27; risco limitado à provenance, não à cobertura final. Vulnerabilidades npm de dependências runtime preexistentes permanecem dívida externa ao diff deste TODO e não foram auto-corrigidas.
 
 ## Independent Test Quality Audit Gate
 
@@ -882,9 +930,9 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Package mode:** `bounded-file-set`.
 - **Canonical method:** `wf-docker-independent-test-quality-audit-method`.
 - **Audit isolation mode:** `fresh internal no-context reviewer`.
-- **Audit status:** `not_run`
-- **Findings summary:** `pending`.
-- **Evidence / reference:** `pending`.
+- **Audit status:** `no_material_findings`
+- **Findings summary:** round 08 confirmou test-quality/cutover sem findings; performance registrou apenas `PERF-R8-01` medium, aceito como dívida não bloqueante local e gate obrigatório de memória near-limit no TODO de cutover.
+- **Evidence / reference:** triple audit `artifacts/tmp/smart-notas-read-audit/round-01/results/test-quality.result.json`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Independent No-Context Final Review Gate
@@ -894,9 +942,9 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Impact signals in scope:** `cross-module|public API|auth|runtime configuration`.
 - **Package mode:** `bounded-file-set`.
 - **Review isolation mode:** `fresh internal no-context reviewer`.
-- **Final review status:** `not_run`
-- **Findings summary:** `pending`.
-- **Evidence / reference:** `pending`.
+- **Final review status:** `no_material_findings`
+- **Findings summary:** confirmação final sem findings após preservar contratos HTTP legados seguros por allowlist explícita e manter toda mensagem/envelope arbitrário sanitizado.
+- **Evidence / reference:** `artifacts/tmp/smart-notas-read-review/final-confirmation.result.json`; focused HTTP 66/66 e suíte consolidada 223/223, build/lint verdes.
 - **Waiver authority / reference:** `n/a`.
 
 ## Independent Cutover Integrity Audit Gate
@@ -905,20 +953,20 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 - **Why this decision:** nova rota candidata coexiste com `/eventos`, o audit floor exige triple-review e o closeout precisa provar separação sem fallback/promoção implícita.
 - **Cutover signals in scope:** `canonical capability transition|legacy-path coexistence`.
 - **Package mode:** `bounded-file-set`.
-- **Cutover audit status:** `not_run`
-- **Findings summary:** `pending`.
+- **Cutover audit status:** `no_material_findings`
+- **Findings summary:** round 08 confirmou a separação local/cutover sem finding: TODO/evidência reconciliados e owner `TODO-uninotas-smart-notas-read-cutover.md` aberto sem autoridade de execução; lint oficial está executável e verde.
 
 ## Pipeline/Copilot P1/P2 Preflight
 
 | Reviewer Surface / Package | Review Focus | Status | Evidence | Findings | Resolution |
 | --- | --- | --- | --- | --- | --- |
-| backend diff + tests + modules | contract/security/runtime P1/P2 | `planned` | pending | pending | pending |
+| backend diff + tests + modules | contract/security/runtime P1/P2 | `passed` | `artifacts/tmp/smart-notas-read-review/p1p2-closure.result.json`; focused config 38/38; full Jest 223/223; build/lint verdes | no P1 or P2; findings: none | resolved; `PERF-R8-01` permanece somente no cutover |
 
 ## Rule-Spirit Anti-Pattern Hunt
 
 | Rule / Principle Surface | Search Lens | Status | Evidence | Findings | Resolution |
 | --- | --- | --- | --- | --- | --- |
-| NestJS boundary + source authority | direct fetch controller, Prisma/log fallback, public credential/CNPJ, raw payload | `planned` | pending | pending | pending |
+| NestJS boundary + source authority | direct fetch controller, Prisma/log fallback, public credential/CNPJ, raw payload | `passed` | `artifacts/tmp/smart-notas-read-review/rule-spirit.json` + `rule-spirit-classification.md` | 21 heurísticas review/warning; zero blocker; fixtures/loopback/CORS baseline/redactor/regex guard classificados | `by-design/no-action`; nenhuma credencial, fallback, payload cru ou bypass de controller em produção |
 
 ## Promotion Finding Routing Ledger
 
@@ -946,19 +994,44 @@ Testes de colisão obrigatórios: sem JWT + query inválida; query inválida + f
 | `R5-RLS-HARNESS-01` | architecture R5 | `medium` | `release-blocker` | saturação garantida, fairness/no-starvation e recovery sem restart | `resolved` | Stages S/FU/FC/R |
 | `R6-RLS-RATE-BUDGET-01` | critique R6 | `medium` | `release-blocker` | forçar actor limiter e context limiter em substages independentes com contagens exatas | `resolved` | Stages FU/FC |
 | `R7-RLS-ATOMIC-COUNTERS-01` | critique R7 | `medium` | `release-blocker` | provar snapshots exatos e imutáveis do outro budget em cada rejeição | `resolved` | Stages FU/FC + `rate_counter_snapshots` |
+| `PERF-DELIVERY-01` | triple audit R1/performance | `high` | `release-blocker` | cancelar/drain body em todo status/oversize rejeitado e provar tempestade/recovery | `resolved` | adapter cancela body preservando erro; RLS Stage E 32/32 cancelados, active 0 |
+| `PERF-DELIVERY-02` | triple audit R1/performance | `medium` | `release-blocker` | remover scan completo por request acima do threshold | `resolved` | sweep amortizado uma vez por fixed window + teste com 5.000 atores/rejeições |
+| `TQA-01` / `CUTOVER-ADHERENCE-02` | triple audit R1 | `high` | `release-blocker` | tornar lint executável ou obter waiver autorizado | `resolved` | tooling ESLint oficial autorizado; lint, testes e build verdes |
+| `TQA-02` | triple audit R1/test quality | `high` | `release-blocker` | matriz decoder campo a campo/paginação/DTO completo | `resolved` | adapter/contract specs agora cobrem null/missing/empty/type/bound/over-bound/extras |
+| `TQA-03` | triple audit R1/test quality | `high` | `release-blocker` | catálogo HTTP completo e JWT exact envelopes | `resolved` | filter matrix 11 códigos + missing/invalid/expired/inactive/cache JWT |
+| `TQA-04` | triple audit R1/test quality | `medium` | `release-blocker` | sincronizar pacote e JSON RLS | `resolved` | package usa métricas/hash do artifact final validado |
+| `TQA-05` | triple audit R1/test quality | `medium` | `release-blocker` | registrar fail-first ou obter disposição explícita | `resolved` | usuário aceitou cobertura final exaustiva como disposição; evidência histórica não foi fabricada |
+| `CUTOVER-ADHERENCE-01` | triple audit R1/cutover | `high` | `release-blocker` | reconciliar TODO com implementação/evidência | `resolved` | scope/DOD/VAL/adherence/PCV/debt atualizados antes do rerun |
+| `CUTOVER-OWNER-01` | triple audit R1/cutover | `medium` | `release-blocker` | materializar owner exato de cutover | `resolved` | TODO cutover ativo em Planning/Pending, execução não autorizada |
+| `TQA-R2-01` | triple audit R2/test quality | `high` | `release-blocker` | testar factory real e wiring dos pares de emissor | `resolved` | factory disabled/enabled + módulo real provam defaults/limites e headers sem cruzamento |
+| `TQA-R2-02` | triple audit R2/test quality | `high` | `release-blocker` | congelar matriz HTTP query e estrutura/precedência de `noteId` | `resolved` | application/contract matrices; full Jest 201/201, build/lint verdes |
+| `CUTOVER-R3-01` | triple audit R3/cutover | `high` | `release-blocker` | remover aliases de paginação não documentados e rejeitar dialeto misto | `resolved` | decoder aceita somente `page/perPage/total/totalPages`; aliases/mistos falham fechados; 201/201 verdes |
+| `TQA-R4-01` | triple audit R4/test quality | `high` | `release-blocker` | alinhar validação Joi e parsing dos limites numéricos de produção | `resolved` | inteiros decimais canônicos/bounds na factory+schema; matriz hostil e ConfigModule real; 201/201 verdes |
+| `TQA-R5-01` | triple audit R5/test quality | `high` | `release-blocker` | tornar paridade Joi/factory e wiring real resistentes a regressão unilateral | `resolved` | `appConfigModuleOptions` compartilhado + mesma tabela isolada para schema/factory + integração; 210/210 verdes |
+| `TQA-R6-01` | triple audit R6/test quality | `high` | `release-blocker` | impedir que AppModule abandone o wiring compartilhado sem falhar testes | `resolved` | AST exige named import/chamada exata; spec congela opções base; 212/212 verdes |
+| `TQA-R7-01` | triple audit R7/test quality | `high` | `release-blocker` | vincular o guard AST ao metadata real de `@Module.imports` e rejeitar chamada-isca | `resolved` | AST localiza decorator/property, exige argumento único e uma única chamada global; 212/212 verdes |
+| `PERF-R8-01` | triple audit R8/performance | `medium` | `follow-up-fast-follow` | calibrar envelope memória/concorrência/corpo antes da ativação | `accepted` | não bloqueia candidato desabilitado; blocker de cutover em CUT-03/DOD-CUT-02 |
+| `P1P2-CONFIG-01` | P1/P2 preflight | `high` | `release-blocker` | aceitar variáveis Smart Notas explicitamente vazias somente com feature desabilitada e testar o shape de `.env.example` | `resolved` | schema fail-closed quando enabled; ConfigModule production-path cobre as cinco variáveis vazias; 223/223 verdes |
+| `P1P2-R8-01` | P1/P2 preflight | `high` | `release-blocker` | impedir falso-verde quando `FiscalNotesModule` não está em `AppModule.imports` | `resolved` | AST exige named import e exatamente uma ocorrência no metadata real; 223/223 verdes |
+| `P2-CONFIG-FLAG-PARITY-01` | P1/P2 confirmation | `medium` | `release-blocker` | alinhar valores aceitos por Joi e factory para a flag de ativação | `resolved` | somente `true`/`false` minúsculos são válidos; `TRUE`/`FALSE` falham no ConfigModule real; enabled/disabled exercitados; 223/223 verdes |
+| `P2-CONFIG-TEMPLATE-BINDING-01` | P1/P2 confirmation | `medium` | `release-blocker` | vincular a regressão ao `.env.example` versionado em vez de duplicar valores | `resolved` | teste lê o arquivo real, exige todas as chaves Smart Notas inclusive base URL e inicializa o ConfigModule compartilhado; focused 38/38, build/lint verdes |
+| `ARCH-ADHERENCE-R8-01` | architecture adherence | `medium` | `release-blocker` | decodificar resposta 200 dentro do boundary instrumentado antes de registrar sucesso | `resolved` | adapter registra `SmartNotasContratoInvalido` para 200 malformado; teste focal e confirmação sem findings |
+| `ARCH-ADHERENCE-R8-02` | architecture adherence | `medium` | `release-blocker` | ampliar source-authority harness para todos os arquivos fiscais de produção | `resolved` | enumeração recursiva cobre nove arquivos, exclui somente specs/__tests__; confirmação sem findings |
+| `FINAL-HTTP-CONTRACT-01` | final no-context review | `high` | `release-blocker` | preservar contratos HTTP legados seguros sem reabrir vazamento global | `resolved` | allowlist explícita cobre JWT/auth/roles/monitoring/realtime/validation; arbitrário continua genérico; focused 66/66, build/lint verdes |
+| `FINAL-EVIDENCE-01` | final no-context review | `medium` | `release-blocker` | não marcar VAL-07 como concluído antes dos guards finais | `resolved-in-sequence` | checklist permanece aberto durante remediação; será marcado e reconciliado somente após os guards finais |
 
 ## TODO Closeout Disposition
 
-- **Disposition:** `keep-active`
-- **Disposition reason:** contrato e gates pré-approval convergiram; execução permanece proibida até aprovação humana explícita.
-- **Post-commit/push status:** `baseline de planejamento 7a1c7a2 publicado; metadata final de revisão/preflight pronta para commit/push`.
-- **Next path/status action:** publicar a metadata final e solicitar `APROVADO`.
+- **Disposition:** `move-completed`
+- **Disposition reason:** implementação local, CI-equivalent, revisões independentes e guards concluídos; nenhuma ação permanece neste contrato e a ativação pertence ao TODO de cutover.
+- **Post-commit/push status:** `sem commit/push de produto; candidato permanece no principal checkout`.
+- **Next path/status action:** mover para `todos/completed/features/`; executar cutover somente após aprovação própria.
 
 ## Module Consolidation Gate
 
-- [ ] Contrato final promovido ao módulo primário/runtime.
-- [ ] Decisões preservadas/superseded com traceabilidade.
-- [ ] TODO movido para `completed/features/` somente após gates.
+- [x] Contrato candidato consolidado em `target_planned`; owner/runtime atual preservado até cutover.
+- [x] Decisões preservadas/superseded com traceabilidade.
+- [x] TODO movido para `completed/features/` somente após gates.
 
 ## Commands (Run Locally)
 

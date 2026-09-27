@@ -31,3 +31,9 @@ The observed runtime boundary composes NestJS, React/Vite, PostgreSQL/Prisma, Do
 
 ## Cross-Module Considerations and Failure Modes
 All modules depend on this topology as an observed boundary. Configuration/deployment failure requires runtime evidence and a separate approved TODO, not documentary substitution.
+
+## Target-Planned Smart Notas Read Configuration
+
+The locally implemented fiscal-read candidate adds no deployment change and remains disabled by default through `SMART_NOTAS_READ_ENABLED=false`. When a separately approved cutover enables it, runtime configuration must provide independent `SMART_NOTAS_UNIFAST_{TOKEN,CNPJ}` and `SMART_NOTAS_PROSPERAR_{TOKEN,CNPJ}` pairs plus a canonical base64 HMAC key of at least 32 decoded bytes. The effective provider destination is fixed to `https://app.smart-notas.com/api`; an optional `SMART_NOTAS_BASE_URL` may only repeat that exact value. Timeout, concurrency, actor-rate, and context-rate settings are validated within their product-owned bounds. No secret value, CNPJ, note identifier, provider payload, or activation claim is recorded here.
+
+This target-planned configuration does not alter the current Docker/Railway topology, health contract, legacy `logs` runtime, or capability ownership. Cutover must validate both issuer bindings, select an operational timeout in light of observed provider latency, calibrate per-replica budgets against provider quota, confirm the audit sink, and prove smoke/rollback before runtime promotion.

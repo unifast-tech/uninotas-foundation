@@ -308,8 +308,8 @@ These are planning requirements, not executed race evidence. The later React tac
 
 ## 4. Current Order
 
-1. Execute the tactical backend read slice at `todos/active/features/TODO-uninotas-smart-notas-read-backend.md` after its explicit `APROVADO`; it owns only Smart Notas list/detail by selected fiscal context.
-2. Keep DANFE/XML, React context/cache, integration-error ingestion/correlation, and `OperationalCase` as separate tactical slices.
+1. Finish the validation/closeout gates for the approved local backend candidate at `todos/active/features/TODO-uninotas-smart-notas-read-backend.md`; implementation and redacted list/detail probes now exist for both fiscal contexts, without runtime activation.
+2. Open the separate Smart Notas read cutover TODO before activation, and keep DANFE/XML, React context/cache, integration-error ingestion/correlation, and `OperationalCase` as separate tactical slices.
 3. Before the error-adapter implementation TODO, confirm which external component writes PostgreSQL integration errors and the exact rule that excludes successes from the target error boundary.
 4. Validate deterministic error-to-note correlation fields against redacted failure rows; keep all ambiguous failures unlinked.
 5. Define `OperationalCase` grouping and existing-treatment migration rules before its own implementation TODO.
@@ -329,4 +329,4 @@ These are planning requirements, not executed race evidence. The later React tac
 
 ## 7. Next Exact Step
 
-- Complete planning/approval of `todos/active/features/TODO-uninotas-smart-notas-read-backend.md`; this ledger remains the no-code authority for unresolved provider/error-boundary questions.
+- Complete the independent delivery reviews and local closeout evidence for `todos/active/features/TODO-uninotas-smart-notas-read-backend.md`, then open its cutover handoff; this ledger remains the no-code authority for unresolved provider/error-boundary questions.
