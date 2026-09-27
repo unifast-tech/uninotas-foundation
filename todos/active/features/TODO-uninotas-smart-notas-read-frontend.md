@@ -84,7 +84,7 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 | Scope Item | Local Branch/Commit | PR to lane threshold | PR to `stage` | PR to `main` | Current Status |
 | --- | --- | --- | --- | --- | --- |
 | React Smart Notas | `delphi-and-foundation@working-tree` | `n/a` | `n/a` | `n/a` | `Pending` |
-| Foundation | `main@db851c8` | `n/a` | `n/a` | `final gate metadata pending` | `reviewed planning` |
+| Foundation | `main@e1fe4c9` | `n/a` | `n/a` | `origin/main@e1fe4c9` | `reviewed planning` |
 
 ## Diff Expectation Contract
 
@@ -286,11 +286,11 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 - **Why this decision:** TODO medium architecture-corrective deve ser revisado a partir de baseline imutável.
 - **Trigger stage:** `before first planning review`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `ed43003e1a3f620b2990158ce662fd7927602796`
-- **Baseline push reference:** `origin/main@ed43003e1a3f620b2990158ce662fd7927602796`
+- **Baseline commit:** `e1fe4c92da4e4a694f1cc2dd59323dd980ca7378`
+- **Baseline push reference:** `origin/main`
 - **Gate status:** `findings_integrated`
 - **Findings summary:** R1..R3 geraram findings todos integrados; R4 aprovou o plano material `db851c8` sem findings.
-- **Evidence / reference:** `uninotas-foundation:main@db851c8`; `origin/main@db851c8` publicado em 2026-09-27; dispatches/resultados em `artifacts/tmp/uninotas-frontend-review/`.
+- **Evidence / reference:** plano material revisado em `db851c8`; metadados finais congelados/publicados em `uninotas-foundation:main@e1fe4c92da4e4a694f1cc2dd59323dd980ca7378`; dispatches/resultados em `artifacts/tmp/uninotas-frontend-review/`.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
@@ -301,9 +301,9 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 - **Baseline source:** `Review Baseline Freeze -> Baseline commit`
 - **Material sections compared:** `canonical template set`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-frontend.md`
-- **Gate status:** `not_run`
-- **Findings summary:** `pending`
-- **Evidence / reference:** `pending`
+- **Gate status:** `no_material_findings`
+- **Findings summary:** zero das 22 seções materiais divergiu do freeze final `e1fe4c9`.
+- **Evidence / reference:** `review_scope_drift_guard.py` retornou `Overall outcome: go` em 2026-09-27.
 - **Waiver authority / reference:** `n/a`
 
 ## Questions To Close
@@ -574,12 +574,12 @@ TTL boundaries use the injected clock and the age of the last successful respons
 | `touches_tests` | `yes` | novo e2e e ajuste do legado |
 | `critical_user_journey` | `yes` | fluxo central do UniNotas |
 | `release_or_promotion_critical` | `yes` | prazo de entrega e cutover dependente |
-| `high_severity_plan_review_issue` | `yes` | findings high de privacidade e segurança do e2e integrados; rerun requerido |
+| `high_severity_plan_review_issue` | `yes` | findings high integrados e confirmados resolvidos pela R4 sem findings |
 | `explicit_three_lane_request` | `no` | não solicitado |
 
 ## Approval
 
-- **Status:** `not_requested`
+- **Status:** `requested`
 - **Approved by:** `n/a`
 - **Approval reference:** `n/a`
 - **Implementation authority:** `none until explicit APROVADO after gates`
@@ -611,7 +611,7 @@ TTL boundaries use the injected clock and the age of the last successful respons
 - **Worktree authorization reference:** `n/a — worktrees/auxiliary checkouts remain forbidden`
 - **Writer scheduling policy:** `single-writer-serialized`
 - **Guard outcome:** `go`
-- **Guard evidence:** `routine-executor/gpt-5.6-terra/medium; principal checkout only; one product-code writer; rerun after APROVADO before implementation`.
+- **Guard evidence:** `todo_authority_guard.py --pre-approval` retornou `Overall outcome: preflight-go`; routine-executor/gpt-5.6-terra/medium; principal checkout only; rerun after APROVADO before implementation.
 - **Waiver / exception reference:** `n/a`
 
 ## Security Risk Assessment
@@ -705,9 +705,9 @@ TTL boundaries use the injected clock and the age of the last successful respons
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
-- **Disposition reason:** contrato ainda precisa de baseline freeze, reviews e aprovação antes de implementação.
-- **Post-commit/push status:** `pending`
-- **Next path/status action:** publicar baseline Foundation, concluir planning gates e solicitar `APROVADO`.
+- **Disposition reason:** plano congelado, reviews e guards pré-aprovação concluídos; aguarda somente aprovação humana.
+- **Post-commit/push status:** `planning gates ready; final evidence commit pending push`
+- **Next path/status action:** obter `APROVADO`, registrar autoridade, ingerir regras vinculantes e iniciar implementação frontend em single-writer.
 
 ## Module Consolidation Gate
 
