@@ -211,13 +211,13 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 
 ## Decisions (Resolved Before Freeze)
 
-- [ ] `D-01` `/` é Geral Smart Notas; `/erros` preserva a fila legada; detalhes permanecem separados em `/notas/:noteId` e `/eventos/:refId`. Ref: feature brief ST-03/ST-04.
-- [ ] `D-02` `contexto=unifast|prosperar` vive na URL, default `unifast`, sem agregado; troca mantém datas/status/documento/idCompra e volta à página 1. Ref: module invariant.
-- [ ] `D-03` intervalo default são os últimos 30 dias corridos incluindo hoje, em `YYYY-MM-DD`, calculados localmente e materializados na URL; máximo 365 dias. Ref: backend query contract.
-- [ ] `D-04` cache: 20 chaves LRU, fresh 60 s, stale retido 10 min; primeiro load/hard refresh consulta API, refresh explícito sempre consulta, stale revalida. Ref: SD-08/G-20.
-- [ ] `D-05` cache key inclui usuário da sessão, contexto, datas, status, documento, idCompra e página; logout desmonta o provider, aborta requests e limpa entradas. Ref: race matrix da descoberta.
-- [ ] `D-06` nenhuma biblioteca nova; adapter e cache host-specific usam React e Web APIs já disponíveis. Ref: package-first sem resultados.
-- [ ] `D-07` erros de integração permanecem legados e não são mesclados em linhas/notas neste corte. Ref: ownership de módulos.
+- [x] `D-01` `/` é Geral Smart Notas; `/erros` preserva a fila legada; detalhes permanecem separados em `/notas/:noteId` e `/eventos/:refId`. Ref: feature brief ST-03/ST-04.
+- [x] `D-02` `contexto=unifast|prosperar` vive na URL, default `unifast`, sem agregado; troca mantém datas/status/documento/idCompra e volta à página 1. Ref: module invariant.
+- [x] `D-03` intervalo default são os últimos 30 dias corridos incluindo hoje, em `YYYY-MM-DD`, calculados localmente e materializados na URL; máximo 365 dias. Ref: backend query contract.
+- [x] `D-04` cache: 20 chaves LRU, fresh 60 s, stale retido 10 min; primeiro load/hard refresh consulta API, refresh explícito sempre consulta, stale revalida. Ref: SD-08/G-20.
+- [x] `D-05` cache key inclui usuário da sessão, contexto, datas, status, documento, idCompra e página; logout desmonta o provider, aborta requests e limpa entradas. Ref: race matrix da descoberta.
+- [x] `D-06` nenhuma biblioteca nova; adapter e cache host-specific usam React e Web APIs já disponíveis. Ref: package-first sem resultados.
+- [x] `D-07` erros de integração permanecem legados e não são mesclados em linhas/notas neste corte. Ref: ownership de módulos.
 
 ## Module Decision Baseline Snapshot
 
@@ -229,7 +229,7 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 
 ## Decision Baseline (Frozen Before Implementation)
 
-- [ ] `D-01..D-07` congeladas somente depois do baseline publicado, review e `APROVADO`.
+- [x] `D-01..D-07` congeladas como baseline de planejamento; implementação continua proibida até review convergir e `APROVADO`.
 
 ## Architecture Change Governance
 
@@ -284,11 +284,11 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 - **Why this decision:** TODO medium architecture-corrective deve ser revisado a partir de baseline imutável.
 - **Trigger stage:** `before first planning review`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `pending`
-- **Baseline push reference:** `pending`
-- **Gate status:** `not_run`
-- **Findings summary:** baseline ainda não foi commitado/publicado.
-- **Evidence / reference:** `pending`
+- **Baseline commit:** `983ac0c2e0ff24e1ef5e58100bef0bb5b9ab1cbc`
+- **Baseline push reference:** `origin/main@983ac0c2e0ff24e1ef5e58100bef0bb5b9ab1cbc`
+- **Gate status:** `no_material_findings`
+- **Findings summary:** baseline documental commitado e publicado; revisões devem usar este checkpoint como origem.
+- **Evidence / reference:** `uninotas-foundation:main@983ac0c2e0ff24e1ef5e58100bef0bb5b9ab1cbc`; `origin/main` confirmado no mesmo SHA em 2026-09-27.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
@@ -317,6 +317,16 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 - **Tier:** `Local host application`
 - **Rationale:** cache curto e adapter são específicos ao contrato UniNotas; nenhuma capacidade proprietária foi encontrada.
 
+## Frontend / Consumer Matrix
+
+| Producer Surface | Consumer Surface | Planned State | Evidence / Guardrail |
+| --- | --- | --- | --- |
+| `GET /api/v1/notas` | `/`, `ListaNotas`, cache/session provider | `consumer planned in this TODO` | tipos exatos + browser list/context/cache |
+| `GET /api/v1/notas/:noteId` | `/notas/:noteId`, `DetalheNota` | `consumer planned in this TODO` | rota opaca + browser detail/404 |
+| `GET /api/v1/eventos*` | `/erros`, `/eventos/:refId` | `existing consumer preserved` | e2e legado e route-scoped hooks |
+| `GET /api/v1/eventos/stream` | somente shell/rota de erros | `existing consumer narrowed to legacy area` | scan estrutural + e2e; Geral não abre SSE |
+| Smart Notas credentials/CNPJ | nenhum consumidor frontend | `consumer intentionally absent` | env/import/bundle scan; backend-only invariant |
+
 ## Assumptions Preview
 
 | Assumption ID | Assumption | Evidence | If False | Confidence | Handling |
@@ -337,7 +347,7 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 2. Criar tipos/adapter fiscal sem alterar o cliente HTTP além de suporte a `AbortSignal` necessário.
 3. Criar provider/cache de sessão e hook com dedupe, abort, TTL/stale/LRU e limpeza.
 4. Criar lista, filtros, contexto, paginação e estados acessíveis.
-5. Criar detalhe fiscal read-only e integrar rotas/navegação/cabeçalho preservando erros legados.
+5. Criar detalhe fiscal read-only e integrar rotas/navegação/cabeçalho; mover resumo/SSE/gatilho para o shell legado de erros para que `Geral` não consulte `/eventos` nem abra stream.
 6. Ajustar estilos responsivos e identidade UniNotas.
 7. Rodar auditorias/testes/build/browser; consolidar módulo e evidências.
 
@@ -383,17 +393,38 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 
 ### Review Sections
 
-- [ ] Architecture
-- [ ] Code Quality
-- [ ] Tests
-- [ ] Performance
-- [ ] Security
-- [ ] Elegance
-- [ ] Structural Soundness
+- [x] Architecture
+- [x] Code Quality
+- [x] Tests
+- [x] Performance
+- [x] Security
+- [x] Elegance
+- [x] Structural Soundness
 
 ### Issue Cards
 
-- **Status:** `prepared-pre-freeze`; issue cards serão produzidos somente após o baseline commitado/publicado.
+- **Issue ID:** `ARCH-01`
+  - **Severity:** `high`
+  - **Evidence:** `frontend/src/App.tsx` monta `useResumo` e `useTempoReal` globalmente; `frontend/src/componentes/Cabecalho.tsx` exige `Resumo`.
+  - **Why it matters now:** trocar apenas a rota raiz manteria consultas/SSE de `logs` na tela Geral, ocultando acoplamento e aumentando carga.
+  - **Option A (Recommended):** tornar o cabeçalho independente do resumo e encapsular resumo/SSE/gatilho em um shell legado montado apenas em `/erros` e `/eventos/:refId`.
+    - **Effort:** `medium`; **Risk:** `low`; **Blast radius:** `module`; **Maintenance burden:** `low`; **Performance impact:** `improves`; **Elegance impact:** `improves`; **Structural soundness impact:** `improves`.
+  - **Option B (Alternative):** manter hooks globais e ocultar indicadores em Geral.
+    - **Effort:** `low`; **Risk:** `high`; **Blast radius:** `cross-module`; **Maintenance burden:** `high`; **Performance impact:** `regresses`; **Elegance impact:** `regresses`; **Structural soundness impact:** `regresses`.
+  - **Option C (Do Nothing):** manter `/` como legado e criar Geral em rota secundária.
+    - **Effort:** `low`; **Risk:** `medium`; **Blast radius:** `module`; **Maintenance burden:** `medium`; **Performance impact:** `neutral`; **Elegance impact:** `regresses`; **Structural soundness impact:** `regresses`.
+  - **Recommendation:** `Integrate Option A`; preserva a separação de fontes também no comportamento de rede.
+- **Issue ID:** `ARCH-02`
+  - **Severity:** `medium`
+  - **Evidence:** `frontend/src/hooks/useFiltros.ts` mistura parsing, defaults e escrita de query; novo backend exige datas canônicas antes do request.
+  - **Why it matters now:** normalização em effects pode gerar request duplo/loop e chaves de cache semanticamente duplicadas.
+  - **Option A (Recommended):** criar parser/normalizador fiscal puro e bloquear a busca até a URL canônica ser aplicada com `replace`.
+    - **Effort:** `medium`; **Risk:** `low`; **Blast radius:** `local`; **Maintenance burden:** `low`; **Performance impact:** `improves`; **Elegance impact:** `improves`; **Structural soundness impact:** `improves`.
+  - **Option B (Alternative):** defaults implícitos fora da URL.
+    - **Effort:** `low`; **Risk:** `medium`; **Blast radius:** `local`; **Maintenance burden:** `medium`; **Performance impact:** `neutral`; **Elegance impact:** `neutral`; **Structural soundness impact:** `neutral`.
+  - **Option C (Do Nothing):** iniciar fetch e corrigir URL depois.
+    - **Effort:** `low`; **Risk:** `high`; **Blast radius:** `module`; **Maintenance burden:** `high`; **Performance impact:** `regresses`; **Elegance impact:** `regresses`; **Structural soundness impact:** `regresses`.
+  - **Recommendation:** `Integrate Option A`; garante uma única identidade para URL, request e cache.
 
 ### Failure Modes & Edge Cases
 
@@ -404,6 +435,7 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 - [ ] 401 encerra sessão; 404 detalhe é vazio específico; 429 oferece retry explícito sem loop.
 - [ ] status fiscal desconhecido é exibido como texto seguro, não descartado.
 - [ ] URL inválida é normalizada sem loop e respeita limite de 365 dias.
+- [ ] Geral não abre `/eventos`, `/eventos/resumo`, `/eventos/produtos` nem SSE; esses consumidores só vivem no shell legado.
 
 ### Residual Unknowns / Risks
 
@@ -462,7 +494,7 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 - **Risk level:** `medium`
 - **Why this risk level:** dados fiscais autenticados ficam transitoriamente em memória e devem ser eliminados ao logout; nenhum segredo/PII novo deve ser exposto.
 - **Attack surface in scope:** JWT client, URL params, noteId opaco, cache por sessão/contexto e mensagens de erro.
-- **Attack simulation decision:** `recommended`
+- **Attack simulation decision:** `required`
 - **Review evidence:** `pending`
 - **Residual security risk:** backend desabilitado até cutover.
 
@@ -506,6 +538,15 @@ O backend local já possui um candidato read-only para listar e detalhar notas S
 - **Final review decision:** `required`
 - **Why this decision:** medium cross-module com rota/autenticação/cache.
 - **Final review status:** `not_run`
+- **Evidence / reference:** `pending implementation`
+
+## Dedicated Triple Review Audit Gate
+
+- **Audit decision:** `required`
+- **Why this decision:** audit floor classificou o fluxo como critical journey e release-sensitive.
+- **Canonical protocol:** `audit-protocol-triple-review`
+- **Lifecycle:** `delivery-side; additive à crítica e ao final review`
+- **Audit status:** `not_run`
 - **Evidence / reference:** `pending implementation`
 
 ## Independent Cutover Integrity Audit Gate
