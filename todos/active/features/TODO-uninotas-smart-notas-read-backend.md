@@ -27,22 +27,36 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 
 ## Implementation Intent
 
-- **Current delivery:** módulo NestJS `fiscal-notes` com lista e detalhe Smart Notas por contexto fiscal, normalização defensiva, configuração validada e testes.
-- **Planned next steps:** TODO React para seletor/cache; TODO de DANFE/XML; TODO de falhas/casos operacionais.
+- **Current delivery:** candidato local do módulo NestJS `fiscal-notes` com lista e detalhe Smart Notas por contexto fiscal, normalização defensiva, configuração validada e testes; não promove ainda o owner canônico nem ativa produção.
+- **Planned next steps:** TODO de cutover/runtime para injetar segredos, habilitar a capacidade e promover ownership; TODO React para seletor/cache; TODO de DANFE/XML; TODO de falhas/casos operacionais.
 - **Anticipatory implementation authorized now:** `none`.
 - **Rationale:** o corte cria a menor fronteira funcional completa que respeita a autoridade Smart Notas e pode ser consumida sem acoplar o backend ao frontend ou ao PostgreSQL.
 
 ## Delivery Status Canon (Required)
 
 - **Current delivery stage:** `Pending`
-- **Qualifiers:** `none`
-- **Next exact step:** congelar e revisar este plano; solicitar `APROVADO` antes de alterar o runtime.
+- **Qualifiers:** `Provisional`
+- **Next exact step:** concluir a reconvergência técnica, atualizar/pushar o baseline, repetir as revisões e obter `preflight-go` antes de solicitar `APROVADO`.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
-- **Work state:** `implementation`
-- **Why this state now:** o contrato está em refinamento pré-implementação.
+- **Work state:** `review`
+- **Why this state now:** `D-06` foi resolvida pelo usuário; os findings técnicos estão sendo incorporados e precisam de nova revisão independente.
 - **Exit condition:** implementação e validação locais concluídas, seguida pelos gates de revisão e promoção aplicáveis.
+
+## Provisional Notes
+
+- **Missing for production-ready:** cutover/runtime separado com segredos injetados, `SMART_NOTAS_READ_ENABLED=true`, probes dos dois emissores, promoção atômica do owner canônico e deploy validado; este TODO pode chegar somente a `Local-Implemented`.
+- **Revisit criteria:** remover `Provisional` somente no TODO de cutover após ativação/promocão/deploy comprovados; não remover ao concluir apenas a implementação local.
+- **Dependencies unblocked:** este candidato local destrava o TODO React e a preparação do cutover sem declarar a nova rota como runtime atual.
+
+## Blocker Notes
+
+- **Blocker:** `resolved` — matriz read-only confirmada.
+- **Why blocked now:** `n/a`; o usuário resolveu a decisão em 2026-09-26.
+- **What unblocks it:** `n/a`; todos os perfis ativos foram autorizados para ambos os contextos, somente leitura.
+- **Owner / source:** usuário/produto; decisão explícita: “Todos os setores podem visualizar”.
+- **Last confirmed truth:** `ADMIN|GESTOR|ANALISTA|LEITOR` ativos podem consultar Unifast e Prosperar; nenhuma permissão fiscal de escrita foi concedida.
 
 ## Scope
 
@@ -52,9 +66,10 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 - [ ] `SCOPE-04` Resolver `unifast|prosperar` exclusivamente no backend para pares independentes de token/CNPJ configurados por ambiente.
 - [ ] `SCOPE-05` Normalizar lista/detalhe em DTOs explícitos, preservando status fiscal do provedor, nullabilidade, datas locais e valores decimais como strings.
 - [ ] `SCOPE-06` Mapear falhas e timeouts do provedor para erros estáveis, sanitizados e não vazios; falha Smart Notas nunca vira lista vazia nem consulta de sucesso ao PostgreSQL.
-- [ ] `SCOPE-07` Validar configuração no bootstrap e documentar somente nomes/semântica das variáveis em `.env.example` e README, sem valores secretos.
-- [ ] `SCOPE-08` Cobrir configuração, codec `noteId`, adapter, serviço, controller/wiring e contratos de erro com testes determinísticos sem chamadas fiscais mutáveis.
-- [ ] `SCOPE-09` Consolidar o contrato entregue em `modules/fiscal-notes-and-documents.md` e a configuração observável em `modules/runtime-and-deployment.md`.
+- [ ] `SCOPE-07` Adicionar ativação segura por `SMART_NOTAS_READ_ENABLED=false`: credenciais são exigidas fail-fast apenas quando habilitada; documentar nomes/semântica em `.env.example` e README sem valores secretos.
+- [ ] `SCOPE-08` Corrigir o filtro global para nunca devolver/logar query string nem valores de parâmetros dinâmicos; cobrir configuração, autorização, codec `noteId`, adapter, serviço, controller/wiring, limites de capacidade e erros com testes determinísticos.
+- [ ] `SCOPE-09` Consolidar o contrato candidato nas seções `target_planned` de `modules/fiscal-notes-and-documents.md` e `modules/runtime-and-deployment.md`, preservando o owner/runtime atual até TODO de cutover.
+- [ ] `SCOPE-10` Aplicar limite por instância de chamadas upstream, cancelamento por desconexão/timeout, zero retry e logs operacionais sanitizados com contexto, operação, outcome e duração, sem identificador fiscal ou PII.
 
 ## Out of Scope
 
@@ -65,7 +80,8 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 - [ ] Prisma, schema/migration PostgreSQL, espelho/cache persistente de notas ou alterações em `logs`.
 - [ ] Fila de erros de integração, correlação com notas, `OperationalCase` ou migração de tratamentos.
 - [ ] Docker, Railway, domínio/ingress, mudança de deploy ou rotação operacional de credenciais.
-- [ ] Autorização por contexto/perfil; o primeiro corte preserva a leitura autenticada já disponível a todos os perfis ativos.
+- [ ] Permissões dinâmicas ou diferentes por emissor; a matriz estática read-only do primeiro corte será definida em `D-06`.
+- [ ] Ativar a flag em produção, injetar/rotacionar segredos, promover `note_read_model`, alterar `scope_subscope_governance.md`, retirar `/eventos` ou declarar o módulo como `current_runtime`.
 - [ ] Worktrees, checkouts auxiliares, `worker/*` ou `reconcile/*`.
 
 ## Delivery Status Semantics
@@ -79,8 +95,8 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 
 - **Local implementation branches:** `MonitorNotes:delphi-and-foundation`; `uninotas-foundation:main`
 - **Promotion lane path:** `MonitorNotes: delphi-and-foundation -> fluxo remoto vigente`; `uninotas-foundation: main -> origin/main`
-- **Lane-promoted threshold for this TODO:** PR/merge do código no lane remoto definido para MonitorNotes e módulos canônicos publicados em `uninotas-foundation:main`.
-- **Production-ready threshold for this TODO:** código promovido pelo fluxo vigente, gates de entrega verdes e configuração de deploy comprovada sem revelar segredos.
+- **Lane-promoted threshold for this TODO:** `n/a — este corte termina em Local-Implemented, Provisional; promoção/ativação pertence ao TODO de cutover`.
+- **Production-ready threshold for this TODO:** `n/a — proibido reivindicar Production-Ready neste TODO`.
 
 ## Promotion Evidence
 
@@ -111,6 +127,8 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 | `MonitorNotes` | `backend/src/app.module.ts` | `M` | registrar o novo módulo |
 | `MonitorNotes` | `backend/src/config/configuration.ts` | `M` | resolver e validar configuração Smart Notas |
 | `MonitorNotes` | `backend/src/config/configuration.spec.ts` | `M` | provar parsing/validação da configuração |
+| `MonitorNotes` | `backend/src/common/filters/all-exceptions.filter.ts` | `M` | substituir URL crua por template de rota sanitizado em resposta/log |
+| `MonitorNotes` | `backend/src/common/filters/all-exceptions.filter.spec.ts` | `A|M` | provar ausência de query, `noteId`, documento e `idCompra` em erro/log |
 | `MonitorNotes` | `backend/.env.example` | `M` | documentar nomes e semântica sem segredo |
 | `MonitorNotes` | `backend/README.md` | `M` | documentar endpoints e configuração operacional |
 | `uninotas-foundation` | `modules/fiscal-notes-and-documents.md` | `M` | promover contrato da capacidade entregue |
@@ -130,6 +148,7 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 | `MonitorNotes` | `backend/.env` | `any` | segredo local não é alterado nem versionado |
 | `MonitorNotes` | `backend/package.json|backend/package-lock.json` | `any` | Node 22 `fetch` atende o adapter; dependência nova não é esperada |
 | `uninotas-foundation` | `project_constitution.md|project_mandate.md|system_roadmap.md` | `any` | canon estratégico já suporta o corte e não será reaberto pelo perfil operacional |
+| `uninotas-foundation` | `policies/scope_subscope_governance.md|deterministic/capability_identity_ledger.json|deterministic/validate_foundation.py` | `any` | ownership/cutover canônico permanece planejado e pertence ao TODO de ativação |
 
 ### Diff Deviation Analysis
 
@@ -142,17 +161,95 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 - **May stay inside this TODO:** DTO/helper/teste local necessário ao mesmo contrato list/detail; pequenas correções documentais nos dois módulos âncora.
 - **Must update or split the TODO:** documentos fiscais, cache, agregação, persistência, nova autorização, mutação fiscal, nova dependência ou mudança de deploy.
 
+## Frozen Public HTTP Contract
+
+### Authorization and activation
+
+- Ambos os endpoints exigem JWT ativo pelo guard global e permitem `ADMIN|GESTOR|ANALISTA|LEITOR`; o primeiro corte não diferencia setor, perfil ou emissor e não concede escrita fiscal.
+- `SMART_NOTAS_READ_ENABLED=false` é o default seguro. Nesse estado, nenhuma chamada externa ocorre e as rotas respondem `503/SmartNotasDesabilitado`; o TODO de cutover injeta segredos e habilita a capacidade.
+
+### `GET /api/v1/notas`
+
+- Query obrigatória: `contextoFiscal=unifast|prosperar`, `dataInicio=YYYY-MM-DD`, `dataFim=YYYY-MM-DD`.
+- Query opcional: `status`, `documento`, `idCompra`, `pagina` (default `1`). Campos desconhecidos são rejeitados pelo `ValidationPipe` global.
+- `status` aceita somente `Pendente|Autorizada|Cancelada|Aguardando|Aguardando Cliente|Denegada|Pausada|Anulada`; um status novo recebido do provedor continua sendo devolvido literalmente em `providerStatus` e não quebra o decoder.
+- `documento` aceita exatamente 11 ou 14 dígitos; `idCompra` aceita 1..100 caracteres após trim; `pagina` aceita inteiro 1..10000; intervalo é inclusivo, ordenado e limitado a 366 dias.
+- Uma request consulta exatamente uma página de exatamente um contexto; não há page-walk, merge, prefetch ou fallback.
+
+Resposta `200`:
+
+| Campo | Tipo / nullability | Regra |
+| --- | --- | --- |
+| `items` | `FiscalNoteSummary[]` | array sempre presente; vazio é sucesso somente após `200` válido do provedor |
+| `page` | integer `>=1` | página reportada pelo provedor |
+| `perPage` | integer `>=0` | não é controlável pelo consumidor |
+| `total` | integer `>=0` | total provider-scoped |
+| `totalPages` | integer `>=0` | nunca combinado entre emissores |
+
+`FiscalNoteSummary` sempre contém todas as chaves abaixo; campos provider-derived ausentes/inválidos tornam-se `null`, exceto os invariantes cuja ausência invalida a resposta:
+
+| Campo | Tipo | Nullability / semântica |
+| --- | --- | --- |
+| `noteId` | string | obrigatório; identidade UniNotas opaca-by-contract |
+| `fiscalContext` | `unifast|prosperar` | obrigatório, resolvido pelo backend |
+| `providerStatus` | string | obrigatório, não vazio; vocabulário aberto na saída |
+| `fiscalNumber`, `accessKey`, `purchaseId` | string | nullable; nunca são identidade da rota |
+| `environment`, `model`, `purpose`, `platform`, `product` | string | nullable |
+| `scheduledIssueDate`, `paymentDate` | `YYYY-MM-DD` | nullable; datas `DD/MM/YYYY` são normalizadas sem timezone |
+| `competence` | string | nullable; preserva datetime sem inventar offset |
+| `recipientName`, `recipientDocument`, `recipientEmail`, `recipientCity`, `recipientState`, `recipientCountry` | string | nullable |
+| `unitValue`, `totalValue` | decimal string | nullable; forma canônica sem binary float |
+
+### `GET /api/v1/notas/:noteId`
+
+- Não aceita `contextoFiscal`, CNPJ ou identificador do provedor. O `noteId` determina o contexto confiável e dispara uma única chamada direta a `/notas/{idInterno}`; é proibido procurar a nota caminhando páginas da lista.
+- Resposta `200` contém todos os campos de `FiscalNoteSummary` e acrescenta, sempre presentes porém nullable: `issueDate: YYYY-MM-DD|null`, `neighborhood`, `postalCode`, `referencedAccessKey`, `street`, `addressNumber`, `addressComplement`, `stateRegistration`, `municipalRegistration`, `operationNature`, `phone` como `string|null`, e `quantity` como decimal string ou `null`.
+- `providerIdInterno`, `retorno` bruto e payload bruto não fazem parte do contrato público.
+
+### Opaque `noteId` integrity contract
+
+- Formato: `v1.<payload-base64url>.<mac-base64url>`, máximo 512 caracteres; payload JSON canônico contém somente `{c: fiscalContext, i: providerIdInterno}`.
+- MAC: HMAC-SHA-256 com `SMART_NOTAS_NOTE_ID_SECRET_BASE64`, decodificado para no mínimo 32 bytes; comparação usa `timingSafeEqual` após validar comprimentos.
+- “Opaco” significa que consumidores não podem construir, decodificar ou depender do conteúdo. HMAC garante integridade, não confidencialidade; por isso o valor também é redatado de logs/erros.
+- Somente `v1` e uma chave ativa são aceitos neste corte. Rotação invalida IDs anteriores, que são recuperáveis por nova listagem; rotação multi-chave pertence ao cutover/hardening.
+
+### Stable error catalog
+
+| HTTP | `erro` estável | Condição |
+| --- | --- | --- |
+| `400` | `ConsultaDeNotasInvalida` | query, intervalo, bound ou `noteId` estruturalmente inválido/adulterado |
+| `401` | contrato JWT atual | token UniNotas ausente/inválido/inativo |
+| `404` | `NotaFiscalNaoEncontrada` | Smart Notas devolve 404 no detalhe |
+| `502` | `SmartNotasCredencialRejeitada` | upstream 401/403 com configuração habilitada |
+| `502` | `SmartNotasContratoInvalido` | upstream 2xx com JSON/shape/tamanho inválido ou 400/422 inesperado após validação local |
+| `503` | `SmartNotasDesabilitado` | flag local desligada |
+| `503` | `SmartNotasOcupado` | limite concorrente por instância atingido; não enfileira |
+| `503` | `SmartNotasIndisponivel` | timeout, rede, upstream 429 ou 5xx |
+
+- O envelope continua `{statusCode,erro,mensagem,caminho,timestamp}`; `mensagem` é estável/sanitizada e `caminho` usa template como `/api/v1/notas/:noteId`, nunca URL/query real.
+- Resposta provider maior que 2 MiB é `SmartNotasContratoInvalido`. Nenhum erro vira lista vazia, fallback PostgreSQL ou mensagem/payload cru.
+
+### Capacity and observability contract
+
+- `SMART_NOTAS_TIMEOUT_MS`: default `10000`, range `1000..30000`; `SMART_NOTAS_MAX_CONCURRENCY`: default `8`, range `1..64`.
+- Sem retry e sem fila local. O fetch é abortado no timeout ou desconexão do consumidor; o slot concorrente é liberado em `finally`.
+- Log estruturado mínimo pertence ao adapter: correlation ID local, operação `list|detail`, contexto fiscal, outcome normalizado, status HTTP upstream quando existir e duração; proíbe query, `noteId`, documento, `idCompra`, CNPJ, Authorization e payload.
+
 ## Definition of Done
 
 - [ ] `DOD-01` Lista context-scoped retorna DTO paginado normalizado e nunca mistura Unifast/Prosperar.
 - [ ] `DOD-02` Detalhe resolve `noteId` assinado para um único contexto/`idInterno`, rejeita adulteração e não aceita CNPJ/token arbitrário.
-- [ ] `DOD-03` Configuração exige base URL HTTPS, credenciais independentes, CNPJs válidos em formato e segredo dedicado do codec; nenhum valor aparece em logs, erros, docs ou testes.
+- [ ] `DOD-03` Com a capacidade habilitada, configuração exige base URL HTTPS, credenciais independentes, CNPJs válidos e segredo HMAC base64 de 32+ bytes; desabilitada por padrão, não exige credenciais e nunca chama o provedor.
 - [ ] `DOD-04` Provider status/nullabilidade/datas/decimais são mapeados defensivamente; payload bruto e retorno sensível não atravessam o contrato público.
 - [ ] `DOD-05` Timeout/rede/401/403/5xx/shape inválido produzem falha explícita e sanitizada; 404 de detalhe permanece 404; nenhum caso cai para `logs`.
 - [ ] `DOD-06` Controller é fino, integração fica atrás de porta/token explícito e o módulo não importa Prisma.
 - [ ] `DOD-07` Testes unitários/integração e build/lint do backend passam no runner declarado.
 - [ ] `DOD-08` Probes read-only redatados comprovam lista e detalhe nos dois contextos sem persistir identificadores, payloads ou valores privados.
-- [ ] `DOD-09` Módulos canônicos registram o contrato realmente entregue, distinguindo runtime atual legado da nova capacidade promovida.
+- [ ] `DOD-09` Módulos canônicos registram o candidato local sem promover ownership: `events-and-classification` continua owner atual e `fiscal-notes-and-documents` continua `target_planned`.
+- [ ] `DOD-10` `ADMIN|GESTOR|ANALISTA|LEITOR` ativos passam pelos dois GETs; usuário ausente/inativo continua bloqueado pelo JWT e nenhuma rota fiscal de escrita existe.
+- [ ] `DOD-11` Uma request gera no máximo uma chamada Smart Notas; concorrência por instância é limitada, desconexão/timeout aborta o fetch, upstream `429` é explícito e nenhum retry/paginação implícita ocorre.
+- [ ] `DOD-12` Respostas e logs de exceção usam template de rota sanitizado e nunca incluem query, `noteId`, documento, `idCompra`, token, CNPJ ou payload do provedor.
+- [ ] `DOD-13` O contrato público abaixo é provado campo a campo, incluindo nullability, paginação, status desconhecido, bounds e catálogo estável de erros.
 
 ## Validation Steps
 
@@ -163,22 +260,25 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 - [ ] `VAL-05` Executar probe opt-in read-only e redatado para lista/detalhe em `unifast` e `prosperar`; registrar apenas status, shape e ausência de vazamento.
 - [ ] `VAL-06` Rodar `python3 foundation_documentation/deterministic/validate_foundation.py --root foundation_documentation` e o `verify_context` canônico do Windows Git Bash.
 - [ ] `VAL-07` Rodar guards de diff, autoridade, conclusão e closeout conforme o lifecycle deste TODO.
+- [ ] `VAL-08` Rodar teste de aplicação/guard para os quatro perfis nos dois GETs e negativas de autenticação, sem depender apenas de teste estrutural de metadata.
+- [ ] `VAL-09` Rodar testes de saturação/abort/timeout/429 e confirmar `one request -> at most one upstream call`.
+- [ ] `VAL-10` Rodar teste do filtro global com query/param canários e capturar logger/resposta para provar redaction.
 
 ## Completion Evidence Matrix
 
 | Criterion ID | Source Section | Criterion | Evidence Type | Evidence Artifact / Command | Runtime Target | Status | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `DOD-01..07` | `Definition of Done` | contratos, isolamento, arquitetura e testes | `code+test` | paths/testes e comandos acima | `backend local` | `planned` | evidência será itemizada antes do claim |
+| `DOD-01..07,DOD-10..13` | `Definition of Done` | contratos, isolamento, autorização, capacidade, redaction, arquitetura e testes | `code+test` | paths/testes e comandos acima | `backend local` | `planned` | evidência será itemizada antes do claim |
 | `DOD-08` | `Definition of Done` | ambos os contextos respondem no adapter real | `runtime` | probe redatado sem dados privados | `Smart Notas read-only` | `planned` | sem mutações |
-| `DOD-09` | `Definition of Done` | consolidação canônica | `doc+review` | módulos âncora + validator | `foundation` | `planned` | pós-implementação |
-| `VAL-01..07` | `Validation Steps` | validação completa do corte | `test+review` | comandos listados | `local/foundation` | `planned` | detalhar resultados na entrega |
+| `DOD-09` | `Definition of Done` | consolidação target-planned sem cutover | `doc+review` | módulos âncora + registry invariants + validator | `foundation` | `planned` | owner atual preservado |
+| `VAL-01..10` | `Validation Steps` | validação completa do corte | `test+review` | comandos listados | `local/foundation` | `planned` | detalhar resultados na entrega |
 
 ## External Dependency Readiness
 
 | Dependency | Why It Matters | Status | Last Verified | Verification Method | Adjustment / Workaround |
 | --- | --- | --- | --- | --- | --- |
 | Smart Notas OpenAPI | contrato da fronteira externa | `healthy` | `2026-09-26` | SHA-256 `cc2a415962dcff00b7d91d3a1bfe99544ec3bd1543b2e5f9d93df1b8ce686502` | parar/revisar se fingerprint mudar |
-| Credenciais Unifast/Prosperar | probes e execução local | `healthy` | `2026-09-25` | probes redatados registrados no ledger discovery | nunca imprimir/persistir valores |
+| Credenciais Unifast/Prosperar | probes e execução local | `healthy` | `2026-09-25` | `GET /empresa` redatado confirmou cada CNPJ configurado; repetir antes do claim | nunca imprimir/persistir valores |
 | Smart Notas quotas/SLA | políticas de retry/load | `unknown` | `2026-09-26` | contrato público não publica limites | zero retry automático; sem polling neste corte |
 
 ## Package-First Assessment
@@ -221,7 +321,7 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 
 ## Decision Pending
 
-- [ ] `none — decisões materiais do corte estão resolvidas abaixo; revisão independente ainda pode reabrir o baseline antes de APROVADO`.
+- [x] `none — a decisão de acesso foi resolvida pelo usuário; os demais findings foram convertidos em contrato técnico dentro do corte`.
 
 ## Decisions (Resolved Before Freeze)
 
@@ -230,10 +330,13 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 - [x] `D-03` Smart Notas é a única fonte dessas rotas; não há Prisma, `logs`, fallback de sucesso ou espelho persistente. Ref: constitution/source ownership + módulo primário.
 - [x] `D-04` `noteId` será um envelope opaco versionado, autenticado por HMAC com segredo dedicado, contendo somente contexto e `idInterno` necessários à resolução stateless; adulteração é rejeitada antes da chamada externa. Ref: identity contract do discovery.
 - [x] `D-05` Lista exige `dataInicio`/`dataFim` ISO date, intervalo inclusivo coerente e máximo de 366 dias; filtros são `status`, `documento`, `idCompra`, `pagina`. Ref: OpenAPI/P-14.
-- [x] `D-06` Todos os perfis ativos autenticados preservam acesso read-only aos dois contextos; permissão por contexto é futuro contrato separado. Ref: `identity-and-team` current read behavior.
+- [x] `D-06` Todos os setores podem visualizar: `ADMIN|GESTOR|ANALISTA|LEITOR` ativos acessam Unifast e Prosperar, somente leitura; nenhuma permissão fiscal de escrita é criada. Ref: decisão explícita do usuário em 2026-09-26 + `identity-and-team`.
 - [x] `D-07` Adapter usa timeout configurável e nenhum retry automático; 401/403/timeout/rede/5xx/shape inválido são indisponibilidade/contrato upstream sanitizado, 404 de detalhe é not-found. Ref: provider gaps API-02/API-06.
 - [x] `D-08` Não haverá cache/polling no backend; cache stale-while-revalidate pertence ao TODO React. Ref: SD-08/ST-04.
 - [x] `D-09` Controller fino -> serviço de aplicação -> porta -> adapter singleton; tipos wire do provedor não escapam da infraestrutura. Ref: NestJS architecture rule.
+- [x] `D-10` Este TODO termina em `Local-Implemented, Provisional`; não altera ownership canônico nem ativa/deploya a capacidade. Cutover atômico pertence a TODO posterior. Ref: registry `planned` + reviewer convergence.
+- [x] `D-11` A flag é false por default; quando habilitada, Joi exige credenciais/segredo e o adapter impõe timeout, concorrência sem fila, cancelamento, 2 MiB e zero retry. Ref: rollout/capacity findings.
+- [x] `D-12` `noteId` HMAC é opaco-by-contract, não confidencial; filtro/logs redatam URL, query e parâmetros, e o contrato de erro é o catálogo congelado acima. Ref: security findings.
 
 ## Module Decision Baseline Snapshot
 
@@ -246,16 +349,16 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 
 ## Decision Baseline (Frozen Before Implementation)
 
-- [x] `D-01..D-09` ficam congeladas para implementação após os gates de planejamento e o `APROVADO`; mudança material exige reconvergência e nova aprovação.
+- [ ] `D-01..D-12` estão resolvidas e serão recongeladas após novo baseline/revisões; implementação continua proibida até `preflight-go` e `APROVADO`.
 
 ## Architecture Change Governance
 
 - **Applicability:** `required`
-- **Why this applies:** estabelece a nova steady-state boundary de notas e promove parte de `note_read_model` do owner legado de eventos para o owner fiscal planejado.
+- **Why this applies:** implementa um candidato local para a futura boundary fiscal, sem promover ainda `note_read_model` nem alterar o owner legado.
 - **Deviation / debt being retired:** reconstrução de notas de sucesso a partir de `logs` nas novas superfícies UniNotas.
-- **Target steady-state after closeout:** lista/detalhe fiscal leem apenas Smart Notas por contexto, enquanto o caminho legado permanece separado até TODO próprio de retirada/migração.
+- **Target steady-state after closeout:** código candidato local list/detail lê apenas Smart Notas por contexto quando habilitado; o canon continua declarando o caminho legado como runtime atual até cutover próprio.
 - **Temporary exceptions allowed:** coexistência explícita das rotas legadas `/eventos` e novas `/notas`; não é fallback nem dual-read dentro da mesma capacidade.
-- **Cutover / removal condition:** retirada das rotas legadas depende de TODO separado após frontend e error-boundary migrarem.
+- **Cutover / removal condition:** TODO separado injeta segredos, prova os dois emissores, habilita/deploya a flag e promove ownership atomicamente; retirada das rotas legadas só ocorre depois de frontend e error-boundary migrarem.
 
 ### Patterns To Enforce
 
@@ -279,6 +382,9 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 | Harness Type | Surface | Command / Rule / Artifact | Regression It Must Catch | Adoption Timing | Evidence Plan |
 | --- | --- | --- | --- | --- | --- |
 | test | note application/adapter | Jest module/contract specs | context leak, fallback, raw shape, tampered `noteId` | `implement-in-this-todo` | DOD-01..06/VAL-02 |
+| test | app wiring/auth | Nest testing module + real global guards | qualquer perfil ativo bloqueado, usuário ausente/inativo aceito, módulo não registrado | `implement-in-this-todo` | DOD-10/VAL-08 |
+| test | exception filter | logger/response spies with canary URL | query, identifier ou PII em log/error | `implement-in-this-todo` | DOD-12/VAL-10 |
+| structural test | fiscal module imports | bounded import scan/Jest | Prisma/LogsModule, controller->fetch ou wire DTO escapando adapter | `implement-in-this-todo` | DOD-06/VAL-02 |
 | analyzer | NestJS surface | `node_capability_surface_audit.py` | manifest/scripts/capability drift | `already-enforced` | VAL-01 |
 | review | code/module diff | architecture adherence review | brittle shortcut/hidden dual-read | `implement-in-this-todo` | final review package |
 
@@ -289,7 +395,7 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set`
 - **Decision review status:** `not_run`
-- **Decision review evidence / resolution:** `pending review baseline freeze`
+- **Decision review evidence / resolution:** `initial fresh opinion findings integrated into D-06/D-10/D-12 and the frozen HTTP contract; authoritative rerun pending refreshed baseline`.
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -303,11 +409,11 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 - **Why this decision:** contrato público/segredos/contextos exigem review a partir de baseline autoritativo reproduzível.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `pending`
-- **Baseline push reference:** `origin/main@pending`
+- **Baseline commit:** `pending refreshed baseline; predecessor 78825a4837ac91754bdd191e2db6a279ca78dfda`
+- **Baseline push reference:** `origin/main`
 - **Gate status:** `not_run`
-- **Findings summary:** `baseline inicial em preparação`.
-- **Evidence / reference:** `pending commit/push`.
+- **Findings summary:** a decisão de acesso e a reconvergência material exigem novo commit/push antes das revisões autoritativas.
+- **Evidence / reference:** predecessor `78825a4` permanece publicado; refresh ainda pendente.
 - **Waiver authority / reference:** `n/a`.
 - **Pre-freeze packet-prep rule:** review rows below are `prepared-pre-freeze`, not passed.
 
@@ -326,7 +432,7 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 
 ## Questions To Close
 
-- [x] Nenhuma pergunta bloqueia `list + detail`; quotas, documentos e permissões por contexto ficam explicitamente fora deste corte.
+- [x] `Q-01` Resolvida em 2026-09-26: todos os setores/perfis ativos visualizam ambos os emissores, somente leitura.
 
 ## Assumptions Preview
 
@@ -341,24 +447,24 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 
 ### Touched Surfaces
 
-- `backend/src/fiscal-notes/**`, configuração/bootstrap wiring, `.env.example`, backend README, testes Jest.
+- `backend/src/fiscal-notes/**`, configuração/bootstrap wiring, filtro global de exceções, `.env.example`, backend README, testes Jest.
 - Módulos Foundation primário/runtime e lifecycle deste TODO.
 
 ### Ordered Steps
 
 1. Ingerir regras vinculantes e confirmar routing/authority após `APROVADO`.
-2. Criar testes fail-first para configuração, `noteId`, normalização, contexto e erros.
-3. Implementar contratos/DTOs, codec, porta e serviço de aplicação sem Prisma.
-4. Implementar adapter `fetch` com timeout, headers resolvidos server-side, shape guards e sanitização.
-5. Registrar módulo/controller no AppModule e documentar env/endpoints.
-6. Rodar testes/build/lint e probes read-only redatados nos dois contextos.
-7. Consolidar módulos Foundation, rodar audits/guards, promover/fechar conforme evidência.
+2. Criar testes fail-first para contrato público, configuração condicional, quatro perfis, `noteId`, normalização, contexto, catálogo de erros, redaction e limites de capacidade.
+3. Implementar DTOs/erros, codec HMAC, porta, serviço de aplicação e teste estrutural sem Prisma/LogsModule.
+4. Implementar adapter `fetch` com semaphore fail-fast, timeout/request-abort, resposta máxima de 2 MiB, headers server-side, shape guards, observabilidade sanitizada e zero retry.
+5. Corrigir o filtro global para usar template de rota; registrar módulo/controller no AppModule e documentar flag/env/endpoints.
+6. Rodar testes/build/lint; com flag opt-in, repetir `/empresa` binding e probes lista/detalhe redatados nos dois contextos.
+7. Consolidar apenas o candidato `target_planned`, rodar audits/guards e encerrar no máximo como `Local-Implemented, Provisional`, abrindo o handoff de cutover.
 
 ### Test Strategy
 
 - **Strategy:** `test-first`.
 - **Why:** contrato externo genérico e isolamento de contexto exigem falhas explícitas antes do adapter.
-- **Fail-first targets:** config ausente/inválida, `noteId` adulterado, credencial errada por contexto, provider 401/403/404/5xx/timeout, shape inválido, decimal/data nullable, ausência de Prisma/log fallback.
+- **Fail-first targets:** config disabled/enabled, quatro perfis, `noteId` adulterado, credencial errada por contexto, provider 400/401/403/404/422/429/5xx/timeout, oversize/shape inválido, decimal/data nullable, status desconhecido, saturation/abort, filtro com canários e ausência de Prisma/log fallback.
 
 ### Pre-APROVADO RED Evidence Capture
 
@@ -379,66 +485,144 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 | --- | --- | --- | --- | --- |
 | `GET /api/v1/notas` | React Geral | novo contrato paginado context-scoped | `none` | TODO React selector/cache |
 | `GET /api/v1/notas/:noteId` | React detalhe | novo DTO/erro estável | `none` | TODO React detalhe |
-| env Smart Notas | Railway/runtime | novas variáveis server-only | exemplo/config apenas | deploy secret injection separado |
+| env Smart Notas | Railway/runtime | flag false por default + variáveis server-only | exemplo/config apenas | TODO cutover injeta segredos e ativa |
+| `note_read_model` | capability registry | candidato não altera owner atual | `none` | TODO cutover promove atomicamente |
 
 ### Local CI-Equivalent Suite Matrix
 
 | Repository / CI Surface | Why In Scope | Behavior / Scenario Covered | Preconditions | Local CI-Equivalent Command | Required Before | Status | Evidence | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| backend Jest | lógica/contrato mudam | lista/detalhe/context/error/config | fixtures provider determinísticas | `npm test -- --runInBand` | `Local-Implemented` | `planned` | pending | sem dados reais |
+| backend Jest | lógica/contrato mudam | lista/detalhe/DTO/nullability/status/bounds/error/config/HMAC/capacity/redaction | fixtures provider determinísticas + URL canaries + fake timers/abort | `npm test -- --runInBand` | `Local-Implemented` | `planned` | pending | sem dados reais |
+| backend app/guard | acesso muda | quatro perfis ativos acessam list/detail; sem JWT/inativo falha | Nest testing app com guards reais e adapter fake | `npm test -- --runInBand` | `Local-Implemented` | `planned` | pending | não aceitar teste só de metadata |
 | backend build | novo módulo/DTO | compilação Nest/TS | Node 22 + deps atuais | `npm run build` | `Local-Implemented` | `planned` | pending | runner Windows |
 | backend lint | novos arquivos TS | regras estáticas/formatação | deps atuais | `npm run lint` | `Local-Implemented` | `planned` | pending | inspecionar rewrites |
-| Smart Notas read probe | integração real | lista/detalhe em ambos contextos | env local preenchido; janela curta | probe opt-in redatado | `Local-Implemented` | `planned` | pending | sem persistir payload |
+| Smart Notas read probe | integração real | `/empresa` binding + lista/detalhe direto em ambos contextos | env local preenchido; flag opt-in; janela curta | probe opt-in redatado | `Local-Implemented` | `planned` | pending | sem persistir payload/identificador |
 | Foundation validator | docs/TODO | coerência/publicação/privacidade | baseline main | validator + verify_context | `promotion` | `planned` | pending | Windows Git Bash para readiness |
 
 ### Runtime / Rollout Notes
 
-- Novas variáveis serão obrigatórias no bootstrap quando o módulo estiver ativo; o deploy precisa recebê-las antes de promover a imagem.
-- Sem feature flag e sem migração. Como as rotas são aditivas e não consumidas pelo frontend atual, coexistem com `/eventos` até o TODO de cutover do consumidor.
+- `SMART_NOTAS_READ_ENABLED=false` permite que a imagem inicialize sem credenciais e impede chamadas externas; quando true, Joi exige base URL, dois pares token/CNPJ, segredo HMAC, timeout e concorrência válidos.
+- Este TODO não liga a flag fora do probe local nem muda `backend/.env`. O deploy precisa receber segredos antes de o TODO de cutover habilitar a flag.
+- As rotas são aditivas e não consumidas pelo frontend atual; coexistem inativas com `/eventos`, sem promover ownership, até o cutover do consumidor.
 
 ## Plan Review Gate
 
-- **Status:** `prepared-pre-freeze`.
+- **Status:** `reconverged-first-party; refreshed-baseline independent gates pending`.
 
 ### Review Sections
 
-- [ ] Architecture
-- [ ] Code Quality
-- [ ] Tests
-- [ ] Performance
-- [ ] Security
-- [ ] Elegance
-- [ ] Structural Soundness
+- [x] Architecture — owner fiscal, porta explícita e source authority preservados.
+- [x] Code Quality — controller fino, decoder separado e erros tipados evitam espalhar condicionais.
+- [x] Tests — fail-first cobre contrato, wiring e falhas; live probe é complementar, não substitui fixtures.
+- [x] Performance — uma chamada provider por request, semaphore sem fila, response cap, abort/timeout e zero retry/cache/polling limitam amplificação.
+- [x] Security — segredo dedicado, context resolution server-side, input bounds e redaction do filtro/logs são obrigatórios.
+- [x] Elegance — módulo coeso sem dependency nova, Prisma ou dual-read.
+- [x] Structural Soundness — coexistência `/eventos` e `/notas` é explícita e sem fallback oculto.
 
 ### Issue Cards
 
-- **Issue ID:** `ARCH-01` (prepared-pre-freeze)
+- **Issue ID:** `ARCH-01`
   - **Severity:** `medium`
-  - **Evidence:** `modules/fiscal-notes-and-documents.md`; `backend/src/app.module.ts`; ausência de módulo Smart Notas.
+  - **Evidence:** `modules/fiscal-notes-and-documents.md:7-20`; `backend/src/app.module.ts:16-31`; busca do backend sem módulo Smart Notas.
   - **Why it matters now:** a primeira integração pode virar acoplamento direto de controller/provider ou criar uma segunda autoridade de notas.
   - **Option A (Recommended):** módulo fiscal com serviço de aplicação, porta explícita, adapter e DTO normalizado.
-    - **Effort/Risk/Blast/Maintenance:** `medium/low/module/low`
-    - **Performance/Elegance/Structural:** `neutral/improves/improves`
+    - **Implementation effort:** `medium`
+    - **Risk:** `low`
+    - **Blast radius:** `module`
+    - **Maintenance burden:** `low`
+    - **Performance impact:** `neutral`
+    - **Elegance impact:** `improves`
+    - **Structural soundness impact:** `improves`
   - **Option B:** serviço único chamando `fetch` diretamente do controller.
-    - **Effort/Risk/Blast/Maintenance:** `low/medium/local/medium`
-    - **Performance/Elegance/Structural:** `neutral/regresses/regresses`
+    - **Implementation effort:** `low`
+    - **Risk:** `medium`
+    - **Blast radius:** `local`
+    - **Maintenance burden:** `medium`
+    - **Performance impact:** `neutral`
+    - **Elegance impact:** `regresses`
+    - **Structural soundness impact:** `regresses`
   - **Option C (Do Nothing):** manter notas em `logs`.
-    - **Effort/Risk/Blast/Maintenance:** `low/high/cross-module/high`
-    - **Performance/Elegance/Structural:** `unknown/regresses/regresses`
+    - **Implementation effort:** `low`
+    - **Risk:** `high`
+    - **Blast radius:** `cross-module`
+    - **Maintenance burden:** `high`
+    - **Performance impact:** `unknown`
+    - **Elegance impact:** `regresses`
+    - **Structural soundness impact:** `regresses`
   - **Recommendation:** `A`, por preservar autoridade única, testabilidade e troca controlada do provedor.
+
+- **Issue ID:** `SEC-01`
+  - **Severity:** `medium`
+  - **Evidence:** `backend/src/config/configuration.ts:28-60`; `backend/src/common/filters/all-exceptions.filter.ts:39-58`; `fiscal-notes-and-documents.md:19-20`.
+  - **Why it matters now:** credenciais/contextos e o `noteId` não podem ser controlados pelo consumidor nem aparecer em erros/logs.
+  - **Option A (Recommended):** configuração Joi fail-fast, resolver server-side, HMAC com segredo dedicado e exceções sanitizadas próprias.
+    - **Implementation effort:** `medium`
+    - **Risk:** `low`
+    - **Blast radius:** `module`
+    - **Maintenance burden:** `low`
+    - **Performance impact:** `neutral`
+    - **Elegance impact:** `improves`
+    - **Structural soundness impact:** `improves`
+  - **Option B:** reutilizar `JWT_SECRET` para assinar `noteId` e confiar no filtro global para sanitização.
+    - **Implementation effort:** `low`
+    - **Risk:** `medium`
+    - **Blast radius:** `cross-module`
+    - **Maintenance burden:** `medium`
+    - **Performance impact:** `neutral`
+    - **Elegance impact:** `regresses`
+    - **Structural soundness impact:** `regresses`
+  - **Option C (Do Nothing):** expor contexto/`idInterno` cru e erros do provedor.
+    - **Implementation effort:** `low`
+    - **Risk:** `high`
+    - **Blast radius:** `cross-module`
+    - **Maintenance burden:** `high`
+    - **Performance impact:** `neutral`
+    - **Elegance impact:** `regresses`
+    - **Structural soundness impact:** `regresses`
+  - **Recommendation:** `A`; key separation e sanitização explícita reduzem acoplamento e vazamento.
+
+- **Issue ID:** `PERF-01`
+  - **Severity:** `low`
+  - **Evidence:** OpenAPI não publica quotas/SLA; `Dockerfile:18-27` confirma Node 22 e build do backend; discovery API-02.
+  - **Why it matters now:** retry/cache/polling prematuros podem amplificar tráfego em duas contas sem quota conhecida.
+  - **Option A (Recommended):** uma chamada por request, `AbortSignal`/timeout configurável, zero retry e EPS evidence.
+    - **Implementation effort:** `low`
+    - **Risk:** `low`
+    - **Blast radius:** `module`
+    - **Maintenance burden:** `low`
+    - **Performance impact:** `improves`
+    - **Elegance impact:** `improves`
+    - **Structural soundness impact:** `improves`
+  - **Option B:** uma repetição automática em timeout/5xx.
+    - **Implementation effort:** `medium`
+    - **Risk:** `medium`
+    - **Blast radius:** `module`
+    - **Maintenance burden:** `medium`
+    - **Performance impact:** `unknown`
+    - **Elegance impact:** `neutral`
+    - **Structural soundness impact:** `neutral`
+  - **Option C (Do Nothing):** sem timeout explícito nem budget de chamadas.
+    - **Implementation effort:** `low`
+    - **Risk:** `high`
+    - **Blast radius:** `runtime`
+    - **Maintenance burden:** `medium`
+    - **Performance impact:** `regresses`
+    - **Elegance impact:** `regresses`
+    - **Structural soundness impact:** `regresses`
+  - **Recommendation:** `A`; mantém pressão previsível sem inventar política do provedor.
 
 ### Failure Modes & Edge Cases
 
-- [ ] Contexto ausente/inválido, CNPJ/token trocados, `noteId` adulterado, intervalo invertido/excessivo, caracteres inválidos no documento/idCompra.
-- [ ] Timeout, abort, DNS, 401/403, 404, 422, 429/5xx e conteúdo não JSON/shape inesperado.
-- [ ] Datas/provider fields nulos, decimal inválido, status desconhecido, page fora do range e lista vazia legítima.
-- [ ] Logs/exception não podem revelar Authorization, CNPJ, provider payload ou decoded `noteId`.
+- [x] Contexto ausente/inválido, CNPJ/token trocados, `noteId` adulterado, intervalo invertido/excessivo, caracteres inválidos no documento/idCompra.
+- [x] Timeout, abort, DNS, 401/403, 404, 422, 429/5xx e conteúdo não JSON/shape inesperado.
+- [x] Datas/provider fields nulos, decimal inválido, status desconhecido, page fora do range e lista vazia legítima.
+- [x] Logs/exception não podem revelar Authorization, CNPJ, provider payload ou decoded `noteId`.
 
 ### Residual Unknowns / Risks
 
-- [ ] Quotas/SLA continuam desconhecidos; mitigação deste corte é uma chamada por request, timeout e zero retry/polling.
-- [ ] Shape detail não é formalmente tipado no OpenAPI; live evidence existe, mas decoder permanece defensivo.
-- [ ] Deploy secret injection é dependência de promoção, não autorização para mudar Railway neste TODO.
+- [x] Quotas/SLA continuam desconhecidos; mitigação deste corte é uma chamada por request, timeout e zero retry/polling.
+- [x] Shape detail não é formalmente tipado no OpenAPI; live evidence existe, mas decoder permanece defensivo.
+- [x] Deploy secret injection é dependência de promoção, não autorização para mudar Railway neste TODO.
 
 ## Additional Architectural Opinions
 
@@ -448,12 +632,15 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 - **Package mode:** `bounded-file-set`.
 - **Internal reviewer mandate:** `required — fresh no-context reviewer after review baseline freeze`.
 - **Required lenses:** `correctness|performance|elegance|structural-soundness|operational-fit`.
+- **Review result:** `initial findings integrated; authoritative rerun pending refreshed baseline`.
+- **Material findings:** separar implementação local de promoção canônica/cutover; decidir `D-06`; impedir vazamento de path/query no filtro global; explicitar contrato HTTP, HMAC, erros, limites e rollout.
+- **Evidence:** fresh no-context architecture opinion over frozen baseline `78825a4`.
 
 ## Audit Trigger Matrix
 
 - **Canonical method:** `wf-docker-audit-escalation-method`
 - **Guard command:** `python3 delphi-ai/tools/audit_escalation_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-backend.md`
-- **Latest TEACH evidence / artifact:** `prepared-pre-freeze diagnostic fingerprint d2c83af51108; not gate evidence and must be rerun after the pushed freeze`.
+- **Latest TEACH evidence / artifact:** post-freeze guard `Overall outcome: go`, fingerprint `d2c83af51108`, against baseline `78825a4`.
 
 | Trigger | Value | Notes |
 | --- | --- | --- |
@@ -466,12 +653,12 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 | `touches_tests` | `yes` | testes novos/alterados |
 | `critical_user_journey` | `yes` | base da central de notas |
 | `release_or_promotion_critical` | `yes` | entrega com prazo curto e dependência do frontend |
-| `high_severity_plan_review_issue` | `no` | nenhum issue high até aqui |
+| `high_severity_plan_review_issue` | `yes` | primeira rodada trouxe quatro highs, agora incorporados e sujeitos a rerun |
 | `explicit_three_lane_request` | `no` | não solicitado |
 
 ## Independent No-Context Critique Gate
 
-- **Critique decision:** `required`.
+- **Critique decision:** `required`
 - **Why this decision:** medium + cross-module + API/auth/runtime-sensitive.
 - **Impact signals in scope:** `cross-module blast radius|public API|auth|runtime configuration`.
 - **Package mode:** `bounded-file-set`.
@@ -479,19 +666,19 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 - **Critique isolation mode:** `fresh internal no-context reviewer`.
 - **Internal reviewer mandate:** `required after freeze`.
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`.
-- **Critique status:** `not_run`.
-- **Findings summary:** `pending`.
-- **Evidence / reference:** `pending`.
+- **Critique status:** `not_run`
+- **Findings summary:** `initial four high and medium findings integrated into contract, decisions, rollout, capacity, tests and cutover boundary; rerun required`.
+- **Evidence / reference:** `initial fresh critique over 78825a4; refreshed-baseline critique pending`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Assumption Code Coherence
 
-- **Gate decision:** `required`.
+- **Gate decision:** `required`
 - **Why this decision:** A-01..A-04 sustentam dependency, guard e wiring decisions.
 - **Trigger stage:** `after critique convergence and before APROVADO`.
 - **Guard scope:** `A-01,A-02,A-03,A-04`.
 - **Guard command:** `python3 delphi-ai/tools/assumption_code_coherence_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-backend.md`.
-- **Gate status:** `not_run`.
+- **Gate status:** `not_run`
 - **Findings summary:** `pending`.
 - **Evidence / reference:** `pending`.
 - **Waiver authority / reference:** `n/a`.
@@ -609,36 +796,36 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 
 ## Independent Test Quality Audit Gate
 
-- **Audit decision:** `required`.
+- **Audit decision:** `required`
 - **Why this decision:** comportamento/API/testes novos.
 - **Trigger signals in scope:** `behavior-defining change|shared API contract|critical user journey`.
 - **Package mode:** `bounded-file-set`.
 - **Canonical method:** `wf-docker-independent-test-quality-audit-method`.
 - **Audit isolation mode:** `fresh internal no-context reviewer`.
-- **Audit status:** `not_run`.
+- **Audit status:** `not_run`
 - **Findings summary:** `pending`.
 - **Evidence / reference:** `pending`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Independent No-Context Final Review Gate
 
-- **Final review decision:** `required`.
+- **Final review decision:** `required`
 - **Why this decision:** API/auth/runtime-sensitive e cross-module.
 - **Impact signals in scope:** `cross-module|public API|auth|runtime configuration`.
 - **Package mode:** `bounded-file-set`.
 - **Review isolation mode:** `fresh internal no-context reviewer`.
-- **Final review status:** `not_run`.
+- **Final review status:** `not_run`
 - **Findings summary:** `pending`.
 - **Evidence / reference:** `pending`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Independent Cutover Integrity Audit Gate
 
-- **Cutover audit decision:** `recommended`.
+- **Cutover audit decision:** `recommended`
 - **Why this decision:** nova rota canônica coexiste com `/eventos`; precisa provar separação, não fallback oculto.
 - **Cutover signals in scope:** `canonical capability transition|legacy-path coexistence`.
 - **Package mode:** `bounded-file-set`.
-- **Cutover audit status:** `not_run`.
+- **Cutover audit status:** `not_run`
 - **Findings summary:** `pending`.
 
 ## Pipeline/Copilot P1/P2 Preflight
@@ -657,14 +844,17 @@ O runtime atual ainda lê notas e eventos da projeção PostgreSQL `logs`. A arq
 
 | Finding ID | Finding Source | Severity | Classification | Required Action | Status | Rationale / Follow-up Reference |
 | --- | --- | --- | --- | --- | --- | --- |
-| `none-yet` | `n/a` | `n/a` | `by-design/no-action` | `no action` | `accepted` | ledger será atualizado se houver finding real |
+| `PLAN-ACCESS-01` | critique + architecture opinion | `high` | `by-design/no-action` | decisão humana para `D-06` e testes da matriz | `resolved` | usuário autorizou todos os setores; D-06/DOD-10/VAL-08 |
+| `PLAN-SEC-01` | critique + architecture opinion | `high` | `release-blocker` | incluir redaction de path/query e esclarecer opacidade do `noteId` | `integrated-pending-rerun` | SCOPE-08/DOD-12/frozen contract |
+| `PLAN-ARCH-01` | critique + architecture opinion | `high` | `release-blocker` | separar implementação local de cutover/promoção canônica | `integrated-pending-rerun` | D-10 + Provisional Notes + out-of-scope |
+| `PLAN-CONTRACT-01` | critique | `high` | `release-blocker` | congelar DTOs, nullability, paginação, bounds e catálogo de erros | `integrated-pending-rerun` | Frozen Public HTTP Contract |
 
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
-- **Disposition reason:** planejamento/approval e implementação ainda pendentes.
+- **Disposition reason:** decisão humana resolvida; reconvergência/revisões/preflight e aprovação ainda pendentes.
 - **Post-commit/push status:** `pending`
-- **Next path/status action:** congelar baseline de review e concluir gates pré-approval.
+- **Next path/status action:** publicar o baseline reconvergido, repetir opinion/critique, executar guards pré-approval e então solicitar `APROVADO`.
 
 ## Module Consolidation Gate
 
