@@ -82,6 +82,7 @@ Smart Notas evidencia paginação numérica, mas não cursor/snapshot nem ordena
 | CSV payload | `24 MiB` incluindo BOM | contador UTF-8 durante serialização; exceder retorna 422 sem response body CSV |
 | exports per fiscal context | `1` ativo por instância | admission guard fail-fast; libera em success/error/abort |
 | exports globally | `2` por instância | consequência de dois contextos e limite acima |
+| export per actor | `1` ativo globalmente por instância e no máximo `1` início por rolling minute | start consome uma unidade de `ratePerUserMinute`; pages não duplicam user charge; cooldown impede reacquisition imediata |
 | upstream calls per export | `<= 200`, sequenciais | uma chamada ativa por export |
 | shared provider-call budget | cada list/detail page e cada export page consome o mesmo budget configurado por contexto | contador/scheduler único; export nunca contorna `ratePerContextMinute` |
 | export share of context budget | no máximo `floor(ratePerContextMinute * 0.75)` chamadas/minuto, mínimo 1 somente quando o budget total >=2 | reserva pelo menos 25% do budget configurado para chamadas interativas; export espera token até deadline |
@@ -131,7 +132,7 @@ Query opcional:
 | --- | --- | --- |
 | `400` | `ConsultaDeNotasInvalida` | filtro inválido, desconhecido ou `pagina` presente |
 | `422` | `ExportacaoFiscalLimiteExcedido` | rows/pages/bytes excedem envelope; mensagem orienta reduzir filtros |
-| `429` | `ExportacaoFiscalOcupada` | contexto/admission/budget sem capacidade dentro do contrato; `Retry-After: 5` |
+| `429` | `ExportacaoFiscalOcupada` | contexto/global/actor admission ou context budget sem capacidade; `Retry-After` é `5` para concorrência e os segundos restantes para o rolling minute do ator |
 | `502` | `ExportacaoFiscalPaginacaoInconsistente` | metadata, tamanho, contagem ou ID duplicado diverge |
 | `504` | `ExportacaoFiscalPrazoExcedido` | deadline total de 180s |
 | existing mapped status | existing provider code | credencial, contrato, indisponibilidade, quota externa ou timeout de uma página |
@@ -187,6 +188,8 @@ Um evento estruturado por exportação registra somente:
 
 Não registrar filtros, documento, ID da compra, número/chave fiscal, provider IDs, token/CNPJ, payload ou CSV. As chamadas do adapter podem manter logs por página, mas recebem/propagam o correlation ID do export para correlação, sem conteúdo sensível.
 
+`ratePerUserMinute` continua sendo orçamento de ações autenticadas: list/detail consomem uma unidade por request e export consome uma unidade no start. A amplificação de páginas é governada pelo budget do contexto; o ator também fica limitado a um export ativo e um início por minuto. Cada page call permanece atribuída ao `actorId` no evento agregado, sem cobrar novamente o contador de ações.
+
 ## Execution Lane Tracking (Required)
 
 - **Local implementation branch:** `MonitorNotes:release/uninotas-smart-notas`
@@ -216,6 +219,7 @@ Antes de executar `ST-EXPORT`, ambos os baselines serão obrigatoriamente refeit
 | --- | --- | --- | --- |
 | `MonitorNotes` | `backend/src/fiscal-notes/**` | `M, A` | filtro base, rota, scheduler/admission, erros, serializer e testes |
 | `MonitorNotes` | `backend/src/common/filters/all-exceptions.filter.ts` | `M` | allowlist de novos códigos e Retry-After canônico |
+| `MonitorNotes` | `backend/src/common/filters/all-exceptions.filter.spec.ts` | `M` | teste owner do catálogo público e Retry-After |
 | `MonitorNotes` | `backend/README.md` | `M` | contrato público/limites |
 | `MonitorNotes` | `frontend/src/api/cliente.ts` | `M` | download cancelável/204 retrocompatível |
 | `MonitorNotes` | `frontend/src/api/notas.ts` | `M` | filtros/export fiscal |
@@ -257,12 +261,12 @@ O serializer fica em `backend/src/fiscal-notes/`; não criar `common/csv.ts` enq
 
 - [ ] `DOD-EX-01` A rota aceita exatamente filtros fiscais sem `pagina`, um contexto e todos os leitores existentes.
 - [ ] `DOD-EX-02` Um filtro vazio retorna 204 sem download; um filtro válido baixa todas as linhas atravessadas, não apenas a página atual.
-- [ ] `DOD-EX-03` Rows/pages/deadline I/O+CPU/bytes/admission e budget/pacing derivados da configuração são aplicados e testados; nenhum limite trunca silenciosamente.
+- [ ] `DOD-EX-03` Rows/pages/deadline I/O+CPU/bytes/admission, actor start/cooldown e context budget/pacing derivados da configuração são aplicados e testados; nenhum limite trunca silenciosamente.
 - [ ] `DOD-EX-04` Metadata/count/duplicidade são verificadas; erro intermediário/inconsistência/abort nunca produz arquivo parcial.
 - [ ] `DOD-EX-05` CSV e headers seguem exatamente os contratos acima, inclusive injection/PII/identificadores/null/datas/decimais.
 - [ ] `DOD-EX-06` CTA usa filtros aplicados, ignora página, evita duplicata e cancela por filtro/navegação/logout/unmount sem download tardio.
 - [ ] `DOD-EX-07` List/detail continuam uma chamada upstream por request e mantêm resposta/contrato existentes.
-- [ ] `DOD-EX-08` Carga concorrente em configuração mínima/default/saturada prova um export por contexto, limite global `min(2,maxConcurrency-1)`, budget comum, reserva interativa e recuperação de list/detail.
+- [ ] `DOD-EX-08` Carga concorrente em configuração mínima/default/saturada prova um export por contexto, um ativo e um start/min por ator, limite global `min(2,maxConcurrency-1)`, context budget comum, reserva interativa e recuperação de list/detail.
 - [ ] `DOD-EX-09` Módulo fiscal e READMEs documentam contrato, limites e ausência de snapshot forte; nenhuma alegação de deploy.
 - [ ] `DOD-EX-10` Local Verification, PCV, segurança, test-quality, arquitetura, final, triple review e guards passam.
 
@@ -350,6 +354,8 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 | `R2-M1` | `medium` | regra da página final contradizia vazio | branch normativa `total=0` separada |
 | `R2-M2` | `medium` | timer não interrompe CPU síncrona | deadline monotônico por chunk + yield cooperativo |
 | `EX-M01` | `medium` | downloader também serve CSV PostgreSQL | assinatura retrocompatível e teste do legado |
+| `R3-EX-H01` | `high` | actor rate podia ser cobrado uma vez ou por página | uma unidade no start + um ativo e um start/min/ator; pages usam context budget |
+| `R3-EX-M02` | `medium` | teste owner do filtro global faltava no diff | `all-exceptions.filter.spec.ts` incluído |
 
 ### Residual Risks
 
@@ -500,9 +506,9 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 ### RLS planned evidence
 
-- **Profile RLS-P1 default:** fake config `maxConcurrency=8`, context rate `120/min`; dois exports (um/contexto) + list/detail controlados; 200 pages/20k rows/24MiB; extra export por contexto deve falhar 429.
-- **Profile RLS-P2 constrained/saturated:** fake config `maxConcurrency=2`, context rate `4/min`; somente um export global, um slot interativo reservado; budgets e abort/recovery sob fake clock.
-- **Thresholds:** export calls nunca ultrapassam `floor(rate*0.75)`/min/context; total calls nunca ultrapassa rate; export concurrency <= `min(2,maxConcurrency-1)`; admitted list/detail error rate `0%`; p95 list/detail <= `2x` baseline do mesmo stub; extra exports `100%` no erro esperado; output <=24MiB; peak heap delta <=96MiB no P1; cleanup/recovery <=1s após abort com fake port; zero late calls após deadline.
+- **Profile RLS-P1 default:** fake config `maxConcurrency=8`, context rate `120/min`, user rate `30/min`; dois exports de atores distintos (um/contexto) + list/detail controlados; 200 pages/20k rows/24MiB; segundo export do mesmo ator e extra por contexto falham 429.
+- **Profile RLS-P2 constrained/saturated:** fake config `maxConcurrency=2`, context rate `4/min`, user rate `2/min`; somente um export global, um slot interativo reservado; actor/context budgets, cooldown e abort/recovery sob fake clock.
+- **Thresholds:** cada start consome exatamente uma user-budget unit; nenhum ator possui >1 export ativo ou >1 start aceito/rolling minute; page calls não alteram user counter; export calls nunca ultrapassam `floor(contextRate*0.75)`/min/context; total calls nunca ultrapassam context rate; export concurrency <= `min(2,maxConcurrency-1)`; admitted list/detail error rate `0%`; p95 list/detail <= `2x` baseline do mesmo stub; extras `100%` no erro esperado; ator B pode iniciar quando contexto distinto/global permitem; output <=24MiB; peak heap delta <=96MiB no P1; cleanup/recovery <=1s após abort com fake port; zero late calls após deadline.
 - Capturar p50/p95/p99, throughput, statuses, calls por classe/contexto, active/peak, RSS/heap, bytes, abort/recovery.
 - Artifact planejado: `foundation_documentation/artifacts/tmp/uninotas-export-pcv/rls-pcv1.json`.
 
