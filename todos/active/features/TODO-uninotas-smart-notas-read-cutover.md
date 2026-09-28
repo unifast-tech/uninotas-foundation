@@ -40,7 +40,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** publicar e atestar o material round 15 com refs Git corrigidas e linearização causal monotônica por `refId`, então executar nova confirmação arquitetural independente; nenhuma mutação Railway está autorizada.
+- **Next exact step:** concluir a atestação do freeze round 15 e executar nova confirmação arquitetural independente; nenhuma mutação Railway está autorizada.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -104,8 +104,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Scope Item | Local Branch/Commit | Main / Authority | Local Source/Build Validation | Single Remote Target: Stage Customer-Facing | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Backend + frontend read-only | round-14 predecessor material root `da6ef14219e92e67428fd30cef98590512dc0832` / attestation carrier `d60bffe4c57ffbc40477c2798d72ac87191b1a6e`; round-15 root irá ao review gate; code-origin `31712a0` | `pending promotion to main` | `pending final cutover suite` | `pending one direct cutover` | `planning round 15 material publication pending` |
-| Foundation cutover contract | round-14 predecessor material `2368b5c7b0a8d3187caae08bd426a4bde63dfda0` / attestation `55ff86207e16255d4e63e014b591fc426e772590`; round-15 material irá ao review gate | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round-15 material publication pending` |
+| Backend + frontend read-only | round-15 material root `bcbcaa736cdeb8d76ab98c6b97c285b91eb183d2`; code-origin `31712a0` | `pending promotion to main` | `pending final cutover suite` | `pending one direct cutover` | `planning freeze/attestation governed by review gate` |
+| Foundation cutover contract | round-15 material `0ea5c76b8e5c3b0aade02e846368a174207d96c1` | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round-15 material frozen; this checkpoint records its attestation` |
 
 ## Out of Scope
 
@@ -166,7 +166,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 ## Diff Expectation Contract
 
-- **Contract status:** `required; round-15 material candidate pending publication`
+- **Contract status:** `required; round-15 material baseline frozen by this checkpoint`
 - **Policy:** `strict; unclassified or forbidden paths block delivery`
 - **User validation:** `required on deviation`
 - **Comparison mode:** `working_tree after candidate checkpoint`
@@ -175,7 +175,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Repository | Path | Baseline ref | Comparison mode |
 | --- | --- | --- | --- |
-| `MonitorNotes` | `.` | round-14 predecessor material root `da6ef14219e92e67428fd30cef98590512dc0832`; round-15 material root será registrado no freeze | `committed_diff`; `31712a0` remains code-origin; attestation-only carrier não é implementação |
+| `MonitorNotes` | `.` | round-15 material root `bcbcaa736cdeb8d76ab98c6b97c285b91eb183d2` | `committed_diff`; `31712a0` remains code-origin; attestation-only carrier não é implementação |
 | `uninotas-foundation` | `foundation_documentation` | `Gate: Review Baseline Freeze -> Baseline commit` | `committed_diff` |
 
 ### Expected Changed Paths
@@ -530,7 +530,7 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 - **Decision review lifecycle:** `after review baseline freeze and before APROVADO`
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set: TODO + topology/dependency artifacts + railway/Docker/config/health/fiscal boundaries`
-- **Decision review status:** `round-15 material publication pending`
+- **Decision review status:** `round-15 confirmation pending`
 - **Decision review evidence / resolution:** quatorze revisores independentes retornaram `BLOCKED` em rodadas sucessivas. Round 14 encerrou `R13-PCV-01`, mas encontrou SHA root transcrito incorretamente e timestamp não causal sob espera do lock. As refs verificadas e a linearização monotônica pós-lock foram integradas; publicação e nova confirmação independente são obrigatórias.
 
 | Finding ID | Severity | Approval-material | Resolution | Evidence in evolved plan |
@@ -622,11 +622,11 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 - **Why this decision:** release, segredos, dois contextos e promoção canônica exigem revisão reproduzível.
 - **Trigger stage:** `before first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `pending round-15 material publication`
+- **Baseline commit:** `0ea5c76b8e5c3b0aade02e846368a174207d96c1`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `not_run`
-- **Findings summary:** `R14-DOC-01` e `R14-BCI-01` foram integrados no material candidato round 15; publicação, sync e attestation ainda pendem.
-- **Evidence / reference:** predecessor Foundation material/attestation `2368b5c7b0a8d3187caae08bd426a4bde63dfda0`/`55ff86207e16255d4e63e014b591fc426e772590`; predecessor root material/carrier `da6ef14219e92e67428fd30cef98590512dc0832`/`d60bffe4c57ffbc40477c2798d72ac87191b1a6e`; novo SHA será registrado após commit/push.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** `R14-DOC-01` e `R14-BCI-01` foram integrados e publicados no material round 15; confirmação independente permanece pendente.
+- **Evidence / reference:** Foundation material `origin/main@0ea5c76b8e5c3b0aade02e846368a174207d96c1`; root material `MonitorNotes/delphi-and-foundation@bcbcaa736cdeb8d76ab98c6b97c285b91eb183d2`; refs verificadas com `git rev-parse --verify`; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73`; Delphi guard `ee9b448`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Review Scope Drift
@@ -639,7 +639,7 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-cutover.md`
 - **Gate status:** `not_run`
 - **Findings summary:** `R14-DOC-01` e `R14-BCI-01` alteraram material de aprovação; scope drift só pode ser atestado após publicar e revisar o freeze round 15.
-- **Evidence / reference:** predecessor em `uninotas-foundation:main@2368b5c7b0a8d3187caae08bd426a4bde63dfda0`; nova evidência virá após convergência round 15.
+- **Evidence / reference:** baseline congelado em `uninotas-foundation:main@0ea5c76b8e5c3b0aade02e846368a174207d96c1`; execução aguarda convergência da confirmação round 15.
 - **Waiver authority / reference:** `n/a`.
 
 ## Frontend / Consumer Matrix
@@ -686,7 +686,7 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 ## Plan Review Gate
 
 - **Review decision:** `required`
-- **Review status:** `round-15 material candidate; publication/sync/attestation and architecture confirmation pending`
+- **Review status:** `round-15 material frozen; attestation and architecture confirmation pending`
 - **Required lenses:** architecture, operations, rollback, security, tests, performance, observability and structural soundness.
 - **Known plan finding:** o health atual retorna HTTP 2xx quando o banco está degradado; `D-CUT-10` agora exige readiness separada não-2xx e mantém Smart Notas fora do loop.
 - **Approval request condition:** nova revisão confirma `D-CUT-06..23`, crítica converge, baseline é atualizado e guards retornam `go/preflight-go`.
