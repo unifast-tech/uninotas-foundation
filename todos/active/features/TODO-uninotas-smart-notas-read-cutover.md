@@ -40,7 +40,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** publicar/atestar o material round 26 com os achados R25 integrados e repetir arquitetura; a crítica independente só inicia após convergência arquitetural. Nenhuma implementação ou mutação Railway está autorizada.
+- **Next exact step:** repetir arquitetura sobre as refs round 26 atestadas; a crítica independente só inicia após convergência arquitetural. Nenhuma implementação ou mutação Railway está autorizada.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -106,8 +106,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Scope Item | Local Branch/Commit | Main / Authority | Local Source/Build Validation | Single Remote Target: Stage Customer-Facing | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Backend + frontend read-only | round-25 attestation carrier predecessor `b068265e988610239338304a86b4f26363c21512`; code-origin `31712a0`; round-26 material/attestation pending publication | `pending promotion to main` | `pending final cutover suite` | `pending capped-legacy prerequisite if L unproven + direct fiscal cutover` | `round-26 candidate; material publication pending` |
-| Foundation cutover contract | round-25 attestation predecessor `5b3e76c2f4b718cc6785d2acad9800428077368d`; round-26 material/attestation pending publication | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round-26 candidate; material publication pending` |
+| Backend + frontend read-only | round-26 material root `ef05341bff43c7059135b35cc94c9d75b64a3adf`; code-origin `31712a0`; attestation carrier pending | `pending promotion to main` | `pending final cutover suite` | `pending capped-legacy prerequisite if L unproven + direct fiscal cutover` | `round-26 material frozen; metadata attestation pending` |
+| Foundation cutover contract | round-26 material `93408c8a53272132ed6577d5fe4dcabc1dfcdfb3`; attestation pending | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round-26 material frozen; metadata attestation pending` |
 
 ## Out of Scope
 
@@ -744,11 +744,11 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 - **Why this decision:** release, segredos, dois contextos e promoção canônica exigem revisão reproduzível.
 - **Trigger stage:** `before first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `pending round-26 material publication; predecessor 5b3e76c2f4b718cc6785d2acad9800428077368d`
+- **Baseline commit:** `93408c8a53272132ed6577d5fe4dcabc1dfcdfb3`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `not_run`
-- **Findings summary:** os três achados arquiteturais R25 foram integrados no candidato round 26; publicação material e attestation pendem.
-- **Evidence / reference:** predecessor Foundation `origin/main@5b3e76c2f4b718cc6785d2acad9800428077368d`; predecessor root `MonitorNotes/delphi-and-foundation@b068265e988610239338304a86b4f26363c21512`; refs round-26 pendentes; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73`; Delphi guard `ee9b448`.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** os três achados arquiteturais R25 foram integrados e publicados no material round 26; esta attestation não altera seções materiais e a arquitetura deve confirmar antes da crítica.
+- **Evidence / reference:** Foundation material `origin/main@93408c8a53272132ed6577d5fe4dcabc1dfcdfb3`; root material `MonitorNotes/delphi-and-foundation@ef05341bff43c7059135b35cc94c9d75b64a3adf`; refs verificadas; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73`; Delphi guard `ee9b448`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Review Scope Drift
@@ -759,9 +759,9 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 - **Baseline source:** `Review Baseline Freeze -> Baseline commit`
 - **Material sections compared:** `canonical defaults, incluindo Diff Expectation Contract, Module Decision Baseline Snapshot e Decision Baseline (Frozen Before Implementation)`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-cutover.md`
-- **Gate status:** `not_run`
-- **Findings summary:** depende da publicação/attestation round 26; depois deve preservar as 23 seções materiais antes da revisão.
-- **Evidence / reference:** predecessor `uninotas-foundation:main@5b3e76c2f4b718cc6785d2acad9800428077368d`; refs round-26 pendentes.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** a attestation round 26 preserva todas as 23 seções materiais do baseline; arquitetura e crítica ainda devem confirmar.
+- **Evidence / reference:** `review_scope_drift_guard.py` contra `uninotas-foundation:main@93408c8a53272132ed6577d5fe4dcabc1dfcdfb3`; resultado `go`, `0/23`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Frontend / Consumer Matrix
@@ -1063,7 +1063,7 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 - **Independent test-quality audit:** `required before Stage cutover`.
 - **Independent final review:** `required after implementation and before Stage cutover`.
 - **Dedicated triple review:** `required because release-critical + secrets + external provider`.
-- **Current status:** `round-25 findings integrated in round-26 candidate; material publication/attestation and architecture confirmation pending before critique`.
+- **Current status:** `round-25 findings integrated and round-26 material published/attested; architecture confirmation pending before critique`.
 
 ## Audit Trigger Matrix (Required Before Audit Decisions Are Trusted)
 
