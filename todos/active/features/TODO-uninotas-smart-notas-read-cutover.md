@@ -40,7 +40,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** publicar/atestar round33 com os quatro achados da crítica R32 integrados e repetir arquitetura/crítica; coherence/drift só ficam satisfatórios causalmente após crítica limpa. Nenhuma implementação ou mutação Railway está autorizada.
+- **Next exact step:** publicar a attestation round33 sobre o material Foundation `9dfd94a2044a8d5fa756da65b4f9bbf4d524a53b` / carrier root `8c84cd5c3df4351a5db8cac97fe8ba0aea33cec3`, então repetir arquitetura e crítica; coherence/drift só ficam satisfatórios causalmente após crítica limpa. Nenhuma implementação ou mutação Railway está autorizada.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -57,7 +57,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 ## Blocker Notes
 
 - **Blocker:** nenhuma mutação Railway pode ocorrer antes da revisão formal, `preflight-go` e nova aprovação operacional específica.
-- **Why blocked now:** round32 está publicado/atestado e arquitetura limpa, mas a crítica R32 bloqueou quatro gaps high; round33 ainda precisa de publicação, attestation e reviews correntes na ordem causal.
+- **Why blocked now:** o material round33 está publicado e congela os quatro gaps high da crítica R32; attestation e reviews correntes ainda precisam ocorrer na ordem causal.
 - **What unblocks it:** round33 publicado/atestado, arquitetura/crítica limpas, coherence/drift rerodados depois da crítica e vinculados ao dispatch, capacidade pré-implementação conclusiva, guards `preflight-go` e `APROVADO` explícito.
 - **Owner / source:** project Owner confirmado privadamente / painel Railway; o identificador pessoal não é persistido na Foundation.
 - **Last confirmed truth:** `Unifast Products / Stage / MonitorNotes / US East / main / Pro`, domínio `https://monitornotes-stage.up.railway.app` e project Owner operador foram confirmados; retenção de 30 dias e janela 20:00–22:00 foram aceitas; health respondeu HTTP 200 com aplicação/banco `ok`.
@@ -121,8 +121,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Scope Item | Local Branch/Commit | Main / Authority | Local Source/Build Validation | Single Remote Target: Stage Customer-Facing | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Backend + frontend read-only | round32 architecture carrier predecessor `1099819b2b3d01a43d09f024f9cc22f5a2020102`; code-origin `31712a0`; round33 material/attestation pending | `pending promotion to main` | `pending final cutover suite` | `pre-implementation capacity hard stop; otherwise direct fiscal cutover` | `round33 candidate; publication pending` |
-| Foundation cutover contract | round32 architecture predecessor `10c4bec02468d9b80d336fcfca094c72dcb5447c`; round33 material/attestation pending | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round33 candidate; publication pending` |
+| Backend + frontend read-only | round33 material carrier `8c84cd5c3df4351a5db8cac97fe8ba0aea33cec3`; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73`; attestation pending | `pending promotion to main` | `pending final cutover suite` | `pre-implementation capacity hard stop; otherwise direct fiscal cutover` | `round33 material published; attestation pending` |
+| Foundation cutover contract | round33 material `9dfd94a2044a8d5fa756da65b4f9bbf4d524a53b`; attestation pending | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round33 material published; attestation pending` |
 
 ## Out of Scope
 
@@ -858,11 +858,11 @@ Transições não pulam evidência: REC-2B exige nenhum Active; REC-3A exige rev
 - **Why this decision:** release, segredos, dois contextos e promoção canônica exigem revisão reproduzível.
 - **Trigger stage:** `before first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `pending round33 material publication`; predecessor `10c4bec02468d9b80d336fcfca094c72dcb5447c`
+- **Baseline commit:** `9dfd94a2044a8d5fa756da65b4f9bbf4d524a53b`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `not_run`
-- **Findings summary:** quatro achados da crítica R32 foram integrados no candidato material round33; publication/attestation ainda precisam fixar refs.
-- **Evidence / reference:** predecessor Foundation `origin/main@10c4bec02468d9b80d336fcfca094c72dcb5447c`; predecessor root `MonitorNotes/delphi-and-foundation@1099819b2b3d01a43d09f024f9cc22f5a2020102`; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73`; round33 pendente.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** os quatro achados da crítica R32 foram integrados, validados e publicados como material imutável round33; a attestation registra essas refs sem alterar as seções materiais.
+- **Evidence / reference:** `reviewRound=33`; Foundation `origin/main@9dfd94a2044a8d5fa756da65b4f9bbf4d524a53b`; root `MonitorNotes/delphi-and-foundation@8c84cd5c3df4351a5db8cac97fe8ba0aea33cec3`; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73`; `todo_deterministic_validator.py=PASS`; `validate_foundation.py=PASS`; pre-attestation drift diagnostic retornou `0/23` seções materiais alteradas, mas permanece deliberadamente não-satisfatório antes da crítica conforme D-CUT-36.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Review Scope Drift
