@@ -133,7 +133,7 @@ Query opcional:
 | `400` | `ConsultaDeNotasInvalida` | filtro inválido, desconhecido ou `pagina` presente |
 | `422` | `ExportacaoFiscalLimiteExcedido` | rows/pages/bytes excedem envelope; mensagem orienta reduzir filtros |
 | `429` | `ExportacaoFiscalOcupada` | configuração incapaz, contexto/global/actor admission ou rolling cooldown; `Retry-After` segue a precedência abaixo |
-| `429` | `LimiteDeConsultaExcedido` | `ratePerUserMinute` já esgotado; `Retry-After` é o restante da janela fixa existente |
+| `429` | `LimiteDeConsultaExcedido` | `ratePerUserMinute` esgotado ou `MAX_ACTOR_BUCKETS` cheio para novo ator; `Retry-After` é o restante da janela fixa existente |
 | `502` | `ExportacaoFiscalPaginacaoInconsistente` | metadata, tamanho, contagem ou ID duplicado diverge |
 | `504` | `ExportacaoFiscalPrazoExcedido` | deadline total de 180s |
 | existing mapped status | existing provider code | credencial, contrato, indisponibilidade, quota externa ou timeout de uma página |
@@ -142,7 +142,7 @@ Abort por desconexão do cliente encerra o trabalho e não tenta responder. Não
 
 ### Atomic Admission and `Retry-After`
 
-Antes da primeira chamada provider, uma seção crítica síncrona por instância avalia, sem mutação, configuração mínima, actor ativo/cooldown, contexto ativo, limite global e user fixed-window budget. Se qualquer condição rejeitar, nenhum contador, cooldown ou lease é alterado.
+Antes da primeira chamada provider, uma seção crítica síncrona por instância prepara/limpa a janela fixa e avalia, sem mutação, configuração mínima, actor ativo/cooldown, contexto ativo, limite global, user fixed-window budget e `MAX_ACTOR_BUCKETS` para novo ator. Se qualquer condição rejeitar, nenhum contador, cooldown ou lease é alterado.
 
 Somente quando todas passam, a mesma seção crítica: consome exatamente uma unidade do user budget; grava o início do rolling cooldown de 60s; e adquire leases de actor/context/global. O cooldown conta do start aceito e permanece consumido mesmo se a chamada posterior falhar, pois o trabalho foi admitido. Leases ativos são liberados em success/error/abort. Cada provider page consome depois o scheduler/budget de contexto; indisponibilidade temporária de token espera até o deadline e termina em 504 se não houver tempo, nunca vira uma segunda cobrança de usuário.
 
@@ -152,10 +152,10 @@ Mapeamento determinístico quando uma tentativa é rejeitada:
 
 1. configuração incapaz de exportar (`maxConcurrency < 2` ou export share zero): `ExportacaoFiscalOcupada`, `Retry-After: 60`;
 2. se qualquer bloqueio export-specific coexistir (actor ativo, actor cooldown, contexto ativo ou global cheio): `ExportacaoFiscalOcupada`, com `Retry-After = max(5 para cada lease ocupado, segundos restantes do cooldown, segundos restantes da user fixed window ou bucket-capacity se também bloqueados)`;
-3. se o único bloqueio for user fixed-window ou `MAX_ACTOR_BUCKETS` sem slot para novo ator: `LimiteDeConsultaExcedido`, com segundos até a próxima janela fixa/cleanup;
+3. se o único bloqueio for user fixed-window ou `MAX_ACTOR_BUCKETS` sem slot para novo ator: `LimiteDeConsultaExcedido`, com segundos até a próxima janela fixa;
 4. token temporário do context budget após admissão espera; deadline produz `ExportacaoFiscalPrazoExcedido` 504.
 
-Testes injetam ambos os relógios e cobrem colisões, fronteira exata da janela fixa, salto/regressão de wall clock sem estender cooldown, expiração monotônica exata, arredondamento/minimum-one, `MAX_ACTOR_BUCKETS`, rejeição sem mutation e liberação de leases em todos os exits. Cooldown aceito permanece após success/error/abort; leases sempre são liberados.
+Buckets de ator pertencem à janela fixa em que foram usados. Na primeira admissão/check de uma nova janela, o mesmo `prepareWindow` existente remove buckets cuja `window` difere da atual antes de verificar capacidade; portanto, bucket-capacity sempre usa `Retry-After` até a próxima fronteira fixa. Testes injetam ambos os relógios e cobrem colisões, fronteira exata da janela fixa, cleanup, salto/regressão de wall clock sem estender cooldown, expiração monotônica exata, arredondamento/minimum-one, `MAX_ACTOR_BUCKETS`, rejeição sem mutation e liberação de leases em todos os exits. Cooldown aceito permanece após success/error/abort; leases sempre são liberados.
 
 ## Pagination Consistency Contract
 
@@ -377,6 +377,7 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 | `R4-EX-H01` | `high` | rejeição/collision/Retry-After ainda permitia implementações divergentes | admissão atômica sem charge em rejeição + precedência cause/header congelada |
 | `R5-H01` | `high` | admission GET muta counters/cooldown/leases sob concorrência | BCI required com exact-once bursts 5/10/20 |
 | `R5-H02` | `high` | clocks, rounding, actor bucket cap e incap branches incompletos | wall/monotonic separados + precedência e fixtures completas |
+| `R6-H01/M02` | `high, medium` | BCI não distinguia eligible/pre-blocked e bucket cleanup estava implícito | oráculos 1/0 separados + lifecycle na janela fixa congelado |
 
 ### Residual Risks
 
@@ -397,11 +398,11 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 - **Gate decision:** `required`
 - **Baseline branch:** `uninotas-foundation/main`
-- **Baseline commit:** `39c48a76554274dba06d7b43e6fbfac8ffe77217`
+- **Baseline commit:** `20b633ef1f0335b67bb2792c52bdea68e917c8b1`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** findings R4 de admissão atômica e Retry-After foram integrados em baseline material isolado e publicado.
-- **Evidence / reference:** `origin/main` contém `39c48a76554274dba06d7b43e6fbfac8ffe77217`; material export está congelado nesse commit.
+- **Findings summary:** findings R5 de BCI/clocks/incapable branches foram integrados em baseline material isolado e publicado.
+- **Evidence / reference:** `origin/main` contém `20b633ef1f0335b67bb2792c52bdea68e917c8b1`; material export está congelado nesse commit.
 
 ## Gate: Review Scope Drift
 
@@ -526,7 +527,7 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 ### BCI planned evidence
 
-- **Invariant `FISCAL-EXPORT-ADMISSION-01`:** para cada conjunto de starts simultâneos do mesmo ator/contexto, exatamente um contender aceito consome uma user unit, cria um cooldown e adquire cada lease uma vez; todo rejeitado deixa todos os counters/cooldowns/leases imutáveis; success/error/abort liberam leases exatamente uma vez, sem remover cooldown aceito.
+- **Invariant `FISCAL-EXPORT-ADMISSION-01`:** em estado inicialmente elegível, cada conjunto de starts simultâneos do mesmo ator/contexto aceita exatamente um contender, que consome uma user unit, cria um cooldown e adquire cada lease uma vez; todo rejeitado deixa todos os counters/cooldowns/leases imutáveis. Em estado pre-blocked/incapable (configuração, budget, bucket cap ou lease já ocupado), aceita exatamente zero e toda tentativa preserva o estado. Success/error/abort de um aceito liberam leases exatamente uma vez, sem remover cooldown aceito.
 - Bursts `5/10/20` cobrem mesmo ator/mesmo contexto, atores distintos/mesmo contexto, mesmo ator/contextos distintos e atores/contextos distintos sob limite global.
 - Cobrir `wallNow` em ambos os lados da fronteira fixa, `monotonicNow` antes/exatamente/depois do expiry, wall regression/jump, `MAX_ACTOR_BUCKETS`, `maxConcurrency < 2`, export share zero, user budget esgotado, collision de todos os bloqueios e arredondamento `max(1,ceil)`.
 - Artifact planejado: `foundation_documentation/artifacts/tmp/uninotas-export-pcv/bci-pcv1.json`.
