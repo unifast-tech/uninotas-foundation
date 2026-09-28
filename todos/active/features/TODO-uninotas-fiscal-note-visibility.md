@@ -531,13 +531,13 @@ Todos os campos abaixo são propriedades obrigatórias no JSON. `string|null` ac
 - **Why this decision:** planning-side reviews must evaluate a committed and pushed scope-bearing contract.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `main`
-- **Baseline commit:** `3b94edcdeeec4744915b2f9dbfa034bfa7574c43`
+- **Baseline commit:** `2d4bb67acf71cbe2404b3e11476c270d42d7b1d5`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** refreshed scope-bearing contract includes exact 17/27-field DTOs, signed/decodificável route semantics, split list/detail records, bounded export evidence, all 21 requested fields and no number search/persistence/CSV expansion.
-- **Evidence / reference:** authority guards returned `go`; refreshed scope baseline `3b94edcdeeec4744915b2f9dbfa034bfa7574c43` was committed and pushed to `origin/main`.
+- **Findings summary:** final scope-bearing contract includes exact 17/27-field DTOs, signed/decodificável route semantics, split list/detail records, bounded export evidence, all 21 requested fields, explicit preservation of four existing detail fields and no number search/persistence/CSV expansion.
+- **Evidence / reference:** authority guards returned `go`; final scope baseline `2d4bb67acf71cbe2404b3e11476c270d42d7b1d5` was committed and pushed to `origin/main`; critique changes were non-material clarifications authored by the fresh critic.
 - **Waiver authority / reference:** `n/a`
-- **Pre-freeze packet-prep rule:** `satisfied; convergence reviews run only after refreshed baseline 3b94edc was pushed`
+- **Pre-freeze packet-prep rule:** `satisfied; architecture convergence ran after 3b94edc and the final critic authored only the two clarifications frozen in 2d4bb67`
 
 ## Gate: Review Scope Drift
 - **Gate decision:** `required`
