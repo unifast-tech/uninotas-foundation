@@ -146,14 +146,16 @@ Antes da primeira chamada provider, uma seção crítica síncrona por instânci
 
 Somente quando todas passam, a mesma seção crítica: consome exatamente uma unidade do user budget; grava o início do rolling cooldown de 60s; e adquire leases de actor/context/global. O cooldown conta do start aceito e permanece consumido mesmo se a chamada posterior falhar, pois o trabalho foi admitido. Leases ativos são liberados em success/error/abort. Cada provider page consome depois o scheduler/budget de contexto; indisponibilidade temporária de token espera até o deadline e termina em 504 se não houver tempo, nunca vira uma segunda cobrança de usuário.
 
+Relógios têm papéis separados: `wallNow` governa somente a janela fixa existente (`floor(epochMs/60_000)`) e sua virada; `monotonicNow` governa cooldown, pacing e deadline e nunca retrocede. Cooldown expira quando `monotonicNow >= acceptedStart + 60_000`. Todo `Retry-After` usa `max(1, ceil(remainingMs/1000))`.
+
 Mapeamento determinístico quando uma tentativa é rejeitada:
 
 1. configuração incapaz de exportar (`maxConcurrency < 2` ou export share zero): `ExportacaoFiscalOcupada`, `Retry-After: 60`;
-2. se qualquer bloqueio export-specific coexistir (actor ativo, actor cooldown, contexto ativo ou global cheio): `ExportacaoFiscalOcupada`, com `Retry-After = max(5 para cada lease ocupado, segundos restantes do cooldown, segundos restantes da user fixed window se também esgotada)`;
-3. se o único bloqueio for user fixed-window: `LimiteDeConsultaExcedido`, com segundos até a próxima janela fixa;
+2. se qualquer bloqueio export-specific coexistir (actor ativo, actor cooldown, contexto ativo ou global cheio): `ExportacaoFiscalOcupada`, com `Retry-After = max(5 para cada lease ocupado, segundos restantes do cooldown, segundos restantes da user fixed window ou bucket-capacity se também bloqueados)`;
+3. se o único bloqueio for user fixed-window ou `MAX_ACTOR_BUCKETS` sem slot para novo ator: `LimiteDeConsultaExcedido`, com segundos até a próxima janela fixa/cleanup;
 4. token temporário do context budget após admissão espera; deadline produz `ExportacaoFiscalPrazoExcedido` 504.
 
-O relógio injetável governa tanto a janela fixa quanto o cooldown. Testes cobrem colisões, fronteira exata de minuto, relógio avançado, rejeição sem mutation de todos os contadores/leases e liberação em todos os exits.
+Testes injetam ambos os relógios e cobrem colisões, fronteira exata da janela fixa, salto/regressão de wall clock sem estender cooldown, expiração monotônica exata, arredondamento/minimum-one, `MAX_ACTOR_BUCKETS`, rejeição sem mutation e liberação de leases em todos os exits. Cooldown aceito permanece após success/error/abort; leases sempre são liberados.
 
 ## Pagination Consistency Contract
 
@@ -282,7 +284,7 @@ O serializer fica em `backend/src/fiscal-notes/`; não criar `common/csv.ts` enq
 - [ ] `DOD-EX-05` CSV e headers seguem exatamente os contratos acima, inclusive injection/PII/identificadores/null/datas/decimais.
 - [ ] `DOD-EX-06` CTA usa filtros aplicados, ignora página, evita duplicata e cancela por filtro/navegação/logout/unmount sem download tardio.
 - [ ] `DOD-EX-07` List/detail continuam uma chamada upstream por request e mantêm resposta/contrato existentes.
-- [ ] `DOD-EX-08` Carga concorrente em configuração mínima/default/saturada prova um export por contexto, um ativo e um start/min por ator, limite global `min(2,maxConcurrency-1)`, context budget comum, reserva interativa e recuperação de list/detail.
+- [ ] `DOD-EX-08` BCI/carga em bursts 5/10/20 e configurações incapable/mínima/default/saturada prova exact-once admission, wall/monotonic clocks, um export por contexto, um ativo e um start/min por ator, limite global `min(2,maxConcurrency-1)`, context budget comum, reserva interativa e recuperação de list/detail.
 - [ ] `DOD-EX-09` Módulo fiscal e READMEs documentam contrato, limites e ausência de snapshot forte; nenhuma alegação de deploy.
 - [ ] `DOD-EX-10` Local Verification, PCV, segurança, test-quality, arquitetura, final, triple review e guards passam.
 
@@ -373,6 +375,8 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 | `R3-EX-H01` | `high` | actor rate podia ser cobrado uma vez ou por página | uma unidade no start + um ativo e um start/min/ator; pages usam context budget |
 | `R3-EX-M02` | `medium` | teste owner do filtro global faltava no diff | `all-exceptions.filter.spec.ts` incluído |
 | `R4-EX-H01` | `high` | rejeição/collision/Retry-After ainda permitia implementações divergentes | admissão atômica sem charge em rejeição + precedência cause/header congelada |
+| `R5-H01` | `high` | admission GET muta counters/cooldown/leases sob concorrência | BCI required com exact-once bursts 5/10/20 |
+| `R5-H02` | `high` | clocks, rounding, actor bucket cap e incap branches incompletos | wall/monotonic separados + precedência e fixtures completas |
 
 ### Residual Risks
 
@@ -393,11 +397,11 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 - **Gate decision:** `required`
 - **Baseline branch:** `uninotas-foundation/main`
-- **Baseline commit:** `ce8ef11885d5d97f63e4d4ece4a4a9452cadce36`
+- **Baseline commit:** `39c48a76554274dba06d7b43e6fbfac8ffe77217`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** findings R3 de actor budget/test ownership foram integrados em baseline material isolado e publicado.
-- **Evidence / reference:** `origin/main` contém `ce8ef11885d5d97f63e4d4ece4a4a9452cadce36`; commit material altera somente este TODO.
+- **Findings summary:** findings R4 de admissão atômica e Retry-After foram integrados em baseline material isolado e publicado.
+- **Evidence / reference:** `origin/main` contém `39c48a76554274dba06d7b43e6fbfac8ffe77217`; material export está congelado nesse commit.
 
 ## Gate: Review Scope Drift
 
@@ -490,6 +494,7 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 | `delphi-ai/skills/test-creation-standard/SKILL.md` | novos testes | fail-first/assertion efficacy | bypass/mock fallback | broad suites |
 | `delphi-ai/skills/endpoint-performance-scrutiny/SKILL.md` | page walk externo | bounds/call budget | amplification | EPS obrigatório |
 | `delphi-ai/skills/frontend-race-condition-validation/SKILL.md` | download async | cancel/drop/stale policy | late download | FRC obrigatório |
+| `delphi-ai/skills/backend-concurrency-idempotency-validation/SKILL.md` | admissão concorrente em memória | exact-once counters/cooldown/leases | double charge/leak | BCI obrigatório |
 | `delphi-ai/skills/runtime-load-stress-validation/SKILL.md` | bulk/memória | profiles/thresholds/recovery | SLO sem prova | RLS obrigatório |
 | `delphi-ai/skills/security-adversarial-review/SKILL.md` | CSV/raw IDs | injection/redaction/auth | conteúdo em logs | security gate |
 | `delphi-ai/skills/ci-equivalent-governance/SKILL.md` | verificação | linguagem honesta | CI claim sem pipeline | Local Verification |
@@ -505,7 +510,7 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `pcv-1` | `EPS` | `endpoint-performance-scrutiny` | `required` | `high` | `EPS-DATA-PATH-CHANGED` | até 200 calls externos, serializer e shared budget | `before_local_implemented` | `EPS-E2` | `pending` | quota/latência real | `U-QUERY-PATH-UNKNOWN` | `2026-09-28T18:00:00Z` | `pending-routine-executor` |
 | `pcv-1` | `FRC` | `frontend-race-condition-validation` | `required` | `high` | `FRC-STALE-RESPONSE` | abort/generation/download pode sobreviver a filtro/sessão | `before_local_implemented` | `FRC-E3` | `pending` | browser scheduling | `U-ASYNC-SURFACE-UNKNOWN` | `2026-09-28T18:00:00Z` | `pending-routine-executor` |
-| `pcv-1` | `BCI` | `backend-concurrency-idempotency-validation` | `not_needed` | `low` | `BCI-NO-WRITE-SIDE-EFFECT` | GET read-only sem mutation/idempotency | `before_local_implemented` | `BCI-INV` | `not_applicable` | none | `none` | `2026-09-28T18:00:00Z` | `pending-routine-executor` |
+| `pcv-1` | `BCI` | `backend-concurrency-idempotency-validation` | `required` | `high` | `BCI-EXACT-ONCE-SEMANTICS` | admissão muta counters/cooldown/leases sob starts sobrepostos | `before_local_implemented` | `BCI-E3` | `pending` | state leak/double charge | `U-CONCURRENCY-SURFACE-UNKNOWN` | `2026-09-28T18:00:00Z` | `pending-routine-executor` |
 | `pcv-1` | `RLS` | `runtime-load-stress-validation` | `required` | `high` | `RLS-BATCH-OR-BULK-PATH-CHANGED` | paginação, memória, budget e concorrência afetam runtime | `before_local_implemented` | `RLS-E2` | `pending` | quota real e memória browser | `U-RUNTIME-PRESSURE-UNKNOWN` | `2026-09-28T18:00:00Z` | `pending-routine-executor` |
 
 ### EPS planned evidence
@@ -519,14 +524,18 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 - Bursts `5/10/20` para `export-duplicate`, `export-cancel-filter`, `export-cancel-session`.
 - Artifact planejado: `foundation_documentation/artifacts/tmp/uninotas-export-pcv/frc-pcv1.json`.
 
-### BCI invariant
+### BCI planned evidence
 
-- O endpoint não escreve nem possui side effect durável; admission/budget é controle efêmero e será coberto por EPS/RLS, não idempotência de mutation.
+- **Invariant `FISCAL-EXPORT-ADMISSION-01`:** para cada conjunto de starts simultâneos do mesmo ator/contexto, exatamente um contender aceito consome uma user unit, cria um cooldown e adquire cada lease uma vez; todo rejeitado deixa todos os counters/cooldowns/leases imutáveis; success/error/abort liberam leases exatamente uma vez, sem remover cooldown aceito.
+- Bursts `5/10/20` cobrem mesmo ator/mesmo contexto, atores distintos/mesmo contexto, mesmo ator/contextos distintos e atores/contextos distintos sob limite global.
+- Cobrir `wallNow` em ambos os lados da fronteira fixa, `monotonicNow` antes/exatamente/depois do expiry, wall regression/jump, `MAX_ACTOR_BUCKETS`, `maxConcurrency < 2`, export share zero, user budget esgotado, collision de todos os bloqueios e arredondamento `max(1,ceil)`.
+- Artifact planejado: `foundation_documentation/artifacts/tmp/uninotas-export-pcv/bci-pcv1.json`.
 
 ### RLS planned evidence
 
 - **Profile RLS-P1 default:** fake config `maxConcurrency=8`, context rate `120/min`, user rate `30/min`; dois exports de atores distintos (um/contexto) + list/detail controlados; 200 pages/20k rows/24MiB; segundo export do mesmo ator e extra por contexto falham 429.
 - **Profile RLS-P2 constrained/saturated:** fake config `maxConcurrency=2`, context rate `4/min`, user rate `2/min`; somente um export global, um slot interativo reservado; actor/context budgets, cooldown e abort/recovery sob fake clock.
+- **Profile RLS-P3 incapable branches:** `maxConcurrency=1` e, separadamente, context rate `1/min` (export share zero); todas as tentativas retornam erro/Retry-After congelado com zero mutation e zero provider call.
 - **Thresholds:** cada start aceito consome exatamente uma user-budget unit e inicia um cooldown; toda rejeição pré-admissão preserva user/context counters, cooldown e leases; nenhum ator possui >1 export ativo ou >1 start aceito/rolling minute; page calls não alteram user counter; colisões retornam o code/Retry-After da precedência congelada, inclusive fronteira fixa/rolling; export calls nunca ultrapassam `floor(contextRate*0.75)`/min/context; total calls nunca ultrapassam context rate; export concurrency <= `min(2,maxConcurrency-1)`; admitted list/detail error rate `0%`; p95 list/detail <= `2x` baseline do mesmo stub; extras `100%` no erro esperado; ator B pode iniciar quando contexto distinto/global permitem; output <=24MiB; peak heap delta <=96MiB no P1; cleanup/recovery <=1s após abort com fake port; zero late calls após deadline.
 - Capturar p50/p95/p99, throughput, statuses, calls por classe/contexto, active/peak, RSS/heap, bytes, abort/recovery.
 - Artifact planejado: `foundation_documentation/artifacts/tmp/uninotas-export-pcv/rls-pcv1.json`.
@@ -540,6 +549,7 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 - `endpoint-performance-scrutiny`: `required`
 - `frontend-race-condition-validation`: `required`
 - `runtime-load-stress-validation`: `required`
+- `backend-concurrency-idempotency-validation`: `required`
 - `security-adversarial-review`: `required`
 - `test-quality-audit`: `required`
 - `architecture-adherence`: `required`
