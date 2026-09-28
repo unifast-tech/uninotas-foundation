@@ -474,11 +474,11 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - **Why this decision:** planning-side reviews must evaluate a committed and pushed scope-bearing contract.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `main`
-- **Baseline commit:** `b85d7577270f497ab395f4157450f7cc2bffdc93`
+- **Baseline commit:** `c11a1849ab143be6fda217b6955be1314a0d8190`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** scope-bearing contract refreshed after architecture-opinion integration; number search remains excluded and the allowlist/null/auth matrix is frozen.
-- **Evidence / reference:** authority guards returned `go`; initial freeze `9d389bd`, refreshed scope baseline pushed through `b85d757`.
+- **Findings summary:** expanded scope-bearing contract is frozen with distinct summary/detail allowlists, all 21 requested detail fields, opaque route identity, no number search and no persistence/export expansion.
+- **Evidence / reference:** authority guards returned `go`; expanded scope baseline `c11a1849ab143be6fda217b6955be1314a0d8190` was committed and pushed to `origin/main`.
 - **Waiver authority / reference:** `n/a`
 - **Pre-freeze packet-prep rule:** `satisfied; no review result predates the freeze`
 
