@@ -40,7 +40,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** concluir a attestation metadata-only do material round 24 e repetir arquitetura + crítica independente; nenhuma implementação ou mutação Railway está autorizada.
+- **Next exact step:** repetir arquitetura + crítica independente sobre as refs round 24 atestadas; nenhuma implementação ou mutação Railway está autorizada.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -106,8 +106,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Scope Item | Local Branch/Commit | Main / Authority | Local Source/Build Validation | Single Remote Target: Stage Customer-Facing | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Backend + frontend read-only | round-23 attested root `b61812b8c4b66cbc7fac8b5f6ce5cb81d24c7bb4`; code-origin `31712a0`; round-24 material pending | `pending promotion to main` | `pending final cutover suite` | `pending capped-legacy prerequisite if L unproven + direct fiscal cutover` | `round-24 findings integration in progress` |
-| Foundation cutover contract | round-23 attestation `6ac9183470dff72431b681ddb1a12af4837ce529`; round-24 material pending | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round-24 findings integration in progress` |
+| Backend + frontend read-only | round-24 material root `91a233112a98dc3ec23c18545a3fef77efdaceb4`; code-origin `31712a0`; attestation carrier pending | `pending promotion to main` | `pending final cutover suite` | `pending capped-legacy prerequisite if L unproven + direct fiscal cutover` | `round-24 material frozen; metadata attestation pending` |
+| Foundation cutover contract | round-24 material `aeaa91a614c5780c23a87e0678997b1311359117`; attestation pending | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round-24 material frozen; metadata attestation pending` |
 
 ## Out of Scope
 
@@ -722,11 +722,11 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 - **Why this decision:** release, segredos, dois contextos e promoção canônica exigem revisão reproduzível.
 - **Trigger stage:** `before first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `pending round-24 material publication`; predecessor attested `6ac9183470dff72431b681ddb1a12af4837ce529`
+- **Baseline commit:** `aeaa91a614c5780c23a87e0678997b1311359117`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `running`
-- **Findings summary:** os três achados arquiteturais R23 estão integrados no candidato round 24; publicação material e attestation pendem.
-- **Evidence / reference:** predecessor Foundation `origin/main@6ac9183470dff72431b681ddb1a12af4837ce529`; predecessor root `MonitorNotes/delphi-and-foundation@b61812b8c4b66cbc7fac8b5f6ce5cb81d24c7bb4`; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73`; Delphi guard `ee9b448`.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** os três achados arquiteturais R23 foram integrados e publicados no material round 24; esta attestation não altera seções materiais; confirmações independentes permanecem pendentes.
+- **Evidence / reference:** Foundation material `origin/main@aeaa91a614c5780c23a87e0678997b1311359117`; root material `MonitorNotes/delphi-and-foundation@91a233112a98dc3ec23c18545a3fef77efdaceb4`; refs verificadas; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73`; Delphi guard `ee9b448`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Review Scope Drift
@@ -737,9 +737,9 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 - **Baseline source:** `Review Baseline Freeze -> Baseline commit`
 - **Material sections compared:** `canonical defaults, incluindo Diff Expectation Contract, Module Decision Baseline Snapshot e Decision Baseline (Frozen Before Implementation)`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-cutover.md`
-- **Gate status:** `not_run`
-- **Findings summary:** depende da publicação/attestation round 24 e será executado antes da nova aprovação.
-- **Evidence / reference:** `pending round-24 material/attestation refs`.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** attestation round 24 preserva todas as seções materiais do baseline; arquitetura e crítica ainda devem confirmar.
+- **Evidence / reference:** `review_scope_drift_guard.py` contra `uninotas-foundation:main@aeaa91a614c5780c23a87e0678997b1311359117`; resultado esperado `go`, `0/23`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Frontend / Consumer Matrix
@@ -1039,7 +1039,7 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 - **Independent test-quality audit:** `required before Stage cutover`.
 - **Independent final review:** `required after implementation and before Stage cutover`.
 - **Dedicated triple review:** `required because release-critical + secrets + external provider`.
-- **Current status:** `round-23 architecture blocked; findings integrated in round-24 candidate; critique waits for architecture convergence`.
+- **Current status:** `round-23 findings integrated and round-24 material published/attested; architecture confirmation pending before critique`.
 
 ## Audit Trigger Matrix (Required Before Audit Decisions Are Trusted)
 
