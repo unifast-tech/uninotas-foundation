@@ -372,7 +372,7 @@ O serializer fica em `backend/src/fiscal-notes/`; não criar `common/csv.ts` enq
 | --- | --- | --- | --- | --- | --- |
 | test | shared fiscal coordinator | `cd backend && npm test -- --runInBand` | partial charge, parallel rate state, clock regression bypass | `implement-in-this-todo` | `DOD-EX-08`, `VAL-EX-01`, mixed Jest specs |
 | guard/test | raw coordinator state + clocks | `cd backend && npm test -- --runInBand fiscal-notes` + `bci-pcv1.json` | non-atomic admission, unbounded actor state, pacing reset | `implement-in-this-todo` | `DOD-EX-08`, BCI-E3 artifact |
-| test | React export lifecycle | `bash delphi-ai/tools/frontend_race_probe.sh ... --runner "npm run test:notas:race"` | duplicate/late download, missed abort, page-only cancellation | `implement-in-this-todo` | `DOD-EX-06/08`, `VAL-EX-04`, FRC-E3 artifact |
+| test | React export lifecycle | exact normalized canonical-runner loop in `VAL-EX-04 Exact WSL Command` | duplicate/late download, missed abort, page-only cancellation | `implement-in-this-todo` | `DOD-EX-06/08`, `VAL-EX-04`, FRC-E3 artifact |
 | audit | coordinator cutover | `triple_audit_session.py` lane `cutover-integrity` | surviving parallel `consumeBudget`/rate maps/shims | `implement-in-this-todo` | `VAL-EX-07`, cutover-integrity result |
 | test | runtime load/memory | `cd backend && node --expose-gc ./node_modules/jest/bin/jest.js --runInBand fiscal-notes.rls` | quota starvation, missed deadline cleanup, RSS/external blowup | `implement-in-this-todo` | `DOD-EX-08`, `VAL-EX-06`, RLS-E2 artifact |
 
@@ -409,11 +409,23 @@ O serializer fica em `backend/src/fiscal-notes/`; não criar `common/csv.ts` enq
 - [ ] `VAL-EX-01` `cd backend && npm test -- --runInBand`
 - [ ] `VAL-EX-02` `cd backend && npm run build && npx eslint "{src,test}/**/*.ts" --max-warnings=0` (não usar `npm run lint`, pois contém `--fix`).
 - [ ] `VAL-EX-03` `cd frontend && npm run test:notas && npm run lint && npm run build`
-- [ ] `VAL-EX-04` Para cada `duplicate|filter-change|navigation|unmount|logout|401|page-only|empty-204`, executar `frontend_race_probe.sh` com perfis `5x2`, `10x3` e `20x5`, passando `npm run test:notas:race` e arquivando resolve/reject tardios e contadores de request/abort/Blob/anchor/ObjectURL/download/state.
+- [ ] `VAL-EX-04` Executar o bloco exato abaixo para cada `duplicate|filter-change|navigation|unmount|logout|401|page-only|empty-204`; ele usa o runner canônico normalizado somente em memória porque o arquivo montado possui CRLF, sem alterar Delphi.
 - [ ] `VAL-EX-05` Build fresco; iniciar preview, comprovar SHA/bundle servido, executar `ALVO=<preview> CHROME=<local> npm run e2e:notas` com APIs interceptadas/download capturado; encerrar preview.
 - [ ] `VAL-EX-06` Executar RLS-E2 `load 4:180s` default e `stress 2:185s` constrained com mixes/resultados/limites de heap/external/arrayBuffers/RSS congelados; comprovar caps e recuperação.
 - [ ] `VAL-EX-07` Capability audits NestJS/React/Vite, endpoint scrutiny, race, load, security, test-quality, arquitetura, final, triple review com lane `cutover-integrity` e verification-debt.
 - [ ] `VAL-EX-08` Foundation validators/guards e `git diff --check`.
+
+### VAL-EX-04 Exact WSL Command
+
+```bash
+for race_scenario in duplicate filter-change navigation unmount logout 401 page-only empty-204; do
+  bash <(tr -d '\r' < delphi-ai/tools/frontend_race_probe.sh) --scenario "$race_scenario" --burst-level 5 --repetitions 2 --timeout-sec 120 --workdir frontend --runner "npm run test:notas:race" --output-dir "artifacts/tmp/uninotas-export-pcv/frc/$race_scenario/low" --fail-fast
+  bash <(tr -d '\r' < delphi-ai/tools/frontend_race_probe.sh) --scenario "$race_scenario" --burst-level 10 --repetitions 3 --timeout-sec 120 --workdir frontend --runner "npm run test:notas:race" --output-dir "artifacts/tmp/uninotas-export-pcv/frc/$race_scenario/medium" --fail-fast
+  bash <(tr -d '\r' < delphi-ai/tools/frontend_race_probe.sh) --scenario "$race_scenario" --burst-level 20 --repetitions 5 --timeout-sec 120 --workdir frontend --runner "npm run test:notas:race" --output-dir "artifacts/tmp/uninotas-export-pcv/frc/$race_scenario/high" --fail-fast
+done
+```
+
+O readiness command executável neste checkout é `bash delphi-ai/tools/verify_context.sh`; o wrapper `delphi-ai/verify_context.sh` também está CRLF e não é alterado por este TODO.
 
 ## Local Verification Matrix
 
@@ -588,6 +600,7 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 | `R9-CR-H5` | `high` | coordinator/deadline/pacing não estavam no baseline 1:1 | `EX-D-09/10 ↔ FISC-EX-09/10` e módulo ampliado |
 | `R9-CR-M1` | `medium` | FRC não individualizava todo lifecycle/204 | oito cenários 5x2/10x3/20x5 + downloader `downloaded|empty` |
 | `R9-AR-M02` | `medium` | retirement do rate path exigia cutover-integrity | lane marcada required no triple review |
+| `R10-AR-H01` | `high` | FRC command tinha placeholder e runner CRLF no WSL | loop exato por cenário/perfil usa runner canônico normalizado em memória; readiness usa helper LF |
 
 ### Residual Risks
 
@@ -608,18 +621,18 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 - **Gate decision:** `required`
 - **Baseline branch:** `uninotas-foundation/main`
-- **Baseline commit:** `eeef7de341c820bab941a33f67130ba0a9c8091c`
+- **Baseline commit:** `38b3381d9a2267364e2344ee2641b79790f23a4b`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** findings R8 de coordinator compartilhado, API/module canonical, BCI/FRC/RLS, transporte e review package foram integrados em baseline material isolado e publicado.
-- **Evidence / reference:** `origin/main` contém `eeef7de341c820bab941a33f67130ba0a9c8091c`; material export está congelado nesse commit.
+- **Findings summary:** findings R9 de deadline cancellation, pacing/state bound, BCI/FRC/RLS, harness e decision/cutover gates foram integrados em baseline material isolado e publicado.
+- **Evidence / reference:** `origin/main` contém `38b3381d9a2267364e2344ee2641b79790f23a4b`; material export está congelado nesse commit.
 
 ## Gate: Review Scope Drift
 
 - **Gate decision:** `required`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-filtered-csv-export.md`
 - **Gate status:** `no_material_findings`
-- **Evidence / reference:** `review_scope_drift_guard.py` sobre baseline `eeef7de341c820bab941a33f67130ba0a9c8091c`: `go`, `0/23` seções materiais alteradas; repetir após o review final antes do `APROVADO`.
+- **Evidence / reference:** `review_scope_drift_guard.py` sobre baseline `38b3381d9a2267364e2344ee2641b79790f23a4b`: `go`, `0/23` seções materiais alteradas; repetir após o review final antes do `APROVADO`.
 
 ## Audit Trigger Matrix
 
@@ -641,8 +654,8 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 - **Critique decision:** `required`
 - **Critique status:** `running`
-- **Findings summary:** R9 encontrou harness inválido, deadline sem cancelamento ativo, pacing/state bound, RLS/FRC e decision baseline incompletos; todos foram integrados, pendentes de fresh rerun.
-- **Evidence / reference:** reviewers `/root/filtered_export_architecture_r9` e `/root/filtered_export_critique_r9`.
+- **Findings summary:** critique R10 retornou GO; architecture R10 encontrou somente comando FRC inexequível/placeholder, agora substituído por loop WSL exato e validado em parse, pendente de fresh rerun.
+- **Evidence / reference:** reviewers `/root/filtered_export_architecture_r10` e `/root/filtered_export_critique_r10`.
 - **Isolation:** `fresh internal no-context reviewer; cannot implement`
 - **Lenses:** `correctness|performance|security|elegance|structure|operational fit`.
 
@@ -809,6 +822,7 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 | `R8-AR-H01..H02,R8-AR-M01..M03,R8-CR-H01..H02,R8-CR-M01..M04` | `high, medium` | `release-blocker` | `same TODO` | coordinator compartilhado, contrato canônico, BCI/FRC/RLS e transport boundary | `integrated_pending_rerun` | architecture/critique R8 |
 | `R8-GOV-H03` | `high` | `by-design/no-action` | `challenged` | commit material não pode conter seu próprio SHA; attestation não material referencia baseline e drift prova 0 seções materiais | `challenged_with_rationale` | Review Baseline Freeze + Scope Drift |
 | `R9-AR-H01,R9-AR-M01..M02,R9-CR-H1..H5,R9-CR-M1` | `high, medium` | `release-blocker` | `same TODO` | harness, deadline, bounded state, pacing, decisions, FRC/RLS e cutover pertencem à feature | `integrated_pending_rerun` | architecture/critique R9 |
+| `R10-AR-H01` | `high` | `release-blocker` | `same TODO` | executabilidade do FRC gate obrigatório | `integrated_pending_rerun` | architecture R10; critique R10 foi GO |
 | `logs-csv-hardening` | `medium` | `follow-up-hardening` | `split` | serializer legado em `backend/src/logs/**` está fora deste diff | `deferred` | requer TODO próprio antes do closeout se confirmado pelo security gate |
 
 ## TODO Closeout Disposition
