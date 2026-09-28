@@ -255,6 +255,7 @@ Os baselines foram refeitos em 2026-09-28 sobre o closeout consolidado de `ST-UX
 | `MonitorNotes` | `backend/README.md` | `M` | contrato público/limites |
 | `MonitorNotes` | `frontend/src/api/cliente.ts` | `M` | download cancelável/204 retrocompatível |
 | `MonitorNotes` | `frontend/src/api/notas.ts` | `M` | filtros/export fiscal |
+| `MonitorNotes` | `frontend/src/notas/exportacaoFiscal.ts` | `A` | owner único de geração/abort e commit tardio do download |
 | `MonitorNotes` | `frontend/src/paginas/ListaNotas.tsx` | `M` | CTA e lifecycle |
 | `MonitorNotes` | `frontend/src/estilos/*.css` | `M` | estado do CTA/erro se necessário |
 | `MonitorNotes` | `frontend/e2e/notas-unit.ts` | `M` | contrato e regressão downloader legado |
@@ -678,7 +679,7 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 - **Status:** `approved-sequenced`
 - **Approved by:** `project owner / user`
-- **Approval reference:** resposta explícita `APROVADO` em 2026-09-28 para o pacote serial UX seguido de exportação; a execução de export permanece condicionada ao rebaseline pós-UX já congelado neste TODO.
+- **Approval reference:** resposta explícita `APROVADO` em 2026-09-28 para o pacote serial UX seguido de exportação; renovação explícita `aprovo` em 2026-09-28 para adicionar `frontend/src/notas/exportacaoFiscal.ts` como owner único de geração/abort e commit tardio do download. A execução permanece condicionada ao rebaseline renovado deste TODO.
 - **Approval scope:** `SCOPE-EX-01..07` e contratos frozen deste TODO.
 - **Not authorized:** `deploy/merge/snapshot claim/async export/runtime config/logs/worktrees`.
 - **Renewed approval required:** volume, formato, colunas, raw identifiers, rota, auth, context, runtime ou diff boundary muda materialmente.
