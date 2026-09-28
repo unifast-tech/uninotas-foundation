@@ -40,7 +40,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** publicar/atestar round30 com o achado arquitetural R29 integrado e repetir arquitetura/crítica/coerência/drift com refs exatas. Nenhuma implementação ou mutação Railway está autorizada.
+- **Next exact step:** despachar arquitetura round30 sobre material/attestation publicados e, se limpa, crítica/coerência/drift com refs exatas. Nenhuma implementação ou mutação Railway está autorizada.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -118,8 +118,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Scope Item | Local Branch/Commit | Main / Authority | Local Source/Build Validation | Single Remote Target: Stage Customer-Facing | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Backend + frontend read-only | round29 attestation carrier predecessor `066f4e8fb2b95d1235f0bc2d5b6730219ed1612e`; code-origin `31712a0`; round30 material/attestation pending | `pending promotion to main` | `pending final cutover suite` | `pre-implementation capacity hard stop; otherwise direct fiscal cutover` | `round30 candidate; publication pending` |
-| Foundation cutover contract | round29 attestation predecessor `0705e068bf1a3ace808c5a11800e687c7d4daa29`; round30 material/attestation pending | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round30 candidate; publication pending` |
+| Backend + frontend read-only | round30 material root `3b763bbd256a0bc60872cf0d9183ce5ee740fd74`; code-origin `31712a0`; attestation carrier pending | `pending promotion to main` | `pending final cutover suite` | `pre-implementation capacity hard stop; otherwise direct fiscal cutover` | `round30 material published; attestation metadata pending commit` |
+| Foundation cutover contract | round30 material `f1f2945ad0dc32dac600b0598fd9f72dcb7b17c5`; attestation pending | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round30 material published; attestation metadata pending commit` |
 
 ## Out of Scope
 
@@ -837,11 +837,11 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 - **Why this decision:** release, segredos, dois contextos e promoção canônica exigem revisão reproduzível.
 - **Trigger stage:** `before first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `pending round30 material publication`; predecessor `0705e068bf1a3ace808c5a11800e687c7d4daa29`
+- **Baseline commit:** `f1f2945ad0dc32dac600b0598fd9f72dcb7b17c5`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `not_run`
-- **Findings summary:** achado arquitetural R29 foi integrado no candidato material round30; publicação e attestation precisam fixar refs exatas sem alterar seções materiais.
-- **Evidence / reference:** predecessor Foundation `origin/main@0705e068bf1a3ace808c5a11800e687c7d4daa29`; predecessor root `MonitorNotes/delphi-and-foundation@066f4e8fb2b95d1235f0bc2d5b6730219ed1612e`; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73`; round30 refs pendentes.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** achado arquitetural R29 foi integrado e publicado no material round30; esta attestation altera somente metadata e a arquitetura round30 deve confirmar antes da crítica.
+- **Evidence / reference:** `reviewRound=30`; Foundation material `origin/main@f1f2945ad0dc32dac600b0598fd9f72dcb7b17c5`; root material `MonitorNotes/delphi-and-foundation@3b763bbd256a0bc60872cf0d9183ce5ee740fd74`; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73`; refs verificadas.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Review Scope Drift
@@ -852,9 +852,9 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 - **Baseline source:** `Review Baseline Freeze -> Baseline commit`
 - **Material sections compared:** `canonical defaults, incluindo Diff Expectation Contract, Module Decision Baseline Snapshot e Decision Baseline (Frozen Before Implementation)`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-cutover.md`
-- **Gate status:** `not_run`
-- **Findings summary:** material round30 ainda não foi publicado/atestado; a contagem `0/23` round29 é histórica e não satisfaz o round corrente.
-- **Evidence / reference:** pendente após publication+attestation round30; exigir `reviewRound=30` e refs exatas correntes.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** a attestation round30 preserva todas as 23 seções materiais do baseline; arquitetura e crítica correntes ainda devem confirmar.
+- **Evidence / reference:** `reviewRound=30`; `review_scope_drift_guard.py` contra `uninotas-foundation:main@f1f2945ad0dc32dac600b0598fd9f72dcb7b17c5`; resultado `go`, `0/23`; root material `3b763bbd256a0bc60872cf0d9183ce5ee740fd74`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Frontend / Consumer Matrix
