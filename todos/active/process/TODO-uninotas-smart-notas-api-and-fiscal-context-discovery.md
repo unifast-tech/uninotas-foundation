@@ -276,7 +276,7 @@ The matrices establish Smart Notas as the sole fiscal-note source and PostgreSQL
 | Revalidation failure with cache | valid rows disappear or failure looks empty | keep stale rows, label them stale, expose retry/error | cached success followed by forced provider error |
 | Logout/session expiry during request | another user can observe prior cached fiscal data | abort/ignore requests and synchronously clear all cache entries | logout/navigation while delayed request is in flight |
 
-These are planning requirements, not executed race evidence. The later React tactical TODO must route them through the frontend race-validation lane.
+The React tactical handoff implemented these policies locally in `TODO-uninotas-smart-notas-read-frontend.md`. Deterministic cache tests, intercepted Chromium navigation and repeated-trigger probes at bursts `5/10/20` now cover dedupe, detach, stale completion, hard-expiry replacement and session clear. This is local candidate evidence only; real-backend and deployed behavior remain cutover gates.
 
 ## 3. Gap / Decision Register
 
@@ -293,7 +293,7 @@ These are planning requirements, not executed race evidence. The later React tac
 | `G-09` | Idempotency and duplicate issuance | `Open` | Retried writes can create fiscal duplicates | blocking provider question for mutations | Obtain provider guarantee or define application idempotency strategy |
 | `G-10` | Rate limits and resilience | `Open` | Two accounts multiply call volume and failure modes | provider clarification | Determine quotas, retry headers, timeouts, and backoff expectations |
 | `G-11` | Authorization and audit | `Open` | Users may have different rights per issuer and action | strategic/security design | Define view/issue/cancel/download permissions and audit fields |
-| `G-12` | UI distinction | `Partial` | Operators must never confuse Unifast with Prosperar | context-first list and no initial aggregate view are confirmed; explicit textual context remains mandatory | Define selector/tab presentation, default context, and URL persistence in the UI tactical TODO |
+| `G-12` | UI distinction | `Closed` | Operators must never confuse Unifast with Prosperar | local React candidate implements textual context selection, default Unifast, no aggregate list and canonical non-sensitive URL state | Preserve during cutover and validate both real contexts |
 | `G-13` | Data ownership and retention | `Partial` | Must distinguish commercial origin, automation, API note data, integration errors, and local workflow | FastPay originates, n8n orchestrates, Smart Notas API owns note reads, PostgreSQL stores failed-attempt evidence, and UniNotas owns normalization/workflow/audit | Confirm the error writer/filter and define sanitized evidence, API-cache, document URL, and raw-source retention policies |
 | `G-14` | Test/sandbox availability | `Open` | Safe integration validation cannot rely on production fiscal mutations | provider clarification | Obtain sandbox/test company or approved controlled validation process |
 | `G-15` | OpenAPI drift | `Partial` | Provider spec is served dynamically without an advertised version lifecycle | track fingerprint | Define snapshot/fingerprint and change-detection policy |
@@ -301,15 +301,15 @@ These are planning requirements, not executed race evidence. The later React tac
 | `G-17` | Canonical API-note identity | `Partial` | Current routes use PostgreSQL `ref_id`, while all target note resources use context-scoped Smart Notas `idInterno` | opaque `noteId` maps to `(provider,fiscalContext,idInterno)` without treating `ref_id` or `idCompra` as note identity | Decide materialized versus deterministic mapping and freeze context-safe routes |
 | `G-18` | Smart Notas field parity | `Partial` | The target UI must source note/customer/sale/status fields from API rather than successful log payloads | redacted list/detail/report live shapes and wire-type differences are recorded; a normalized DTO candidate is defined | Confirm target UI field selection and retain defensive handling because the live shape is not a formal provider schema |
 | `G-19` | Treatment and history migration | `Partial` | Treatments are local product data, but their only link is `ref_id` | confirmed `OperationalCase` owns workflow/history and contains one optional note plus zero or more pipeline occurrences, with at least one source anchor | Define existing-treatment migration, case grouping, merge/split, and deduplication rules |
-| `G-20` | API note read strategy | `Partial` | Provider pagination, no webhook, tab navigation, and generic detail shapes affect usability and resilience | selected-context API reads plus bounded session-memory stale-while-revalidate cache are confirmed; no persistent mirror or initial aggregate list | Freeze tactical TTL/cap, route ownership, request cancellation/deduplication, document delivery, and safe error mapping |
+| `G-20` | API note read strategy | `Partial` | Provider pagination, no webhook, tab navigation, and generic detail shapes affect usability and resilience | local frontend freezes and implements 20-key session LRU, 60-second freshness, 10-minute hard expiry, route ownership, cancellation/deduplication and safe list/detail errors; no persistent mirror or aggregate list | Validate the same contract against deployed backend; document delivery remains separate |
 | `G-21` | Pipeline failure visibility | `Closed` | FastPay/n8n/Smart Notas pipeline errors may explain missing notes, invalid addresses, or duplicate issuance | retain permanent sanitized pipeline occurrences, linked to notes when deterministic and otherwise shown in a dedicated queue | Carry contract into canonical modules and tactical ingestion/UI TODOs |
 | `G-22` | Integration-error-to-note correlation | `Partial` | Wrong links can mix companies or attach a failure to the wrong API note | exact context plus provider identifier first; proven exact `idTransacao/idCompra` second; otherwise unlinked; no fuzzy matching | Verify identifier availability and fiscal-context evidence in redacted error rows |
 | `G-23` | Integration-error persistence ownership | `Partial` | Runtime ownership and incident diagnosis depend on knowing who writes and filters PostgreSQL failures | the target role is error-only, but the exact external writer and failure-selection contract are not evidenced; canonical correction may preserve this as an explicit unknown and must not name a writer | Resolve before the error-adapter implementation TODO, without copying production payloads |
 
 ## 4. Current Order
 
-1. Finish the validation/closeout gates for the approved local backend candidate at `todos/active/features/TODO-uninotas-smart-notas-read-backend.md`; implementation and redacted list/detail probes now exist for both fiscal contexts, without runtime activation.
-2. Open the separate Smart Notas read cutover TODO before activation, and keep DANFE/XML, React context/cache, integration-error ingestion/correlation, and `OperationalCase` as separate tactical slices.
+1. Execute the already-open Smart Notas read cutover TODO before activation; the backend and frontend TODOs are complete only as inactive local candidates, with the frontend evidence at `todos/completed/features/TODO-uninotas-smart-notas-read-frontend.md`.
+2. Keep DANFE/XML, integration-error ingestion/correlation, and `OperationalCase` as separate tactical slices.
 3. Before the error-adapter implementation TODO, confirm which external component writes PostgreSQL integration errors and the exact rule that excludes successes from the target error boundary.
 4. Validate deterministic error-to-note correlation fields against redacted failure rows; keep all ambiguous failures unlinked.
 5. Define `OperationalCase` grouping and existing-treatment migration rules before its own implementation TODO.
@@ -329,4 +329,4 @@ These are planning requirements, not executed race evidence. The later React tac
 
 ## 7. Next Exact Step
 
-- Complete the independent delivery reviews and local closeout evidence for `todos/active/features/TODO-uninotas-smart-notas-read-backend.md`, then open its cutover handoff; this ledger remains the no-code authority for unresolved provider/error-boundary questions.
+- Complete the frontend local closeout and then execute `todos/active/features/TODO-uninotas-smart-notas-read-cutover.md` for activation/deployment/real-context smoke; this ledger remains the no-code authority for unresolved provider/error-boundary questions.
