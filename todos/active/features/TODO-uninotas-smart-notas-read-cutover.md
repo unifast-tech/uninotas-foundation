@@ -40,7 +40,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** integrar os achados `R10-*`, publicar o baseline material round 11 e executar nova confirmação arquitetural independente; nenhuma mutação Railway está autorizada.
+- **Next exact step:** concluir sync/attestation do freeze round 11 e executar nova confirmação arquitetural independente; nenhuma mutação Railway está autorizada.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -101,8 +101,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Scope Item | Local Branch/Commit | Main / Authority | Local Source/Build Validation | Single Remote Target: Stage Customer-Facing | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Backend + frontend read-only | material root predecessor `delphi-and-foundation@d4e6b5c`; code-origin `31712a0` | `pending promotion to main` | `pending final cutover suite` | `pending one direct cutover` | `round-11 planning sync pending` |
-| Foundation cutover contract | predecessor `main@5e79e96`; round-11 SHA pending | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round-11 material publication pending` |
+| Backend + frontend read-only | round-11 material root sync registrado em `Gate: Review Baseline Freeze`; code-origin `31712a0` | `pending promotion to main` | `pending final cutover suite` | `pending one direct cutover` | `planning freeze/attestation governed by review gate` |
+| Foundation cutover contract | round-11 material commit registrado em `Gate: Review Baseline Freeze` | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round-11 material frozen; attestation may follow` |
 
 ## Out of Scope
 
@@ -158,7 +158,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 ## Diff Expectation Contract
 
-- **Contract status:** `required; round-11 material baseline pending publication`
+- **Contract status:** `required; round-11 material baseline frozen by this checkpoint`
 - **Policy:** `strict; unclassified or forbidden paths block delivery`
 - **User validation:** `required on deviation`
 - **Comparison mode:** `working_tree after candidate checkpoint`
@@ -644,7 +644,7 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` exige merge/tree equ
 ## Plan Review Gate
 
 - **Review decision:** `required`
-- **Review status:** `round-11 material integration complete; publication and architecture confirmation pending`
+- **Review status:** `round-11 material frozen; sync/attestation and architecture confirmation pending`
 - **Required lenses:** architecture, operations, rollback, security, tests, performance, observability and structural soundness.
 - **Known plan finding:** o health atual retorna HTTP 2xx quando o banco está degradado; `D-CUT-10` agora exige readiness separada não-2xx e mantém Smart Notas fora do loop.
 - **Approval request condition:** nova revisão confirma `D-CUT-06..19`, crítica converge, baseline é atualizado e guards retornam `go/preflight-go`.
