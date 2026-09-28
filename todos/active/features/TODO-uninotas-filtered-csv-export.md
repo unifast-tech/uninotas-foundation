@@ -370,18 +370,18 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 - **Gate decision:** `required`
 - **Baseline branch:** `uninotas-foundation/main`
-- **Baseline commit:** `ed3b774e73e36fd4fc588aba866cbde1f6a423ba`
+- **Baseline commit:** `03c225d0fe9278b3b594a883b28a929ecbe4d70d`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
 - **Findings summary:** findings R2 foram integrados em baseline material isolado e publicado.
-- **Evidence / reference:** `origin/main` contém `ed3b774e73e36fd4fc588aba866cbde1f6a423ba`; somente brief e dois TODOs compõem o commit material.
+- **Evidence / reference:** `origin/main` contém `03c225d0fe9278b3b594a883b28a929ecbe4d70d`; commit material final altera somente os dois TODOs após `ed3b774`.
 
 ## Gate: Review Scope Drift
 
 - **Gate decision:** `required`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-filtered-csv-export.md`
-- **Gate status:** `not_run`
-- **Evidence / reference:** `pending after clean R3 reviews`.
+- **Gate status:** `no_material_findings`
+- **Evidence / reference:** `review_scope_drift_guard.py` sobre baseline `03c225d0fe9278b3b594a883b28a929ecbe4d70d`: `go`, `0/23` seções materiais alteradas; repetir após R3 antes do APROVADO.
 
 ## Audit Trigger Matrix
 
