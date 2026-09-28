@@ -40,7 +40,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** despachar arquitetura round32 sobre material/attestation publicados e, se limpa, crítica/coerência/drift. Nenhuma implementação ou mutação Railway está autorizada.
+- **Next exact step:** despachar crítica independente round32 sobre as refs arquiteturalmente aprovadas; depois rerodar coherence/drift correntes. Nenhuma implementação ou mutação Railway está autorizada.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -118,8 +118,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Scope Item | Local Branch/Commit | Main / Authority | Local Source/Build Validation | Single Remote Target: Stage Customer-Facing | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Backend + frontend read-only | round32 material root `269940808f6a01cc94cdb8167f0249d7be989f67`; code-origin `31712a0`; attestation carrier pending | `pending promotion to main` | `pending final cutover suite` | `pre-implementation capacity hard stop; otherwise direct fiscal cutover` | `round32 material published; attestation metadata pending commit` |
-| Foundation cutover contract | round32 material `21a818d9ddc056a073691a5ae0b102eda264286d`; attestation pending | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round32 material published; attestation metadata pending commit` |
+| Backend + frontend read-only | round32 material root `269940808f6a01cc94cdb8167f0249d7be989f67`; attestation carrier `2825e0737ccb32c542a5623169233bc8aedc08bc`; code-origin `31712a0` | `pending promotion to main` | `pending final cutover suite` | `pre-implementation capacity hard stop; otherwise direct fiscal cutover` | `round32 architecture clean; critique pending` |
+| Foundation cutover contract | round32 material `21a818d9ddc056a073691a5ae0b102eda264286d`; attestation `3b111fc5f734a4683ae89b1a7f5907e49c22e43b` | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round32 architecture clean; critique pending` |
 
 ## Out of Scope
 
@@ -708,8 +708,8 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 - **Decision review lifecycle:** `after review baseline freeze and before APROVADO`
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set: TODO + topology/dependency artifacts + railway/Docker/config/health/fiscal boundaries`
-- **Decision review status:** `not_run`
-- **Decision review evidence / resolution:** arquitetura round31 confirmou `0/23`, mas bloqueou em `R31-ARCH-OPS-01/02`; round32 terminaliza todo Active por Remove e cobre extra-only Active em REC-3B. Reviewer fresco é exigido após publication+attestation. Evidência: `/tmp/uninotas-cutover-round31-architecture.GTJgLy/dispatch.json`.
+- **Decision review status:** `round32 clean; no material findings`
+- **Decision review evidence / resolution:** `reviewRound=32`; reviewer fresco `round32-architecture-no-context` validou refs material/attestation exatas, `0/23`, D-CUT-33..37, REC-2B/3A/3B/4, término do sampler/clients e uma réplica. Evidência: `/tmp/uninotas-cutover-round32-architecture.d5tPly/dispatch.json`.
 
 | Finding ID | Severity | Approval-material | Resolution | Evidence in evolved plan |
 | --- | --- | --- | --- | --- |
@@ -910,7 +910,7 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 ## Plan Review Gate
 
 - **Review decision:** `required`
-- **Review status:** `round32 candidate integrates R31 architecture findings; publication, attestation and current architecture/critique pending`
+- **Review status:** `round32 material published/attested and architecture clean; independent critique pending`
 - **Required lenses:** architecture, operations, rollback, security, tests, performance, observability and structural soundness.
 - **Known plan finding:** o health atual retorna HTTP 2xx quando o banco está degradado; `D-CUT-10` agora exige readiness separada não-2xx e mantém Smart Notas fora do loop.
 - **Approval request condition:** nova revisão confirma `D-CUT-06..37` e REC executável, crítica/coerência/drift convergem com refs round32 exatas, preflight D-CUT-32/34/35/37 é conclusivo, baseline atualizado e guards `go/preflight-go`.
