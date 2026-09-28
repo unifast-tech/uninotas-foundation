@@ -3,7 +3,7 @@
 ## Artifact Identity
 
 - **Artifact type:** `tactical_execution_contract`
-- **Status:** `Draft`
+- **Status:** `Approved`
 - **Created:** `2026-09-28`
 - **Owner:** `Delphi / Operational Coder`, sob autoridade humana do usuário
 
@@ -32,13 +32,13 @@ Smart Notas evidencia paginação numérica, mas não cursor/snapshot nem ordena
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** aguardar o checkpoint verde e closeout de `ST-UX`; então rebaselinear produto/Foundation e repetir coherence, diff, drift e authority antes da execução.
+- **Next exact step:** iniciar o executor serial de `ST-EXPORT` no checkout principal sobre os baselines revalidados abaixo.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
-- **Work state:** `review`
-- **Why this state now:** baseline material publicado, reviews R12 sem findings materiais e guards pré-aprovação prontos; aguarda autoridade humana.
-- **Exit condition:** aprovação explícita e authority guard pós-aprovação em `go`, ou bloqueio formal.
+- **Work state:** `implementation`
+- **Why this state now:** `ST-UX` foi fechado, o usuário aprovou o pacote serial e o rebaseline pós-UX preserva integralmente o contrato material revisado.
+- **Exit condition:** implementação, evidência e gates obrigatórios concluem em `Local-Implemented`, ou bloqueio formal.
 
 ## Provisional Notes
 
@@ -240,10 +240,10 @@ Não registrar filtros, documento, ID da compra, número/chave fiscal, provider 
 
 | Repository | Path | Baseline ref | Comparison mode |
 | --- | --- | --- | --- |
-| `MonitorNotes` | `.` | `release/uninotas-smart-notas@a4b5a0eb6ae96291ffe5c6e16f297b64dcd62f29` | `working_tree` |
-| `uninotas-foundation` | `foundation_documentation` | `main@feaf2e090927aa15087ee9ea4185886f749586e6` | `working_tree` |
+| `MonitorNotes` | `.` | `release/uninotas-smart-notas@f1a950a9fb48db68fd7370aed1a7605958a5d50b` | `working_tree` |
+| `uninotas-foundation` | `foundation_documentation` | `main@0a3a9bc796b37f809b6d85a3649323d7b24409b9` | `working_tree` |
 
-Antes de executar `ST-EXPORT`, ambos os baselines serão obrigatoriamente refeitos sobre o closeout consolidado de `ST-UX`; coherence, diff, drift e authority serão repetidos. Mudança material reabre review/aprovação.
+Os baselines foram refeitos em 2026-09-28 sobre o closeout consolidado de `ST-UX`. Coherence, diff, drift e authority foram repetidos sem mudança material; a aprovação existente permanece válida.
 
 ### Expected Changed Paths
 
@@ -265,7 +265,6 @@ Antes de executar `ST-EXPORT`, ambos os baselines serão obrigatoriamente refeit
 | `MonitorNotes` | `artifacts/**` | `??` | estado preexistente do usuário; aceitar no diff, nunca stagear/alterar |
 | `uninotas-foundation` | `todos/active/features/TODO-uninotas-filtered-csv-export.md` | `M, D` | evidência/closeout |
 | `uninotas-foundation` | `todos/completed/features/TODO-uninotas-filtered-csv-export.md` | `A` | destino de closeout |
-| `uninotas-foundation` | `todos/active/features/TODO-uninotas-fiscal-workspace-ux.md` | `M` | coordenação/rebaseline serial entre histórias |
 | `uninotas-foundation` | `artifacts/feature-briefs/uninotas-fiscal-workspace-improvements.md` | `M` | coordenação do objetivo de release |
 | `uninotas-foundation` | `modules/fiscal-notes-and-documents.md` | `M` | contrato estável consolidado no gate pré-aprovação |
 | `uninotas-foundation` | `artifacts/publication-manifest.txt` | `M` | publicação dos paths finais |
@@ -673,6 +672,7 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 - **Guard command:** `python3 delphi-ai/tools/assumption_code_coherence_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-filtered-csv-export.md`
 - **Gate status:** `no_material_findings`
 - **Evidence / reference:** paths do adapter/types/config/service/controller/downloader/session/eventos resolvidos no checkout e sustentam `EX-A-01..05`.
+- **Post-UX rebaseline:** `go` em 2026-09-28 sobre `MonitorNotes@f1a950a9` e `uninotas-foundation@0a3a9bc`; nenhum owner/contrato das assumptions mudou.
 
 ## Approval
 
@@ -713,6 +713,14 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 | export error catalog / `Retry-After` | shared HTTP client + `ListaNotas` error region | `planned` | filter contract tests + independent UI error state |
 | extended `baixar(caminho,nome,options?) -> downloaded|empty` | fiscal export and existing `/eventos/exportar` | `planned backward-compatible` | fiscal abort/204 tests plus legacy PostgreSQL CSV regression |
 | fiscal module contract | backend/frontend READMEs and Foundation module | `planned` | exact route/headers/limits/no-snapshot language |
+
+## Package-First Assessment
+
+- **Query executed:** `bash delphi-ai/tools/query_packages.sh --project-root . --search "csv export nestjs react"`
+- **Relevant packages found:** `none`.
+- **Decision:** implementar nos owners existentes `backend/src/fiscal-notes/**` e frontend fiscal, sem criar pacote ou dependência.
+- **Capability evidence:** audits NestJS, React e Vite retornaram `ready` para os manifests e scripts requeridos.
+- **Rationale:** o serializer, coordinator de quota e lifecycle do download pertencem ao boundary fiscal local congelado; o catálogo proprietário não contém capacidade equivalente.
 
 ## Rules Acknowledgement / Ingestion
 
@@ -838,5 +846,5 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
-- **Reason:** reviews R12 limpos; aguardando somente `APROVADO` explícito.
+- **Reason:** reviews R12 limpos, aprovação explícita registrada e rebaseline pós-UX verde; implementação serial em andamento.
 - **Target after implementation:** `Local-Implemented`, sem deploy.
