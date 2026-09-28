@@ -289,11 +289,11 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 - **Why this decision:** TODO medium/cross-stack com contrato público e URL fiscal externa.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `7029e90ab8501a0d7e2ebe9ecc335b8ff1015ccd`
+- **Baseline commit:** `fdddcc97f29e3a03993161e0384ce45055c129e5`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** `baseline inicial de7ef48 foi criticado; findings CRIT-DOC-001..005 foram integrados e o contrato material refinado foi recongelado antes da segunda crítica; nenhuma implementação foi incluída`.
-- **Evidence / reference:** `uninotas-foundation@7029e90ab8501a0d7e2ebe9ecc335b8ff1015ccd`, publicado em `origin/main` via Windows Git Credential Manager após o Git WSL não encontrar credencial.
+- **Findings summary:** `baselines de7ef48 e 7029e90 foram criticados; CRIT-DOC-001..006 e CRIT-DOC-001-R2 foram integrados, incluindo matriz HTTP total e pcv-1; o contrato foi recongelado antes da terceira crítica; nenhuma implementação foi incluída`.
+- **Evidence / reference:** `uninotas-foundation@fdddcc97f29e3a03993161e0384ce45055c129e5`, publicado em `origin/main` via Windows Git Credential Manager após o Git WSL não encontrar credencial.
 - **Waiver authority / reference:** `n/a`.
 - **Pre-freeze packet-prep rule:** `planning rows remain prepared-pre-freeze until the pushed baseline exists`.
 
@@ -400,6 +400,9 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 | upstream `202 {mensagem}` valid | `202` | `{documentType:'pdf'|'xml', availability:'pending', url:null}` | same | message required/bounded at adapter, never echoed |
 | upstream `201|204|206` ou qualquer status não listado | `502` | `SmartNotasContratoInvalido` | global error contract | somente `200|202` são sucessos documentais |
 | invalid/tampered/raw `noteId` | `400` | `ConsultaDeNotasInvalida` | global error contract | no upstream call |
+| JWT ausente, inválido ou expirado | `401` | contrato global de autenticação | global error contract | guards bloqueiam antes do controller/service/provider |
+| capability `SMART_NOTAS_READ_ENABLED=false` | `503` | `SmartNotasDesabilitado` | global error contract | nenhuma chamada upstream |
+| contexto decodificado sem credencial runtime | `502` | `SmartNotasCredencialRejeitada` | global error contract | defesa fail-closed; bootstrap normal exige ambos os pares |
 | local user/context rate limit | `429` | `LimiteDeConsultaExcedido` | global error contract + existing `Retry-After` | same coordinator semantics |
 | upstream `404` | `404` | `NotaFiscalNaoEncontrada` | global error contract | no provider body echo |
 | upstream `401|403` | `502` | `SmartNotasCredencialRejeitada` | global error contract | no credential value echo |
@@ -495,6 +498,9 @@ Every public JSON property above is required. `url` is non-null only for `availa
 | `CRIT-DOC-005` anchor auth inexistente | `low` | `Integrated` | secondary module removido; perfis preservados no módulo fiscal |
 | `CRIT-DOC-006` contrato pcv-1 ausente | `high` | `Integrated` | matriz `pcv-1` com exatamente EPS/FRC/BCI/RLS, deadlines, estados e evidence plans |
 | `CRIT-DOC-001-R2` HTTP 2xx inesperado/evidência pública | `medium` | `Integrated` | catch-all 201/204/206/unlisted e DOD-DOC-03 exige adapter + controller/application status/body/headers |
+| `CRIT-DOC-006-R3` BCI/RLS fora dos registries fechados | `high` | `Integrated` | reason/evidence IDs agora usam valores registrados, com trigger predicate explicitamente falso e estado `not_applicable` |
+| `CRIT-DOC-001-R3` outcomes locais herdados ausentes | `medium` | `Integrated` | matriz HTTP inclui JWT 401, capability disabled 503 e credencial runtime ausente 502 |
+| `CRIT-DOC-007` preflight incompleto | `medium` | `Integrated` | ingestion table com cinco campos e routing tuple canônico; guard será executado somente após convergência |
 
 - **Critique status:** `round-1 findings integrated; round-2 findings integrated; affected gates must reconverge before APROVADO`.
 - **Critique evidence:** reviewers `fresh-no-context-plan-critic` e `fresh-no-context-plan-critic-r2`; dispatches `/tmp/uninotas-documents-critique.dispatch.json` e `/tmp/uninotas-documents-critique-r2.dispatch.json`; baselines `de7ef48` e `7029e90`.
@@ -528,7 +534,7 @@ Every public JSON property above is required. `url` is non-null only for `availa
 | `high_severity_plan_review_issue` | `yes` | URL fiscal externa requer decisão explícita SEC-01 |
 | `explicit_three_lane_request` | `no` | usuário não solicitou auditoria paralela específica |
 
-### Derived Audit Floor
+## Derived Audit Floor
 
 | Lane | Decision | Deadline | Planned Handling |
 | --- | --- | --- | --- |
@@ -560,8 +566,8 @@ Every public JSON property above is required. `url` is non-null only for `availa
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `pcv-1` | `EPS` | `endpoint-performance-scrutiny` | `required` | `medium` | `EPS-EXACT-LOOKUP-SURFACE-CHANGED` | novas rotas fazem lookup direto por noteId/provider ID e não podem page-walk/list-filter | `before_local_implemented` | `EPS-E2` | `pending` | chamada externa direta ainda consome quota/latência | `none` | `2026-09-28T22:18:45Z` | `root-operational-coder` |
 | `pcv-1` | `FRC` | `frontend-race-condition-validation` | `required` | `medium` | `FRC-LIFECYCLE-ASYNC-EFFECT` | menu dispara read assíncrono com close/navigation/logout/unmount e efeito visível externo | `before_local_implemented` | `FRC-E2` | `pending` | browser pode bloquear nova aba; fallback permanece | `none` | `2026-09-28T22:18:45Z` | `root-operational-coder` |
-| `pcv-1` | `BCI` | `backend-concurrency-idempotency-validation` | `not_needed` | `low` | `n/a` | nenhuma escrita, mutation ou efeito backend irreversível muda | `before_local_implemented` | `n/a` | `not_applicable` | `none` | `none` | `2026-09-28T22:18:45Z` | `root-operational-coder` |
-| `pcv-1` | `RLS` | `runtime-load-stress-validation` | `not_needed` | `low` | `n/a` | sem batch/bulk/fila/realtime/cache-index sensível ou compromisso de SLO/capacidade | `before_production_ready` | `n/a` | `not_applicable` | `none` | `none` | `2026-09-28T22:18:45Z` | `root-operational-coder` |
+| `pcv-1` | `BCI` | `backend-concurrency-idempotency-validation` | `not_needed` | `low` | `BCI-NON-IDEMPOTENT-WRITE` | predicate falso: nenhuma escrita, mutation ou efeito backend irreversível muda | `before_local_implemented` | `BCI-E1` | `not_applicable` | `none` | `none` | `2026-09-28T22:18:45Z` | `root-operational-coder` |
+| `pcv-1` | `RLS` | `runtime-load-stress-validation` | `not_needed` | `low` | `RLS-SLO-CLAIM` | predicate falso: sem batch/bulk/fila/realtime/cache-index sensível ou compromisso de SLO/capacidade | `before_production_ready` | `RLS-E1` | `not_applicable` | `none` | `none` | `2026-09-28T22:18:45Z` | `root-operational-coder` |
 
 ### Planned pcv-1 Evidence Contracts
 
@@ -579,21 +585,33 @@ Artifacts in `running|passed` must carry every `pcv-1` evidence field, including
 
 ## Rules Acknowledgement / Ingestion
 
-| Rule / Workflow | Why In Scope | Status |
-| --- | --- | --- |
-| `skills/rule-nestjs-nestjs-architecture-always-on/SKILL.md` | boundary NestJS | `loaded for planning; reload after approval` |
-| `workflows/nestjs/change-application-boundary-method.md` | novas rotas/controller/port | `loaded for planning; reload after approval` |
-| `skills/rule-react-react-architecture-always-on/SKILL.md` | UI state/effects/a11y | `loaded for planning; reload after approval` |
-| `workflows/react/change-ui-boundary-method.md` | menu/list/detail | `loaded for planning; reload after approval` |
-| `skills/frontend-race-condition-validation/SKILL.md` | resultados tardios/duplicate actions | `planned post-approval` |
-| `skills/test-creation-standard/SKILL.md` | testes novos | `planned post-approval` |
+| Source | Why It Applies Now | Must Preserve | Must Avoid | Execution Impact |
+| --- | --- | --- | --- | --- |
+| `delphi-ai/skills/rule-nestjs-nestjs-architecture-always-on/SKILL.md` | boundary NestJS | controller fino, port explícito, runtime validation | payload/provider decision no controller | application/adapter/contract tests |
+| `delphi-ai/workflows/nestjs/change-application-boundary-method.md` | novas rotas/controller/port | auth, error mapping, cancellation e bounds | export global/circular/import oportunista | capability audit + full backend suite |
+| `delphi-ai/skills/rule-react-react-architecture-always-on/SKILL.md` | UI state/effects/a11y | owner único, render puro, cleanup e foco | nested interactive/link, stale effect | unit + browser observable |
+| `delphi-ai/workflows/react/change-ui-boundary-method.md` | menu/list/detail | estados loading/pending/error/fallback e teclado | estado duplicado e suppression de lint | full frontend + browser fresco |
+| `delphi-ai/skills/frontend-race-condition-validation/SKILL.md` | async document action | `drop duplicate`, abort lifecycle e late suppression | duplo efeito/chamada invisível | pcv-1 FRC artifact bursts 5/10/20 |
+| `delphi-ai/skills/endpoint-performance-scrutiny/SKILL.md` | exact lookup novo | uma chamada direta por provider ID | page-walk/list-filter | pcv-1 EPS artifact/audit |
+| `delphi-ai/skills/test-creation-standard/SKILL.md` | contrato público e fluxo crítico | fail-first e fixtures sintéticas | teste frágil/dado real | testes em camadas + suite completa |
 
 ## Agent Routing Preflight
 
-- **Planned implementation tuple:** `surface=primary-checkout; role=operational-coder; model=inherited; topology=single-writer`
-- **Subagent / delegation authorization:** `not requested; implementation remains root single writer unless separately authorized`.
-- **Git isolation authorization:** `not authorized; no worktrees or auxiliary checkouts`.
-- **Authority guard:** `pending pre-approval after review convergence`.
+- **Client surface:** `codex`
+- **Current governed action:** `implementation`
+- **Selected role:** `routine-executor`
+- **Selected model:** `gpt-5.6-terra`
+- **Selected effort:** `medium`
+- **Proof mode:** `declared`
+- **Exception reason:** `n/a`
+- **Subagent / delegation authorization:** `not-requested`
+- **Execution topology:** `primary-checkout-single-writer`
+- **Worktree / auxiliary-checkout authorization:** `not-authorized`
+- **Worktree authorization evidence:** `n/a`
+- **Writer scheduling policy:** `single-writer-serialized`
+- **Guard outcome:** `pending after critique convergence`
+- **Waiver / exception reference:** `n/a`
+- **Guard evidence:** `todo_authority_guard.py --pre-approval must return preflight-go; no implementation authority is implied`.
 
 ## Approval
 
