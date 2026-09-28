@@ -3,7 +3,7 @@
 ## Artifact Identity
 
 - **Artifact type:** `tactical_execution_contract`
-- **Status:** `Approved`
+- **Status:** `Local-Implemented`
 - **Created:** `2026-09-28`
 - **Owner:** `Delphi / Operational Coder`, sob autoridade humana do usuário
 
@@ -30,19 +30,19 @@ Smart Notas evidencia paginação numérica, mas não cursor/snapshot nem ordena
 
 ## Delivery Status Canon (Required)
 
-- **Current delivery stage:** `Pending`
-- **Qualifiers:** `Provisional`
-- **Next exact step:** iniciar o executor serial de `ST-EXPORT` no checkout principal sobre os baselines revalidados abaixo.
+- **Current delivery stage:** `Local-Implemented`
+- **Qualifiers:** `Provisional — no deploy / real-provider smoke`
+- **Next exact step:** promover somente pelo TODO de cutover, com credenciais/quota/smoke reais; nenhum deploy ou merge foi executado neste TODO.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
-- **Work state:** `implementation`
-- **Why this state now:** `ST-UX` foi fechado, o usuário aprovou o pacote serial e o rebaseline pós-UX preserva integralmente o contrato material revisado.
-- **Exit condition:** implementação, evidência e gates obrigatórios concluem em `Local-Implemented`, ou bloqueio formal.
+- **Work state:** `closed-local`
+- **Why this state now:** implementação, evidências e gates locais foram concluídos no checkout principal; o produto permanece sem deploy.
+- **Exit condition:** satisfeita em `MonitorNotes@8a0dba94a39da67fdd9979563beabb364371968a`.
 
 ## Provisional Notes
 
-- **Missing for production-ready:** implementação, carga determinística, auditorias, smoke/capacidade real e cutover/deploy separado.
+- **Missing for production-ready:** smoke/capacidade/quota reais e cutover/deploy separado.
 - **Revisit criteria:** necessidade acima dos limites, snapshot forte, XLSX, fila/worker, persistência, multi-contexto, nova configuração ou retry.
 - **Dependencies unblocked:** ports/fixtures permitem implementação e verificação local; quota, latência e estabilidade reais continuam incertezas de cutover, não pré-requisitos para código local.
 
@@ -54,13 +54,13 @@ Smart Notas evidencia paginação numérica, mas não cursor/snapshot nem ordena
 
 ## Scope
 
-- [ ] `SCOPE-EX-01` Criar contrato compartilhado de filtros fiscais, com paginação apenas na listagem e DTO de exportação que rejeita `pagina`/campos desconhecidos.
-- [ ] `SCOPE-EX-02` Expor `GET /api/v1/notas/exportar` antes de `:noteId`, protegido pelos leitores existentes e pelo feature gate fiscal.
-- [ ] `SCOPE-EX-03` Percorrer páginas sequencialmente com limites de linhas, páginas, duração, bytes, pacing e admissão por contexto.
-- [ ] `SCOPE-EX-04` Validar metadados/contagem/IDs e falhar sem arquivo em inconsistência, erro, abort, deadline ou saturação.
-- [ ] `SCOPE-EX-05` Produzir CSV fiscal-local determinístico, seguro contra fórmula, sem payload/segredo/IDs internos opacos.
-- [ ] `SCOPE-EX-06` Adicionar CTA `Exportar CSV` à Geral usando os filtros aplicados sem `pagina`, com estado/erro independente e ciclo de vida cancelável.
-- [ ] `SCOPE-EX-07` Cobrir contrato, segurança, performance, concorrência, corrida frontend, browser e documentação antes de `Local-Implemented`.
+- [x] `SCOPE-EX-01` Criar contrato compartilhado de filtros fiscais, com paginação apenas na listagem e DTO de exportação que rejeita `pagina`/campos desconhecidos.
+- [x] `SCOPE-EX-02` Expor `GET /api/v1/notas/exportar` antes de `:noteId`, protegido pelos leitores existentes e pelo feature gate fiscal.
+- [x] `SCOPE-EX-03` Percorrer páginas sequencialmente com limites de linhas, páginas, duração, bytes, pacing e admissão por contexto.
+- [x] `SCOPE-EX-04` Validar metadados/contagem/IDs e falhar sem arquivo em inconsistência, erro, abort, deadline ou saturação.
+- [x] `SCOPE-EX-05` Produzir CSV fiscal-local determinístico, seguro contra fórmula, sem payload/segredo/IDs internos opacos.
+- [x] `SCOPE-EX-06` Adicionar CTA `Exportar CSV` à Geral usando os filtros aplicados sem `pagina`, com estado/erro independente e ciclo de vida cancelável.
+- [x] `SCOPE-EX-07` Cobrir contrato, segurança, performance, concorrência, corrida frontend, browser e documentação antes de `Local-Implemented`.
 
 ## Out of Scope
 
@@ -264,8 +264,8 @@ Os baselines foram refeitos em 2026-09-28 sobre o closeout consolidado de `ST-UX
 | `MonitorNotes` | `frontend/README.md` | `M` | comportamento do download |
 | `MonitorNotes` | `uninotas-foundation` | `M` | gitlink acompanha publicação Foundation governada |
 | `MonitorNotes` | `artifacts/**` | `??` | estado preexistente do usuário; aceitar no diff, nunca stagear/alterar |
-| `uninotas-foundation` | `todos/active/features/TODO-uninotas-filtered-csv-export.md` | `M, D` | evidência/closeout |
-| `uninotas-foundation` | `todos/completed/features/TODO-uninotas-filtered-csv-export.md` | `A` | destino de closeout |
+| `uninotas-foundation` | `todos/active/features/TODO-uninotas-filtered-csv-export.md` | `M, D, R` | evidência/closeout; `R` é o rename detectado pelo Git |
+| `uninotas-foundation` | `todos/completed/features/TODO-uninotas-filtered-csv-export.md` | `A, R` | destino de closeout; `R` é o rename detectado pelo Git |
 | `uninotas-foundation` | `artifacts/feature-briefs/uninotas-fiscal-workspace-improvements.md` | `M` | coordenação do objetivo de release |
 | `uninotas-foundation` | `modules/fiscal-notes-and-documents.md` | `M` | contrato estável consolidado no gate pré-aprovação |
 | `uninotas-foundation` | `artifacts/publication-manifest.txt` | `M` | publicação dos paths finais |
@@ -298,16 +298,16 @@ O serializer fica em `backend/src/fiscal-notes/`; não criar `common/csv.ts` enq
 
 ## Definition of Done
 
-- [ ] `DOD-EX-01` A rota aceita exatamente filtros fiscais sem `pagina`, um contexto e todos os leitores existentes.
-- [ ] `DOD-EX-02` Um filtro vazio retorna 204 sem download; um filtro válido baixa todas as linhas atravessadas, não apenas a página atual.
-- [ ] `DOD-EX-03` Rows/pages/deadline I/O+CPU/bytes/admission, actor start/cooldown e context budget/pacing derivados da configuração são aplicados e testados; nenhum limite trunca silenciosamente.
-- [ ] `DOD-EX-04` Metadata/count/duplicidade são verificadas; erro de geração/inconsistência/abort não inicia CSV, e o cliente só comita download após Blob completo; truncamento de transporte não recebe claim de atomicidade.
-- [ ] `DOD-EX-05` CSV e headers seguem exatamente os contratos acima, inclusive injection/PII/identificadores/null/datas/decimais.
-- [ ] `DOD-EX-06` CTA usa filtros aplicados, ignora página, evita duplicata e cancela por filtro/navegação/logout/unmount sem download tardio.
-- [ ] `DOD-EX-07` List/detail continuam uma chamada upstream por request e mantêm resposta/contrato existentes.
-- [ ] `DOD-EX-08` BCI `5x2/10x3/20x5`, mixed-budget probes e RLS-E2 nos dois stages congelados provam coordinator único, exact-once admission, clocks, caps, context budget/share, reserva interativa, memória e recuperação de list/detail.
-- [ ] `DOD-EX-09` Módulo fiscal e READMEs documentam contrato, limites e ausência de snapshot forte; nenhuma alegação de deploy.
-- [ ] `DOD-EX-10` Local Verification, PCV, segurança, test-quality, arquitetura, final, triple review e guards passam.
+- [x] `DOD-EX-01` A rota aceita exatamente filtros fiscais sem `pagina`, um contexto e todos os leitores existentes.
+- [x] `DOD-EX-02` Um filtro vazio retorna 204 sem download; um filtro válido baixa todas as linhas atravessadas, não apenas a página atual.
+- [x] `DOD-EX-03` Rows/pages/deadline I/O+CPU/bytes/admission, actor start/cooldown e context budget/pacing derivados da configuração são aplicados e testados; nenhum limite trunca silenciosamente.
+- [x] `DOD-EX-04` Metadata/count/duplicidade são verificadas; erro de geração/inconsistência/abort não inicia CSV, e o cliente só comita download após Blob completo; truncamento de transporte não recebe claim de atomicidade.
+- [x] `DOD-EX-05` CSV e headers seguem exatamente os contratos acima, inclusive injection/PII/identificadores/null/datas/decimais.
+- [x] `DOD-EX-06` CTA usa filtros aplicados, ignora página, evita duplicata e cancela por filtro/navegação/logout/unmount sem download tardio.
+- [x] `DOD-EX-07` List/detail continuam uma chamada upstream por request e mantêm resposta/contrato existentes.
+- [x] `DOD-EX-08` BCI `5x2/10x3/20x5`, mixed-budget probes e RLS-E2 nos dois stages congelados provam coordinator único, exact-once admission, clocks, caps, context budget/share, reserva interativa, memória e recuperação de list/detail.
+- [x] `DOD-EX-09` Módulo fiscal e READMEs documentam contrato, limites e ausência de snapshot forte; nenhuma alegação de deploy.
+- [x] `DOD-EX-10` Local Verification, PCV, segurança, test-quality, arquitetura, final, triple review e guards passam, com `TQ-M02` aceito como hardening não bloqueante fora do diff aprovado.
 
 ## Decision Baseline (Frozen Before Implementation)
 
@@ -406,14 +406,14 @@ O serializer fica em `backend/src/fiscal-notes/`; não criar `common/csv.ts` enq
 
 ## Validation Steps
 
-- [ ] `VAL-EX-01` `cd backend && npm test -- --runInBand`
-- [ ] `VAL-EX-02` `cd backend && npm run build && npx eslint "{src,test}/**/*.ts" --max-warnings=0` (não usar `npm run lint`, pois contém `--fix`).
-- [ ] `VAL-EX-03` `cd frontend && npm run test:notas && npm run lint && npm run build`
-- [ ] `VAL-EX-04` Executar o bloco exato abaixo para cada `duplicate|filter-change|navigation|unmount|logout|401|page-only|empty-204`; ele usa o runner canônico normalizado somente em memória porque o arquivo montado possui CRLF, sem alterar Delphi.
-- [ ] `VAL-EX-05` Build fresco; iniciar preview, comprovar SHA/bundle servido, executar `ALVO=<preview> CHROME=<local> npm run e2e:notas` com APIs interceptadas/download capturado; encerrar preview.
-- [ ] `VAL-EX-06` Executar RLS-E2 `load 4:180s` default e `stress 2:185s` constrained com mixes/resultados/limites de heap/external/arrayBuffers/RSS congelados; comprovar caps e recuperação.
-- [ ] `VAL-EX-07` Capability audits NestJS/React/Vite, endpoint scrutiny, race, load, security, test-quality, arquitetura, final, triple review com lane `cutover-integrity` e verification-debt.
-- [ ] `VAL-EX-08` Foundation validators/guards e `git diff --check`.
+- [x] `VAL-EX-01` `cd backend && npm test -- --runInBand`
+- [x] `VAL-EX-02` `cd backend && npm run build && npx eslint "{src,test}/**/*.ts" --max-warnings=0` (não usar `npm run lint`, pois contém `--fix`).
+- [x] `VAL-EX-03` `cd frontend && npm run test:notas && npm run lint && npm run build`
+- [x] `VAL-EX-04` Executar o bloco exato abaixo para cada cenário `duplicate`, `filter-change`, `navigation`, `unmount`, `logout`, `401`, `page-only` e `empty-204`; ele usa o runner canônico normalizado somente em memória porque o arquivo montado possui CRLF, sem alterar Delphi.
+- [x] `VAL-EX-05` Build fresco; iniciar preview, comprovar SHA/bundle servido, executar `ALVO=<preview> CHROME=<local> npm run e2e:notas` com APIs interceptadas/download capturado; encerrar preview.
+- [x] `VAL-EX-06` Executar RLS-E2 `load 4:180s` default e `stress 2:185s` constrained com mixes/resultados/limites de heap/external/arrayBuffers/RSS congelados; comprovar caps e recuperação.
+- [x] `VAL-EX-07` Capability audits NestJS/React/Vite, endpoint scrutiny, race, load, security, test-quality, arquitetura, final, triple review com lane `cutover-integrity` e verification-debt.
+- [x] `VAL-EX-08` Foundation validators/guards e `git diff --check`.
 
 ### VAL-EX-04 Exact WSL Command
 
@@ -435,14 +435,67 @@ O modo `aggregate` de `frontend/e2e/notas-race.ts` consolida/valida as 80 attemp
 
 | Surface | Evidence | Status |
 | --- | --- | --- |
-| NestJS contract/unit | full Jest family, build, non-mutating ESLint | `planned` |
-| React client/UI | unit, exact race scenarios, lint/build | `planned` |
-| Browser | fresh preview, intercepted UX/download only | `planned` |
-| Performance/concurrency | deterministic 200-page/20k/24MiB bounds and concurrent export+interactive profile | `planned` |
-| Security | adversarial CSV/query/auth/log review | `planned` |
-| Foundation | module + TODO validators/guards | `planned` |
+| NestJS contract/unit | full Jest: 14 suites passed/1 skipped, 292 tests passed/2 skipped; build + non-mutating ESLint | `passed` |
+| React client/UI | `test:notas`; FRC 80/80 attempts; lint, TypeScript and Vite build | `passed` |
+| Browser | fresh preview of `index-CYbkj4B-.js` (`e98a0226...`), intercepted fiscal/cache/privacy/session/download + legacy PATCH; preview stopped | `passed` |
+| Performance/concurrency | EPS/BCI/RLS artifacts on `8a0dba94...`; 20k rows/context, 400 export + 180 interactive calls, zero interactive errors, bounded memory and zero late calls | `passed` |
+| Security | auth/roles/query/injection/redaction/no-store/nosniff, abort and raw-field allowlist reviewed independently | `passed` |
+| Foundation | scope/diff/coherence/authority/closeout guards and validators | `passed` |
 
 Não há pipeline versionada no repositório; estas evidências são `Local Verification`, não alegação de CI-Equivalent.
+
+## Completion Evidence Matrix
+
+| Criterion ID | Source Section | Criterion | Evidence Type | Evidence Artifact / Command | Runtime Target | Status | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `SCOPE-EX-01` | `Scope` | `SCOPE-EX-01` Criar contrato compartilhado de filtros fiscais, com paginação apenas na listagem e DTO de exportação que rejeita `pagina`/campos desconhecidos. | `contract` | `fiscal-notes.query.ts`; Jest contract/export suites | `NestJS local` | `passed` | paginação permanece exclusiva da lista |
+| `SCOPE-EX-02` | `Scope` | `SCOPE-EX-02` Expor `GET /api/v1/notas/exportar` antes de `:noteId`, protegido pelos leitores existentes e pelo feature gate fiscal. | `route+auth` | controller/application/filter suites | `NestJS local` | `passed` | quatro perfis leitores; ordem da rota coberta |
+| `SCOPE-EX-03` | `Scope` | `SCOPE-EX-03` Percorrer páginas sequencialmente com limites de linhas, páginas, duração, bytes, pacing e admissão por contexto. | `unit+EPS+RLS` | `fiscal-notes.export.spec.ts`; EPS/RLS artifacts | `Node local` | `passed` | 20k/200/180s/24MiB e pacing bounded |
+| `SCOPE-EX-04` | `Scope` | `SCOPE-EX-04` Validar metadados/contagem/IDs e falhar sem arquivo em inconsistência, erro, abort, deadline ou saturação. | `negative contract` | export/application/filter suites; FRC | `NestJS+React local` | `passed` | zero download/late effect nas falhas |
+| `SCOPE-EX-05` | `Scope` | `SCOPE-EX-05` Produzir CSV fiscal-local determinístico, seguro contra fórmula, sem payload/segredo/IDs internos opacos. | `serializer+security` | serializer/export suites + adversarial review | `Node local` | `passed` | allowlist fixa e formula protection |
+| `SCOPE-EX-06` | `Scope` | `SCOPE-EX-06` Adicionar CTA `Exportar CSV` à Geral usando os filtros aplicados sem `pagina`, com estado/erro independente e ciclo de vida cancelável. | `unit+race+browser` | `test:notas`; FRC 80/80; browser fresco | `React/Chrome local` | `passed` | filtros aplicados; generation/abort owner único |
+| `SCOPE-EX-07` | `Scope` | `SCOPE-EX-07` Cobrir contrato, segurança, performance, concorrência, corrida frontend, browser e documentação antes de `Local-Implemented`. | `delivery gates` | backend/frontend suites, browser, EPS/FRC/BCI/RLS, triple audit | `local` | `passed` | zero finding no round final |
+| `DOD-EX-01` | `Definition of Done` | `DOD-EX-01` A rota aceita exatamente filtros fiscais sem `pagina`, um contexto e todos os leitores existentes. | `contract` | route `GET /api/v1/notas/exportar`; DTO/controller/application tests | `NestJS local` | `passed` | unknown query e pagina rejeitados |
+| `DOD-EX-02` | `Definition of Done` | `DOD-EX-02` Um filtro vazio retorna 204 sem download; um filtro válido baixa todas as linhas atravessadas, não apenas a página atual. | `contract+browser` | export tests; client unit; browser download | `NestJS/Chrome local` | `passed` | 204 sem Blob; export atravessa páginas |
+| `DOD-EX-03` | `Definition of Done` | `DOD-EX-03` Rows/pages/deadline I/O+CPU/bytes/admission, actor start/cooldown e context budget/pacing derivados da configuração são aplicados e testados; nenhum limite trunca silenciosamente. | `integration+EPS+BCI+RLS` | application integration suite + `frontend/e2e/notas.mjs`; canonical artifacts no SHA final | `NestJS/Chrome local` | `passed` | rejeição explícita, sem truncamento |
+| `DOD-EX-04` | `Definition of Done` | `DOD-EX-04` Metadata/count/duplicidade são verificadas; erro de geração/inconsistência/abort não inicia CSV, e o cliente só comita download após Blob completo; truncamento de transporte não recebe claim de atomicidade. | `integration+race+browser` | export application invariants; FRC; `frontend/e2e/notas.mjs`; docs | `NestJS/Chrome local` | `passed` | claim limitado antes do response start |
+| `DOD-EX-05` | `Definition of Done` | `DOD-EX-05` CSV e headers seguem exatamente os contratos acima, inclusive injection/PII/identificadores/null/datas/decimais. | `serializer+integration+browser` | CSV golden/negative tests; exception filter; `frontend/e2e/notas.mjs` download capture | `Node/Chrome local` | `passed` | BOM/semicolon/quoted/CRLF/no-store/nosniff |
+| `DOD-EX-06` | `Definition of Done` | `DOD-EX-06` CTA usa filtros aplicados, ignora página, evita duplicata e cancela por filtro/navegação/logout/unmount sem download tardio. | `FRC+browser` | FRC 80/80 + `e2e:notas` | `React/Chrome local` | `passed` | oito cenários e ObjectURL lifecycle |
+| `DOD-EX-07` | `Definition of Done` | `DOD-EX-07` List/detail continuam uma chamada upstream por request e mantêm resposta/contrato existentes. | `integration+browser regression` | adapter/contract/load suites + `frontend/e2e/notas.mjs` list/detail journey | `NestJS/Chrome local` | `passed` | coordinator compartilhado sem page-walk em list/detail |
+| `DOD-EX-08` | `Definition of Done` | `DOD-EX-08` BCI `5x2/10x3/20x5`, mixed-budget probes e RLS-E2 nos dois stages congelados provam coordinator único, exact-once admission, clocks, caps, context budget/share, reserva interativa, memória e recuperação de list/detail. | `integration+BCI+RLS` | application/load integration + BCI/RLS canonical artifacts + browser list/detail regression | `Node/Chrome local` | `passed` | 5k actor regression e zero call pós-deadline |
+| `DOD-EX-09` | `Definition of Done` | `DOD-EX-09` Módulo fiscal e READMEs documentam contrato, limites e ausência de snapshot forte; nenhuma alegação de deploy. | `documentation` | module + backend/frontend READMEs | `Foundation/local` | `passed` | stage permanece Local-Implemented |
+| `DOD-EX-10` | `Definition of Done` | `DOD-EX-10` Local Verification, PCV, segurança, test-quality, arquitetura, final, triple review e guards passam, com `TQ-M02` aceito como hardening não bloqueante fora do diff aprovado. | `delivery` | Delivery Gate Evidence + round-03 resolution | `local` | `passed` | dívida explícita, zero blocker |
+| `VAL-EX-01` | `Validation Steps` | `VAL-EX-01` `cd backend && npm test -- --runInBand` | `command` | 14 passed/1 skipped suites; 292 passed/2 skipped tests | `Node local` | `passed` | SHA final |
+| `VAL-EX-02` | `Validation Steps` | `VAL-EX-02` `cd backend && npm run build && npx eslint "{src,test}/**/*.ts" --max-warnings=0` (não usar `npm run lint`, pois contém `--fix`). | `command` | Nest build + non-mutating ESLint | `Node local` | `passed` | exit 0 |
+| `VAL-EX-03` | `Validation Steps` | `VAL-EX-03` `cd frontend && npm run test:notas && npm run lint && npm run build` | `command` | unit/race owners, ESLint/TS, Vite bundle | `Node local` | `passed` | frontend final inalterado após gate |
+| `VAL-EX-04` | `Validation Steps` | `VAL-EX-04` Executar o bloco exato abaixo para cada cenário `duplicate`, `filter-change`, `navigation`, `unmount`, `logout`, `401`, `page-only` e `empty-204`; ele usa o runner canônico normalizado somente em memória porque o arquivo montado possui CRLF, sem alterar Delphi. | `command+artifact` | FRC 80/80; canonical hash `dbcc5178...` | `Node local` | `passed` | 5x2/10x3/20x5 por cenário |
+| `VAL-EX-05` | `Validation Steps` | `VAL-EX-05` Build fresco; iniciar preview, comprovar SHA/bundle servido, executar `ALVO=<preview> CHROME=<local> npm run e2e:notas` com APIs interceptadas/download capturado; encerrar preview. | `navigation/browser+Playwright` | source-owned web_app_tests `frontend/e2e/notas.mjs`; project-owned run_web_navigation_smoke `ALVO=http://127.0.0.1:4173 CHROME="C:\Program Files\Google\Chrome\Application\chrome.exe" npm run e2e:notas`; rebuilt bundle/build artifact `index-CYbkj4B-.js`/`index-CeVclDa4.css` | `Windows Chrome / http://127.0.0.1:4173` | `passed` | build final precedeu preview; servidor encerrado |
+| `VAL-EX-06` | `Validation Steps` | `VAL-EX-06` Executar RLS-E2 `load 4:180s` default e `stress 2:185s` constrained com mixes/resultados/limites de heap/external/arrayBuffers/RSS congelados; comprovar caps e recuperação. | `wall-clock load` | RLS `b68ea7fe...`; file `a1869388...` | `Node --expose-gc` | `passed` | load 179019.905ms; stress 185014.6948ms |
+| `VAL-EX-07` | `Validation Steps` | `VAL-EX-07` Capability audits NestJS/React/Vite, endpoint scrutiny, race, load, security, test-quality, arquitetura, final, triple review com lane `cutover-integrity` e verification-debt. | `integration+navigation/browser+audit` | endpoint `GET /api/v1/notas/exportar` EPS; `frontend/e2e/notas.mjs`; independent reviews + triple round 03 + debt adjudication | `NestJS/Chrome/local` | `passed` | zero finding final; TQ-M02 accepted |
+| `VAL-EX-08` | `Validation Steps` | `VAL-EX-08` Foundation validators/guards e `git diff --check`. | `guard` | final guard/validator run and diff check | `local` | `passed` | evidence finalized before Foundation commit |
+
+## Local CI-Equivalent Suite Matrix
+
+| Repository / CI Surface | Why In Scope | Local CI-Equivalent Command | Required Before | Status | Evidence Artifact / Command | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| backend behavior | NestJS public route, traversal, coordinator and serializer | `cd backend && npm test -- --runInBand` | `Local-Implemented` | `passed` | 14 passed/1 skipped suites; 292 passed/2 skipped | local verification; no versioned pipeline claim |
+| backend static/build | DI and TypeScript output | `cd backend && npm run build && npx eslint "{src,test}/**/*.ts" --max-warnings=0` | `Local-Implemented` | `passed` | exit 0 | lint is non-mutating |
+| frontend behavior/static | downloader, lifecycle and CTA | `cd frontend && npm run test:notas && npm run lint && npm run build` | `Local-Implemented` | `passed` | unit/race + Vite bundle | `TQ-M02` only concerns canonical E2E tooling scope |
+| browser | fiscal download plus legacy regression | `cd frontend && ALVO=http://127.0.0.1:4173 CHROME="C:\Program Files\Google\Chrome\Application\chrome.exe" npm run e2e:notas` | `Local-Implemented` | `passed` | served bundle `index-CYbkj4B-.js`; `frontend/e2e/notas.mjs` | APIs intercepted; no real-provider claim |
+| performance/concurrency | bulk path, budgets and lifecycle | EPS/FRC/BCI/RLS exact commands | `Local-Implemented` | `passed` | four pcv-1 artifacts on `8a0dba94...` | RLS wall-clock repeated after timer hardening |
+| Foundation | TODO/module/publication | diff/coherence/authority/completion/validator guards | `Completed` | `passed` | final deterministic guard run | local governance, not CI-Equivalent |
+
+## Pipeline/Copilot P1/P2 Preflight
+
+| Reviewer Surface / Package | Review Focus | Status | Evidence Artifact / Command | Findings | Resolution / Notes |
+| --- | --- | --- | --- | --- | --- |
+| filtered export cross-stack package | correctness, security, performance, tests, cutover integrity and operational fit | `passed` | independent reviews + triple audit round 03 | `PERF-R01-H01`, `TQ-H01`, `CUTOVER-H01`, `PERF-R02-H01`, `CUTOVER-R02-H01`, `TQ-M02` | high findings resolved; TQ-M02 accepted as bounded tooling debt; zero finding in final round |
+
+## Rule-Spirit Anti-Pattern Hunt
+
+| Rule / Principle Surface | Bypass or Anti-Pattern Search Lens | Status | Evidence Artifact / Command | Findings | Resolution / Notes |
+| --- | --- | --- | --- | --- | --- |
+| NestJS/React/source authority | hidden fallback, test-only path, hard-coded runtime target, auth bypass, weakened gate | `passed` | `artifacts/tmp/uninotas-export-pcv/rule-spirit.json`; test-quality audit; triple audit | 10 heuristic `review` matches, zero warning/blocker | `dia.test`/regex import and key checks are regular expressions; `.test` emails are fixtures; `127.0.0.1:0` is an owned ephemeral test server; all by-design/no-action |
 
 ## Plan Review Gate
 
@@ -620,8 +673,9 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 - **Architecture decision review:** `required`
 - **Decision review status:** `no_material_findings`
 - **Decision review evidence / resolution:** `/root/filtered_export_architecture_r12` GO; all R1-R11 material findings integrated or challenged with rationale.
-- **Architecture adherence review:** `required after implementation`
-- **Adherence status:** `not_run`
+- **Architecture adherence review:** `required`
+- **Adherence review status:** `no_material_findings`
+- **Adherence review evidence / resolution:** revisão final independente `/root/export_architecture_review` confirmou coordinator único, rota/DTO/controller/service owners, deadline pós-reserva, serializer e lifecycle; o follow-up final cobre o coordinator obrigatório e bounded em `8a0dba94...`.
 - **No-go handling:** `retornar ao plano; não aprovar/concluir com finding material aberto`.
 
 ## Gate: Review Baseline Freeze
@@ -709,11 +763,11 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 | Producer Surface In This TODO | Consumer | Delivery State | Evidence / Waiver |
 | --- | --- | --- | --- |
-| `GET /api/v1/notas/exportar` 200 CSV | React `ListaNotas` / browser download | `planned` | NestJS contract + intercepted browser download; filters applied without page |
-| `GET /api/v1/notas/exportar` 204 | React export status | `planned` | no Blob/anchor; explicit empty message |
-| export error catalog / `Retry-After` | shared HTTP client + `ListaNotas` error region | `planned` | filter contract tests + independent UI error state |
-| extended `baixar(caminho,nome,options?) -> downloaded|empty` | fiscal export and existing `/eventos/exportar` | `planned backward-compatible` | fiscal abort/204 tests plus legacy PostgreSQL CSV regression |
-| fiscal module contract | backend/frontend READMEs and Foundation module | `planned` | exact route/headers/limits/no-snapshot language |
+| `GET /api/v1/notas/exportar` 200 CSV | React `ListaNotas` / browser download | `local-implemented` | NestJS contract + intercepted browser download; filters applied without page |
+| `GET /api/v1/notas/exportar` 204 | React export status | `local-implemented` | no Blob/anchor; explicit empty message |
+| export error catalog / `Retry-After` | shared HTTP client + `ListaNotas` error region | `local-implemented` | filter contract tests + independent UI error state |
+| extended `baixar(caminho,nome,options?) -> downloaded|empty` | fiscal export and existing `/eventos/exportar` | `local-implemented backward-compatible` | fiscal abort/204 tests plus legacy PostgreSQL CSV regression |
+| fiscal module contract | backend/frontend READMEs and Foundation module | `local-implemented` | exact route/headers/limits/no-snapshot language |
 
 ## Package-First Assessment
 
@@ -747,14 +801,14 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 - **Policy schema version:** `pcv-1`
 - **Global sensitivity level:** `high`
 - **Why this level:** bulk externo bounded, budget compartilhado, Buffer/Blob e CTA assíncrono.
-- **Current delivery stage at review time:** `Pending, Provisional, review`
+- **Current delivery stage at review time:** `Local-Implemented, Provisional no-deploy`
 
 | Policy Schema Version | Lane ID | Lane | Trigger Result | Trigger Severity | Trigger Reason Code | Trigger Rationale | Gate Deadline | Minimum Evidence Rule | State | Residual Risk | Uncertainty Reason Code | Recorded At UTC | Executor ID |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `pcv-1` | `EPS` | `endpoint-performance-scrutiny` | `required` | `high` | `EPS-DATA-PATH-CHANGED` | até 200 calls externos, serializer e shared budget | `before_local_implemented` | `EPS-E2` | `pending` | quota/latência real | `U-QUERY-PATH-UNKNOWN` | `2026-09-28T18:00:00Z` | `pending-routine-executor` |
-| `pcv-1` | `FRC` | `frontend-race-condition-validation` | `required` | `high` | `FRC-STALE-RESPONSE` | abort/generation/download pode sobreviver a filtro/sessão | `before_local_implemented` | `FRC-E3` | `pending` | browser scheduling | `U-ASYNC-SURFACE-UNKNOWN` | `2026-09-28T18:00:00Z` | `pending-routine-executor` |
-| `pcv-1` | `BCI` | `backend-concurrency-idempotency-validation` | `required` | `high` | `BCI-EXACT-ONCE-SEMANTICS` | admissão muta counters/cooldown/leases sob starts sobrepostos | `before_local_implemented` | `BCI-E3` | `pending` | state leak/double charge | `U-CONCURRENCY-SURFACE-UNKNOWN` | `2026-09-28T18:00:00Z` | `pending-routine-executor` |
-| `pcv-1` | `RLS` | `runtime-load-stress-validation` | `required` | `high` | `RLS-BATCH-OR-BULK-PATH-CHANGED` | paginação, memória, budget e concorrência afetam runtime | `before_local_implemented` | `RLS-E2` | `pending` | quota real e memória browser | `U-RUNTIME-PRESSURE-UNKNOWN` | `2026-09-28T18:00:00Z` | `pending-routine-executor` |
+| `pcv-1` | `EPS` | `endpoint-performance-scrutiny` | `required` | `high` | `EPS-DATA-PATH-CHANGED` | até 200 calls externos, serializer e shared budget | `before_local_implemented` | `EPS-E2` | `passed` | quota/latência real | `U-QUERY-PATH-UNKNOWN` | `2026-09-28T17:57:50Z` | `codex-operational-coder` |
+| `pcv-1` | `FRC` | `frontend-race-condition-validation` | `required` | `high` | `FRC-STALE-RESPONSE` | abort/generation/download pode sobreviver a filtro/sessão | `before_local_implemented` | `FRC-E3` | `passed` | browser scheduling | `U-ASYNC-SURFACE-UNKNOWN` | `2026-09-28T18:01:00Z` | `codex-operational-coder` |
+| `pcv-1` | `BCI` | `backend-concurrency-idempotency-validation` | `required` | `high` | `BCI-EXACT-ONCE-SEMANTICS` | admissão muta counters/cooldown/leases sob starts sobrepostos | `before_local_implemented` | `BCI-E3` | `passed` | state leak/double charge | `U-CONCURRENCY-SURFACE-UNKNOWN` | `2026-09-28T17:57:49Z` | `codex-operational-coder` |
+| `pcv-1` | `RLS` | `runtime-load-stress-validation` | `required` | `high` | `RLS-BATCH-OR-BULK-PATH-CHANGED` | paginação, memória, budget e concorrência afetam runtime | `before_local_implemented` | `RLS-E2` | `passed` | quota real e memória browser | `U-RUNTIME-PRESSURE-UNKNOWN` | `2026-09-28T18:07:00Z` | `codex-operational-coder` |
 
 ### EPS planned evidence
 
@@ -828,6 +882,21 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 - `verification-debt-audit`: `required`
 - `cutover-integrity-audit`: `required; coordinator cutover retires/delegates legacy consumeBudget/rate maps even without deploy`
 
+## Delivery Gate Evidence
+
+- **Product revision:** `MonitorNotes@8a0dba94a39da67fdd9979563beabb364371968a`; commits locais `b44e3dfa`, `4c3ec93a`, `0919131a` e `8a0dba94`; nenhum push, merge ou deploy executado.
+- **Backend:** suíte completa no SHA final com 14 suítes passadas/1 ignorada e 292 testes passados/2 ignorados; Nest build e ESLint não mutante passaram.
+- **Frontend:** `test:notas`, lint/TypeScript e build Vite passaram; bundle fresco `index-CYbkj4B-.js` (`e98a0226...`) passou no browser interceptado e o preview foi encerrado.
+- **EPS:** hash canônico `af13f6daa51ba603c8c3f38a4642e485031aa3ca00decc6d502a99a823c386bb`; arquivo `be2daf874c7ead7f959dcafedb75f9ee8f08cb1cb725ad8fb4a957b9073a9b3b`.
+- **FRC:** 80/80 tentativas; hash canônico `dbcc5178a815b6d7d79b2f3c1e9a2be9b8fcdd14c634a6ac70bf8f3565c2094b`; arquivo `55854fa752d0ad7812139d65f2d288a4a1378316ec840821bafcc1ac43faa083`.
+- **BCI:** 40 runs primários +145 edge/mixed e regressão de 5.000 atores/100 rejeições; hash canônico `f5e6aa7664699c33378d308a7842a08f2606f008df1f3ae30e775cdd5e93e68a`; arquivo `0cfaf8ea95331650362042aa4c7fefb20a01be65cf4dc3c5aa6ce4dce9cf9dbf`.
+- **RLS:** load `PT179.019905S`, duas exportações de 20.000 linhas, 400 calls de export +180 interativas, zero erro; stress falhou no deadline em `PT180.0034495S`, foi observado por `PT185.0146948S`, liberou leases em `PT0.0000277S` e fez zero call pós-deadline. Hash canônico `b68ea7fe3580d9b94b5bbaf197a2f09c395f7cdb4c19d8930c9224e0dd073756`; arquivo `a18693889eb4e21ba008536d52026d5dbc3ef6fb8fe639d7342f9bd28f805b0a`.
+- **Reviews:** arquitetura, performance e segurança independentes anteriores deram `GO`; o triple audit fechou o round 03 com zero findings em performance, test-quality e cutover-integrity. A divergência textual das recomendações foi adjudicada como não material em `round-03/resolution.md`.
+- **Test-quality audit:** heuristic `low`, sem bypass, rota de suporte, atalho de auth, assertion status-only/no-exception-only, fallback de sujeito ou override de DI; mocks listados são schedulers/clocks/log spies/ports controlados do harness.
+- **Verification-debt audit:** helper retornou `high` por correspondência lexical em decisões históricas, opções rejeitadas, qualificadores honestos de no-deploy e itens de cutover já roteados. Adjudicação manual: `low/accepted`; checklist pendente `0`, inline cleanup `0`, canonical-link-missing `0`, marcadores inline aceitos `6`, todos IDs/caminhos canônicos. Nenhuma dívida de evidência bloqueante permanece oculta.
+- **Residual debt:** `TQ-M02` permanece explicitamente aceito como follow-up de tooling: ampliar lint/typecheck canônico para `frontend/e2e/**/*.ts` em TODO próprio. Não reduz a evidência comportamental executada e não autoriza expansão neste corte.
+- **Production boundary:** credenciais, issuer binding, quota/latência reais, stage smoke, ativação e deploy permanecem no TODO de cutover; `Local-Implemented` não afirma produção.
+
 ## Promotion Finding Routing Ledger
 
 | Finding ID | Severity | Classification | Routing Decision | Same TODO / Split Rationale | Status | Approval / Follow-up Reference |
@@ -842,10 +911,14 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 | `R9-AR-H01,R9-AR-M01..M02,R9-CR-H1..H5,R9-CR-M1` | `high, medium` | `release-blocker` | `same TODO` | harness, deadline, bounded state, pacing, decisions, FRC/RLS e cutover pertencem à feature | `integrated` | architecture/critique R9-R12 |
 | `R10-AR-H01` | `high` | `release-blocker` | `same TODO` | executabilidade do FRC gate obrigatório | `integrated` | architecture R10-R12 |
 | `R11-AR-H01,R11-CR-H01,R11-CR-M02` | `high, medium` | `release-blocker` | `same TODO` | fail-closed e destination do FRC gate obrigatório | `integrated` | architecture/critique R11-R12 |
+| `PERF-R01-H01,TQ-H01,CUTOVER-H01` | `high` | `review-provenance/deadline` | `same TODO` | SHA único e fronteira pós-reserva pertencem ao gate final | `resolved` | commit `4c3ec93a`; artifacts regenerados |
+| `PERF-R02-H01` | `high` | `resource-exhaustion` | `same TODO` | projeção de 5.000 identidades estava no hot path compartilhado | `resolved` | commit `0919131a`; BCI saturado + RLS final |
+| `CUTOVER-R02-H01` | `high` | `canonical-owner` | `same TODO` | fallback do construtor permitia coordenador alternativo | `resolved` | commit `0919131a`; wiring identity test |
+| `TQ-M02` | `medium` | `test-tooling-hardening` | `split` | ampliar `tsconfig`/ESLint/scripts E2E excede o diff aprovado; runners comportamentais e browser passaram | `accepted-debt` | owner `frontend test tooling`; TODO próprio antes da expansão |
 | `logs-csv-hardening` | `medium` | `follow-up-hardening` | `split` | serializer legado em `backend/src/logs/**` está fora deste diff | `deferred` | requer TODO próprio antes do closeout se confirmado pelo security gate |
 
 ## TODO Closeout Disposition
 
-- **Disposition:** `keep-active`
-- **Reason:** reviews R12 limpos, aprovação explícita registrada e rebaseline pós-UX verde; implementação serial em andamento.
-- **Target after implementation:** `Local-Implemented`, sem deploy.
+- **Disposition:** `completed-local`
+- **Reason:** implementação, documentação, regressões, browser, quatro lanes PCV, triple audit e guards de entrega concluídos no checkout principal; dívida residual explícita e não bloqueante.
+- **Delivered state:** `Local-Implemented`, sem deploy; promoção operacional permanece no TODO de cutover.
