@@ -40,7 +40,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** executar confirmação arquitetural e crítica independente sobre round 5, depois scope/coherence/authority guards e `preflight-go`; nenhuma mutação Railway está autorizada.
+- **Next exact step:** publicar/fixar round 6, executar confirmação arquitetural e crítica independente, depois scope/coherence/authority guards e `preflight-go`; nenhuma mutação Railway está autorizada.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -50,8 +50,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 ## Provisional Notes
 
-- **Missing for production-ready:** implementação reconvergida, configuração remota, probes reais, carga local da imagem exata, attestation do rollback target, cutover/smoke no Stage e promoção Foundation.
-- **Revisit criteria:** concluir `DOD-CUT-01..13` com evidência redatada da release exata.
+- **Missing for production-ready:** implementação reconvergida, configuração remota, probes reais, carga local do build candidato, attestation do rollback target, rebuild/cutover/smoke no Stage e promoção Foundation.
+- **Revisit criteria:** concluir `DOD-CUT-01..14` com evidência redatada da release exata.
 - **Dependencies unblocked:** o código local permite preparar o cutover sem redesenhar contratos de lista/detalhe.
 
 ## Blocker Notes
@@ -79,26 +79,27 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 - [ ] `CUT-03` Executar probe redatado `/empresa`, lista e detalhe para os dois contextos e bloquear mismatch antes de tráfego de usuário.
 - [ ] `CUT-04` Exigir no startup timeout `10 s`, concorrência `4`, rate `15 req/min` por usuário e `60 req/min` por contexto na única réplica; validar esse envelope com carga/respostas próximas de 2 MiB. Qualquer mudança exige rebaseline e nova aprovação.
 - [ ] `CUT-05` Comprovar destino, retenção, acesso e redaction dos logs operacionais antes da ativação.
-- [ ] `CUT-06` Provar a imagem exata localmente com readiness, probes Smart Notas redatados, smoke autenticado e jornada de navegador nos dois contextos antes da janela; não existe ambiente Railway isolado.
+- [ ] `CUT-06` Provar localmente a tree candidata com build Docker, readiness, probes Smart Notas redatados, smoke autenticado e jornada de navegador nos dois contextos; Railway fará rebuild remoto e os bits reais só serão validados pelo smoke no Stage.
 - [ ] `CUT-07` Antes do deploy, registrar a release Railway verde anterior e comprovar que o Owner consegue acionar seu redeploy; em abort, restaurá-la em até 10 minutos e validar recuperação. A flag é apenas kill switch do provedor.
 - [ ] `CUT-08` Executar um único cutover direto no `Stage` customer-facing entre 20:00–22:00, observar por no mínimo 30 minutos e abortar pelos thresholds congelados.
 - [ ] `CUT-09` Validar rotação HMAC por substituição da chave e relistagem obrigatória; `noteId` anterior deve falhar fechado.
 - [ ] `CUT-10` Promover atomicamente `note_read_model` para Smart Notas nos módulos/ledger somente após smoke e rollback aprovados.
 - [ ] `CUT-11` Tornar PostgreSQL `logs` exclusivamente uma fonte de erros Routerfy/n8n no boundary do produto: um predicado central derivado da classificação original nega `SUCESSO` em lista, resumo, produtos, exportação, detalhe, payload, tratamento unitário/lote, monitoramento, realtime e UI. Inventário/attestation de consumidores externos é gate antes do deploy.
 - [ ] `CUT-12` Propagar um único correlation ID do request autenticado até o adapter Smart Notas, limitar `actorId` a identificador interno pseudônimo e atualizar `DEPLOY.md` com ordem atômica de variáveis/readiness/deploy/rollback.
-- [ ] `CUT-13` Promover por PR apenas uma tree Git equivalente ao candidato validado; registrar candidate SHA/tree OID, final main SHA/tree OID e fingerprint/digest da imagem. Mismatch bloqueia/aborta o cutover.
+- [ ] `CUT-13` Promover por PR apenas uma tree Git equivalente ao candidato validado; registrar candidate SHA/tree OID, final main SHA/tree OID e revision Railway. A imagem local é evidência source-level, não o OCI implantado; mismatch de tree bloqueia/aborta, e o primeiro smoke Stage valida os bits do rebuild remoto.
+- [ ] `CUT-14` Manter `uninotas-foundation:main` como autoridade independente após a promoção canônica; não sincronizar o gitlink documental em `MonitorNotes:main` neste closeout para evitar segundo auto-deploy. Registrar follow-up para o próximo release aprovado.
 
 ## Execution Lane Tracking (Required)
 
 - **Local implementation branches:** `MonitorNotes:delphi-and-foundation`; `uninotas-foundation:main` (canonical main-only documentation authority)
-- **Promotion lane path:** `delphi-and-foundation candidate tree -> exact-image local validation -> PR with identical final tree on main -> single Railway Stage customer-facing cutover -> Foundation runtime promotion`
+- **Promotion lane path:** `delphi-and-foundation candidate tree -> local source/build validation -> PR with identical final tree on main -> Railway remote rebuild -> single Stage customer-facing cutover -> independent Foundation runtime promotion`
 - **Lane-promoted threshold for this TODO:** `main com checkpoint aprovado e CI-equivalent verde`
 - **Production-ready threshold for this TODO:** `Stage customer-facing com smoke e 30 minutos de observação; rollback target atestado e, se acionado, restaurado em até 10 minutos; promoção Foundation concluída`
 - **Execution topology:** `principal checkout, single code writer; worktrees/auxiliary checkouts forbidden`
 
 ## Promotion Evidence
 
-| Scope Item | Local Branch/Commit | Main / Authority | Exact-Image Local Validation | Single Remote Target: Stage Customer-Facing | Current Status |
+| Scope Item | Local Branch/Commit | Main / Authority | Local Source/Build Validation | Single Remote Target: Stage Customer-Facing | Current Status |
 | --- | --- | --- | --- | --- | --- |
 | Backend + frontend read-only | `delphi-and-foundation@31712a042cab3c796d5daca7350c6c58453e1c73` | `pending promotion to main` | `pending final cutover suite` | `pending one direct cutover` | `published review candidate` |
 | Foundation cutover contract | `main@dbefd833e5c8da095ccfcae748663d066be1eb99` | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `published round-5 review baseline` |
@@ -108,7 +109,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 - Emissão/cancelamento, DANFE/XML e novos relatórios/exportações fiscais Smart Notas; a exportação legada de `/eventos` permanece em escopo apenas para restringi-la a erros.
 - Alteração de schema Prisma/PostgreSQL ou persistência de espelho/cache de notas.
 - Agregação “Todos”, polling, webhook ou retry automático da Smart Notas.
-- Mudança de escrita/tratamento das falhas Routerfy/n8n; o boundary de leitura `/eventos` será restringido a filas de erro/pendência/tratadas e deixará de expor sucessos.
+- Mudança de escrita das falhas Routerfy/n8n; o boundary `/eventos` será restrito somente a linhas cuja classificação original é `ERRO`, tratadas ou não. `PENDENTE` e `SUCESSO` deixam de ser elegíveis.
 - Redesign visual; correção indispensável à compatibilidade exigirá desvio explícito.
 - Worktrees, checkouts auxiliares ou branches de reconciliação sem autorização humana separada e nominal.
 - Deploy direto no `Stage` customer-facing sem alvo comprovado, aprovação específica e rollback disponível.
@@ -119,17 +120,18 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 | --- | --- | --- | --- |
 | `D-CUT-01` | Frontend e backend formam uma release Docker indivisível e serão promovidos juntos. | O backend serve o bundle Vite na mesma origem. | `frozen` |
 | `D-CUT-02` | Unifast e Prosperar são contextos fiscais separados; não há lista agregada. | Preserva identidade fiscal e contrato aprovado. | `frozen` |
-| `D-CUT-03` | Smart Notas é a única fonte de sucesso. Um predicado central baseado na classificação original autoriza apenas erro/pendência/tratamento e é aplicado a toda leitura/mutação `/eventos`, payload, resumo/produtos/exportação, monitoramento, realtime e UI; tentativa sobre sucesso falha fechado sem revelar sua existência. | Torna `logs error-only` um boundary executável, uniforme e testável. | `frozen; implementation pending renewed approval` |
+| `D-CUT-03` | Smart Notas é a única fonte de sucesso. Um predicado central autoriza somente linhas cuja classificação original é `ERRO`, tratadas ou não; `PENDENTE` e `SUCESSO` falham fechado em toda leitura/mutação `/eventos`, payload, resumo/produtos/exportação, monitoramento, realtime e UI, sem revelar existência. | Mantém `IntegrationErrorOccurrence` semanticamente fiel a falhas reais. | `frozen; implementation pending renewed approval` |
 | `D-CUT-04` | Segredos entram apenas por variáveis seladas do Railway; evidências não contêm valores. | Mantém configuração fora da imagem. | `frozen` |
 | `D-CUT-05` | Rollback primário reimplanta a release anterior; flag `false` é kill switch secundário. | A nova UI depende das rotas fiscais. | `frozen` |
-| `D-CUT-06` | `Stage` é o único alvo e recebe usuários reais; não existe staging/PR environment. O corte é direto após validação local da imagem exata, durante 20:00–22:00, com risco residual explícito de o primeiro smoke/rollback Railway ocorrer diante de usuários. | Remove a topologia fictícia e torna a limitação operacional parte da aprovação. | `frozen topology; renewed user approval required` |
+| `D-CUT-06` | `Stage` é o único alvo e recebe usuários reais; não existe staging/PR environment. O corte é direto após validação local da source tree/build candidato, durante 20:00–22:00; o primeiro smoke valida os bits do rebuild Railway diante de usuários. | Remove a topologia fictícia e explicita que build local não é OCI remoto. | `frozen topology; renewed user approval required` |
 | `D-CUT-07` | Rotação HMAC invalida `noteId` anterior e exige relistagem; sem grace period neste corte. | IDs são opacos/transitórios; reduz janela de segredo. | `frozen; user accepted 2026-09-27` |
 | `D-CUT-08` | Adotar os logs estruturados Railway com retenção Pro de 30 dias neste primeiro cutover; forwarding externo fica como hardening se surgir requisito superior. | O cutover não registra payload fiscal/segredo, e 30 dias cobre diagnóstico inicial sem infraestrutura extra. | `frozen; user accepted 2026-09-27` |
 | `D-CUT-09` | Ownership `note_read_model` só muda após smoke/observação verde no Stage, attestation pré-corte do rollback target e restore bem-sucedido caso tenha havido abort. | Documentação não pode antecipar realidade operacional nem alegar drill inexistente. | `frozen` |
 | `D-CUT-10` | Railway usará readiness separada que responde não-2xx quando PostgreSQL estiver indisponível; liveness não chama Smart Notas e o binding fiscal permanece em probe explícito. | Impede promover release sem autenticação/Erros e evita restart storm por dependência externa. | `frozen; implementation pending approval` |
 | `D-CUT-11` | Com a flag ativa, timeout `10 s`, concorrência `4`, `15 req/min` por usuário e `60 req/min` por contexto são variáveis obrigatórias sem fallback; ausência/valor divergente do envelope aprovado falha no startup. Aumentar budget exige nova evidência/aprovação. | Impede que defaults atuais `8/30/120` dobrem silenciosamente o envelope enquanto a quota do provedor é desconhecida. | `frozen fail-closed envelope` |
 | `D-CUT-12` | Logs operacionais guardam no máximo correlation ID e `actorId` interno pseudônimo por 30 dias; nunca e-mail/nome/payload fiscal; acesso restrito ao Owner e mantenedores autorizados. | Mantém correlação com minimização de dados. | `frozen` |
-| `D-CUT-13` | A identidade promovida é a tree Git validada, não necessariamente o mesmo commit SHA: branch candidata deve estar sobre o `main` atual; PR pode gerar novo SHA somente se `candidate^{tree} == final-main^{tree}`. Imagem/fingerprint fica ligada à tree; mismatch aborta. | Torna squash/merge/rebase compatível com governança sem permitir source drift antes do auto-deploy. | `frozen` |
+| `D-CUT-13` | A identidade source promovida é a tree Git validada: PR pode gerar novo SHA somente se `candidate^{tree} == final-main^{tree}`. Railway reconstrói com base/apt mutáveis, portanto o build local não é o mesmo OCI; revision/build remoto e smoke Stage validam os bits reais. | Preserva source equivalence sem alegar reprodutibilidade inexistente do Dockerfile atual. | `frozen; remote-rebuild risk requires final approval` |
+| `D-CUT-14` | A Foundation pós-cutover é autoridade em seu próprio `main`; o gitlink de `MonitorNotes` pode ficar intencionalmente no pin pré-promoção até o próximo release de produto aprovado. Não criar commit apenas documental em `MonitorNotes:main`, pois ele dispararia rebuild remoto. | Desacopla autoridade documental de deploy e evita um segundo cutover sem valor runtime. | `frozen; follow-up required` |
 
 ## Required Operational Decisions Before Approval
 
@@ -148,7 +150,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 ## Diff Expectation Contract
 
-- **Contract status:** `required; round-5 baseline checkpoint frozen`
+- **Contract status:** `required; round-6 refresh pending after artifact/domain/topology findings`
 - **Policy:** `strict; unclassified or forbidden paths block delivery`
 - **User validation:** `required on deviation`
 - **Comparison mode:** `working_tree after candidate checkpoint`
@@ -184,6 +186,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 | `uninotas-foundation` | `project_mandate.md` | `M` | alinhar mandato atual com Smart Notas/error-only |
 | `uninotas-foundation` | `domain_entities.md` | `M` | promover entidades/owners atuais |
 | `uninotas-foundation` | `system_roadmap.md` | `M` | registrar entrega observada e retirar estado futuro superseded |
+| `uninotas-foundation` | `technology_baseline.md` | `M` | promover adapter/config Smart Notas de target para runtime observado |
+| `uninotas-foundation` | `policies/query_path_guardrails.md` | `M` | retirar `logs` como note/event read model misto e fixar error-only |
 | `uninotas-foundation` | `todos/active/features/TODO-uninotas-smart-notas-read-cutover.md` | `M|D` | evidence/closeout movement |
 | `uninotas-foundation` | `todos/completed/features/TODO-uninotas-smart-notas-read-cutover.md` | `A` | closeout destination |
 | `uninotas-foundation` | `modules/fiscal-notes-and-documents.md` | `M` | promote read ownership |
@@ -235,14 +239,15 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 1. Confirmar topologia e obter inventário/attestation do Owner sobre consumidores externos de `/eventos`/`logs`; consumidor desconhecido bloqueia o deploy, salvo novo aceite explícito de hard cut.
 2. Obter `APROVADO`, carregar regras e implementar na branch de trabalho: budgets fail-closed `10 s/4/15/60`, readiness PostgreSQL-aware, correlation ID ponta a ponta, boundary error-only central e runbook.
 3. Executar testes focados, revisar o diff e congelar um novo checkpoint candidato contendo toda a implementação; registrar SHA e tree OID. Nenhum build anterior é evidência de entrega.
-4. Sobre essa tree exata, executar CI-equivalent completo, build Docker com fingerprint/digest, startup/readiness negativo, probes redatados dos dois emissores, carga near-limit e browser smoke autenticado local.
+4. Sobre essa tree exata, executar CI-equivalent completo e build Docker local como evidência source-level, além de startup/readiness negativo, probes redatados dos dois emissores, carga near-limit e browser smoke autenticado. Não alegar OCI idêntico ao rebuild Railway.
 5. Concluir auditorias delivery-side; rebasear somente se `main` mudou e, nesse caso, invalidar/repetir o checkpoint/validação. Preparar PR cuja tree final prevista seja idêntica à tree validada.
 6. Dentro de 20:00–22:00, preparar no Railway os cinco segredos/bindings e quatro budgets selados enquanto a release anterior continua servindo; revisar presença/escopo sem imprimir valores.
 7. Antes de promover `main`, registrar redatados: release verde anterior, revision candidata, source, diff de configuração, acesso aos logs e controle de redeploy. Este é attestation, não drill.
-8. Promover o PR para `main`, verificar imediatamente `candidate^{tree} == final-main^{tree}` e atestar o novo main SHA/tree. O auto-deploy pode usar SHA diferente, mas deve construir a mesma tree/fingerprint; mismatch aciona abort/rollback. Readiness impede troca se PostgreSQL falhar.
+8. Promover o PR para `main`, verificar imediatamente `candidate^{tree} == final-main^{tree}` e atestar o novo main SHA/tree. Railway faz rebuild remoto da mesma source tree com bits potencialmente diferentes; registrar revision/build remoto e usar readiness/smoke Stage como validação dos bits. Mismatch de tree aciona abort/rollback.
 9. Executar imediatamente smoke de API/navegador para os dois contextos, `/erros`, payload/tratamentos elegíveis, correlação, redaction e ausência de `SUCESSO`/fallback; observar por no mínimo 30 minutos.
 10. Em qualquer abort condition, usar o kill switch apenas como contenção e reimplantar a release anterior em até 10 minutos; validar login, `/erros` e UI anterior. Sem abort, nenhum drill remoto é alegado.
-11. Após janela verde e inventário externo limpo, promover capabilities/policies/módulos Foundation de forma atômica. Consumidor externo descoberto bloqueia a promoção e o deploy até coordenação ou novo aceite de hard cut.
+11. Após janela verde e inventário externo limpo, promover capabilities/policies/módulos/root docs Foundation de forma atômica. Consumidor externo descoberto bloqueia a promoção e o deploy até coordenação ou novo aceite de hard cut.
+12. Não sincronizar o novo commit Foundation em `MonitorNotes:main` neste closeout. Registrar o pin divergente e um follow-up para atualizar o gitlink dentro do próximo release de produto, onde a mudança entrará na tree validada sem deploy documental isolado.
 
 ## Health, Readiness and Rollback Contract
 
@@ -272,14 +277,15 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 - [ ] `DOD-CUT-03` Os dois pares fiscais são validados contra a empresa esperada sem exposição de segredo/CNPJ.
 - [ ] `DOD-CUT-04` Timeout, rate, concorrência e bytes/memória são calibrados para a topologia real sob carga near-limit.
 - [ ] `DOD-CUT-05` Logs têm sink, retenção, acesso e redaction comprovados.
-- [ ] `DOD-CUT-06` Imagem exata passa localmente em readiness, probes, API smoke, browser smoke e `/erros`; a ausência de alvo Railway isolado permanece risco aceito, não evidência simulada.
+- [ ] `DOD-CUT-06` A tree candidata passa localmente em build, readiness, probes, API/browser smoke e `/erros`; essa evidência não é tratada como OCI Railway idêntico.
 - [ ] `DOD-CUT-07` Release anterior e controle de redeploy são comprovados antes do corte; se acionado, rollback restaura a UI anterior em até 10 minutos.
 - [ ] `DOD-CUT-08` `Stage` customer-facing passa em lista/detalhe para ambos sem fallback/mistura por no mínimo 30 minutos na janela.
 - [ ] `DOD-CUT-09` Rotação HMAC falha fechado para ID antigo e relistagem produz IDs válidos.
-- [ ] `DOD-CUT-10` Um predicado central nega `SUCESSO` em lista, resumo, produtos, exportação, detalhe, payload, tratamento unitário/lote, monitoramento, realtime e UI; deploy/promoção exigem inventário externo limpo ou novo aceite explícito de hard cut.
+- [ ] `DOD-CUT-10` Um predicado central autoriza somente classificação original `ERRO` (tratada ou não) e nega `PENDENTE`/`SUCESSO` em lista, resumo, produtos, exportação, detalhe, payload, tratamento unitário/lote, monitoramento, realtime e UI; deploy/promoção exigem inventário externo limpo ou novo aceite de hard cut.
 - [ ] `DOD-CUT-11` Railway usa readiness PostgreSQL-aware não-2xx, liveness não chama Smart Notas e o runbook descreve variáveis fiscais, ordem atômica e rollback.
 - [ ] `DOD-CUT-12` Request, aplicação, upstream e filtro de erro reutilizam o mesmo correlation ID; logs retêm por 30 dias somente metadados redatados/`actorId` pseudônimo com acesso restrito.
-- [ ] `DOD-CUT-13` Candidate e final main possuem tree OID idêntico; imagem/fingerprint e deployment revision ficam ligados a essa tree, sem build de source divergente.
+- [ ] `DOD-CUT-13` Candidate e final main possuem tree OID idêntico; revision/build remoto fica ligado ao final main e seus bits passam readiness/smoke Stage, sem alegar digest idêntico ao build local.
+- [ ] `DOD-CUT-14` Promoção Foundation independente é concluída sem novo commit/deploy em `MonitorNotes:main`; gitlink divergente e follow-up do próximo product release ficam registrados.
 
 ## Validation Steps
 
@@ -291,11 +297,12 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 - [ ] `VAL-CUT-06` Executar smoke autenticado dos GETs e jornada browser `Geral -> detalhe -> Erros -> Geral` nos dois contextos.
 - [ ] `VAL-CUT-07` Inspecionar logs/respostas por padrão sensível sem registrar os valores pesquisados.
 - [ ] `VAL-CUT-08` Antes do corte, atestar no painel a release anterior, o controle de redeploy e o acesso do Owner sem acionar restore; se houver abort, registrar restore real/RTO e não reimplantar candidato automaticamente.
-- [ ] `VAL-CUT-09` Executar `cutover_integrity_audit` e testes negativos do predicado central provando ausência de bridge/dual-read e de exposição/tratamento `SUCESSO` em lista, resumo, produtos, exportação, detalhe, payload, lote, monitoramento, realtime e UI.
+- [ ] `VAL-CUT-09` Executar `cutover_integrity_audit` e testes do predicado central: somente `ERRO` original passa; `PENDENTE` e `SUCESSO` não podem ser lidos/tratados em lista, resumo, produtos, exportação, detalhe, payload, lote, monitoramento, realtime ou UI.
 - [ ] `VAL-CUT-10` Rodar guards Delphi de autoridade, diff, CI, revisão, completion e Foundation conforme a fase.
 - [ ] `VAL-CUT-11` Forçar PostgreSQL indisponível em ambiente local controlado e comprovar readiness não-2xx enquanto liveness do processo permanece bounded.
 - [ ] `VAL-CUT-12` Correlacionar um request sintético em controller/request context, service, adapter/upstream e exception filter com um único ID; revisar logs por PII/payload/segredo sem persistir os valores pesquisados.
-- [ ] `VAL-CUT-13` Comparar `git rev-parse <candidate>^{tree}` com `git rev-parse <final-main>^{tree}`, registrar SHA/tree/fingerprint redatados e confirmar no Railway a revision correspondente; qualquer diferença aborta.
+- [ ] `VAL-CUT-13` Comparar `candidate^{tree}` com `final-main^{tree}`, registrar SHAs/tree, build local como evidência separada, revision/build Railway e smoke dos bits remotos; tree mismatch ou smoke remoto falho aborta.
+- [ ] `VAL-CUT-14` Provar que o Dockerfile não consome a Foundation, registrar `Foundation main@sha` versus root gitlink pin e abrir follow-up para sincronização no próximo release sem mutar `MonitorNotes:main` agora.
 
 ## Completion Evidence Matrix
 
@@ -304,17 +311,18 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 | `DOD-CUT-01` | Definition of Done | checkpoint final | git/build | novo `branch@sha` após implementação + build verde | local/CI | `planned` | `31712a0` é baseline inicial, não artefato final |
 | `DOD-CUT-02` | Definition of Done | alvo/responsáveis | doc/manual | `environment-topology.md` redatado | Railway | `passed` | Owner/topologia confirmados |
 | `DOD-CUT-03` | Definition of Done | binding emissores | runtime | live probe redatado | local authorized runner | `planned` | ambos os contextos antes da janela |
-| `DOD-CUT-04` | Definition of Done | capacidade | load | relatório RLS near-limit | local exact image + Railway metrics | `planned` | budgets iniciais congelados |
+| `DOD-CUT-04` | Definition of Done | capacidade | load | relatório RLS near-limit | local candidate build + Railway metrics | `planned` | budgets iniciais congelados |
 | `DOD-CUT-05` | Definition of Done | auditoria | runtime/review | política + consulta redatada | Railway | `planned` | 30 dias confirmados; provar acesso/redaction |
-| `DOD-CUT-06` | Definition of Done | smoke pré-cutover | runtime/browser | API + browser evidence | local exact image | `planned` | sem alegar staging inexistente |
+| `DOD-CUT-06` | Definition of Done | smoke pré-cutover | runtime/browser | API + browser evidence | local candidate tree/build | `planned` | source-level; não prova OCI Railway |
 | `DOD-CUT-07` | Definition of Done | rollback | runtime | deployment IDs redatados + restore se acionado | Railway Stage | `planned` | alvo e controle antes do corte; RTO 10 min |
 | `DOD-CUT-08` | Definition of Done | cutover | runtime/browser | smoke + observação 30 min | Railway Stage customer-facing | `planned` | corte direto na janela aprovada |
-| `DOD-CUT-09` | Definition of Done | HMAC | test/runtime | relistagem após rotação | local exact image/Stage | `planned` | sem chave antiga |
+| `DOD-CUT-09` | Definition of Done | HMAC | test/runtime | relistagem após rotação | local candidate build/Stage | `planned` | sem chave antiga |
 | `DOD-CUT-10` | Definition of Done | error-only + promoção | tests/doc/validator/manual | central-predicate negative tests + external-consumer attestation + module/policy diffs | local + Owner + Foundation | `planned` | inventário antes do deploy; promoção após Stage verde |
 | `DOD-CUT-11` | Definition of Done | readiness/runbook | test/doc/runtime | HTTP negative test + `railway.json` + `DEPLOY.md` | local/Railway | `planned` | sem probe Smart Notas no health loop |
 | `DOD-CUT-12` | Definition of Done | correlação/privacy | test/log review | request ID end-to-end + redaction evidence | local/Railway | `planned` | actor interno, sem e-mail/nome |
-| `DOD-CUT-13` | Definition of Done | source/artifact identity | git/build/runtime | candidate/main tree OID + image fingerprint + Railway revision | local/GitHub/Railway | `planned` | SHA pode diferir; tree não |
-| `VAL-CUT-01..13` | Validation Steps | validações | mixed | preencher cada evidência durante execução | mixed | `planned` | agregado não substitui linhas no closeout |
+| `DOD-CUT-13` | Definition of Done | source/deployed identity | git/build/runtime | candidate/main tree OID + local build record + Railway revision/smoke | local/GitHub/Railway | `planned` | SHA pode diferir; tree não; OCI pode diferir |
+| `DOD-CUT-14` | Definition of Done | Foundation/gitlink topology | doc/git | canonical Foundation SHA + stale-pin record + follow-up | Foundation/MonitorNotes | `planned` | nenhum segundo deploy documental |
+| `VAL-CUT-01..14` | Validation Steps | validações | mixed | preencher cada evidência durante execução | mixed | `planned` | agregado não substitui linhas no closeout |
 
 ## External Dependency Readiness
 
@@ -341,7 +349,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 ## Complexity
 
 - **Level:** `big`
-- **Checkpoint policy:** `section-by-section: published checkpoint -> exact-image local validation -> direct Stage cutover -> 30-minute observation -> conditional canonical promotion`
+- **Checkpoint policy:** `section-by-section: published source checkpoint -> local candidate build validation -> Railway remote rebuild -> direct Stage smoke/30-minute observation -> conditional canonical promotion`
 - **Why this level:** release crítica cross-stack, dois contextos fiscais, dependência externa, segredos, capacidade, observabilidade e rollback real.
 
 ## Canonical Module Anchors
@@ -408,7 +416,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set: TODO + topology/dependency artifacts + railway/Docker/config/health/fiscal boundaries`
 - **Decision review status:** `findings_integrated`
-- **Decision review evidence / resolution:** quatro revisores independentes retornaram `BLOCKED` em rodadas sucessivas; o round 4 validou todas as decisões operacionais anteriores e encontrou 4 lacunas finais de governança (guard baseline, consumer matrix, PR/tree identity e upper canon). Todas foram integradas; round-5 freeze e confirmação limpa ainda são obrigatórios.
+- **Decision review evidence / resolution:** cinco revisores independentes retornaram `BLOCKED` em rodadas sucessivas; round 5 fechou R1–R4 e encontrou 4 decisões finais sobre rebuild OCI, semântica `PENDENTE`, dois documentos canônicos e gitlink pós-cutover. Todas foram integradas; round-6 freeze/confirmação limpa ainda são obrigatórios.
 
 | Finding ID | Severity | Approval-material | Resolution | Evidence in evolved plan |
 | --- | --- | --- | --- | --- |
@@ -430,12 +438,16 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 | `CONFIRM-ARCH-02` | high | yes | `Integrated` | predicado central cobre detalhe, payload e tratamentos unitário/lote além de todas as projeções; export legado foi desambiguado. |
 | `CONFIRM-ARCH-03` | high | yes | `Integrated` | whitelist inclui policy registry e todos os owner modules de errors/monitoring/realtime/treatments. |
 | `CONFIRM-ARCH-04` | high | yes | `Integrated` | `backend/src/common/**` autorizado e validação exige mesmo correlation ID em request/aplicação/upstream/erro. |
-| `CONFIRM-ARCH-05` | high | yes | `Integrated` | implementação precede novo checkpoint, CI/build e exact-image validation; só o mesmo SHA segue para main/Stage. |
+| `CONFIRM-ARCH-05` | high | yes | `Integrated` | implementação precede novo checkpoint/CI/build; somente a mesma source tree segue para main/Stage. |
 | `CONFIRM-ARCH-06` | medium | yes | `Integrated` | estados refletem novo drift e serão congelados no round 4 antes de reviews/guards. |
 | `R4-ARCH-01` | high | yes | `Integrated` | freeze passa a registrar somente Foundation commit/ref resolvível; código/root ficam em evidência separada. |
 | `R4-ARCH-02` | high | yes | `Integrated` | `Frontend / Consumer Matrix` cobre React, EventSource, UptimeRobot, Railway readiness, env e canon Foundation. |
-| `R4-ARCH-03` | high | yes | `Integrated` | `D-CUT-13` congela equivalência por tree OID/fingerprint entre candidate e final main via PR. |
+| `R4-ARCH-03` | high | yes | `Integrated` | `D-CUT-13` congela equivalência por tree OID entre candidate e final main via PR, sem equiparar OCI local/remoto. |
 | `R4-ARCH-04` | high | yes | `Integrated` | whitelist inclui constituição, mandato, entidades e roadmap para promoção canônica atômica. |
+| `R5-ARCH-01` | high | yes | `Integrated` | build local virou evidência source-level; rebuild Railway é não idêntico e seus bits são validados por readiness/smoke Stage. |
+| `R5-ARCH-02` | high | yes | `Integrated` | elegibilidade central exige classificação original `ERRO`; `PENDENTE` e `SUCESSO` são negados. |
+| `R5-ARCH-03` | high | yes | `Integrated` | whitelist inclui `technology_baseline.md` e `policies/query_path_guardrails.md`. |
+| `R5-ARCH-04` | high | yes | `Integrated` | Foundation fica autoridade independente; gitlink root não é sincronizado pós-cutover e recebe follow-up no próximo product release. |
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before cutover closeout`
 - **Adherence review kind:** `architecture_adherence`
@@ -449,11 +461,11 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 - **Why this decision:** release, segredos, dois contextos e promoção canônica exigem revisão reproduzível.
 - **Trigger stage:** `before first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `dbefd833e5c8da095ccfcae748663d066be1eb99`
-- **Baseline push reference:** `origin/main`
-- **Gate status:** `no_material_findings`
-- **Findings summary:** `R4-ARCH-01..04` foram integrados e publicados; baseline Foundation está no formato singular exigido pelo scope-drift guard.
-- **Evidence / reference:** `origin/main@dbefd833e5c8da095ccfcae748663d066be1eb99`; implementation candidate separado `MonitorNotes@31712a042cab3c796d5daca7350c6c58453e1c73`; root sync será evidência auxiliar, não baseline do guard.
+- **Baseline commit:** `pending round-6 Foundation checkpoint`; round 5 `dbefd833e5c8da095ccfcae748663d066be1eb99` está superseded pelos findings integrados.
+- **Baseline push reference:** `pending origin/main refresh`
+- **Gate status:** `blocked`
+- **Findings summary:** `R5-ARCH-01..04` mudaram materialmente artifact identity, error domain e pós-cutover topology; novo freeze é obrigatório.
+- **Evidence / reference:** implementation candidate permanece separado em `MonitorNotes@31712a042cab3c796d5daca7350c6c58453e1c73`; novo Foundation SHA será registrado após push.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Review Scope Drift
@@ -464,9 +476,9 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 - **Baseline source:** `Review Baseline Freeze -> Baseline commit`
 - **Material sections compared:** `Context|Contract Boundary|Scope|Out of Scope|Definition of Done|Validation Steps|Execution Lane Tracking|Decision Baseline|Architecture Change Governance|Assumptions Preview|Execution Plan|Security Risk Assessment|Performance & Concurrency Risk Assessment`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-cutover.md`
-- **Gate status:** `no_material_findings`
-- **Findings summary:** nenhum drift nas 22 seções materiais entre `dbefd83` e a attestation metadata corrente.
-- **Evidence / reference:** `review_scope_drift_guard.py`; `Overall outcome: go`; baseline `uninotas-foundation:main@dbefd833e5c8da095ccfcae748663d066be1eb99`, push ref `origin/main`, changed material sections `0`.
+- **Gate status:** `blocked`
+- **Findings summary:** round 5 introduziu drift material necessário; rerun somente após round-6 freeze e reviews.
+- **Evidence / reference:** reviewer `/root/cutover_architecture_round5`; `R5-ARCH-01..04` integrados, refresh pendente.
 - **Waiver authority / reference:** `n/a`.
 
 ## Frontend / Consumer Matrix
@@ -475,8 +487,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 | --- | --- | --- | --- |
 | `GET /api/v1/notas` | React `Geral`, `ListaNotas`, session cache | `implemented candidate; final tree validation pending` | fiscal contract/browser/cache suites + Stage smoke |
 | `GET /api/v1/notas/:noteId` | React `/notas/:noteId`, `DetalheNota` | `implemented candidate; final tree validation pending` | opaque-ID/detail/error tests + Stage smoke |
-| `/api/v1/eventos` list/resumo/produtos/export/detalhe/payload | React `/erros` + `/eventos/:refId`; external consumers unknown | `producer restriction and consumer alignment planned in this TODO` | central-predicate negative matrix; Owner external-consumer attestation before deploy; no waiver |
-| `/api/v1/eventos/*/tratamento` unitário/lote | React error-treatment flows | `producer guard planned; consumer behavior preserved only for eligible errors` | mutation tests deny `SUCESSO` without existence disclosure |
+| `/api/v1/eventos` list/resumo/produtos/export/detalhe/payload | React `/erros` + `/eventos/:refId`; external consumers unknown | `producer restricted to original ERRO rows; alignment planned in this TODO` | central-predicate matrix denies `PENDENTE`/`SUCESSO`; Owner attestation before deploy; no waiver |
+| `/api/v1/eventos/*/tratamento` unitário/lote | React error-treatment flows | `producer guard planned; behavior preserved only when original class is ERRO` | mutation tests deny `PENDENTE`/`SUCESSO` without existence disclosure |
 | `GET /api/v1/realtime/eventos` | React `useTempoReal`/EventSource somente em `/erros` | `producer filter + consumer evidence planned` | SSE contract test + browser proof that Geral/detalhe fiscal do not connect |
 | `GET /api/v1/monitoramento/erros` | UptimeRobot | `response shape preserved; source projection becomes error-only` | controller/service contract + authorized monitor smoke; no success count authority |
 | `GET /api/v1/prontidao` | Railway deployment healthcheck | `new producer/config consumer planned` | PostgreSQL-down non-2xx test + `railway.json` exact path + deployed readiness evidence |
@@ -489,7 +501,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 - **Strategy:** verification-first para deploy; nenhuma mutação fiscal externa.
 - **Local:** suites, fail-closed config, build Docker, lint/build e Foundation.
 - **External read-only:** `/empresa`, lista e detalhe nos dois contextos.
-- **Browser:** imagem exata local com fingerprint e interceptação controlada; depois smoke imediato no único `Stage` customer-facing.
+- **Browser:** build local da source tree com interceptação controlada; depois smoke imediato dos bits reconstruídos no único `Stage` customer-facing.
 - **Capacity:** latência, quota, concorrência e memória near-limit.
 - **Rollback:** release anterior identificada/acionável antes do corte; restore real somente em abort porque não há alvo isolado, com risco residual explicitamente aprovado e RTO de 10 minutos.
 
@@ -507,7 +519,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 ## Plan Review Gate
 
 - **Review decision:** `required`
-- **Review status:** `round-5 frozen; architecture confirmation and independent critique pending`
+- **Review status:** `round-5 findings integrated; round-6 freeze and confirmation pending`
 - **Required lenses:** architecture, operations, rollback, security, tests, performance, observability and structural soundness.
 - **Known plan finding:** o health atual retorna HTTP 2xx quando o banco está degradado; `D-CUT-10` agora exige readiness separada não-2xx e mantém Smart Notas fora do loop.
 - **Approval request condition:** nova revisão confirma `D-CUT-06..12`, crítica converge, baseline é atualizado e guards retornam `go/preflight-go`.
@@ -653,8 +665,9 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 ## Questions To Close
 
-- `approval final deve aceitar explicitamente o cutover direto no único Stage customer-facing, o risco de o primeiro rollback Railway ocorrer com usuários, os thresholds/RTO congelados e retenção por 30 dias do actorId interno pseudônimo.`
+- `approval final deve aceitar explicitamente o cutover direto no único Stage customer-facing, o rebuild Railway não idêntico ao build local, o primeiro smoke/rollback com usuários, os thresholds/RTO congelados e retenção por 30 dias do actorId interno pseudônimo.`
 - `antes do deploy, o Owner deve atestar se existe consumidor externo de sucesso em /eventos/logs; se existir ou permanecer desconhecido, o deploy fica bloqueado até coordenação ou novo aceite explícito de hard cut.`
+- `approval final também aceita o gitlink MonitorNotes intencionalmente atrás da Foundation pós-cutover até o próximo product release aprovado, evitando segundo auto-deploy documental.`
 
 ## Early Approval Signal
 
