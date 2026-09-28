@@ -40,7 +40,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** registrar a arquitetura round34 limpa e despachar crítica fresca sobre material/attestation/architecture refs exatas; somente depois rerodar coherence/drift. Nenhuma implementação ou mutação Railway está autorizada.
+- **Next exact step:** despachar crítica fresca round34 sobre material/attestation/architecture refs exatas; somente depois rerodar coherence/drift. Nenhuma implementação ou mutação Railway está autorizada.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -123,8 +123,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Scope Item | Local Branch/Commit | Main / Authority | Local Source/Build Validation | Single Remote Target: Stage Customer-Facing | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Backend + frontend read-only | round34 material/attestation carriers `769f1d8f6922c84efd74dad479d124aaa30c9f1d`/`dcd6eecd6557b87f90d453238889d68568a08f9c`; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73` | `pending promotion to main` | `pending final cutover suite` | `pre-implementation capacity hard stop; otherwise direct fiscal cutover` | `round34 published/attested; architecture rerun pending` |
-| Foundation cutover contract | round34 material/attestation `f7bedfcebbfd12e83e853bbac94ab4eba112bd78`/`eaf9428a1824dbb4cd79451aae755591b60b130d` | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round34 published/attested; architecture rerun pending` |
+| Backend + frontend read-only | round34 material/attestation/architecture carriers `769f1d8f6922c84efd74dad479d124aaa30c9f1d`/`dcd6eecd6557b87f90d453238889d68568a08f9c`/`1720ccaadaaeeb8527027fbef20f74e63861a07b`; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73` | `pending promotion to main` | `pending final cutover suite` | `pre-implementation capacity hard stop; otherwise direct fiscal cutover` | `round34 architecture clean; critique pending` |
+| Foundation cutover contract | round34 material/attestation/architecture `f7bedfcebbfd12e83e853bbac94ab4eba112bd78`/`eaf9428a1824dbb4cd79451aae755591b60b130d`/`218b336ebd5c0895cf9a069b5f37d1c4d26524e1` | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round34 architecture clean; critique pending` |
 
 ## Out of Scope
 
@@ -739,7 +739,7 @@ Transições não pulam evidência: REC-2B exige nenhum Active; REC-3A exige rev
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set: TODO + topology/dependency artifacts + railway/Docker/config/health/fiscal boundaries`
 - **Decision review status:** `no_material_findings`
-- **Decision review evidence / resolution:** `reviewRound=34`; material/attestation Foundation `f7bedfcebbfd12e83e853bbac94ab4eba112bd78`/`eaf9428a1824dbb4cd79451aae755591b60b130d`; root carriers `769f1d8f6922c84efd74dad479d124aaa30c9f1d`/`dcd6eecd6557b87f90d453238889d68568a08f9c`; arquitetura causal limpa `/tmp/uninotas-cutover-round34b-architecture.GBSi7l/dispatch.json`, SHA-256 `23429a55ee1ca47103bf0b568332a8f745012a10641a15c37aea1f7b700ac742`, zero findings. A primeira opinião round34 permanece histórica/provisória por `R34-GOV-01`; nenhum material mudou entre as duas opiniões.
+- **Decision review evidence / resolution:** `reviewRound=34`; material/attestation/architecture record Foundation `f7bedfcebbfd12e83e853bbac94ab4eba112bd78`/`eaf9428a1824dbb4cd79451aae755591b60b130d`/`218b336ebd5c0895cf9a069b5f37d1c4d26524e1`; root carriers `769f1d8f6922c84efd74dad479d124aaa30c9f1d`/`dcd6eecd6557b87f90d453238889d68568a08f9c`/`1720ccaadaaeeb8527027fbef20f74e63861a07b`; arquitetura causal limpa `/tmp/uninotas-cutover-round34b-architecture.GBSi7l/dispatch.json`, SHA-256 `23429a55ee1ca47103bf0b568332a8f745012a10641a15c37aea1f7b700ac742`, zero findings. A primeira opinião round34 permanece histórica/provisória por `R34-GOV-01`; nenhum material mudou entre as duas opiniões.
 
 | Finding ID | Severity | Approval-material | Resolution | Evidence in evolved plan |
 | --- | --- | --- | --- | --- |
