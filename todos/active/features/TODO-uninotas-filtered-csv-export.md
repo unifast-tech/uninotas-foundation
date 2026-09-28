@@ -37,7 +37,7 @@ Smart Notas evidencia paginação numérica, mas não cursor/snapshot nem ordena
 ## Active Work State (Required While TODO Remains In `active/`)
 
 - **Work state:** `review`
-- **Why this state now:** achados de arquitetura/performance foram incorporados; novo baseline e reviews ainda são necessários.
+- **Why this state now:** achados R7 foram incorporados ao contrato; novo baseline e reviews finais ainda são necessários.
 - **Exit condition:** aprovação explícita e authority guard pós-aprovação em `go`, ou bloqueio formal.
 
 ## Provisional Notes
@@ -81,7 +81,7 @@ Smart Notas evidencia paginação numérica, mas não cursor/snapshot nem ordena
 | whole export deadline | `180s` | deadline absoluto monotônico; AbortController cobre espera/I/O e o serializer confere o deadline por chunks |
 | CSV payload | `24 MiB` incluindo BOM | contador UTF-8 durante serialização; exceder retorna 422 sem response body CSV |
 | exports per fiscal context | `1` ativo por instância | admission guard fail-fast; libera em success/error/abort |
-| exports globally | `2` por instância | consequência de dois contextos e limite acima |
+| exports globally | `min(2, maxConcurrency - 1)` por instância, com máximo absoluto `2` | com default `8`, são `2`; com `maxConcurrency=2`, é `1`; abaixo disso a exportação fica indisponível |
 | export per actor | `1` ativo globalmente por instância e no máximo `1` início por rolling minute | start consome uma unidade de `ratePerUserMinute`; pages não duplicam user charge; cooldown impede reacquisition imediata |
 | upstream calls per export | `<= 200`, sequenciais | uma chamada ativa por export |
 | shared provider-call budget | cada list/detail page e cada export page consome o mesmo budget configurado por contexto | contador/scheduler único; export nunca contorna `ratePerContextMinute` |
@@ -138,15 +138,15 @@ Query opcional:
 | `504` | `ExportacaoFiscalPrazoExcedido` | deadline total de 180s |
 | existing mapped status | existing provider code | credencial, contrato, indisponibilidade, quota externa ou timeout de uma página |
 
-Abort por desconexão do cliente encerra o trabalho e não tenta responder. Não há retry.
+Abort por desconexão do cliente encerra o trabalho e não tenta responder. O `AbortSignal` e o deadline monotônico são conferidos antes e depois de cada yield/chunk do serializer, além de cobrirem espera e I/O. Não há retry.
 
 ### Atomic Admission and `Retry-After`
 
-Antes da primeira chamada provider, uma seção crítica síncrona por instância prepara/limpa a janela fixa e avalia, sem mutação, configuração mínima, actor ativo/cooldown, contexto ativo, limite global, user fixed-window budget e `MAX_ACTOR_BUCKETS` para novo ator. Se qualquer condição rejeitar, nenhum contador, cooldown ou lease é alterado.
+Antes da primeira chamada provider, uma seção crítica síncrona por instância amostra `wallNow` e `monotonicNow` exatamente uma vez e avalia, sem mutação, configuração mínima, actor ativo/cooldown, contexto ativo, limite global, user fixed-window budget e `MAX_ACTOR_BUCKETS` para novo ator. A visão projetada ignora buckets fora da janela efetiva, mas não os remove. Se qualquer condição rejeitar, o estado bruto inteiro — buckets inclusive — permanece byte-for-byte equivalente.
 
-Somente quando todas passam, a mesma seção crítica: consome exatamente uma unidade do user budget; grava o início do rolling cooldown de 60s; e adquire leases de actor/context/global. O cooldown conta do start aceito e permanece consumido mesmo se a chamada posterior falhar, pois o trabalho foi admitido. Leases ativos são liberados em success/error/abort. Cada provider page consome depois o scheduler/budget de contexto; indisponibilidade temporária de token espera até o deadline e termina em 504 se não houver tempo, nunca vira uma segunda cobrança de usuário.
+Somente quando todas passam, a mesma seção crítica faz um único commit atômico: remove buckets fora da janela efetiva; avança o high-water da janela; consome exatamente uma unidade do user budget; grava o início do rolling cooldown de 60s; e adquire leases de actor/context/global. A primeira aceitação de uma janela executa o cleanup uma vez; rejeições nunca o executam. O cooldown conta do start aceito e permanece consumido mesmo se a chamada posterior falhar, pois o trabalho foi admitido. Leases ativos são liberados em success/error/abort. Cada provider page consome depois o scheduler/budget de contexto; falta temporária de token do contexto não é bloqueio pré-admissão: exatamente um contender elegível é admitido, espera até o deadline e termina em 504 se não houver tempo, sem segunda cobrança de usuário. `exportShare=0` continua configuração incapaz e aceita zero.
 
-Relógios têm papéis separados: `wallNow` governa somente a janela fixa existente (`floor(epochMs/60_000)`) e sua virada; `monotonicNow` governa cooldown, pacing e deadline e nunca retrocede. Cooldown expira quando `monotonicNow >= acceptedStart + 60_000`. Todo `Retry-After` usa `max(1, ceil(remainingMs/1000))`.
+Relógios têm papéis separados. Para cada decisão, `rawWindow=floor(wallNow/60_000)` e `effectiveWindow=max(lastCommittedWindow, rawWindow)`; o high-water só muda num start aceito, logo regressão do wall clock nunca reabre budget já consumido. `monotonicNow` governa cooldown, pacing e deadline e nunca retrocede. Cooldown expira quando `monotonicNow >= acceptedStart + 60_000`. Todo `Retry-After` usa `max(1, ceil(remainingMs/1000))`; para budget/capacidade fixa, `remainingMs=(effectiveWindow+1)*60_000-wallNow`, que pode exceder 60s sob regressão e permanece fail-closed.
 
 Mapeamento determinístico quando uma tentativa é rejeitada:
 
@@ -155,14 +155,14 @@ Mapeamento determinístico quando uma tentativa é rejeitada:
 3. se o único bloqueio for user fixed-window ou `MAX_ACTOR_BUCKETS` sem slot para novo ator: `LimiteDeConsultaExcedido`, com segundos até a próxima janela fixa;
 4. token temporário do context budget após admissão espera; deadline produz `ExportacaoFiscalPrazoExcedido` 504.
 
-Buckets de ator pertencem à janela fixa em que foram usados. Na primeira admissão/check de uma nova janela, o mesmo `prepareWindow` existente remove buckets cuja `window` difere da atual antes de verificar capacidade; portanto, bucket-capacity sempre usa `Retry-After` até a próxima fronteira fixa. Testes injetam ambos os relógios e cobrem colisões, fronteira exata da janela fixa, cleanup, salto/regressão de wall clock sem estender cooldown, expiração monotônica exata, arredondamento/minimum-one, `MAX_ACTOR_BUCKETS`, rejeição sem mutation e liberação de leases em todos os exits. Cooldown aceito permanece após success/error/abort; leases sempre são liberados.
+Buckets de ator pertencem à janela efetiva em que foram aceitos. O precheck usa uma projeção read-only que descarta logicamente buckets de outra janela; somente o commit aceito remove esses buckets fisicamente. Um ator já presente não precisa de novo slot; ator novo é comparado com a contagem projetada. Testes observam estado bruto e cobrem: rejeição sem qualquer mutação; virada com cleanup somente no primeiro aceito; salto/regressão de wall clock; uma amostra de cada relógio por decisão; fronteira exata; expiração monotônica exata; arredondamento/minimum-one; `MAX_ACTOR_BUCKETS`; e liberação de leases em todos os exits. Cooldown aceito permanece após success/error/abort; leases sempre são liberados.
 
 ## Pagination Consistency Contract
 
 Após a primeira página válida, congelar `perPage`, `total`, `totalPages`. Se `total=0`, exigir `totalPages=0` e `items=[]`, retornar 204 e não aplicar regras de página final. Para `total>0`, exigir:
 
 1. `returned.page === requestedPage`;
-2. os quatro metadados permanecem idênticos;
+2. os três metadados congelados (`perPage`, `total`, `totalPages`) permanecem idênticos; `page` varia e já é validado pela regra 1;
 3. `totalPages === Math.ceil(total / perPage)`;
 4. página não-final contém exatamente `perPage` itens;
 5. página final contém exatamente `total - perPage * (totalPages - 1)` itens;
@@ -253,7 +253,7 @@ Antes de executar `ST-EXPORT`, ambos os baselines serão obrigatoriamente refeit
 | `uninotas-foundation` | `todos/completed/features/TODO-uninotas-filtered-csv-export.md` | `A` | destino de closeout |
 | `uninotas-foundation` | `todos/active/features/TODO-uninotas-fiscal-workspace-ux.md` | `M` | coordenação/rebaseline serial entre histórias |
 | `uninotas-foundation` | `artifacts/feature-briefs/uninotas-fiscal-workspace-improvements.md` | `M` | coordenação do objetivo de release |
-| `uninotas-foundation` | `modules/fiscal-notes-and-documents.md` | `M` | contrato estável, antes do código como primeiro passo aprovado |
+| `uninotas-foundation` | `modules/fiscal-notes-and-documents.md` | `M` | contrato estável consolidado no gate pré-aprovação |
 | `uninotas-foundation` | `artifacts/publication-manifest.txt` | `M` | publicação dos paths finais |
 
 ### Not Expected Changed Paths
@@ -299,6 +299,21 @@ O serializer fica em `backend/src/fiscal-notes/`; não criar `common/csv.ts` enq
 - [x] `EX-D-07` Exportação assíncrona/persistida fica fora; filtros acima do envelope precisam ser reduzidos.
 - [x] `EX-D-08` Raw `idCompra`/`chaveAcesso` entram no arquivo para leitores autenticados; não logar esses valores.
 
+## Module Decision Consistency Gate
+
+- **Primary module:** `foundation_documentation/modules/fiscal-notes-and-documents.md`
+- **Gate status:** `no_material_findings`
+
+| Module decision | Disposition | TODO alignment |
+| --- | --- | --- |
+| Smart Notas é a única autoridade de notas | `Preserve` | export lê somente Smart Notas; PostgreSQL/logs não participa |
+| contexto fiscal é único por operação | `Preserve` | `contextoFiscal` obrigatório; agregado permanece fora |
+| perfis leitores existentes compartilham o read boundary | `Preserve` | os quatro perfis podem exportar os mesmos campos já autorizados |
+| list/detail são bounded e sem payload/PII | `Preserve` | export adiciona boundary próprio, limites explícitos e CSV allowlisted |
+| módulo ainda descrevia apenas list/detail | `Supersede` | módulo agora registra `GET /api/v1/notas/exportar` como capacidade planejada |
+| ativação/runtime real depende de cutover | `Preserve` | entrega termina em `Local-Implemented`; nenhum claim de deploy |
+| DANFE/XML, emissão e logs de integração | `Out of Scope` | nenhuma mudança neste TODO |
+
 ## Assumptions Preview
 
 | ID | Assumption | Concrete Evidence | If False | Confidence | Handling |
@@ -311,7 +326,7 @@ O serializer fica em `backend/src/fiscal-notes/`; não criar `common/csv.ts` enq
 
 ## Execution Plan
 
-1. Como primeiro passo pós-aprovação, atualizar `modules/fiscal-notes-and-documents.md` com este contrato público congelado antes de editar código.
+1. Confirmar que o módulo fiscal consolidado e este TODO permanecem 1:1 antes de editar código.
 2. Criar testes backend fail-first para DTO/rota/erros, 0/1/200/201 páginas, 20k/20k+1, deadline I/O+CPU, bytes, budget/admission configuráveis, consistência, CSV e logs sanitizados.
 3. Implementar filtro base + DTOs, erros/filtro global, coordinator/service com scheduler comum por contexto, serializer fiscal-local chunked e controller thin; não chamar recursivamente `FiscalNotesService.list()`.
 4. Criar testes frontend/race/browser fail-first para filtros aplicados, 204, duplicate, filter change, navigation, logout, 401, abort, URL lifecycle e late response.
@@ -322,7 +337,7 @@ O serializer fica em `backend/src/fiscal-notes/`; não criar `common/csv.ts` enq
 ## Test Strategy
 
 - **Backend test-first:** port/fetch, relógio e pacing injetáveis; nenhum acesso real no suite determinístico.
-- **Deadline CPU:** serializer confere relógio monotônico em cada chunk (máximo 500 linhas), faz yield cooperativo entre chunks e aborta antes de produzir Buffer se o prazo venceu.
+- **Deadline CPU:** serializer confere relógio monotônico e `AbortSignal` antes e depois de cada chunk/yield (máximo 500 linhas) e aborta antes de produzir Buffer se prazo ou cliente encerrou.
 - **Frontend test-first:** extrair somente um pequeno coordinator/hook se necessário para testar ownership; não duplicar filtro.
 - **Browser:** APIs interceptadas provam UX/download; não é prova cross-stack.
 - **Cross-stack:** specs NestJS provam HTTP/CSV; smoke real fica no cutover.
@@ -378,6 +393,14 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 | `R5-H01` | `high` | admission GET muta counters/cooldown/leases sob concorrência | BCI required com exact-once bursts 5/10/20 |
 | `R5-H02` | `high` | clocks, rounding, actor bucket cap e incap branches incompletos | wall/monotonic separados + precedência e fixtures completas |
 | `R6-H01/M02` | `high, medium` | BCI não distinguia eligible/pre-blocked e bucket cleanup estava implícito | oráculos 1/0 separados + lifecycle na janela fixa congelado |
+| `R7-AR-H01/CR-H02` | `high` | cleanup mutante contradizia rejeição sem mutação | projeção read-only + cleanup somente no commit aceito; oráculo usa estado bruto |
+| `R7-AR-M01/CR-H04` | `high` | regressão/amostras de relógio podiam reabrir budget ou divergir header | amostra única + `effectiveWindow` não regressiva + Retry-After fail-closed |
+| `R7-CR-H01` | `high` | `page` era contado entre quatro metadados invariáveis | somente `perPage/total/totalPages` invariáveis; `page === requestedPage` |
+| `R7-CR-H03/H05` | `high` | token de contexto e topologias BCI não tinham oráculos exatos | matriz setup/aceitos/erro/delta e distinção admission versus HTTP congeladas |
+| `R7-AR-M02/CR-M01` | `medium` | limite global dizia 2 e fórmula variável | fórmula `min(2,maxConcurrency-1)`, máximo absoluto 2 |
+| `R7-CR-M02` | `medium` | serializer não checava client abort por chunk | signal/deadline antes e depois de todo chunk/yield |
+| `R7-AR-M03/CR-M03` | `medium` | módulo canônico ainda não continha o endpoint planejado | módulo sincronizado + gate `Preserve/Supersede/Out of Scope` |
+| `R7-CR-M04` | `medium` | ledger usava taxonomia inválida | categorias normalizadas à taxonomia do projeto |
 
 ### Residual Risks
 
@@ -398,11 +421,11 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 - **Gate decision:** `required`
 - **Baseline branch:** `uninotas-foundation/main`
-- **Baseline commit:** `20b633ef1f0335b67bb2792c52bdea68e917c8b1`
+- **Baseline commit:** `f4d3f185a79a451bda463890d4eedc34bd81d740`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** findings R5 de BCI/clocks/incapable branches foram integrados em baseline material isolado e publicado.
-- **Evidence / reference:** `origin/main` contém `20b633ef1f0335b67bb2792c52bdea68e917c8b1`; material export está congelado nesse commit.
+- **Findings summary:** findings R6 de oráculos BCI elegível/pré-bloqueado e lifecycle do limite de actor buckets foram integrados em baseline material isolado e publicado.
+- **Evidence / reference:** `origin/main` contém `f4d3f185a79a451bda463890d4eedc34bd81d740`; material export está congelado nesse commit.
 
 ## Gate: Review Scope Drift
 
@@ -430,9 +453,9 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 ## Independent No-Context Critique Gate
 
 - **Critique decision:** `required`
-- **Critique status:** `not_run`
-- **Findings summary:** R3 encontrou actor-budget ambíguo e spec ausente; ambos integrados em `ce8ef118`; R4 pendente.
-- **Evidence / reference:** reviewer `/root/fiscal_split_critique_r3`.
+- **Critique status:** `running`
+- **Findings summary:** R7 encontrou contradições de cleanup/paginação, clocks, topologias BCI, abort e taxonomia; todas foram integradas ao contrato e módulo, pendentes de fresh rerun.
+- **Evidence / reference:** reviewers `/root/filtered_export_architecture_r7` e `/root/filtered_export_critique_r7`.
 - **Isolation:** `fresh internal no-context reviewer; cannot implement`
 - **Lenses:** `correctness|performance|security|elegance|structure|operational fit`.
 
@@ -527,9 +550,26 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 ### BCI planned evidence
 
-- **Invariant `FISCAL-EXPORT-ADMISSION-01`:** em estado inicialmente elegível, cada conjunto de starts simultâneos do mesmo ator/contexto aceita exatamente um contender, que consome uma user unit, cria um cooldown e adquire cada lease uma vez; todo rejeitado deixa todos os counters/cooldowns/leases imutáveis. Em estado pre-blocked/incapable (configuração, budget, bucket cap ou lease já ocupado), aceita exatamente zero e toda tentativa preserva o estado. Success/error/abort de um aceito liberam leases exatamente uma vez, sem remover cooldown aceito.
-- Bursts `5/10/20` cobrem mesmo ator/mesmo contexto, atores distintos/mesmo contexto, mesmo ator/contextos distintos e atores/contextos distintos sob limite global.
-- Cobrir `wallNow` em ambos os lados da fronteira fixa, `monotonicNow` antes/exatamente/depois do expiry, wall regression/jump, `MAX_ACTOR_BUCKETS`, `maxConcurrency < 2`, export share zero, user budget esgotado, collision de todos os bloqueios e arredondamento `max(1,ceil)`.
+- **Invariant `FISCAL-EXPORT-ADMISSION-01`:** “aceito” significa concessão atômica de admissão/leases, não HTTP 200. Em estado elegível, cada burst concede exatamente as admissões da matriz abaixo; cada aceito consome uma user unit, cria um cooldown e adquire leases uma vez. Todo rejeitado preserva o estado bruto. Success/error/abort liberam leases exatamente uma vez sem apagar budget/cooldown aceitos.
+- **Concurrency policy:** `simultaneous-start/barrier`; cada batch começa de fixture isolada determinística. Executar bursts `5/10/20` e, para evidência `BCI-E3`, `20 operações x 5 batches` por topologia, registrando `concurrency_policy`, setup, accepted count, status/header e delta bruto de estado.
+
+| Setup / topology | Accepted admissions | Rejected result | Exact state oracle |
+| --- | --- | --- | --- |
+| elegível, mesmo ator/contexto | `1` | `429 ExportacaoFiscalOcupada`; precedência/max congelados | `+1` user unit, `+1` cooldown, `+1` actor/context/global lease; losers `delta=0` |
+| elegível, atores distintos/mesmo contexto | `1` | `429 ExportacaoFiscalOcupada`, mínimo lease `Retry-After=5` | um conjunto de charges/leases; losers `delta=0` |
+| elegível, mesmo ator/contextos distintos | `1` | `429 ExportacaoFiscalOcupada`, actor lease/cooldown | um conjunto de charges/leases; losers `delta=0` |
+| elegível, atores distintos/contextos distintos | `min(2,maxConcurrency-1)` limitado aos dois contextos | excedentes `429 ExportacaoFiscalOcupada` | exatamente um charge/cooldown por aceito e leases correspondentes |
+| user fixed-window budget já esgotado | `0` | `429 LimiteDeConsultaExcedido`; segundos até fronteira da janela efetiva | estado bruto idêntico |
+| configuração incapaz (`maxConcurrency<2` ou `exportShare=0`) | `0` | `429 ExportacaoFiscalOcupada; Retry-After=60` | estado bruto idêntico; zero provider call |
+| actor/context/global lease já bloqueia | `0` | `429 ExportacaoFiscalOcupada`; precedência/max congelados | estado bruto idêntico |
+| token de contexto temporariamente indisponível, demais gates elegíveis | mesma contagem do topology elegível | aceito espera; deadline vira `504`, não `429` de admissão | admissão/charge persistem; lease libera no exit |
+| actor bucket em `cap-1`, novo ator elegível | `1` | n/a | projected/raw bucket count chega ao cap |
+| actor buckets no cap, novo ator | `0` | `429 LimiteDeConsultaExcedido`; fronteira efetiva | nenhum bucket criado/removido |
+| actor buckets no cap, ator já existente e sem outro bloqueio | `1` | n/a | nenhum novo slot; unit/cooldown/leases do ator existente |
+| nova janela com buckets stale e tentativa depois rejeitada | `0` | código/header da causa real | estado bruto idêntico; stale permanece |
+| nova janela com buckets stale e tentativa aceita | conforme topology elegível | n/a | stale removido exatamente uma vez no commit; bucket atual criado |
+
+- Cobrir amostra única de `wallNow`/`monotonicNow`, ambos os lados e a fronteira fixa exata, monotônico antes/exatamente/depois do expiry, wall regression `W10→W9→W10` sem reabrir W10, wall jump, `MAX_ACTOR_BUCKETS`, colisões de todos os bloqueios e arredondamento `max(1,ceil)`.
 - Artifact planejado: `foundation_documentation/artifacts/tmp/uninotas-export-pcv/bci-pcv1.json`.
 
 ### RLS planned evidence
@@ -563,13 +603,15 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 | Finding ID | Severity | Classification | Routing Decision | Same TODO / Split Rationale | Status | Approval / Follow-up Reference |
 | --- | --- | --- | --- | --- | --- | --- |
-| `REV-01..09` | `high, medium` | `plan-correction` | `same TODO` | contrato original de exportação | `integrated_pending_rerun` | R3 architecture/critique |
-| `R2-H1..H5,R2-M1..M2` | `high, medium` | `plan-correction` | `same TODO` | budget, audit, guards e gates pertencem ao endpoint | `integrated_pending_rerun` | R3 architecture/critique |
-| `EX-M01..M03` | `medium` | `plan-correction` | `same TODO` | compatibilidade downloader/auth/audit dentro da feature | `integrated_pending_rerun` | R3 architecture/critique |
-| `logs-csv-hardening` | `medium` | `security-follow-up` | `split` | serializer legado em `backend/src/logs/**` está fora deste diff | `deferred` | abrir TODO separado sem bloquear export fiscal |
+| `REV-01..09` | `high, medium` | `release-blocker` | `same TODO` | contrato original de exportação | `integrated_pending_rerun` | reviews R1-R7 |
+| `R2-H1..H5,R2-M1..M2` | `high, medium` | `release-blocker` | `same TODO` | budget, audit, guards e gates pertencem ao endpoint | `integrated_pending_rerun` | reviews R2-R7 |
+| `EX-M01..M03` | `medium` | `release-blocker` | `same TODO` | compatibilidade downloader/auth/audit dentro da feature | `integrated_pending_rerun` | reviews R2-R7 |
+| `R3-EX-H01,R3-EX-M02,R4-EX-H01,R5-H01..H02,R6-H01/M02` | `high, medium` | `release-blocker` | `same TODO` | admissão, clocks, capacidade e owners pertencem ao endpoint | `integrated_pending_rerun` | reviews R3-R7 |
+| `R7-AR-H01,R7-AR-M01..M03,R7-CR-H01..H05,R7-CR-M01..M04` | `high, medium` | `release-blocker` | `same TODO` | contratos de paginação, admissão, BCI, módulo e governança | `integrated_pending_rerun` | architecture/critique R7 |
+| `logs-csv-hardening` | `medium` | `follow-up-hardening` | `split` | serializer legado em `backend/src/logs/**` está fora deste diff | `deferred` | requer TODO próprio antes do closeout se confirmado pelo security gate |
 
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
-- **Reason:** aguardando baseline, fresh reviews e aprovação.
+- **Reason:** aguardando publicação do baseline R7, fresh reviews finais e aprovação.
 - **Target after implementation:** `Local-Implemented`, sem deploy.
