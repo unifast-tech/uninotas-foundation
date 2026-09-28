@@ -235,14 +235,14 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 
 ## Decisions
 
-- [ ] `D-01` Preservar o detalhe atual de 27 propriedades; nenhuma nova implementação de `notasDetalhe`.
-- [ ] `D-02` Expor dois endpoints subordinados a `noteId`, nunca `idInterno` cru.
-- [ ] `D-03` Resolver URL somente por clique; sem prefetch, persistência ou cache.
-- [ ] `D-04` Retornar exatamente HTTP `200 {documentType, availability:'available', url:string}` ou HTTP `202 {documentType, availability:'pending', url:null}`; todas as três propriedades são obrigatórias, nenhuma extra é pública e a mensagem upstream nunca é ecoada.
-- [ ] `D-05` Validar URL absoluta até `8 KiB`, HTTPS/443, sem username/password/hash e com origin exata `https://files.smart-notas.com` ou `https://storage.smart-notas.com.br`; como não há fetch server-side, não existe SSRF. Frontend nunca mostra a URL crua, usa `noopener`/`noreferrer` e mantém fallback seguro acionável.
-- [ ] `D-06` Reutilizar rate/concurrency/audit do módulo; operação documental é interativa e possui nomes fixos `pdf|xml`, nunca paths/URLs dinâmicos em log.
-- [ ] `D-07` Menu por nota é disclosure acessível, não `role=menu`; apenas um fica aberto. Um owner por tela aceita somente a primeira ação enquanto pending, desabilita todas as ações documentais, ignora bursts iguais e aborta/invalida por fechar menu, navegar, trocar nota/tela, logout ou unmount.
-- [ ] `D-08` Aumentar glifo para pelo menos `20px` e caixa para `44x44px`, sem biblioteca de ícones.
+- [x] `D-01` Preservar o detalhe atual de 27 propriedades; nenhuma nova implementação de `notasDetalhe`.
+- [x] `D-02` Expor dois endpoints subordinados a `noteId`, nunca `idInterno` cru.
+- [x] `D-03` Resolver URL somente por clique; sem prefetch, persistência ou cache.
+- [x] `D-04` Retornar exatamente HTTP `200 {documentType, availability:'available', url:string}` ou HTTP `202 {documentType, availability:'pending', url:null}`; todas as três propriedades são obrigatórias, nenhuma extra é pública e a mensagem upstream nunca é ecoada.
+- [x] `D-05` Validar URL absoluta até `8 KiB`, HTTPS/443, sem username/password/hash e com origin exata `https://files.smart-notas.com` ou `https://storage.smart-notas.com.br`; como não há fetch server-side, não existe SSRF. Frontend nunca mostra a URL crua, usa `noopener`/`noreferrer` e mantém fallback seguro acionável.
+- [x] `D-06` Reutilizar rate/concurrency/audit do módulo; operação documental é interativa e possui nomes fixos `pdf|xml`, nunca paths/URLs dinâmicos em log.
+- [x] `D-07` Menu por nota é disclosure acessível, não `role=menu`; apenas um fica aberto. Um owner por tela aceita somente a primeira ação enquanto pending, desabilita todas as ações documentais, ignora bursts iguais e aborta/invalida por fechar menu, navegar, trocar nota/tela, logout ou unmount.
+- [x] `D-08` Aumentar glifo para pelo menos `20px` e caixa para `44x44px`, sem biblioteca de ícones.
 
 ## Module Decision Baseline Snapshot
 
@@ -256,7 +256,7 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 
 ## Decision Baseline (Frozen Before Implementation)
 
-- [ ] `D-01..D-08` serão congeladas após review baseline, sem decisão material pendente.
+- [x] `D-01..D-08` congeladas no baseline final, sem decisão material pendente.
 
 ## Architecture Change Governance
 
@@ -289,11 +289,11 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 - **Why this decision:** TODO medium/cross-stack com contrato público e URL fiscal externa.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `10a30d3dc8fa8603b6e2cd70a55247313311f706`
+- **Baseline commit:** `295234e6ccf825392c4c80064a17803bdf6d533d`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** `três rounds foram integrados; HTTP inclui outcomes upstream/local/auth, pcv-1 usa registries fechados e preflight possui schema completo; contrato recongelado antes do quarto round; nenhuma implementação foi incluída`.
-- **Evidence / reference:** `uninotas-foundation@10a30d3dc8fa8603b6e2cd70a55247313311f706`, publicado em `origin/main` via Windows Git Credential Manager após o Git WSL não encontrar credencial.
+- **Findings summary:** `round 4 convergiu sem findings; paths concretos das duas premissas live foram adicionados para satisfazer coherence e recongelados após o drift guard; nenhuma implementação foi incluída`.
+- **Evidence / reference:** `uninotas-foundation@295234e6ccf825392c4c80064a17803bdf6d533d`, publicado em `origin/main` via Windows Git Credential Manager após o Git WSL não encontrar credencial.
 - **Waiver authority / reference:** `n/a`.
 - **Pre-freeze packet-prep rule:** `planning rows remain prepared-pre-freeze until the pushed baseline exists`.
 
@@ -318,9 +318,9 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 - **Material sections compared:** `Context|Contract Boundary|Scope|Out of Scope|Definition of Done|Validation Steps|Execution Lane Tracking|Canonical Module Anchors|Decisions|Decision Baseline|Architecture Change Governance|Questions To Close|Assumptions Preview|Execution Plan|Flow Evidence Planning Matrix|Local CI-Equivalent Suite Matrix|Runtime / Rollout Notes|Security Risk Assessment|Performance & Concurrency Risk Assessment`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo uninotas-foundation/todos/active/features/TODO-uninotas-fiscal-note-documents.md`
 - **No-go handling rule:** `revalidar qualquer drift material com o usuário e repetir freeze/review afetada`.
-- **Gate status:** `not_run`
-- **Findings summary:** `pending`.
-- **Evidence / reference:** `pending`.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** `após refresh em 295234e e critique r5, zero seções materiais diferem; working tree contém somente ponteiro/evidência de baseline e review`.
+- **Evidence / reference:** `review_scope_drift_guard.py` retornou `Overall outcome: go`, 23 seções comparadas e zero mudanças materiais contra `295234e6ccf825392c4c80064a17803bdf6d533d`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Questions To Close
@@ -487,7 +487,7 @@ Every public JSON property above is required. `url` is non-null only for `availa
 - [ ] Browser pode bloquear abertura automática após fetch; fallback visível obrigatório remove o bloqueio funcional.
 - [ ] O OpenAPI usa uma origin de exemplo diferente da observada no probe Prosperar; ambas ficam allowlisted. Unifast ainda precisa de smoke redatado no cutover porque suas credenciais locais estão vazias. Qualquer terceira origin exige revisão material antes de ser aceita.
 
-### Independent Critique Findings — Round 1
+### Independent Critique Findings — Rounds 1–5
 
 | Finding | Severity | Resolution | Evidence / Contract Change |
 | --- | --- | --- | --- |
@@ -503,7 +503,7 @@ Every public JSON property above is required. `url` is non-null only for `availa
 | `CRIT-DOC-007` preflight incompleto | `medium` | `Integrated` | ingestion table com cinco campos e routing tuple canônico; guard será executado somente após convergência |
 
 - **Critique status:** `no_material_findings`; rounds 1–3 findings integrados e round 4 convergiu sem findings.
-- **Critique evidence:** reviewers `fresh-no-context-plan-critic`, `r2`, `r3`, `r4`; dispatches `/tmp/uninotas-documents-critique*.dispatch.json`; baseline final `10a30d3dc8fa8603b6e2cd70a55247313311f706`; r4 classificou performance/elegância/solidez como `strong_positive` e operational fit como `acceptable`.
+- **Critique evidence:** reviewers `fresh-no-context-plan-critic`, `r2`, `r3`, `r4`, `r5`; dispatches `/tmp/uninotas-documents-critique*.dispatch.json`; baseline final `295234e6ccf825392c4c80064a17803bdf6d533d`; r4/r5 convergiram sem findings e classificaram performance/elegância/solidez como `strong_positive`, operational fit `acceptable`.
 
 ## Additional Architectural Opinions
 
@@ -609,9 +609,9 @@ Artifacts in `running|passed` must carry every `pcv-1` evidence field, including
 - **Worktree / auxiliary-checkout authorization:** `not-authorized`
 - **Worktree authorization evidence:** `n/a`
 - **Writer scheduling policy:** `single-writer-serialized`
-- **Guard outcome:** `pending after critique convergence`
+- **Guard outcome:** `go`
 - **Waiver / exception reference:** `n/a`
-- **Guard evidence:** `todo_authority_guard.py --pre-approval must return preflight-go; no implementation authority is implied`.
+- **Guard evidence:** `agent_role_routing_guard.py` retornou `Overall outcome: go` para `codex/implementation/routine-executor/gpt-5.6-terra/medium`, topology principal single-writer e worktree not-authorized. `todo_authority_guard.py --pre-approval` retornou `Overall outcome: preflight-go`, 7 rule-ingestion rows e zero violations; nenhum dos dois concede implementação.
 
 ## Approval
 
