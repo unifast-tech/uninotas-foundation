@@ -40,7 +40,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** publicar e atestar o material round 20 com timer-CAS, datasource session-affine e drenagem all-boots, então executar nova confirmação arquitetural independente; nenhuma mutação Railway está autorizada.
+- **Next exact step:** concluir a attestation metadata-only do material round 20 e executar nova confirmação arquitetural independente; nenhuma mutação Railway está autorizada.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -105,8 +105,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Scope Item | Local Branch/Commit | Main / Authority | Local Source/Build Validation | Single Remote Target: Stage Customer-Facing | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Backend + frontend read-only | round-19 predecessor material root `6f7ba148c0e3df3bddd97f5990db8f83527455d9` / attestation carrier `eba81393921cfead8fe127e4712b4eaf094cd170`; round-20 root irá ao review gate; code-origin `31712a0` | `pending promotion to main` | `pending final cutover suite` | `pending one direct cutover` | `planning round 20 material publication pending` |
-| Foundation cutover contract | round-19 predecessor material `e07c2ac79dfac70ceee99e5ae87bebb229300861` / attestation `ab752d9e7812a84dea38061cb5bde652adb0a099`; round-20 material irá ao review gate | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round-20 material publication pending` |
+| Backend + frontend read-only | round-20 material root `5029599006f859d3486bd8044a73c3de5badd94b`; code-origin `31712a0`; attestation carrier pending | `pending promotion to main` | `pending final cutover suite` | `pending one direct cutover` | `round-20 material frozen; metadata attestation pending` |
+| Foundation cutover contract | round-20 material `5e547eb159ccd07d7cdfbf9f404b992ffb3d2a4a`; attestation pending | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round-20 material frozen; metadata attestation pending` |
 
 ## Out of Scope
 
@@ -556,7 +556,7 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no merge; `RE
 - **Decision review lifecycle:** `after review baseline freeze and before APROVADO`
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set: TODO + topology/dependency artifacts + railway/Docker/config/health/fiscal boundaries`
-- **Decision review status:** `round-20 material publication pending`
+- **Decision review status:** `round-20 confirmation pending`
 - **Decision review evidence / resolution:** dezenove revisores independentes retornaram `BLOCKED` em rodadas sucessivas. Round 19 validou identity/epoch do opener, mas encontrou timer stale (`R19-OPS-BCI-01`), rollback olhando só o boot roteado (`R19-OPS-BCI-02`), hipótese não congelada de session affinity (`R19-OPS-DB-01`) e precedência 409/503 ambígua (`R19-API-01`). Timer-CAS, inventário all-boots, direct/session-affine gate e precedence stale-first integram a correção; publicação e nova confirmação são obrigatórias.
 
 | Finding ID | Severity | Approval-material | Resolution | Evidence in evolved plan |
@@ -660,11 +660,11 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no merge; `RE
 - **Why this decision:** release, segredos, dois contextos e promoção canônica exigem revisão reproduzível.
 - **Trigger stage:** `before first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `e07c2ac79dfac70ceee99e5ae87bebb229300861`
+- **Baseline commit:** `5e547eb159ccd07d7cdfbf9f404b992ffb3d2a4a`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `running`
-- **Findings summary:** `R19-OPS-BCI-01/02`, `R19-OPS-DB-01` e `R19-API-01` foram integrados no candidato material round 20; publicação, attestation metadata-only e confirmação independente permanecem pendentes.
-- **Evidence / reference:** predecessor Foundation `origin/main@e07c2ac79dfac70ceee99e5ae87bebb229300861`; predecessor root `MonitorNotes/delphi-and-foundation@6f7ba148c0e3df3bddd97f5990db8f83527455d9`; round-20 refs serão registradas após publicação; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73`; Delphi guard `ee9b448`.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** `R19-OPS-BCI-01/02`, `R19-OPS-DB-01` e `R19-API-01` foram integrados e publicados no material round 20; esta attestation não altera seções materiais; confirmação independente permanece pendente.
+- **Evidence / reference:** Foundation material `origin/main@5e547eb159ccd07d7cdfbf9f404b992ffb3d2a4a`; root material `MonitorNotes/delphi-and-foundation@5029599006f859d3486bd8044a73c3de5badd94b`; refs verificadas com `git rev-parse --verify`; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73`; Delphi guard `ee9b448`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Review Scope Drift
@@ -675,9 +675,9 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no merge; `RE
 - **Baseline source:** `Review Baseline Freeze -> Baseline commit`
 - **Material sections compared:** `canonical defaults, incluindo Diff Expectation Contract, Module Decision Baseline Snapshot e Decision Baseline (Frozen Before Implementation)`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-cutover.md`
-- **Gate status:** `not_run`
-- **Findings summary:** os achados round 19 alteraram material de aprovação; scope drift só pode ser atestado após publicar/revisar o freeze round 20 e comprovar attestation metadata-only.
-- **Evidence / reference:** predecessor congelado em `uninotas-foundation:main@e07c2ac79dfac70ceee99e5ae87bebb229300861`; attestation metadata-only será verificada pelo guard após convergência round 20.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** attestation round 20 preserva todas as seções materiais do baseline publicado; confirmação arquitetural ainda é obrigatória.
+- **Evidence / reference:** `review_scope_drift_guard.py` contra `uninotas-foundation:main@5e547eb159ccd07d7cdfbf9f404b992ffb3d2a4a`; resultado esperado `go`, `0/23` seções materiais alteradas nesta attestation.
 - **Waiver authority / reference:** `n/a`.
 
 ## Frontend / Consumer Matrix
@@ -725,7 +725,7 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no merge; `RE
 ## Plan Review Gate
 
 - **Review decision:** `required`
-- **Review status:** `round-20 material publication pending; metadata-only attestation and architecture confirmation follow`
+- **Review status:** `round-20 material frozen; metadata-only attestation and architecture confirmation pending`
 - **Required lenses:** architecture, operations, rollback, security, tests, performance, observability and structural soundness.
 - **Known plan finding:** o health atual retorna HTTP 2xx quando o banco está degradado; `D-CUT-10` agora exige readiness separada não-2xx e mantém Smart Notas fora do loop.
 - **Approval request condition:** nova revisão confirma `D-CUT-06..24`, crítica converge, baseline é atualizado e guards retornam `go/preflight-go`.
