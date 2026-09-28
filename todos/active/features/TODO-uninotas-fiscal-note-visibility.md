@@ -531,13 +531,13 @@ Todos os campos abaixo são propriedades obrigatórias no JSON. `string|null` ac
 - **Why this decision:** planning-side reviews must evaluate a committed and pushed scope-bearing contract.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `main`
-- **Baseline commit:** `2d4bb67acf71cbe2404b3e11476c270d42d7b1d5`
+- **Baseline commit:** `f4fef68f088c0ade68650db7803c968dd4c548d2`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
 - **Findings summary:** final scope-bearing contract includes exact 17/27-field DTOs, signed/decodificável route semantics, split list/detail records, bounded export evidence, all 21 requested fields, explicit preservation of four existing detail fields and no number search/persistence/CSV expansion.
-- **Evidence / reference:** authority guards returned `go`; final scope baseline `2d4bb67acf71cbe2404b3e11476c270d42d7b1d5` was committed and pushed to `origin/main`; critique changes were non-material clarifications authored by the fresh critic.
+- **Evidence / reference:** authority guards returned `go`; final canonical-format baseline `f4fef68f088c0ade68650db7803c968dd4c548d2` was committed and pushed to `origin/main`; differences after `2d4bb67` are gate evidence and schema-only anti-pattern/routing formatting with unchanged functional contract.
 - **Waiver authority / reference:** `n/a`
-- **Pre-freeze packet-prep rule:** `satisfied; architecture convergence ran after 3b94edc and the final critic authored only the two clarifications frozen in 2d4bb67`
+- **Pre-freeze packet-prep rule:** `satisfied; reviews cover the unchanged functional contract and the final refresh only normalized required governance schemas/evidence`
 
 ## Gate: Review Scope Drift
 - **Gate decision:** `required`
