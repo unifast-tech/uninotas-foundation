@@ -40,7 +40,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** publicar o baseline reconvergido com os findings arquiteturais integrados, executar revalidação/crítica independente e buscar `preflight-go`; nenhuma mutação Railway está autorizada.
+- **Next exact step:** executar confirmação arquitetural e crítica independente sobre o baseline publicado, depois guards e `preflight-go`; nenhuma mutação Railway está autorizada.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -100,7 +100,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 | Scope Item | Local Branch/Commit | Main / Authority | Exact-Image Local Validation | Single Remote Target: Stage Customer-Facing | Current Status |
 | --- | --- | --- | --- | --- | --- |
 | Backend + frontend read-only | `delphi-and-foundation@31712a042cab3c796d5daca7350c6c58453e1c73` | `pending promotion to main` | `pending final cutover suite` | `pending one direct cutover` | `published review candidate` |
-| Foundation cutover contract | `main@815a0edd5141cc1d44bd5617df5884353fbc10eb` | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `published reconverged review baseline` |
+| Foundation cutover contract | `main@f49a479b3b18ee3ccacc1a04f08a3be21a7d689a` | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `published round-3 review baseline` |
 
 ## Out of Scope
 
@@ -145,7 +145,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 ## Diff Expectation Contract
 
-- **Contract status:** `required; revalidation findings integrated, refreshed baseline pending`
+- **Contract status:** `required; round-3 baseline checkpoint frozen`
 - **Policy:** `strict; unclassified or forbidden paths block delivery`
 - **User validation:** `required on deviation`
 - **Comparison mode:** `working_tree after candidate checkpoint`
@@ -155,7 +155,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 | Repository | Path | Baseline ref | Comparison mode |
 | --- | --- | --- | --- |
 | `MonitorNotes` | `.` | `31712a042cab3c796d5daca7350c6c58453e1c73` | `committed_diff` |
-| `uninotas-foundation` | `foundation_documentation` | `815a0edd5141cc1d44bd5617df5884353fbc10eb` | `committed_diff` |
+| `uninotas-foundation` | `foundation_documentation` | `f49a479b3b18ee3ccacc1a04f08a3be21a7d689a` | `committed_diff` |
 
 ### Expected Changed Paths
 
@@ -422,11 +422,11 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 - **Why this decision:** release, segredos, dois contextos e promoção canônica exigem revisão reproduzível.
 - **Trigger stage:** `before first planning-side review or guard run`
 - **Baseline branch:** `MonitorNotes:delphi-and-foundation` + `uninotas-foundation:main`
-- **Baseline commit:** código preservado em `MonitorNotes@31712a042cab3c796d5daca7350c6c58453e1c73`; Foundation `815a0edd5141cc1d44bd5617df5884353fbc10eb` foi revisada e está superseded pelos findings integrados ainda não publicados.
-- **Baseline push reference:** `MonitorNotes/delphi-and-foundation` publicado; refresh de `uninotas-foundation:main` pendente sob autoridade documental main-only.
-- **Gate status:** `blocked`
-- **Findings summary:** `REVAL-ARCH-01..06` alteraram materialmente lane, budgets, error-only boundary, rollback e scope; novo freeze é obrigatório.
-- **Evidence / reference:** revalidação `/root/cutover_architecture_revalidation`; novo SHA será registrado depois do push autorizado pela lane documental.
+- **Baseline commit:** `MonitorNotes@31712a042cab3c796d5daca7350c6c58453e1c73` + `uninotas-foundation@f49a479b3b18ee3ccacc1a04f08a3be21a7d689a`.
+- **Baseline push reference:** `MonitorNotes/delphi-and-foundation` + `uninotas-foundation:main`; SHAs publicados e verificados remotamente.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** `REVAL-ARCH-01..06` foram integrados e publicados; o checkpoint funcional continua imutável e a Foundation round-3 governa a nova revisão.
+- **Evidence / reference:** push Foundation `2520c38..f49a479`; `rev-parse`/`ls-remote` iguais em `f49a479b3b18ee3ccacc1a04f08a3be21a7d689a`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Review Scope Drift
