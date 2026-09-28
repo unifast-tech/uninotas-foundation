@@ -36,7 +36,7 @@ Em 2026-09-28, o usuário esclareceu que a exportação deve abranger **todos os
 | `ST-UX` | Usar um workspace fiscal legível, alinhado, com marca e navegação coerentes | `todos/active/features/TODO-uninotas-fiscal-workspace-ux.md` | React/Vite, ativo local, CSS, acessibilidade e browser; sem novo endpoint | `1` |
 | `ST-EXPORT` | Baixar todas as notas que pertencem ao contexto e aos filtros aplicados | `todos/active/features/TODO-uninotas-filtered-csv-export.md` | NestJS + cliente React, CSV seguro, paginação bounded, corrida/cancelamento e carga; sem deploy | `2` |
 
-Os dois TODOs podem receber aprovação na mesma conversa, mas mantêm implementação, risco e evidência independentes. O executor permanece serializado no checkout principal.
+Os dois TODOs podem receber aprovação na mesma conversa, mas mantêm implementação, risco e evidência independentes. O executor permanece serializado no checkout principal. Depois do closeout local de `ST-UX` e antes de iniciar `ST-EXPORT`, o segundo TODO deve rebaselinar produto e Foundation sobre o estado consolidado, reclassificar o diff e repetir coherence/drift/authority; qualquer mudança material exige review e aprovação renovados.
 
 ## Provider Constraint
 

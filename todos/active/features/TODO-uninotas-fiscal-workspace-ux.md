@@ -51,7 +51,7 @@ A validação visual da primeira versão do UniNotas mostrou selects ilegíveis 
 ## Scope
 
 - [ ] `SCOPE-UX-01` Corrigir select/campo/opções e indicadores de foco para contraste WCAG nos temas claro e escuro.
-- [ ] `SCOPE-UX-02` Alinhar controles da barra pela base; manter atualização automática de contexto/status/datas; remover `Atualizar`; manter `Aplicar filtros` somente para Documento e ID da compra.
+- [ ] `SCOPE-UX-02` Alinhar controles da barra pela base; manter carga automática ao mudar contexto/status/datas e ao retornar com cache stale; remover `Atualizar` da barra; manter `Aplicar filtros` somente para Documento e ID da compra; preservar retry contextual `Tentar novamente` quando a listagem falhar.
 - [ ] `SCOPE-UX-03` Versionar e usar como ativo local a imagem oficial anexada, preservando fallback textual acessível.
 - [ ] `SCOPE-UX-04` Reorganizar o header com marca, `Smart Notas` e `Processamento das notas`; ambos os destinos permanecem disponíveis a todos os usuários autenticados.
 - [ ] `SCOPE-UX-05` Substituir o bloco textual de sessão por botão de configurações que mostre conta/perfil e contenha tema, senha, sair e Equipe somente para ADMIN.
@@ -79,13 +79,14 @@ A validação visual da primeira versão do UniNotas mostrou selects ilegíveis 
 - **Contract status:** `required`
 - **Policy:** `strict`
 - **Comparison mode:** `working_tree`
+- **User validation:** `required on deviation`
 
 ### Repository Baselines
 
-| Repository | Baseline ref | Notes |
-| --- | --- | --- |
-| `MonitorNotes` | `release/uninotas-smart-notas@a4b5a0eb6ae96291ffe5c6e16f297b64dcd62f29` | preservar `artifacts/**` e gitlink preexistentes |
-| `uninotas-foundation` | `main@9cffb901c063ad581d3519f5009814f38f7ec5db` | autoridade canônica antes do split |
+| Repository | Path | Baseline ref | Comparison mode |
+| --- | --- | --- | --- |
+| `MonitorNotes` | `.` | `release/uninotas-smart-notas@a4b5a0eb6ae96291ffe5c6e16f297b64dcd62f29` | `working_tree` |
+| `uninotas-foundation` | `foundation_documentation` | `main@feaf2e090927aa15087ee9ea4185886f749586e6` | `working_tree` |
 
 ### Expected Changed Paths
 
@@ -93,28 +94,39 @@ A validação visual da primeira versão do UniNotas mostrou selects ilegíveis 
 | --- | --- | --- | --- |
 | `MonitorNotes` | `frontend/public/marca-unifast.jpeg` | `A` | imagem oficial fornecida |
 | `MonitorNotes` | `frontend/src/componentes/Cabecalho.tsx` | `M` | marca, navegação e disclosure |
-| `MonitorNotes` | `frontend/src/paginas/ListaNotas.tsx` | `M` | filtros e paginação |
+| `MonitorNotes` | `frontend/src/paginas/ListaNotas.tsx` | `M` | filtros, retry contextual e paginação |
 | `MonitorNotes` | `frontend/src/hooks/useTema.ts` | `M` | somente se necessário para seleção explícita de tema |
 | `MonitorNotes` | `frontend/src/estilos/*.css` | `M` | contraste, alinhamento, disclosure e respiro |
-| `MonitorNotes` | `frontend/e2e/notas.mjs`, `frontend/e2e/notas-unit.ts` | `M` | comportamento e acessibilidade |
+| `MonitorNotes` | `frontend/e2e/notas.mjs` | `M` | jornada browser e acessibilidade |
+| `MonitorNotes` | `frontend/e2e/notas-unit.ts` | `M` | comportamento unitário |
 | `MonitorNotes` | `frontend/README.md` | `M` | navegação/validação, se desatualizado |
-| `uninotas-foundation` | este TODO e destino completed | `M|D|A` | evidência/closeout |
+| `MonitorNotes` | `uninotas-foundation` | `M` | gitlink acompanha publicação Foundation governada |
+| `MonitorNotes` | `artifacts/**` | `??` | estado preexistente do usuário; aceitar no diff, nunca stagear/alterar |
+| `uninotas-foundation` | `todos/active/features/TODO-uninotas-fiscal-workspace-ux.md` | `M, D` | evidência e closeout |
+| `uninotas-foundation` | `todos/completed/features/TODO-uninotas-fiscal-workspace-ux.md` | `A` | destino de closeout |
 | `uninotas-foundation` | `modules/fiscal-notes-and-documents.md` | `M` | navegação/UX estável no closeout |
+| `uninotas-foundation` | `artifacts/publication-manifest.txt` | `M` | publicação dos paths finais |
 
 ### Not Expected Changed Paths
 
-| Repository | Path glob | Reason |
-| --- | --- | --- |
-| `MonitorNotes` | `backend/**`, `backend/prisma/**` | pacote frontend-only |
-| `MonitorNotes` | `frontend/src/api/**` | nenhum contrato HTTP novo |
-| `MonitorNotes` | `Dockerfile`, `docker-compose.yml`, `.github/**`, `*.env*` | runtime/pipeline/config fora do escopo |
-| `MonitorNotes` | `artifacts/**` | estado preexistente do usuário |
-| `uninotas-foundation` | `project_constitution.md`, `system_roadmap.md`, `policies/**`, `deterministic/**` | sem mudança estratégica/validator |
+| Repository | Path glob | Change types | Reason |
+| --- | --- | --- | --- |
+| `MonitorNotes` | `backend/**` | `any` | pacote frontend-only |
+| `MonitorNotes` | `frontend/src/api/**` | `any` | nenhum contrato HTTP novo |
+| `MonitorNotes` | `Dockerfile` | `any` | runtime fora do escopo |
+| `MonitorNotes` | `docker-compose.yml` | `any` | runtime fora do escopo |
+| `MonitorNotes` | `.github/**` | `any` | pipeline fora do escopo |
+| `MonitorNotes` | `backend/.env*` | `any` | config fora do escopo |
+| `MonitorNotes` | `frontend/.env*` | `any` | config fora do escopo |
+| `uninotas-foundation` | `project_constitution.md` | `any` | sem mudança estratégica |
+| `uninotas-foundation` | `system_roadmap.md` | `any` | sem mudança estratégica |
+| `uninotas-foundation` | `policies/**` | `any` | sem mudança de política |
+| `uninotas-foundation` | `deterministic/**` | `any` | sem mudança de validator |
 
 ## Definition of Done
 
 - [ ] `DOD-UX-01` Selects, opções, bordas e foco são legíveis em claro/escuro: texto normal >= 4.5:1; fronteira e foco >= 3:1.
-- [ ] `DOD-UX-02` Filtros e CTA alinham; contexto/status/datas continuam automáticos; Documento/ID dependem de Aplicar; `Atualizar` inexiste.
+- [ ] `DOD-UX-02` Filtros e CTA alinham; contexto/status/datas continuam disparando carga automática; Documento/ID dependem de Aplicar; `Atualizar` inexiste na barra e erro oferece `Tentar novamente` sem mudar o filtro.
 - [ ] `DOD-UX-03` A imagem anexada aparece como marca oficial local com fallback acessível.
 - [ ] `DOD-UX-04` `Smart Notas` abre a última Geral e `Processamento das notas` abre `/erros` para todos os perfis autenticados.
 - [ ] `DOD-UX-05` Configurações mostra nome, e-mail e perfil; expõe tema, senha e sair; Equipe somente para ADMIN.
@@ -126,26 +138,26 @@ A validação visual da primeira versão do UniNotas mostrou selects ilegíveis 
 
 - [x] `UX-D-01` Usar disclosure simples contendo conteúdo, links e botões normais; não usar `role=menu`.
 - [x] `UX-D-02` O ícone de configurações terá nome acessível; estado aberto/fechado é local ao header.
-- [x] `UX-D-03` Escape fecha e devolve foco; clique externo fecha; navegação fecha naturalmente por unmount.
+- [x] `UX-D-03` Escape fecha e devolve foco; clique externo fecha; cada link/ação fecha explicitamente e mudança de location fecha o disclosure, pois o header permanece montado entre rotas.
 - [x] `UX-D-04` `Processamento das notas` substitui o rótulo genérico `Erros` na navegação principal, preservando `/erros`.
-- [x] `UX-D-05` A marca é copiada byte a byte do JPEG fornecido para `frontend/public/marca-unifast.jpeg`; nenhuma geração/alteração visual.
-- [x] `UX-D-06` Nenhuma ação manual de refresh permanece na Geral; o cache/revalidation existente não muda.
+- [x] `UX-D-05` A marca é copiada byte a byte do JPEG quadrado fornecido para `frontend/public/marca-unifast.jpeg`; SHA-256 `72cfcd5c1e7c221560af23ae4a56d010793178e8a3e3334c3c2ada8828a7e034`, geometria `256x256`; nenhuma geração/alteração visual e CSS usa contain, não crop.
+- [x] `UX-D-06` Nenhuma ação genérica de refresh permanece na barra; falha da listagem mantém `Tentar novamente`, acionando o refresh já existente e evitando perda de recovery.
 
 ## Assumptions Preview
 
-| ID | Assumption | Concrete Evidence | If False | Handling |
-| --- | --- | --- | --- | --- |
-| `UX-A-01` | `/erros` é o destino PostgreSQL existente para todos os autenticados | `frontend/src/App.tsx:21-33`; `frontend/src/App.tsx:36-45` | exige mudança de rota/permissão | renovar aprovação |
-| `UX-A-02` | tema atual já possui owner único reutilizável | `frontend/src/hooks/useTema.ts`; `frontend/src/componentes/Cabecalho.tsx:36-73` | exige refatorar contrato de tema | manter dentro do frontend se local |
-| `UX-A-03` | atualização automática atual pertence ao contexto/lista | `frontend/src/paginas/ListaNotas.tsx:9-19`; `frontend/src/contextos/NotasFiscaisContexto.tsx` | remoção do botão poderia impedir revalidação | bloquear e revisar |
-| `UX-A-04` | imagem anexada é a marca autorizada | JPEG anexado em `/mnt/c/Users/X23/Documents/`; solicitação explícita | ativo incorreto | substituir somente por nova orientação |
+| ID | Assumption | Concrete Evidence | If False | Confidence | Handling |
+| --- | --- | --- | --- | --- | --- |
+| `UX-A-01` | `/erros` é o destino PostgreSQL existente para todos os autenticados | `frontend/src/App.tsx:21`; `frontend/src/App.tsx:36` | exige mudança de rota/permissão | `High` | `Keep as Assumption` |
+| `UX-A-02` | tema atual já possui owner único reutilizável | `frontend/src/hooks/useTema.ts`; `frontend/src/componentes/Cabecalho.tsx:36` | exige refatorar contrato de tema | `High` | `Keep as Assumption` |
+| `UX-A-03` | refresh existente pode ser reutilizado somente como retry de erro | `frontend/src/paginas/ListaNotas.tsx:9`; `frontend/src/contextos/NotasFiscaisContexto.tsx`; `frontend/src/notas/cacheFiscal.ts:71` | remoção causaria perda de recovery | `High` | `Keep as Assumption` |
+| `UX-A-04` | imagem anexada é a marca autorizada | ativo provisório em `frontend/public/marca-unifast.svg`; decisão humana + SHA congelado | ativo incorreto | `High` | `Promoted to UX-D-05` |
 
 ## Execution Plan
 
 1. Criar/ajustar testes fail-first para filtros, disclosure, permissões, links e layout.
 2. Copiar a imagem oficial como ativo local versionado.
-3. Refatorar header/disclosure com foco e ações existentes, sem efeitos de render.
-4. Corrigir filtros, contraste e paginação em CSS/ListaNotas.
+3. Refatorar header/disclosure com foco, fechamento explícito por ações/location e ações existentes, sem efeitos de render.
+4. Corrigir filtros, contraste, retry contextual e paginação em CSS/ListaNotas.
 5. Rodar unit/lint/build e preview browser fresco desktop/mobile.
 6. Executar revisão de acessibilidade, aderência, qualidade de teste, final e guards; consolidar módulo somente depois de comportamento estável.
 
@@ -187,11 +199,14 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 | pacote combinava UX global e exportação pública | `high` | split em `ST-UX` e `ST-EXPORT` |
 | acessibilidade do menu era vaga | `medium` | disclosure, foco, Escape, clique externo, contraste e overflow congelados |
 | comandos eram chamados indevidamente de CI-Equivalent | `high` | matriz renomeada Local Verification e preview lifecycle explicitado |
+| remover Atualizar eliminaria o único retry imediato | `high` | remover apenas da barra e preservar `Tentar novamente` contextual usando refresh existente |
+| header não desmonta entre rotas | `medium` | links/actions/location fecham disclosure explicitamente |
+| ativo oficial estava ambíguo | `medium` | SHA-256, geometria quadrada e destino congelados |
 
 ## Architecture Review Gates
 
 - **Architecture decision review:** `required`
-- **Decision review status:** `not_run after split`
+- **Decision review status:** `findings_integrated_pending_rerun`
 - **Architecture adherence review:** `required after implementation`
 - **Adherence status:** `not_run`
 - **No-go handling:** `retornar ao plano; não aprovar/concluir com finding material aberto`.
@@ -200,11 +215,11 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 - **Gate decision:** `required`
 - **Baseline branch:** `uninotas-foundation/main`
-- **Baseline commit:** `1ced35fc4ece74ee472ec6696d6f0f1e8e5e60e0`
-- **Baseline push reference:** `origin/main@1ced35fc4ece74ee472ec6696d6f0f1e8e5e60e0`
-- **Gate status:** `no_material_findings`
-- **Findings summary:** o split material e este contrato UX foram publicados no main canônico.
-- **Evidence / reference:** commit `1ced35fc4ece74ee472ec6696d6f0f1e8e5e60e0`, push confirmado em 2026-09-28.
+- **Baseline commit:** `pending material R3 commit`
+- **Baseline push reference:** `pending`
+- **Gate status:** `not_run`
+- **Findings summary:** R2 gerou mudanças materiais integradas; novo freeze será publicado antes de R3.
+- **Evidence / reference:** `pending R3 material commit`.
 
 ## Gate: Review Scope Drift
 
@@ -252,21 +267,41 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 ## Agent Routing Preflight
 
 - **Client surface:** `codex`
-- **Governed action:** `implementation`
+- **Current governed action:** `implementation`
 - **Selected role:** `routine-executor`
 - **Selected model:** `gpt-5.6-terra`
 - **Selected effort:** `medium`
-- **Subagent authorization:** `pending APROVADO; workflow-required serialized executor`
+- **Proof mode:** `declared`
+- **Subagent / delegation authorization:** `pending APROVADO; workflow-required serialized executor`
 - **Execution topology:** `primary-checkout-single-writer`
-- **Guard outcome:** `pending`
+- **Worktree authorization:** `not-authorized`
+- **Guard outcome:** `go`
+- **Guard evidence:** `agent_role_routing_guard.py` para codex/implementation/routine-executor/gpt-5.6-terra/medium/declared; não concede autoridade antes do APROVADO.
+
+## Rules Acknowledgement / Ingestion
+
+| Source | Why It Applies | Must Preserve | Must Avoid | Execution Impact |
+| --- | --- | --- | --- | --- |
+| `delphi-ai/rules/core/todo-driven-execution-model-decision.md` | tactical TODO | approval, diff, evidence | preapproval code | lifecycle governado |
+| `delphi-ai/skills/rule-react-react-architecture-always-on/SKILL.md` | header/list React | pure render, owner único, a11y | side effects no render | component/browser review |
+| `delphi-ai/skills/wf-react-change-ui-boundary-method/SKILL.md` | UI boundary | estados/ações explícitos | coupling oculto | test-first UI |
+| `delphi-ai/skills/rule-vite-vite-build-runtime-always-on/SKILL.md` | ativo/build | asset local e bundle fresco | env/asset guess | build/preview proof |
+| `delphi-ai/skills/test-creation-standard/SKILL.md` | testes mudam | fail-first/assertions eficazes | bypass | unit/browser |
+| `delphi-ai/skills/ci-equivalent-governance/SKILL.md` | verificação | linguagem honesta | alegação CI sem pipeline | Local Verification |
 
 ## Performance & Concurrency Risk Assessment
 
-- **Global sensitivity:** `low`
-- **EPS:** `not_needed — no endpoint/data path change`
-- **FRC:** `not_needed — disclosure has synchronous local state; browser lifecycle assertions still required`
-- **BCI:** `not_needed — no backend/write`
-- **RLS:** `not_needed — no bulk/runtime path`
+- **Policy schema version:** `pcv-1`
+- **Global sensitivity level:** `low`
+- **Why this level:** somente estado local síncrono e layout; refresh reutiliza fluxo já existente.
+- **Current delivery stage at review time:** `Pending, Provisional, review`
+
+| Policy Schema Version | Lane ID | Lane | Trigger Result | Trigger Severity | Trigger Reason Code | Trigger Rationale | Gate Deadline | Minimum Evidence Rule | State | Residual Risk | Uncertainty Reason Code | Recorded At UTC | Executor ID |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `pcv-1` | `EPS` | `endpoint-performance-scrutiny` | `not_needed` | `low` | `EPS-NO-DATA-PATH-CHANGE` | nenhum endpoint/query/repository muda | `before_local_implemented` | `EPS-INV` | `not_applicable` | none | `none` | `2026-09-28T18:00:00Z` | `codex-primary` |
+| `pcv-1` | `FRC` | `frontend-race-condition-validation` | `not_needed` | `low` | `FRC-NO-NEW-ASYNC-SURFACE` | disclosure é síncrono; retry usa request guard existente | `before_local_implemented` | `FRC-INV` | `not_applicable` | fechamento por location | `none` | `2026-09-28T18:00:00Z` | `codex-primary` |
+| `pcv-1` | `BCI` | `backend-concurrency-idempotency-validation` | `not_needed` | `low` | `BCI-NO-BACKEND-WRITE` | sem backend/mutation | `before_local_implemented` | `BCI-INV` | `not_applicable` | none | `none` | `2026-09-28T18:00:00Z` | `codex-primary` |
+| `pcv-1` | `RLS` | `runtime-load-stress-validation` | `not_needed` | `low` | `RLS-NO-BULK-PATH` | sem bulk/runtime | `before_local_implemented` | `RLS-INV` | `not_applicable` | none | `none` | `2026-09-28T18:00:00Z` | `codex-primary` |
 
 ## Required Delivery Gates
 
