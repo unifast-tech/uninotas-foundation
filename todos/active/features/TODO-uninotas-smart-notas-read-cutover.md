@@ -40,7 +40,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** publicar attestation round35 sobre material Foundation `985b5d13d96a46bd8107e8796986f4704838133c` / carrier root `b02b8c7646ed894b08abb4e76db6be1483f2ae8b`, então repetir arquitetura/crítica; coherence/drift continuam bloqueados. Nenhuma implementação ou mutação Railway está autorizada.
+- **Next exact step:** repetir arquitetura round35 sobre material/attestation Foundation `985b5d13d96a46bd8107e8796986f4704838133c`/`b344e409b98df12304ca902d1ef17512440c4c17` e root `b02b8c7646ed894b08abb4e76db6be1483f2ae8b`/`7605c80dec967f4013906801129acf4b0baa2a57`; crítica/coherence/drift continuam bloqueados. Nenhuma implementação ou mutação Railway está autorizada.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -57,7 +57,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 ## Blocker Notes
 
 - **Blocker:** nenhuma mutação Railway pode ocorrer antes da revisão formal, `preflight-go` e nova aprovação operacional específica.
-- **Why blocked now:** material round35 está publicado e integra o recovery pré-merge; attestation e reviews correntes ainda precisam ocorrer.
+- **Why blocked now:** round35 está publicado/atestado e integra o recovery pré-merge; reviews correntes ainda precisam ocorrer.
 - **What unblocks it:** round35 publicado/atestado, arquitetura/crítica limpas, coherence/drift rerodados depois da crítica e vinculados aos dispatches correntes, capacidade e probes do prior preflighted, guards `preflight-go` e `APROVADO` explícito.
 - **Owner / source:** project Owner confirmado privadamente / painel Railway; o identificador pessoal não é persistido na Foundation.
 - **Last confirmed truth:** `Unifast Products / Stage / MonitorNotes / US East / main / Pro`, domínio `https://monitornotes-stage.up.railway.app` e project Owner operador foram confirmados; retenção de 30 dias e janela 20:00–22:00 foram aceitas; health respondeu HTTP 200 com aplicação/banco `ok`.
@@ -124,8 +124,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Scope Item | Local Branch/Commit | Main / Authority | Local Source/Build Validation | Single Remote Target: Stage Customer-Facing | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Backend + frontend read-only | round35 material carrier `b02b8c7646ed894b08abb4e76db6be1483f2ae8b`; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73`; attestation pending | `pending promotion to main` | `pending final cutover suite` | `pre-implementation capacity hard stop; otherwise direct fiscal cutover` | `round35 material published; attestation pending` |
-| Foundation cutover contract | round35 material `985b5d13d96a46bd8107e8796986f4704838133c`; attestation pending | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round35 material published; attestation pending` |
+| Backend + frontend read-only | round35 material/attestation carriers `b02b8c7646ed894b08abb4e76db6be1483f2ae8b`/`7605c80dec967f4013906801129acf4b0baa2a57`; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73` | `pending promotion to main` | `pending final cutover suite` | `pre-implementation capacity hard stop; otherwise direct fiscal cutover` | `round35 published/attested; architecture pending` |
+| Foundation cutover contract | round35 material/attestation `985b5d13d96a46bd8107e8796986f4704838133c`/`b344e409b98df12304ca902d1ef17512440c4c17` | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round35 published/attested; architecture pending` |
 
 ## Out of Scope
 
@@ -885,7 +885,7 @@ Transições não pulam evidência: desde a primeira mutação, REC-1 exige nenh
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
 - **Findings summary:** `R34-OPS-01` foi integrado, validado e publicado como material imutável round35; a attestation registra essas refs sem alterar as seções materiais.
-- **Evidence / reference:** `reviewRound=35`; Foundation `origin/main@985b5d13d96a46bd8107e8796986f4704838133c`; root `MonitorNotes/delphi-and-foundation@b02b8c7646ed894b08abb4e76db6be1483f2ae8b`; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73`; `todo_deterministic_validator.py=PASS`; `validate_foundation.py=PASS`; drift diagnóstico `go`, `0/23`, mas deliberadamente não satisfaz o gate causal antes da crítica conforme D-CUT-36.
+- **Evidence / reference:** `reviewRound=35`; Foundation material/attestation `origin/main@985b5d13d96a46bd8107e8796986f4704838133c`/`b344e409b98df12304ca902d1ef17512440c4c17`; root material/attestation carriers `MonitorNotes/delphi-and-foundation@b02b8c7646ed894b08abb4e76db6be1483f2ae8b`/`7605c80dec967f4013906801129acf4b0baa2a57`; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73`; `todo_deterministic_validator.py=PASS`; `validate_foundation.py=PASS`; drift diagnóstico `go`, `0/23`, mas deliberadamente não satisfaz o gate causal antes da crítica conforme D-CUT-36.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Review Scope Drift
@@ -950,7 +950,7 @@ Transições não pulam evidência: desde a primeira mutação, REC-1 exige nenh
 ## Plan Review Gate
 
 - **Review decision:** `required`
-- **Review status:** `round35 candidate integrates R34 critique finding; publication/attestation/current architecture/critique pending`
+- **Review status:** `round35 published/attested with exact refs; current architecture/critique pending`
 - **Required lenses:** architecture, operations, rollback, security, tests, performance, observability and structural soundness.
 - **Known plan finding:** o health atual retorna HTTP 2xx quando o banco está degradado; `D-CUT-10` agora exige readiness separada não-2xx e mantém Smart Notas fora do loop.
 - **Approval request condition:** nova revisão confirma `D-CUT-06..42`, crítica limpa e somente depois coherence/drift convergem com refs/digest round35; preflight D-CUT-32/34/35/37/38/40/41/42 é conclusivo e guards `go/preflight-go`.
