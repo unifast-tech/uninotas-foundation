@@ -100,7 +100,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 | Scope Item | Local Branch/Commit | PR / Main | Validation Environment | Production | Current Status |
 | --- | --- | --- | --- | --- | --- |
 | Backend + frontend read-only | `delphi-and-foundation@31712a042cab3c796d5daca7350c6c58453e1c73` | `pending promotion to main` | `pending` | `pending` | `published review candidate` |
-| Foundation cutover contract | `main@pending evolved checkpoint` (baseline anterior `38c0771aa6b44f56b81d6a08eecd9111c37ae8af`) | `n/a — main-only authority` | `n/a` | `pending runtime promotion` | `architecture findings integrated` |
+| Foundation cutover contract | `main@815a0edd5141cc1d44bd5617df5884353fbc10eb` | `n/a — main-only authority` | `n/a` | `pending runtime promotion` | `published reconverged review baseline` |
 
 ## Out of Scope
 
@@ -155,7 +155,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 | Repository | Path | Baseline ref | Comparison mode |
 | --- | --- | --- | --- |
 | `MonitorNotes` | `.` | `31712a042cab3c796d5daca7350c6c58453e1c73` | `committed_diff` |
-| `uninotas-foundation` | `foundation_documentation` | `38c0771aa6b44f56b81d6a08eecd9111c37ae8af` | `committed_diff` |
+| `uninotas-foundation` | `foundation_documentation` | `815a0edd5141cc1d44bd5617df5884353fbc10eb` | `committed_diff` |
 
 ### Expected Changed Paths
 
@@ -408,11 +408,11 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 - **Why this decision:** release, segredos, dois contextos e promoção canônica exigem revisão reproduzível.
 - **Trigger stage:** `before first planning-side review or guard run`
 - **Baseline branch:** `MonitorNotes:delphi-and-foundation` + `uninotas-foundation:main`
-- **Baseline commit:** candidato funcional preservado em `MonitorNotes@31712a042cab3c796d5daca7350c6c58453e1c73`; baseline Foundation reconvergido `pending checkpoint`.
-- **Baseline push reference:** `MonitorNotes/delphi-and-foundation` publicado; novo `uninotas-foundation:main` pendente após integração de `ARCH-01..08`, sob autoridade documental main-only.
-- **Gate status:** `blocked`
-- **Findings summary:** o baseline original foi publicado e revisado, mas a integração material dos findings exige refresh antes de nova revisão/guard.
-- **Evidence / reference:** baseline anterior `MonitorNotes@31712a0` + Foundation `38c0771`; metadata de rastreabilidade `6fbd343`; novo SHA será registrado após push.
+- **Baseline commit:** `MonitorNotes@31712a042cab3c796d5daca7350c6c58453e1c73` + `uninotas-foundation@815a0edd5141cc1d44bd5617df5884353fbc10eb`.
+- **Baseline push reference:** `MonitorNotes/delphi-and-foundation` + `uninotas-foundation:main`; ambos publicados e resolvidos remotamente para os SHAs registrados.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** pacote reconvergido com `ARCH-01..08` foi publicado na autoridade Foundation main-only; código candidato permanece no checkpoint funcional imutável.
+- **Evidence / reference:** push Foundation `6fbd343..815a0ed`; `rev-parse`/`ls-remote` iguais em `815a0edd5141cc1d44bd5617df5884353fbc10eb`; MonitorNotes remoto preservado em `31712a0` para a revisão funcional.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Review Scope Drift
