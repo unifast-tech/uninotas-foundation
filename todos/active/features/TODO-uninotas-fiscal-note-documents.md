@@ -23,7 +23,8 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 - O detalhe existente continua em `GET /api/v1/notas/:noteId` e deve permanecer com exatamente os 27 campos públicos já aprovados; nenhuma segunda rota de detalhe será criada.
 - Novas rotas autenticadas resolvem, separadamente, PDF e XML usando somente o `noteId` assinado/context-bound.
 - O backend chama SmartNotas com token/CNPJ do contexto decodificado, admite `200 { url }` ou `202 { mensagem }` e devolve um contrato público mínimo e estável.
-- A URL disponível é efêmera: HTTPS, sem credenciais embutidas, nunca persiste, não entra em cache, logs, erro, telemetria ou estado de sessão.
+- A resposta pública disponível é HTTP `200` e a pendente é HTTP `202`; ambas usam o discriminador exato `{ documentType, availability, url }`, headers `Cache-Control: private, no-store`, `Pragma: no-cache` e `X-Content-Type-Options: nosniff`, sem ecoar corpo/mensagem do provedor.
+- A URL disponível é uma capability efêmera: HTTPS, porta padrão, sem credenciais ou fragmento e origin exata `https://files.smart-notas.com` ou `https://storage.smart-notas.com.br`; nunca persiste nos stores/cache/logs/erros/telemetria controlados pelo UniNotas. Navegador, rede e destino externo permanecem fora da promessa de não retenção.
 - A Geral e o detalhe expõem um disclosure `⋮` com `Abrir PDF` e `Abrir XML`; nenhum documento é consultado antes da escolha explícita.
 - Todos os perfis leitores atuais (`ADMIN`, `GESTOR`, `ANALISTA`, `LEITOR`) mantêm o mesmo acesso.
 - O glifo de configurações aumenta, preservando nome acessível, foco, Escape, clique externo, permissões e conteúdo.
@@ -62,7 +63,7 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 ## Scope
 
 - [ ] `SCOPE-DOC-01` Preservar e regressar o detalhe completo existente; não duplicar `notasDetalhe`.
-- [ ] `SCOPE-DOC-02` Adicionar ao port/adapter SmartNotas resoluções independentes para `/notas/{idInterno}/pdf` e `/xml`, com decoder positivo de `200`/`202`, limites, cancelamento e redaction existentes.
+- [ ] `SCOPE-DOC-02` Adicionar ao port/adapter SmartNotas resoluções independentes para `/notas/{idInterno}/pdf` e `/xml`, com decoder positivo de `200`/`202`, body máximo `16 KiB`, URL máxima `8 KiB`, origin allowlist fixa, cancelamento e redaction existentes.
 - [ ] `SCOPE-DOC-03` Expor rotas públicas `GET /api/v1/notas/:noteId/documentos/pdf` e `GET /api/v1/notas/:noteId/documentos/xml`, protegidas pelos quatro perfis leitores e pelo mesmo `noteId` assinado.
 - [ ] `SCOPE-DOC-04` Adicionar disclosure vertical `⋮` em cada linha/card da Geral e no detalhe, com ações sob demanda, loading, pendente, erro e recuperação.
 - [ ] `SCOPE-DOC-05` Abrir URL disponível em nova aba com `noopener`/`noreferrer`; se a abertura automática for bloqueada, manter link visível e acionável; limpar a URL efêmera ao fechar/trocar nota/logout.
@@ -160,10 +161,10 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 ## Definition of Done
 
 - [ ] `DOD-DOC-01` Abrir uma nota continua exibindo exatamente os 27 campos públicos aprovados, obtidos pelo endpoint de detalhe já existente.
-- [ ] `DOD-DOC-02` PDF e XML resolvem pelo contexto contido no `noteId`; adulteração, raw `idInterno`, contexto/credencial cruzados e identidade divergente falham antes de vazar dados.
-- [ ] `DOD-DOC-03` `200` aceita somente objeto com URL HTTPS absoluta, sem userinfo ou fragmento; `202` vira estado público pendente; redirects, status/shape inválidos, timeout, oversize, abort e limites seguem erros estáveis.
-- [ ] `DOD-DOC-04` Nenhuma URL/token/CNPJ/`noteId`/payload entra em logs, erros, storage, cache fiscal ou telemetria; a URL existe apenas na resposta e estado efêmero da ação.
-- [ ] `DOD-DOC-05` Cada nota na Geral e o detalhe oferecem `⋮`, `Abrir PDF` e `Abrir XML`; consulta ocorre somente após clique e uma ação em andamento não duplica chamadas.
+- [ ] `DOD-DOC-02` `noteId` é validado/decodificado antes de I/O e exatamente seu contexto, credencial e `providerIdInterno` compõem uma única chamada direta; adulteração, raw `idInterno` e entrada alternativa falham. O conteúdo remoto não pode ter sua identidade atestada pelo contrato URL-only e nenhuma garantia além da chamada exata é alegada.
+- [ ] `DOD-DOC-03` Upstream `200` aceita somente envelope bounded com URL absoluta de até `8 KiB`, `https`, porta padrão, sem userinfo/fragmento e origin allowlisted; `202` exige mensagem bounded mas não a ecoa; redirects, status/shape inválidos, timeout, body acima de `16 KiB`, abort e limites seguem a matriz HTTP estável.
+- [ ] `DOD-DOC-04` Nenhuma URL/token/CNPJ/`noteId`/payload entra em logs, erros, storage, cache fiscal ou telemetria controlados pelo UniNotas; a URL existe apenas na resposta e estado efêmero, é rotulada como capability sensível e nunca aparece como texto bruto na UI.
+- [ ] `DOD-DOC-05` Cada nota na Geral e o detalhe oferecem `⋮`, `Abrir PDF` e `Abrir XML`; consulta ocorre somente após clique. Existe um owner ativo por tela, chaveado por `noteId+documentType+generation`; burst do mesmo clique aceita uma chamada, e todos os botões documentais ficam desabilitados até conclusão/abort.
 - [ ] `DOD-DOC-06` O menu é operável por teclado, possui nome/estado acessível, fecha por Escape/clique externo/navegação, preserva foco e não aciona o link da nota ao selecionar documento.
 - [ ] `DOD-DOC-07` Documento pendente/erro é anunciado e recuperável; popup bloqueado mantém link seguro visível; logout/unmount/nova ação aborta ou invalida resultado tardio.
 - [ ] `DOD-DOC-08` Configurações mantém comportamento existente com glifo visual maior e alvo mínimo `44x44px` em desktop/mobile.
@@ -228,7 +229,7 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 ## Canonical Module Anchors
 
 - **Primary module doc:** `modules/fiscal-notes-and-documents.md`
-- **Secondary module docs:** `modules/authentication-and-access.md`
+- **Secondary module docs:** `none`; auth/perfis são preservados pelo contrato do próprio módulo fiscal.
 - **Planned decision promotion targets:** `fiscal-notes-and-documents.md > API Endpoint Definitions; Invariants; Frontend behavior`.
 - **Module decision consolidation targets:** `fiscal-notes-and-documents.md > Smart Notas read boundary; document availability; errors`.
 
@@ -237,10 +238,10 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 - [ ] `D-01` Preservar o detalhe atual de 27 propriedades; nenhuma nova implementação de `notasDetalhe`.
 - [ ] `D-02` Expor dois endpoints subordinados a `noteId`, nunca `idInterno` cru.
 - [ ] `D-03` Resolver URL somente por clique; sem prefetch, persistência ou cache.
-- [ ] `D-04` Retornar allowlist pública `{ documentType, availability, url }`, com `url` presente somente quando `availability=available`; `pending` representa o `202` oficial.
-- [ ] `D-05` Validar URL absoluta HTTPS sem username/password/hash; como ela não é buscada pelo servidor, não há superfície SSRF; frontend usa `noopener`/`noreferrer` e fallback acionável.
+- [ ] `D-04` Retornar exatamente HTTP `200 {documentType, availability:'available', url:string}` ou HTTP `202 {documentType, availability:'pending', url:null}`; todas as três propriedades são obrigatórias, nenhuma extra é pública e a mensagem upstream nunca é ecoada.
+- [ ] `D-05` Validar URL absoluta até `8 KiB`, HTTPS/443, sem username/password/hash e com origin exata `https://files.smart-notas.com` ou `https://storage.smart-notas.com.br`; como não há fetch server-side, não existe SSRF. Frontend nunca mostra a URL crua, usa `noopener`/`noreferrer` e mantém fallback seguro acionável.
 - [ ] `D-06` Reutilizar rate/concurrency/audit do módulo; operação documental é interativa e possui nomes fixos `pdf|xml`, nunca paths/URLs dinâmicos em log.
-- [ ] `D-07` Menu por nota é disclosure acessível, não `role=menu`; apenas um fica aberto, com ownership único e proteção contra resultado tardio/duplo clique.
+- [ ] `D-07` Menu por nota é disclosure acessível, não `role=menu`; apenas um fica aberto. Um owner por tela aceita somente a primeira ação enquanto pending, desabilita todas as ações documentais, ignora bursts iguais e aborta/invalida por fechar menu, navegar, trocar nota/tela, logout ou unmount.
 - [ ] `D-08` Aumentar glifo para pelo menos `20px` e caixa para `44x44px`, sem biblioteca de ícones.
 
 ## Module Decision Baseline Snapshot
@@ -288,11 +289,11 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 - **Why this decision:** TODO medium/cross-stack com contrato público e URL fiscal externa.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `pending`
+- **Baseline commit:** `de7ef48935f76ab9d9475d835e6f53306b9e93f0`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `not_run`
-- **Findings summary:** `packet prepared pre-freeze; nenhuma review marcada passed`.
-- **Evidence / reference:** `pending commit/push`.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** `feature brief, tactical TODO e manifesto coerente foram congelados antes da primeira review/guard; nenhuma implementação foi incluída`.
+- **Evidence / reference:** `uninotas-foundation@de7ef48935f76ab9d9475d835e6f53306b9e93f0`, publicado em `origin/main` via Windows Git Credential Manager após o Git WSL não encontrar credencial.
 - **Waiver authority / reference:** `n/a`.
 - **Pre-freeze packet-prep rule:** `planning rows remain prepared-pre-freeze until the pushed baseline exists`.
 
@@ -391,6 +392,26 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 | `GET /api/v1/notas/:noteId/documentos/pdf` | menu Geral/detalhe | `{documentType:'pdf', availability, url}` | pending/erro visível; no raw provider shape |
 | `GET /api/v1/notas/:noteId/documentos/xml` | menu Geral/detalhe | `{documentType:'xml', availability, url}` | idem |
 
+### Public Document HTTP Matrix (Frozen)
+
+| Provider / local outcome | Public HTTP | Exact public body / error | Required success headers | Notes |
+| --- | --- | --- | --- | --- |
+| upstream `200 {url}` valid | `200` | `{documentType:'pdf'|'xml', availability:'available', url:string}` | `Cache-Control: private, no-store`; `Pragma: no-cache`; `X-Content-Type-Options: nosniff` | exact three keys; URL ≤ 8 KiB and origin allowlisted |
+| upstream `202 {mensagem}` valid | `202` | `{documentType:'pdf'|'xml', availability:'pending', url:null}` | same | message required/bounded at adapter, never echoed |
+| invalid/tampered/raw `noteId` | `400` | `ConsultaDeNotasInvalida` | global error contract | no upstream call |
+| local user/context rate limit | `429` | `LimiteDeConsultaExcedido` | global error contract + existing `Retry-After` | same coordinator semantics |
+| upstream `404` | `404` | `NotaFiscalNaoEncontrada` | global error contract | no provider body echo |
+| upstream `401|403` | `502` | `SmartNotasCredencialRejeitada` | global error contract | no credential value echo |
+| upstream `3xx` or decoded URL outside allowlist | `502` | `SmartNotasDestinoInvalido` | global error contract | redirects remain manual/forbidden |
+| upstream other `4xx`, malformed `200|202`, body > 16 KiB or URL > 8 KiB | `502` | `SmartNotasContratoInvalido` | global error contract | response cancelled/drained boundedly |
+| upstream `429` | `503` | `SmartNotasLimiteExterno` | global error contract | no retry loop |
+| upstream `5xx`/network | `503` | `SmartNotasIndisponivel` | global error contract | no raw cause |
+| local saturation | `503` | `SmartNotasOcupado` | global error contract | existing concurrency cap |
+| timeout | `504` | `SmartNotasTimeout` | global error contract | bounded by current config |
+| client abort | no completed response claim | no business error body required | `n/a` | cancel provider body/request; audit fixed outcome only |
+
+Every public JSON property above is required. `url` is non-null only for `available`; no provider `mensagem`, provider payload, origin diagnostics or unknown key crosses the controller. PDF and XML have identical semantics except for the fixed `documentType` and upstream suffix.
+
 ### Local CI-Equivalent Suite Matrix
 
 | Repository / CI Surface | Why In Scope | Behavior / Scenario Covered | Fixture / Seed / Runtime Preconditions | Local CI-Equivalent Command | Required Before | Status | Evidence Artifact / Command | Notes |
@@ -407,6 +428,7 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 - Nenhuma variável, banco, migração ou infra nova.
 - Capability usa o mesmo `SMART_NOTAS_READ_ENABLED` e credenciais existentes.
 - Smoke real de PDF/XML por contexto e tratamento de URL real pertence ao cutover, redatado.
+- Probe redatado em 2026-09-28: credenciais Unifast locais estavam vazias; Prosperar retornou `200` para PDF/XML em `https://files.smart-notas.com`, porta padrão, sem query/fragment/userinfo e URLs de 86 caracteres. A origin documentada como exemplo (`https://storage.smart-notas.com.br`) e a origin runtime observada compõem a allowlist fixa; qualquer nova origin falha fechada e exige revisão do contrato.
 
 ## Plan Review Gate
 
@@ -454,11 +476,25 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 - [ ] ação `⋮` não navega para detalhe; restante da linha continua navegável.
 - [ ] mobile não corta disclosure e settings mantém 44x44.
 - [ ] `noteId` adulterado/ID cru/contexto cruzado nunca chama documento errado.
+- [ ] bursts determinísticos de 5/10/20 cliques na mesma ação produzem exatamente uma chamada aceita, um efeito visível e zero entrega tardia; todas as ações documentais ficam disabled enquanto pending.
 
 ### Residual Unknowns / Risks
 
 - [ ] Browser pode bloquear abertura automática após fetch; fallback visível obrigatório remove o bloqueio funcional.
-- [ ] Host real da URL não é normativo no OpenAPI; contrato valida segurança sintática e não faz fetch server-side. Se o produto decidir allowlist de host, isso exige decisão/material scope refresh.
+- [ ] O OpenAPI usa uma origin de exemplo diferente da observada no probe Prosperar; ambas ficam allowlisted. Unifast ainda precisa de smoke redatado no cutover porque suas credenciais locais estão vazias. Qualquer terceira origin exige revisão material antes de ser aceita.
+
+### Independent Critique Findings — Round 1
+
+| Finding | Severity | Resolution | Evidence / Contract Change |
+| --- | --- | --- | --- |
+| `CRIT-DOC-001` contrato HTTP público incompleto | `high` | `Integrated` | `Public Document HTTP Matrix`, D-04 e DOD-DOC-03 congelam 200/202, body, headers e erros |
+| `CRIT-DOC-002` identidade do conteúdo remoto não é atestável | `high` | `Integrated` | DOD-DOC-02 limita a garantia à validação/decodificação e chamada exata; conteúdo URL-only não é alegado |
+| `CRIT-DOC-003` qualquer HTTPS e limites vagos | `medium` | `Integrated` | D-05, origin allowlist, body 16 KiB, URL 8 KiB e retenção controlada explícita; probe redatado registrado |
+| `CRIT-DOC-004` concorrência UI ambígua | `medium` | `Integrated` | D-07/DOD-DOC-05 definem owner único, drop enquanto pending, abort lifecycle e burst 5/10/20 |
+| `CRIT-DOC-005` anchor auth inexistente | `low` | `Integrated` | secondary module removido; perfis preservados no módulo fiscal |
+
+- **Critique status:** `findings_integrated; affected re-critique required before APROVADO`.
+- **Critique evidence:** reviewer `fresh-no-context-plan-critic`, dispatch `/tmp/uninotas-documents-critique.dispatch.json`, baseline `de7ef48935f76ab9d9475d835e6f53306b9e93f0`.
 
 ## Additional Architectural Opinions
 
@@ -486,6 +522,8 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 | `touches_tests` | `yes` | backend/frontend/browser |
 | `critical_user_journey` | `yes` | conferência fiscal |
 | `release_or_promotion_critical` | `yes` | próxima entrega |
+| `high_severity_plan_review_issue` | `yes` | URL fiscal externa requer decisão explícita SEC-01 |
+| `explicit_three_lane_request` | `no` | usuário não solicitou auditoria paralela específica |
 
 ## Security Risk Assessment
 

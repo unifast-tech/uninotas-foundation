@@ -35,7 +35,7 @@ Referências oficiais informadas:
 - **Constitution impact:** `none` — fonte, perfis e separação de contextos não mudam.
 - **Roadmap impact:** `none` — extensão do módulo fiscal já previsto.
 - **Primary module candidates:** `modules/fiscal-notes-and-documents.md`
-- **Secondary module candidates:** `modules/authentication-and-access.md`
+- **Secondary module candidates:** `none` — os quatro perfis leitores já pertencem ao contrato do módulo fiscal; não existe módulo `authentication-and-access.md`.
 
 ## Evidence / References
 
@@ -51,7 +51,7 @@ Referências oficiais informadas:
 | --- | --- | --- | --- | --- |
 | `AMB-01` | A solicitação de detalhe exigiria uma nova rota? | Duplicaria contrato e chamadas ao provedor. | detalhe backend/frontend já implementado e testado | `resolve now: preservar e testar; nenhuma nova rota de detalhe` |
 | `AMB-02` | PDF/XML devem ser pré-carregados? | Dobraria chamadas, consumiria quota e criaria URLs obsoletas. | endpoints oficiais são independentes e retornam `202` quando pendentes | `resolve now: resolver somente após clique` |
-| `AMB-03` | O backend deve armazenar ou fazer proxy do arquivo? | Aumentaria retenção, memória e superfície SSRF. | o contrato oficial devolve uma URL HTTPS; pedido é acesso por URL | `resolve now: handoff efêmero da URL validada, sem proxy/persistência` |
+| `AMB-03` | O backend deve armazenar ou fazer proxy do arquivo? | Aumentaria retenção, memória e superfície SSRF. | o contrato oficial devolve uma URL HTTPS; probe redatado Prosperar observou `files.smart-notas.com` | `resolve now: handoff efêmero de URL restrita às origins conhecidas, sem proxy/persistência` |
 | `AMB-04` | O menu aparece apenas no detalhe? | “em cada nota” inclui as linhas/cards da Geral. | lista já é a superfície de seleção de nota | `resolve now: menu em cada linha/card e também no cabeçalho do detalhe` |
 
 ## Story Decomposition
@@ -64,4 +64,3 @@ Referências oficiais informadas:
 ## Retire This Brief When
 
 - O TODO `todos/active/features/TODO-uninotas-fiscal-note-documents.md` estiver aprovado e não houver ambiguidade de framing pendente.
-
