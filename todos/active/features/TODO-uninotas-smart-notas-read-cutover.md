@@ -40,18 +40,18 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** concluir sync/attestation do freeze round 12 e executar nova confirmação arquitetural independente; nenhuma mutação Railway está autorizada.
+- **Next exact step:** concluir sync/attestation do freeze round 13 e executar nova confirmação arquitetural independente; nenhuma mutação Railway está autorizada.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
 - **Work state:** `review`
 - **Why this state now:** a topologia customer-facing e o baseline Git estão confirmados; a revisão arquitetural formal é o gate corrente.
-- **Exit condition:** fatos remotos confirmados, decisões `D-CUT-06..19` congeladas, revisão pré-aprovação limpa e `todo_authority_guard.py --pre-approval` em `preflight-go`.
+- **Exit condition:** fatos remotos confirmados, decisões `D-CUT-06..22` congeladas, revisão pré-aprovação limpa e `todo_authority_guard.py --pre-approval` em `preflight-go`.
 
 ## Provisional Notes
 
 - **Missing for production-ready:** implementação reconvergida, configuração remota, probes reais, carga local do build candidato, attestation do rollback target, rebuild/cutover/smoke no Stage e promoção Foundation.
-- **Revisit criteria:** concluir `DOD-CUT-01..18` com evidência redatada da deployment exata.
+- **Revisit criteria:** concluir `DOD-CUT-01..20` com evidência redatada da deployment exata.
 - **Dependencies unblocked:** o código local permite preparar o cutover sem redesenhar contratos de lista/detalhe.
 
 ## Blocker Notes
@@ -88,6 +88,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 - [ ] `CUT-12` Propagar um único correlation ID do request autenticado até o adapter Smart Notas, limitar `actorId` a identificador interno pseudônimo e atualizar `DEPLOY.md` com ordem atômica de variáveis/readiness/deploy/rollback.
 - [ ] `CUT-13` Promover por PR apenas uma tree Git equivalente ao candidato validado; registrar candidate SHA/tree OID, final main SHA/tree OID e revision Railway. A imagem local é evidência source-level, não o OCI implantado; mismatch de tree bloqueia/aborta, e o primeiro smoke Stage valida os bits do rebuild remoto.
 - [ ] `CUT-14` Manter `uninotas-foundation:main` como autoridade independente após a promoção canônica; não sincronizar o gitlink documental em `MonitorNotes:main` neste closeout para evitar segundo auto-deploy. Registrar follow-up para o próximo release aprovado.
+- [ ] `CUT-15` Antes do merge, migrar/atestar o consumidor UptimeRobot para `x-monitor-token` na release corrente sem rotacionar token; se o token não estiver configurado, atestar modo público. Consumidor/configuração desconhecidos bloqueiam o corte.
+- [ ] `CUT-16` Endurecer export CSV e inputs legados: neutralizar fórmulas em todo texto externo, limitar `refId` a 1..64 após trim e token de monitoramento a 1..200, e coalescer bursts de tratamentos realtime no frontend.
 
 ## Execution Lane Tracking (Required)
 
@@ -101,8 +103,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Scope Item | Local Branch/Commit | Main / Authority | Local Source/Build Validation | Single Remote Target: Stage Customer-Facing | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Backend + frontend read-only | round-11 predecessor root `28f585b`/carrier `3ab03e2`; round-12 material root em `Gate: Review Baseline Freeze`; code-origin `31712a0` | `pending promotion to main` | `pending final cutover suite` | `pending one direct cutover` | `planning freeze/attestation governed by review gate` |
-| Foundation cutover contract | round-11 predecessor `0be6ca8`/attestation `aa57ddb`; round-12 material em `Gate: Review Baseline Freeze` | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round-12 material frozen; attestation may follow` |
+| Backend + frontend read-only | round-12 predecessor root `85442f5`/carrier `d5420be`; round-13 root em `Gate: Review Baseline Freeze`; code-origin `31712a0` | `pending promotion to main` | `pending final cutover suite` | `pending one direct cutover` | `planning freeze/attestation governed by review gate` |
+| Foundation cutover contract | round-12 predecessor `05e2765`/attestation `82c3401`; round-13 material em `Gate: Review Baseline Freeze` | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round-13 material frozen; attestation may follow` |
 
 ## Out of Scope
 
@@ -138,6 +140,9 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 | `D-CUT-17` | `/api/v1/eventos` aceita somente filtros `TODOS`, `ERRO` e `TRATADOS`. `ERRO` inclui erro original sem tratamento ou reaberto por tratamento `PENDENTE`; `TRATADOS` inclui `RESOLVIDO`/`IGNORADO`; `PENDENTE` e `SUCESSO` como filtros retornam HTTP 400. Resumo retorna exatamente `{total, erro, tratados}`. Produtos preservam temporariamente `{nome, eventos, erros}`, com `eventos == erros`, por compatibilidade. Detalhe/payload/histórico de ref inelegível retornam 404 sem revelar existência; histórico contém apenas linhas de erro original. | Congela o contrato público final do hard cut e impede que compatibilidade nominal reintroduza sucesso oriundo de logs. | `frozen; approval-material` |
 | `D-CUT-18` | `/api/v1/monitoramento/erros` calcula somente erros originais ativos e preserva exatamente os dez campos existentes: `status`, `cor`, `erros`, `pendentes`, `sucessos`, `total`, `ultima_verificacao`, `janela`, `limites`, `detalhe`. `total == erros`; `pendentes=0` e `sucessos=0` são depreciados; erros `RESOLVIDO/IGNORADO` não contam, e tratamento `PENDENTE` volta a contar. A única credencial aceita é `x-monitor-token`; token em query é rejeitado. | Mantém o UptimeRobot compatível sem representar logs como autoridade fiscal nem expor credencial em URL. | `frozen; approval-material` |
 | `D-CUT-19` | O SSE não detecta inserts externos neste corte. `GET /api/v1/realtime/eventos` usa o guard JWT global e `Authorization: Bearer`, nunca token/query; o React consome por `fetch`/ReadableStream, cancela no unmount/logout e rebusca dados. Cada stream termina no servidor em no máximo 30 s e o cliente reconecta com novo request autenticado, de modo que o `JwtStrategy` reavalie o usuário ativo no mesmo envelope de cache das demais rotas. O stream emite somente `evento.tratado` originado por mutation elegível e `heartbeat`; novos erros chegam por refresh ao abrir/atualizar `/erros`. Nenhum URL/log contém JWT. | Elimina bypass prolongado de usuário inativo e vazamento em ingress, e remove paginação impossível de provar numa tabela externa sem PK. | `frozen; approval-material` |
+| `D-CUT-20` | A rejeição de token em query do monitor só entra após migração comprovada do UptimeRobot na release atual: se `MONITORAMENTO_TOKEN` estiver configurado, cadastrar `x-monitor-token`, remover credential da URL e provar 200/401 sem revelar/rotacionar o valor; se ausente, atestar modo público. Estado/consumer desconhecido bloqueia merge. A rotação não pertence ao changeset de dez chaves. | Evita derrubar o monitor durante o hard cut e mantém segredo fora da URL sem criar segunda mudança Railway. | `frozen; approval-material` |
+| `D-CUT-21` | Todo `refId` de path/lote é trimado, deve ter 1..64 caracteres e falha 400 se branco/oversize; só ref válido inexistente/inelegível retorna 404. `MONITORAMENTO_TOKEN` configurado e header oferecido devem ter 1..200 caracteres; config fora do bound falha startup e header fora do bound retorna 400. Export CSV prefixa `'` em todo scalar textual externo cujo primeiro caractere seja `=`, `+`, `-`, `@`, TAB ou CR antes do escaping CSV. | Alinha varchar persistido, limita inputs e neutraliza spreadsheet formula injection. | `frozen; approval-material` |
+| `D-CUT-22` | O consumidor React coalesce eventos `evento.tratado` em janela trailing de 250 ms: qualquer burst produz no máximo um refetch de lista e um de resumo por janela, mantendo o refetch idempotente. Um lote síncrono de 500 refs deve produzir exatamente um par de invalidações após aquietar. | Evita tempestade de até 1.000 requests por tratamento em lote sem alterar o contrato SSE. | `frozen; approval-material` |
 
 ## Required Operational Decisions Before Approval
 
@@ -155,10 +160,11 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 | Atomic staged enable | dez variáveis commitadas sem redeploy; o único rebuild pós-merge consome flag `true` + bindings + budgets | diff redatado do changeset e controle commit-without-redeploy no painel | `required pre-merge; inability blocks cutover` |
 | Recovery action | state machine `REC-0/1/2A/2B/3`: config restore somente após terminal não ativo; qualquer active força stored-image rollback; `Redeploy` só fallback degradado | current/candidate IDs e status, cancel action, config snapshot/restore, previous-target option após switch | `required per reached state; inability aborts or requires renewed risk/RTO` |
 | External `/eventos` consumers | inventariar integrações fora deste repositório e obter attestation do Owner antes do deploy | lista redatada/declaração do Owner | `required pre-deploy; unknown consumer blocks deploy unless hard-cut risk is explicitly reapproved` |
+| UptimeRobot auth migration | atestar token public/configured; se configured, migrar current monitor para `x-monitor-token` e limpar URL antes do merge | presença/bound redatados + current-release 200/401/URL proof | `required pre-merge; unknown or query-token consumer blocks cutover` |
 
 ## Diff Expectation Contract
 
-- **Contract status:** `required; round-12 material baseline frozen by this checkpoint`
+- **Contract status:** `required; round-13 material baseline frozen by this checkpoint`
 - **Policy:** `strict; unclassified or forbidden paths block delivery`
 - **User validation:** `required on deviation`
 - **Comparison mode:** `working_tree after candidate checkpoint`
@@ -167,7 +173,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Repository | Path | Baseline ref | Comparison mode |
 | --- | --- | --- | --- |
-| `MonitorNotes` | `.` | round-11 material root `28f585baadd0b0e814552a7c212dafa030dfddc9`; attestation carrier `3ab03e2428f5cb022a49ccb53fb61f256e6e4b05` | `committed_diff`; `31712a0` remains code-origin; round-12 material/root refs serão registrados no review gate; attestation-only gitlink carrier não é implementação |
+| `MonitorNotes` | `.` | round-12 material root `85442f5ee4e6343b5ccb3b4c58b9f3d229361730`; attestation carrier `d5420be4736739bd51d21e73020a497197ceac23` | `committed_diff`; `31712a0` remains code-origin; round-13 refs irão ao review gate; attestation-only carrier não é implementação |
 | `uninotas-foundation` | `foundation_documentation` | `Gate: Review Baseline Freeze -> Baseline commit` | `committed_diff` |
 
 ### Expected Changed Paths
@@ -186,6 +192,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 | `MonitorNotes` | `backend/src/logs/**` | `M` | tornar `/eventos` error-only e testar bloqueio de sucessos |
 | `MonitorNotes` | `backend/src/monitoramento/**` | `M` | remover sucesso da projeção operacional baseada em logs |
 | `MonitorNotes` | `backend/src/realtime/**` | `M` | remover polling/LISTEN/JWT em query e manter stream autenticado somente para tratamentos elegíveis/heartbeat |
+| `MonitorNotes` | `backend/package.json` | `M` | remover dependência direta `pg` não usada após retirar LISTEN |
+| `MonitorNotes` | `backend/package-lock.json` | `M` | atualizar lockfile junto da remoção de `pg`/`@types/pg` |
 | `MonitorNotes` | `backend/.env.example` | `M` | approved non-secret production controls |
 | `MonitorNotes` | `frontend/src/api/eventos.ts` | `M` | alinhar cliente ao boundary error-only |
 | `MonitorNotes` | `frontend/src/api/tipos.ts` | `M` | congelar filtros/DTOs error-only e remover campos de sucesso do resumo |
@@ -253,18 +261,19 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 ## Execution Plan
 
-1. Confirmar topologia e obter inventário/attestation do Owner sobre consumidores externos de `/eventos`/`logs`; consumidor desconhecido bloqueia o deploy, salvo novo aceite explícito de hard cut.
+1. Confirmar topologia e obter inventário/attestation do Owner sobre consumidores externos de `/eventos`/`logs` e modo atual do UptimeRobot/`MONITORAMENTO_TOKEN`; consumidor ou monitor mode desconhecido bloqueia deploy.
 2. Obter `APROVADO`, carregar regras e implementar na branch de trabalho: budgets fail-closed `10 s/4/15/60`, readiness PostgreSQL-aware, correlation ID ponta a ponta, boundary error-only central e runbook.
 3. Executar testes focados, revisar o diff e congelar um novo checkpoint candidato contendo toda a implementação; registrar SHA e tree OID. Nenhum build anterior é evidência de entrega.
 4. Sobre essa tree exata, executar CI-equivalent completo e build Docker local como evidência source-level, além de startup/readiness negativo, probes redatados dos dois emissores, carga near-limit e browser smoke autenticado. Não alegar OCI idêntico ao rebuild Railway.
 5. Concluir auditorias delivery-side; rebasear somente se `main` mudou e, nesse caso, invalidar/repetir o checkpoint/validação. Preparar PR cuja tree final prevista seja idêntica à tree validada.
-6. Dentro de 20:00–22:00, criar um único changeset Railway com dez variáveis: cinco valores sensíveis/bindings, quatro budgets exatos e `SMART_NOTAS_READ_ENABLED=true`; revisar o diff/presença/escopo sem imprimir valores e usar o commit de staged changes sem redeploy (controle `Alt` ao aplicar). A deployment anterior deve continuar servindo; se não for possível provar esse estado atômico, abortar antes do merge.
-7. Antes de promover `main`, registrar redatados: deployment corrente verde, deployment ID, plano Pro, source branch/configuração esperada, snapshot dos nomes/escopo das variáveis, changeset de dez variáveis commitado sem redeploy, acesso aos logs e Owner com acesso à capacidade geral de rollback. Não alegar que a deployment corrente já aparece como alvo anterior; a revision candidata ainda não existe.
-8. Promover o PR para `main`, verificar imediatamente `candidate^{tree} == final-main^{tree}` e atestar o novo main SHA/tree. Capturar revision/build Railway e aguardar readiness tornar a nova deployment ativa. Nesse instante, antes do smoke amplo, localizar o deployment ID antigo agora anterior e confirmar que a opção `Rollback` exata está visível dentro da retenção; ausência aciona abort ou o gate explícito de risco/RTO do fallback. Mismatch de tree/revision aciona abort.
-9. Somente após o gate pós-switch de rollback, executar smoke de API/navegador para os dois contextos, `/erros`, payload/tratamentos elegíveis, correlação, redaction e ausência de `SUCESSO`/fallback; observar por no mínimo 30 minutos.
-10. Em abort, seguir exatamente o estado `REC-1`, `REC-2A/2B` ou `REC-3`: antes de candidate-active restaurar somente configuração após terminal não ativo confirmado; depois de candidate-active usar `Rollback` da deployment verde anterior em até 10 minutos. Kill switch é contenção; `Redeploy` só é fallback degradado após risco/RTO renovados. Sem abort, nenhum drill remoto é alegado.
-11. Após janela verde e inventário externo limpo, promover capabilities/policies/módulos/root docs Foundation de forma atômica. Consumidor externo descoberto bloqueia a promoção e o deploy até coordenação ou novo aceite de hard cut.
-12. Não sincronizar o novo commit Foundation em `MonitorNotes:main` neste closeout. Registrar o pin divergente e um follow-up para atualizar o gitlink dentro do próximo release de produto, onde a mudança entrará na tree validada sem deploy documental isolado.
+6. Ainda sobre a release corrente, se `MONITORAMENTO_TOKEN` estiver configurado, cadastrar `x-monitor-token` no UptimeRobot, remover token da URL e provar request autorizado 200/503 e request sem header 401; se ausente, atestar modo público. Não rotacionar valor. Falta de acesso/evidência aborta antes do merge.
+7. Dentro de 20:00–22:00, criar um único changeset Railway com dez variáveis: cinco valores sensíveis/bindings, quatro budgets exatos e `SMART_NOTAS_READ_ENABLED=true`; revisar presença/escopo sem imprimir valores e usar commit staged sem redeploy. A deployment anterior continua servindo; se atomicidade não for comprovada, abortar antes do merge.
+8. Antes de promover `main`, registrar deployment corrente/ID, plano Pro, source/config, snapshot, changeset de dez variáveis sem redeploy, logs, Owner e migração do monitor. Não alegar revision candidata/previous target ainda inexistentes.
+9. Promover PR para `main`, verificar `candidate^{tree} == final-main^{tree}` e entrar imediatamente em `REC-2A`, mesmo sem deployment record. Capturar trigger/approval/revision/build; se ativa, confirmar antigo ID com `Rollback` antes do smoke amplo. Mismatch aciona abort.
+10. Somente após gate pós-switch, executar smoke API/browser nos dois contextos, `/erros`, CSV adversarial, tratamentos/SSE coalescido, monitoramento header-only, correlação/redaction e ausência de `SUCESSO`/fallback; observar 30 minutos.
+11. Em abort, seguir `REC-1`, `REC-2A/2B` ou `REC-3`; nunca restaurar config enquanto trigger/candidate puder iniciar. Kill switch é contenção; `Redeploy` só fallback degradado com risco/RTO renovados. Sem abort, nenhum drill remoto é alegado.
+12. Após janela verde e inventário externo limpo, promover capabilities/policies/módulos/root docs Foundation atomicamente. Consumidor externo descoberto bloqueia promoção/deploy até coordenação ou novo aceite.
+13. Não sincronizar novo Foundation commit em `MonitorNotes:main` neste closeout; registrar pin divergente e follow-up do próximo release de produto.
 
 ## Public Error API Contract
 
@@ -275,12 +284,12 @@ Regras comuns: `/eventos/**` e `/realtime/eventos` exigem `Authorization: Bearer
 | `GET /eventos` | somente `situacao=TODOS|ERRO|TRATADOS` (default `ERRO`), `busca<=120`, `produto<=200`, `pagina` inteiro >=1 (default 1), `limite` inteiro 1..200 (default 25), `direcao=asc|desc` (default `desc`), `dataInicio/dataFim` ISO; `PENDENTE|SUCESSO` inválidos | 200 `{dados,meta}`; cada item mantém exatamente `refId,eventAt,situacao,situacaoOriginal,mensagem,idSmartNotas,clienteNome,clienteDocumento,produto,valorVenda,meioPagamento,tentativas`; meta mantém `total,pagina,limite,totalPaginas,temProxima`; somente erro original | 400 query/chave inválida; 401 auth |
 | `GET /eventos/resumo` | aceita somente `busca<=120`, `produto<=200`, `dataInicio/dataFim` ISO; não aceita nem ignora `situacao,pagina,limite,direcao`; sem defaults além de ausência dos filtros | 200 exatamente `{total,erro,tratados}`; `erro` inclui não tratado/reaberto, `tratados` inclui resolvido/ignorado e `total=erro+tratados` | 400/401 |
 | `GET /eventos/produtos` | sem body; eligibility antes de group/order | 200 array `{nome,eventos,erros}` com `eventos==erros`, somente produtos com erro original | 401 |
-| `GET /eventos/exportar` | aceita somente `situacao=TODOS|ERRO|TRATADOS` (default `ERRO`), `busca<=120`, `produto<=200`, `dataInicio/dataFim` ISO; rejeita `pagina,limite,direcao`; teto interno fixo 20.000 | 200 CSV UTF-8/BOM com colunas exatas `refId;idTransacao;eventAt;situacao;mensagem;idSmartNotas;clienteNome;clienteDocumento;clienteEmail;produto;codProduto;valorVenda;meioPagamento`, somente erro original | `Content-Type: text/csv; charset=utf-8`; `Content-Disposition` sanitizado; 400/401 |
-| `GET /eventos/:refId` | ref elegível original-`ERRO` | 200 `LogDetalheDto`: campos de `LogResumoDto` mais `orientacao,origem,cliente,venda,produtor,historico,camposPendentes,payload,resposta`; cada tentativa mantém `em,mensagem,ok,autorNome`, mas histórico contém somente linhas originais `ERRO` | 401; 404 inexistente/inelegível |
-| `GET /eventos/:refId/payload` | ref elegível original-`ERRO` | 200 exatamente `{enviado,resposta}` | 401; 404 inexistente/inelegível |
-| `PATCH /eventos/:refId/tratamento` | body exatamente `{situacao: RESOLVIDO|IGNORADO|PENDENTE, observacao?: string<=1000}`; ref elegível | 200 `LogDetalheDto`; `PENDENTE` reabre para situação efetiva `ERRO` | 400/401/403; 404 inexistente/inelegível |
-| `POST /eventos/tratar-lote` | body `{refIds: string[1..500], situacao, observacao?}`; cada ref é trimada, deve permanecer não vazia e ser única após trim; branco/duplicata rejeita todo lote com 400; mesma enum/regra do unitário | 200 exatamente `{solicitados,aplicados,ignorados}`; `solicitados` é o tamanho do array já validado e único; `ignorados` ecoa somente refs fornecidas não aplicadas, sem distinguir inexistente de inelegível | 400/401/403 |
-| `GET /monitoramento/erros` | público se `MONITORAMENTO_TOKEN` ausente; se configurado, aceita somente header `x-monitor-token`; query `token` é inválida; aceita `minutos` inteiro 1..1440 default 60, `atencao` inteiro >=1 default 1, `critico` inteiro >=1 default 6 (sem relação adicional), `alertarEm=atencao|critico` opcional; demais chaves rejeitadas | 200 exatamente `{status,cor,erros,pendentes,sucessos,total,ultima_verificacao,janela:{inicio,fim,minutos},limites:{atencao,critico},detalhe}`; `erros=total` conta ativos/reabertos, tratados não contam, `pendentes=0`, `sucessos=0` | `Cache-Control: no-store`; 400 query/chave inválida; 401 token ausente/incorreto quando configurado; 503 banco indisponível ou severidade >= `alertarEm`, com o mesmo shape |
+| `GET /eventos/exportar` | aceita somente `situacao=TODOS|ERRO|TRATADOS` (default `ERRO`), `busca<=120`, `produto<=200`, `dataInicio/dataFim` ISO; rejeita `pagina,limite,direcao`; teto interno fixo 20.000 | 200 CSV UTF-8/BOM com colunas exatas `refId;idTransacao;eventAt;situacao;mensagem;idSmartNotas;clienteNome;clienteDocumento;clienteEmail;produto;codProduto;valorVenda;meioPagamento`, somente erro original; antes de quote/escape, cada scalar textual externo iniciado por `=,+,-,@,TAB,CR` recebe prefixo `'` | `Content-Type: text/csv; charset=utf-8`; `Content-Disposition` sanitizado; 400/401 |
+| `GET /eventos/:refId` | path decodificado/trimado deve ter 1..64 caracteres; branco/oversize = 400; ref válida deve ser original-`ERRO` | 200 `LogDetalheDto`: campos de `LogResumoDto` mais `orientacao,origem,cliente,venda,produtor,historico,camposPendentes,payload,resposta`; cada tentativa mantém `em,mensagem,ok,autorNome`, mas histórico contém somente linhas originais `ERRO` | 400 input; 401; 404 ref válida inexistente/inelegível |
+| `GET /eventos/:refId/payload` | mesmo bound 1..64/trim; ref elegível original-`ERRO` | 200 exatamente `{enviado,resposta}` | 400 input; 401; 404 válida inexistente/inelegível |
+| `PATCH /eventos/:refId/tratamento` | mesmo bound 1..64/trim; body exatamente `{situacao: RESOLVIDO|IGNORADO|PENDENTE, observacao?: string<=1000}`; ref elegível | 200 `LogDetalheDto`; `PENDENTE` reabre para situação efetiva `ERRO` | 400 input/body; 401/403; 404 válida inexistente/inelegível |
+| `POST /eventos/tratar-lote` | body `{refIds: string[1..500], situacao, observacao?}`; cada ref é trimada, deve ter 1..64 e ser única após trim; branca/oversize/duplicata rejeita todo lote com 400; mesma enum/regra do unitário | 200 exatamente `{solicitados,aplicados,ignorados}`; `solicitados` é tamanho validado/único; `ignorados` ecoa somente refs válidas não aplicadas, sem distinguir inexistente de inelegível | 400/401/403 |
+| `GET /monitoramento/erros` | `MONITORAMENTO_TOKEN`, se configurado, deve ter 1..200 ou startup falha; aceita somente header `x-monitor-token` 1..200, oversize/branco = 400; query `token` inválida; `minutos` inteiro 1..1440 default 60, `atencao` >=1 default 1, `critico` >=1 default 6, `alertarEm=atencao|critico`; demais chaves rejeitadas | 200 exatamente `{status,cor,erros,pendentes,sucessos,total,ultima_verificacao,janela:{inicio,fim,minutos},limites:{atencao,critico},detalhe}`; `erros=total` conta ativos/reabertos, tratados não contam, `pendentes=0`, `sucessos=0` | `Cache-Control: no-store`; 400 input; 401 token ausente/incorreto quando configurado; 503 banco indisponível ou severidade >= `alertarEm`, mesmo shape |
 | `GET /realtime/eventos` | header Bearer obrigatório; nenhum token/query; consumidor usa `fetch` streaming e reconecta após término normal | 200 `text/event-stream`; apenas `evento.tratado` com `refId,situacao,origem='api',em` e `heartbeat` com `origem='sistema',em`; servidor encerra em <=30 s; sem polling/NOTIFY/`evento.novo` | 401 ausente/inválido/inativo a cada conexão; cancelar em logout/unmount; `Cache-Control: no-store`; nenhum JWT em URL/log |
 
 ## Recovery State Machine
@@ -289,11 +298,11 @@ Regras comuns: `/eventos/**` e `/realtime/eventos` exigem `Authorization: Bearer
 | --- | --- | --- | --- |
 | `REC-0 no-remote-mutation` | qualquer estado de código/checkpoint, publicado ou não, enquanto nenhuma configuração Railway foi commitada | nenhuma recuperação Railway; reverter somente diff/commit do TODO conforme autoridade Git e manter Stage intocado | refs/status/diff classificados; `5 min` |
 | `REC-1 staged-config` | changeset de dez chaves foi commitado sem redeploy, mas `main` ainda não foi promovida | restaurar o snapshot redatado anterior via novo staged commit sem redeploy; confirmar deployment corrente inalterada | nomes/escopo antes/depois + mesmo deployment ID; `10 min` |
-| `REC-2A candidate-in-flight` | merge ocorreu e candidato está queued/building/deploying | solicitar cancelamento uma vez e observar serialmente; não restaurar configuração enquanto o candidato não estiver terminal; se ficar ativo em qualquer instante, transicionar imediatamente para `REC-3` | candidate/revision + cancel action + estado observado; decisão em `5 min`, RTO total ainda `10 min` |
-| `REC-2B candidate-terminal-not-active` | cancelamento/falha terminal confirmado e candidato nunca ficou ativo | restaurar snapshot anterior por staged commit sem redeploy e comprovar mesma deployment verde ativa; não usar `Rollback` | status terminal + current deployment ID antes/depois + config redatada restaurada; concluir dentro do RTO total `10 min` |
+| `REC-2A post-merge-not-safe` | começa imediatamente após promover `main`, inclusive sem deployment visível, trigger atrasado/rejeitado, awaiting approval, queued/building/deploying | bloquear qualquer restore; impedir/rejeitar approval/trigger quando disponível, ou cancelar deployment visível uma vez; observar serialmente até prova conclusiva de que nenhum candidato pode iniciar/ficar ativo; se active em qualquer instante, ir a `REC-3` | main SHA + trigger/approval/deployment states + ação; decisão em `5 min`; sem prova, recovery falha e exige reassessment humano |
+| `REC-2B candidate-conclusively-prevented` | trigger conclusivamente rejeitado/impedido sem deployment possível, ou deployment terminal cancelado/falho e nunca active | somente então restaurar snapshot anterior por staged commit sem redeploy e comprovar mesma deployment verde ativa; não usar `Rollback` | prova do trigger impedido ou status terminal + current deployment ID antes/depois + config redatada restaurada; concluir dentro do RTO total `10 min` |
 | `REC-3 candidate-active` | candidato tornou-se ativo e a deployment verde antiga virou previous | confirmar o ID antigo e executar `Rollback` armazenado; validar readiness/login/UI anterior; kill switch é somente contenção | action/target IDs redatados + probes + RTO; `10 min` desde abort |
 
-Transições não podem pular evidência: `REC-1 -> REC-2A` exige merge/tree equivalentes; `REC-2A -> REC-2B` exige terminal não ativo confirmado; qualquer observação `Active` força `REC-2A -> REC-3`; o smoke amplo só começa após o target de `REC-3` estar comprovadamente rollbackable. Um único operador serializa cancelamento, observação e restauração; nenhuma ação concorrente/retry automático é permitida. Falha de recuperação encerra o corte e exige nova avaliação humana.
+Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante do merge/tree equivalente, mesmo sem deployment record; `REC-2A -> REC-2B` exige prova de trigger impedido ou terminal não ativo; qualquer observação `Active` força `REC-3`; o smoke amplo só começa após target rollbackable. Um único operador serializa approval/trigger/cancelamento/observação/restauração; nenhuma ação concorrente/retry automático. Falta de prova em 5 min ou recovery acima de 10 min é falha explícita e exige reassessment humano, sem restaurar config de modo inseguro.
 
 ## Health, Readiness and Rollback Contract
 
@@ -302,7 +311,7 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` exige merge/tree equ
 - Criar readiness em `/api/v1/prontidao`, respondendo não-2xx se PostgreSQL estiver indisponível; Railway passa a usar essa rota. `/api/v1/saude` permanece liveness simples.
 - Binding token/CNPJ é comprovado por probe pré-tráfego, nunca por conteúdo sensível no health.
 - Pré-merge: atestar plano Pro, deployment ID corrente, snapshot redatado de configuração/nomes de variáveis, acesso do Owner e capacidade geral de rollback; não alegar elegibilidade futura do alvo exato. Abort antes do merge segue `REC-1` se config já foi commitada.
-- Pós-merge/pré-active: um operador observa/cancela serialmente (`REC-2A`); config só é restaurada após terminal não ativo confirmado (`REC-2B`). Se ficar active durante a corrida, migrar imediatamente para `REC-3`.
+- Pós-merge/pré-active: um operador observa approval/trigger/cancela serialmente (`REC-2A`); config só é restaurada após trigger conclusivamente impedido ou terminal não ativo (`REC-2B`). Se ficar active, migrar imediatamente para `REC-3`.
 - Pós-switch/pre-smoke amplo: assim que a nova deployment estiver ativa, confirmar que o ID antigo agora aparece como previous deployment com `Rollback` visível; a retenção Pro de `120 h` passa a governar a imagem removida/substituída.
 - Rollback primário: ação Railway `Rollback` sobre esse alvo antigo exato restaura imagem/variáveis sem rebuild; RTO máximo `10 min` desde o abort.
 - Fallback degradado: `Redeploy` reconstrói a deployment a partir do source/config original e não preserva identidade de bits; só pode ser usado após bloqueio/renovação explícita do risco e do RTO.
@@ -329,7 +338,7 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` exige merge/tree equ
 - [ ] `DOD-CUT-04` Timeout, rate, concorrência e bytes/memória são calibrados para a topologia real sob carga near-limit.
 - [ ] `DOD-CUT-05` Logs têm sink, retenção, acesso e redaction comprovados.
 - [ ] `DOD-CUT-06` A tree candidata passa localmente em build, readiness, probes, API/browser smoke e `/erros`; essa evidência não é tratada como OCI Railway idêntico.
-- [ ] `DOD-CUT-07` Cada estado `REC-0`, `REC-1`, `REC-2A`, `REC-2B` e `REC-3` possui ação/evidência executável; um operador serializa cancelamento/observação/restore, candidate-active durante abort força `REC-3`, e rollback sem rebuild restaura imagem/variáveis/UI em até 10 minutos. `Redeploy` não é confundido com rollback.
+- [ ] `DOD-CUT-07` `REC-0/1/2A/2B/3` cobre record ausente, awaiting approval, delayed/rejected trigger, in-flight, terminal e active; um operador serializa ações, restore exige prevenção/terminal conclusivo, active força `REC-3`, e recovery conclui/falha explicitamente em 10 minutos.
 - [ ] `DOD-CUT-08` `Stage` customer-facing passa em lista/detalhe para ambos sem fallback/mistura por no mínimo 30 minutos na janela.
 - [ ] `DOD-CUT-09` Teste local determinístico com chaves efêmeras prova que rotação HMAC invalida ID antigo e relistagem produz IDs válidos; nenhuma rotação HMAC ocorre no `Stage` deste TODO.
 - [ ] `DOD-CUT-10` Um predicado SQL canônico de classificação original `ERRO` é aplicado antes de count/group/order/limit/paginação e mutations em lista, resumo, produtos, exportação, detalhe, payload, histórico correlacionado, tratamento unitário/lote e monitoramento; defesa TypeScript não substitui query-side filtering; tratamento `PENDENTE` sobre erro original permanece elegível; o contrato público congelado em `D-CUT-17..19`, `backend/README.md`, decorators OpenAPI e a descrição Swagger global em `backend/src/main.ts` estão coerentes.
@@ -338,9 +347,11 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` exige merge/tree equ
 - [ ] `DOD-CUT-13` Candidate e final main possuem tree OID idêntico; revision/build remoto fica ligado ao final main e seus bits passam readiness/smoke Stage, sem alegar digest idêntico ao build local.
 - [ ] `DOD-CUT-14` Promoção Foundation independente é concluída sem novo commit/deploy em `MonitorNotes:main`; gitlink divergente e follow-up do próximo product release ficam registrados.
 - [ ] `DOD-CUT-15` Um changeset Railway de dez variáveis inclui flag `true`, cinco valores sensíveis/bindings e quatro budgets; é revisado e commitado sem redeploy da deployment antiga, e o único rebuild pós-merge comprova que consumiu esse estado.
-- [ ] `DOD-CUT-16` Realtime não abre `LISTEN`, polling ou timer de varredura; stream usa `fetch` + Bearer/global guard, nunca JWT em URL, termina em <=30 s para nova validação e emite somente tratamento elegível/heartbeat; frontend reconecta, cancela em unmount/logout e refaz fetch ao receber tratamento.
+- [ ] `DOD-CUT-16` Realtime não abre `LISTEN`, polling ou timer de varredura; stream usa `fetch` + Bearer/global guard, termina em <=30 s e emite tratamento/heartbeat; frontend reconecta/cancela e coalesce em 250 ms, de modo que lote síncrono de 500 gere um refetch de lista e um de resumo.
 - [ ] `DOD-CUT-17` Queries críticas error-only possuem plano `EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)` redatado e p95 SQL/endpoint separados sobre fixture determinística de 20.000 linhas, sem alteração de schema/índice, e passam os thresholds pré-promoção congelados.
-- [ ] `DOD-CUT-18` Lista, resumo, produtos, exportação, detalhe, payload, tratamentos, monitoramento e SSE respeitam integralmente métodos, allowlists, defaults, bounds, campos, envelope de erro, códigos, headers e negações do `Public Error API Contract`; frontend types/README não expõem filtros, contadores ou EventSource removidos.
+- [ ] `DOD-CUT-18` Lista, resumo, produtos, exportação, detalhe, payload, tratamentos, monitoramento e SSE respeitam métodos, allowlists, defaults, bounds 1..64/1..200, campos, envelope, códigos, headers e negações; frontend types/README não expõem contratos removidos.
+- [ ] `DOD-CUT-19` Modo atual de `MONITORAMENTO_TOKEN`/UptimeRobot é atestado; se configurado, consumidor usa header e URL está limpa antes do merge, provado contra a release corrente; nenhuma rotação/11ª chave ocorre.
+- [ ] `DOD-CUT-20` Todo campo textual externo do CSV neutraliza inícios `=,+,-,@,TAB,CR` antes do escaping, com testes adversariais coluna a coluna; `pg`/`@types/pg` são removidos de manifest/lockfile.
 
 ## Validation Steps
 
@@ -351,16 +362,18 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` exige merge/tree equ
 - [ ] `VAL-CUT-05` Executar carga near-2MiB no candidato local com budgets `10 s/4/15/60` e registrar p95/p99, 429/5xx/timeout, RSS/heap e recuperação; confirmar métricas Railway antes do corte.
 - [ ] `VAL-CUT-06` Executar smoke autenticado dos GETs e jornada browser `Geral -> detalhe -> Erros -> Geral` nos dois contextos.
 - [ ] `VAL-CUT-07` Inspecionar logs/respostas por padrão sensível sem registrar os valores pesquisados.
-- [ ] `VAL-CUT-08` Antes do merge, atestar deployment corrente/ID/plano/snapshot redatado/acesso geral e ensaiar `REC-0/1/2A/2B/3`, incluindo corrida cancelamento→active; se houver abort pré-ativação, provar terminal não ativo antes do restore, config restaurada e deployment verde inalterada; depois do switch e antes do smoke amplo, comprovar `Rollback` no antigo ID exato. Registrar RTO e não reimplantar automaticamente.
-- [ ] `VAL-CUT-09` Executar `cutover_integrity_audit`, testes estruturais SQL e fixtures com alta proporção inelegível: count/total/páginas corretos e só `ERRO` original pós-query; histórico filtra `SUCESSO/PENDENTE`; reabertura permanece elegível; validar allowlists/defaults/bounds, 400 para filtro/chave/ref branca/duplicada, envelope de erro, 404 sem disclosure, DTOs/headers exatos e revisar `backend/README.md`, `frontend/README.md`, decorators e `backend/src/main.ts` por cinco abas/sucesso/EventSource removidos.
+- [ ] `VAL-CUT-08` Antes do merge, atestar deployment/ID/plano/snapshot e ensaiar `REC-0/1/2A/2B/3`, incluindo merge sem record, awaiting approval, trigger atrasado/rejeitado, cancel→active e terminal; provar trigger impedido/terminal antes do restore e transição para rollback se active. Registrar RTO/falha e não reimplantar automaticamente.
+- [ ] `VAL-CUT-09` Executar `cutover_integrity_audit`, testes SQL e fixtures inelegíveis: count/páginas corretos, só `ERRO`, histórico filtrado e reabertura elegível; validar allowlists/defaults, ref path/lote whitespace/1/64/65/duplicata pós-trim, token config/header 0/1/200/201, 400 versus 404, envelope/DTO/header exatos e docs/OpenAPI sem contratos removidos.
 - [ ] `VAL-CUT-10` Rodar guards Delphi de autoridade, diff, CI, revisão, completion e Foundation conforme a fase.
 - [ ] `VAL-CUT-11` Forçar PostgreSQL indisponível em ambiente local controlado e comprovar readiness não-2xx enquanto liveness do processo permanece bounded.
 - [ ] `VAL-CUT-12` Correlacionar um request sintético em controller/request context, service, adapter/upstream e exception filter com um único ID; revisar logs por PII/payload/segredo sem persistir os valores pesquisados.
 - [ ] `VAL-CUT-13` Comparar `candidate^{tree}` com `final-main^{tree}`, registrar SHAs/tree, build local como evidência separada, revision/build Railway e smoke dos bits remotos; tree mismatch ou smoke remoto falho aborta.
 - [ ] `VAL-CUT-14` Provar que o Dockerfile não consome a Foundation, registrar `Foundation main@sha` versus root gitlink pin e abrir follow-up para sincronização no próximo release sem mutar `MonitorNotes:main` agora.
 - [ ] `VAL-CUT-15` Capturar o changeset staged de dez chaves por nomes/redaction, provar commit sem redeploy da deployment antiga e correlacionar a única revision pós-merge com flag `true` e budgets aprovados.
-- [ ] `VAL-CUT-16` Provar que realtime não cria conexão `pg`, polling/timer ou `evento.novo`; abrir stream por fetch com Bearer e testar 401 para ausente/inválido/inativo, encerramento <=30 s, reconexão com nova checagem após desativação, nenhuma query credential/log, tratamento elegível, heartbeat, cancelamento em logout/unmount e refetch idempotente. Inspecionar logs de aplicação/ingress redatados por ausência de JWT/Authorization.
-- [ ] `VAL-CUT-17` Gerar com seed versionada fixture local de exatamente 20.000 logs (80% originais `PENDENTE/SUCESSO`, 20% `ERRO`; entre erros, 25% `RESOLVIDO/IGNORADO` e casos reabertos), registrar versão/config PostgreSQL e estatísticas. Workloads fixos, isolados e nesta ordem: lista `ERRO?page=1&limit=25&desc`, lista `TRATADOS?page=1&limit=25&desc`, resumo sem filtros, produtos, export `TODOS`/20k. Para **cada** workload: 5 warm-ups descartados, um `EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)` redatado e 30 execuções SQL sequenciais; depois, processo endpoint separado com estado reiniciado, 5 warm-ups e 50 requests medidos com concorrência 4 para cada workload não-export, e 5 warm-ups + 20 requests medidos com concorrência 1 para export. Para cada série ordenar wall-clock crescente e calcular nearest-rank `p95 = amostra[ceil(0.95*n)-1]`; não misturar operações/séries. Bloquear se filtro original-`ERRO` vier após limit/window/group, houver scan correlacionado por linha, qualquer lista/resumo/produtos exceder p95 `3 s` ou export exceder p95 `8 s`. Falha exige TODO separado de schema/índice e nova aprovação.
+- [ ] `VAL-CUT-16` Provar ausência de conexão `pg`/polling/`evento.novo`; fetch Bearer testa 401, <=30 s, reconexão após desativação, nenhuma credential em URL/log, treatment/heartbeat/cancel; fake timers provam que 500 eventos síncronos geram zero refetch antes de 250 ms e exatamente um list + um resumo ao aquietar.
+- [ ] `VAL-CUT-17` Gerar com seed versionada fixture local de exatamente 20.000 logs (80% originais `PENDENTE/SUCESSO`, 20% `ERRO`; entre erros, 25% `RESOLVIDO/IGNORADO` e casos reabertos), registrar versão/config PostgreSQL e estatísticas. Workloads HTTP fixos, isolados e nesta ordem: `GET /eventos?situacao=ERRO&pagina=1&limite=25&direcao=desc`, `GET /eventos?situacao=TRATADOS&pagina=1&limite=25&direcao=desc`, `GET /eventos/resumo`, `GET /eventos/produtos`, `GET /eventos/exportar?situacao=TODOS`; o harness SQL usa filtros equivalentes sem inventar query keys. Para **cada** workload: 5 warm-ups descartados, um `EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)` redatado e 30 execuções SQL sequenciais; depois, processo endpoint separado/reiniciado, 5 warm-ups e 50 requests medidos com concorrência 4 para cada workload não-export, e 5 warm-ups + 20 requests com concorrência 1 para export. Por série ordenar wall-clock e calcular nearest-rank `p95 = amostra[ceil(0.95*n)-1]`; não misturar séries. Bloquear se filtro vier após limit/window/group, houver scan correlacionado por linha, lista/resumo/produtos >`3 s` ou export >`8 s`. Falha exige TODO separado de schema/índice e nova aprovação.
+- [ ] `VAL-CUT-18` Antes do changeset/merge, inspecionar apenas presença/bound do `MONITORAMENTO_TOKEN` sem valor; se presente, provar UptimeRobot com `x-monitor-token`, URL sem query credential, current release 200/503 com header e 401 sem ele; se ausente, provar modo público. Desconhecido bloqueia corte; não rotacionar.
+- [ ] `VAL-CUT-19` Para cada coluna textual externa do CSV, testar valores iniciados individualmente por `=`, `+`, `-`, `@`, TAB e CR; output deve conter prefixo `'` dentro do valor CSV escapado, preservar BOM/headers e não alterar números seguros.
 
 ## Completion Evidence Matrix
 
@@ -384,7 +397,9 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` exige merge/tree equ
 | `DOD-CUT-16` | Definition of Done | realtime auth/boundary | test/security | fetch Bearer/global guard + no query JWT/poll/LISTEN + treatment-only | local backend/browser | `planned` | usuário inativo 401; cancel/refetch comprovados |
 | `DOD-CUT-17` | Definition of Done | query performance | explain/load | fixture 20k versionada + planos JSON + p95 SQL/endpoint | local PostgreSQL | `planned` | 80% inelegível; schema/index fora do escopo |
 | `DOD-CUT-18` | Definition of Done | public HTTP contract | contract/browser | métodos/campos/status/headers/negações exatos | local backend/frontend | `planned` | frontend types e OpenAPI coerentes |
-| `VAL-CUT-01..17` | Validation Steps | validações | mixed | preencher cada evidência durante execução | mixed | `planned` | agregado não substitui linhas no closeout |
+| `DOD-CUT-19` | Definition of Done | monitor consumer migration | ops/security | mode attestation + header-only current-release probe | UptimeRobot/current Stage | `planned` | sem token value/rotation |
+| `DOD-CUT-20` | Definition of Done | CSV/dependency hardening | test/security/manifest | adversarial columns + manifest/lock diff | local backend | `planned` | formula prefix + pg removal |
+| `VAL-CUT-01..19` | Validation Steps | validações | mixed | preencher cada evidência durante execução | mixed | `planned` | agregado não substitui linhas no closeout |
 
 ## External Dependency Readiness
 
@@ -492,6 +507,9 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` exige merge/tree equ
 | structural/test | integration-error SQL boundary | SQL-shape + high-ineligible-ratio pagination tests across logs/monitoring | filtro pós-query, total/página falsa ou read/mutation `SUCESSO` escapando | `implement-in-this-todo` | `VAL-CUT-09` antes do deploy |
 | contract/test | public `/eventos` + monitoramento + SSE | method/request/DTO/status/header matrix from `D-CUT-17..19` | zeros enganosos, filtros legados, disclosure, credential URL ou auth bypass | `implement-in-this-todo` | `VAL-CUT-09/16` antes do deploy |
 | security/contract | realtime stream | Bearer/global guard + browser fetch parser/cancel/refetch + no pg/timer structure | JWT em URL/log, usuário inativo, reconnect leak ou insert externo alegado | `implement-in-this-todo` | `VAL-CUT-16` antes do deploy |
+| security/test | CSV export | per-column formula-prefix fixture for `=,+,-,@,TAB,CR` | spreadsheet formula injection or numeric corruption | `implement-in-this-todo` | `VAL-CUT-19` antes do deploy |
+| ops/consumer | UptimeRobot | current-release header migration/public-mode attestation | query credential breakage or false outage | `manual pre-merge gate` | `VAL-CUT-18` antes do changeset/merge |
+| race/load | treatment SSE consumer | fake-time burst of 500 events | unbounded list/summary refetch storm | `implement-in-this-todo` | `VAL-CUT-16` antes do deploy |
 | explain/performance | logs query family | redacted JSON plans on representative high-ineligible dataset | predicate late, correlated per-row scan or p95 above promotion budget | `implement-in-this-todo` | `VAL-CUT-17` antes do deploy |
 | config test | bootstrap variables | configuration specs with flag false/true-invalid | enable sem pares fiscais/HMAC ou valores fora de bound | `already-enforced` | rerun obrigatório em `VAL-CUT-03` |
 | read-only runtime probe | Smart Notas binding | `smart-notas-live.probe.spec.ts` | token/CNPJ mismatch, lista/detail indisponível | `already-enforced` | execução real obrigatória em `VAL-CUT-04` |
@@ -505,8 +523,8 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` exige merge/tree equ
 - **Decision review lifecycle:** `after review baseline freeze and before APROVADO`
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set: TODO + topology/dependency artifacts + railway/Docker/config/health/fiscal boundaries`
-- **Decision review status:** `round-12 confirmation pending`
-- **Decision review evidence / resolution:** onze revisores independentes retornaram `BLOCKED` em rodadas sucessivas. Round 11 confirmou recovery, monitoring, realtime scope/auth, HMAC, runner e SQL; encontrou defaults/limites HTTP, `frontend/README.md`, amostras por workload e metadata exata. Todos estão integrados neste baseline round 12; nova confirmação independente é obrigatória.
+- **Decision review status:** `round-13 confirmation pending`
+- **Decision review evidence / resolution:** doze revisores independentes retornaram `BLOCKED` em rodadas sucessivas. Round 12 confirmou realtime/auth, HMAC e SQL; encontrou estado pós-merge sem record/approval, migração UptimeRobot, CSV injection, bounds de ref/token, burst de refetch, URI de benchmark, cleanup `pg` e metadata. Todos estão integrados neste baseline round 13; nova confirmação independente é obrigatória.
 
 | Finding ID | Severity | Approval-material | Resolution | Evidence in evolved plan |
 | --- | --- | --- | --- | --- |
@@ -573,6 +591,14 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` exige merge/tree equ
 | `R11-STRUCT-01` | medium | no | `Integrated` | whitelist e consumer matrix incluem `frontend/README.md` com error-only/refresh/fetch-Bearer. |
 | `R11-PERF-01` | medium | no | `Integrated` | `VAL-CUT-17` congela workloads, ordem, warm-ups e amostras por operação, concorrência, isolamento e fórmula nearest-rank. |
 | `R11-DOC-01` | low | no | `Integrated` | round-11 material/attestation e root material/carrier são registrados exatamente; estados avançam para round 12. |
+| `R12-OPS-01` | high | yes | `Integrated` | `REC-2A` inicia no merge e cobre record ausente, approval, delayed/rejected trigger e in-flight; restore exige prevenção/terminal conclusivo. |
+| `R12-OPS-02` | high | yes | `Integrated` | `D-CUT-20`, Execution 1/6/8 e `VAL-CUT-18` migram/atestam UptimeRobot header-only antes do merge, sem rotação. |
+| `R12-SEC-01` | high | yes | `Integrated` | `D-CUT-21` e `VAL-CUT-19` neutralizam `=,+,-,@,TAB,CR` em cada coluna textual externa do CSV. |
+| `R12-ARCH-01` | high | yes | `Integrated` | path/lote usam ref 1..64; monitor config/header 1..200; whitespace/oversize dão 400 e ref válida inelegível dá 404. |
+| `R12-PERF-01` | medium | no | `Integrated` | `D-CUT-22`/`VAL-CUT-16` coalescem 500 eventos em um par list/resumo por janela 250 ms. |
+| `R12-PERF-02` | medium | no | `Integrated` | workloads usam URIs portuguesas exatas e filtros SQL equivalentes separados. |
+| `R12-STRUCT-01` | medium | no | `Integrated` | whitelist inclui backend manifest/lock e exige remover `pg`/`@types/pg`. |
+| `R12-DOC-01` | low | no | `Integrated` | round-12 refs exatas registradas e estados avançam para round 13. |
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before cutover closeout`
 - **Adherence review kind:** `architecture_adherence`
@@ -586,11 +612,11 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` exige merge/tree equ
 - **Why this decision:** release, segredos, dois contextos e promoção canônica exigem revisão reproduzível.
 - **Trigger stage:** `before first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `05e27650bc717c4ad0e08bbd5d2a0517b68ebeee`
+- **Baseline commit:** `pending round-13 material publication`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `no_material_findings`
-- **Findings summary:** `R11-ARCH-01`, `R11-STRUCT-01`, `R11-PERF-01` e `R11-DOC-01` integrados e publicados; round 12 governa nova confirmação.
-- **Evidence / reference:** `origin/main@05e27650bc717c4ad0e08bbd5d2a0517b68ebeee`; material root baseline `MonitorNotes@85442f5ee4e6343b5ccb3b4c58b9f3d229361730`; round-11 predecessor refs preservadas no diff contract; code-origin `31712a0`; Delphi `ee9b448`.
+- **Gate status:** `not_run`
+- **Findings summary:** `R12-OPS-01..02`, `R12-SEC-01`, `R12-ARCH-01`, `R12-PERF-01..02`, `R12-STRUCT-01` e `R12-DOC-01` integrados; publicação round 13 pendente.
+- **Evidence / reference:** predecessor `origin/main@05e27650bc717c4ad0e08bbd5d2a0517b68ebeee`; round-12 attestation `82c3401`; root material/carrier `85442f5`/`d5420be`; novo SHA será registrado após commit/push.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Review Scope Drift
@@ -601,9 +627,9 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` exige merge/tree equ
 - **Baseline source:** `Review Baseline Freeze -> Baseline commit`
 - **Material sections compared:** `canonical defaults, incluindo Diff Expectation Contract, Module Decision Baseline Snapshot e Decision Baseline (Frozen Before Implementation)`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-cutover.md`
-- **Gate status:** `no_material_findings`
-- **Findings summary:** nenhum drift material entre o freeze round 12 e esta attestation metadata; confirmação arquitetural independente continua pendente.
-- **Evidence / reference:** `review_scope_drift_guard.py@ee9b448`; baseline `uninotas-foundation:main@05e27650bc717c4ad0e08bbd5d2a0517b68ebeee`; material root baseline `MonitorNotes@85442f5ee4e6343b5ccb3b4c58b9f3d229361730`; `Overall outcome: go`.
+- **Gate status:** `not_run`
+- **Findings summary:** achados round 12 alteraram material de aprovação; scope drift só pode ser atestado após publicar e revisar o freeze round 13.
+- **Evidence / reference:** predecessor `uninotas-foundation:main@05e27650bc717c4ad0e08bbd5d2a0517b68ebeee`; nova evidência virá após convergência round 13.
 - **Waiver authority / reference:** `n/a`.
 
 ## Frontend / Consumer Matrix
@@ -616,7 +642,7 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` exige merge/tree equ
 | `/api/v1/eventos` contract documentation | `backend/README.md` + `frontend/README.md` + Swagger/OpenAPI decorators in `backend/src/logs/logs.controller.ts` + global description in `backend/src/main.ts` | `known contract consumers; update required` | docs remove five-tab/log-success/EventSource claims and describe error-only + refresh + fetch/Bearer treatment stream |
 | `/api/v1/eventos/*/tratamento` unitário/lote | React error-treatment flows | `producer guard planned; behavior preserved only when original class is ERRO` | mutation tests deny `PENDENTE`/`SUCESSO` without existence disclosure |
 | `GET /api/v1/realtime/eventos` | React `useTempoReal`/fetch streaming somente em `/erros` | `D-CUT-19 frozen; producer/consumer change planned` | Bearer/global guard/inactive-user negatives, no query JWT/log, treatment-only stream, cancel/refetch; Geral/detalhe fiscal não conectam |
-| `GET /api/v1/monitoramento/erros` | UptimeRobot | `exact ten-field shape frozen by D-CUT-18; source projection becomes active-error-only` | header-only token, 200/401/503 + no-store; `total == erros`, `pendentes=0`, `sucessos=0`, tratados excluídos |
+| `GET /api/v1/monitoramento/erros` | UptimeRobot | `exact shape frozen; consumer migration required before merge by D-CUT-20` | current-release header migration/URL cleanup or public-mode attestation; 200/400/401/503 + no-store; tratados excluídos |
 | `GET /api/v1/prontidao` | Railway deployment healthcheck | `new producer/config consumer planned` | PostgreSQL-down non-2xx test + `railway.json` exact path + deployed readiness evidence |
 | `GET /api/v1/saude` | human/public liveness consumers | `existing contract retained as liveness; removed from Railway readiness role` | existing shape/status test + runbook distinction |
 | Smart Notas env/budgets | NestJS bootstrap / Railway sealed variables | `budgets fail-closed change planned; no frontend consumer` | missing-variable startup negatives + client bundle/env scan |
@@ -626,7 +652,7 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` exige merge/tree equ
 
 - **Strategy (`test-first|test-after|not-applicable`):** `test-first`.
 - **Why:** budgets fail-closed, readiness e predicado error-only alteram contratos de segurança/produção; cada mudança começa por um teste negativo reproduzível antes do código.
-- **Fail-first targets:** flag ativa sem cada budget; PostgreSQL indisponível em readiness; SQL sem predicado `ERRO` antes de count/group/order/limit/mutations; paginação com alta proporção de `SUCESSO/PENDENTE`; filtros legados aceitos; métodos/DTOs/status/headers fora de `D-CUT-17..19`; detalhe/histórico `erro + tentativa não elegível`; JWT em query, usuário inativo no SSE, polling/LISTEN remanescente, stream não cancelado; correlation ID divergente; context/cache switch; noteId anterior após rotação local; live probe `30 s/2/30/120` até usar `10 s/4/15/60`.
+- **Fail-first targets:** budgets/readiness; SQL predicate/paginação/histórico; contratos `D-CUT-17..22`; ref/token whitespace/oversize/duplicata; CSV formula chars por coluna; monitor ainda em query token; merge sem deployment record/approval; JWT query/inactive SSE/polling; lote 500 sem coalescing; correlation/context/cache/HMAC/probe envelope.
 - **External read-only:** `/empresa`, lista e detalhe nos dois contextos, sem mutação fiscal e com saída redatada.
 - **Browser:** build local da source tree com interceptação controlada; depois smoke imediato dos bits reconstruídos no único `Stage` customer-facing.
 - **Capacity:** latência, quota, concorrência e memória near-limit; planos `EXPLAIN` redatados e p95 query-side cumprem `VAL-CUT-17` antes de promoção.
@@ -649,10 +675,10 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` exige merge/tree equ
 ## Plan Review Gate
 
 - **Review decision:** `required`
-- **Review status:** `round-12 material frozen; sync/attestation and architecture confirmation pending`
+- **Review status:** `round-13 material frozen; sync/attestation and architecture confirmation pending`
 - **Required lenses:** architecture, operations, rollback, security, tests, performance, observability and structural soundness.
 - **Known plan finding:** o health atual retorna HTTP 2xx quando o banco está degradado; `D-CUT-10` agora exige readiness separada não-2xx e mantém Smart Notas fora do loop.
-- **Approval request condition:** nova revisão confirma `D-CUT-06..19`, crítica converge, baseline é atualizado e guards retornam `go/preflight-go`.
+- **Approval request condition:** nova revisão confirma `D-CUT-06..22`, crítica converge, baseline é atualizado e guards retornam `go/preflight-go`.
 
 ### Review Sections
 
@@ -762,11 +788,15 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` exige merge/tree equ
 - [ ] Changeset staged não pode ser commitado sem redeploy ou não contém exatamente dez chaves: abortar antes do merge.
 - [ ] Pré-merge sem plano/ID/snapshot/acesso geral, ou pós-switch sem `Rollback` no antigo ID exato antes do smoke amplo: abortar ou renovar risco/RTO para fallback `Redeploy`.
 - [ ] Railway cria revision de source/config inesperadas ou readiness/smoke falha: abortar e acionar rollback.
+- [ ] Após merge, deployment ainda invisível/awaiting approval/trigger delayed ou rejected: permanecer `REC-2A`; nunca restaurar config sem prova conclusiva de prevenção/terminal.
 - [ ] Binding fiscal diverge, ocorre cross-context, segredo/PII vaza, quota/memória satura: abortar imediatamente pelos thresholds.
 - [ ] Linha principal é `ERRO`, mas histórico correlacionado contém `SUCESSO/PENDENTE` original: filtrar cada linha; tratamento `PENDENTE` do erro continua visível.
 - [ ] Predicado aplicado só depois da query: bloquear por totais/páginas/agregações incorretos; teste estrutural deve provar filtro SQL antes de count/group/order/limit/mutations.
 - [ ] Filtros `PENDENTE/SUCESSO` ainda aceitos, resumo mantém campos removidos, ou detalhe/tratamento revela ref inelegível: bloquear promoção por contrato público divergente.
 - [ ] Defaults/allowlists divergem, resumo/export aceitam paginação ignorada, lote aceita ref branca/duplicada, ou erro sai fora do envelope comum: bloquear promoção.
+- [ ] UptimeRobot ainda usa query token, consumer mode é desconhecido ou header não foi provado contra current release: bloquear merge sem rotacionar segredo.
+- [ ] CSV permite scalar textual iniciado por `=,+,-,@,TAB,CR` sem prefixo neutralizador: bloquear por spreadsheet injection.
+- [ ] Lote 500 causa mais de um refetch list + um resumo na mesma janela 250 ms: bloquear por request storm.
 - [ ] README, decorators OpenAPI ou descrição Swagger global ainda anunciam cinco abas/sucesso legado: bloquear promoção por contrato incoerente.
 - [ ] Realtime ainda aceita JWT em query, ignora o guard global, abre conexão PostgreSQL/polling/NOTIFY, emite `evento.novo`, ou deixa stream vivo após logout/unmount: bloquear promoção.
 - [ ] Plano SQL filtra inelegíveis após window/group/limit, executa scan correlacionado por linha, ou excede p95 `3 s` (`8 s` export): bloquear e abrir TODO separado de schema/index.
@@ -787,9 +817,9 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` exige merge/tree equ
 
 - **Risk level:** `high`
 - **Why this risk level:** dois tokens fiscais, CNPJs, HMAC, dados autenticados e configuração de produção.
-- **Attack surface in scope:** secret store, logs/ingress, probes, binding, noteId, Bearer/SSE, deploy output, responses e rollback.
+- **Attack surface in scope:** secret store, logs/ingress, probes, binding, noteId/refId, monitor token, Bearer/SSE, CSV/spreadsheet, deploy output, responses e rollback.
 - **Attack simulation decision:** `required before Stage cutover`
-- **Required result:** nenhum vazamento, JWT em URL/log, usuário inativo no stream, cross-context, SSRF/redirect ou aceitação de noteId antigo/corrompido.
+- **Required result:** nenhum vazamento/query credential, JWT em URL/log, usuário inativo no stream, spreadsheet formula, input fora de bound, cross-context, SSRF/redirect ou noteId antigo/corrompido.
 - **Current status:** `pending`.
 
 ## Performance & Concurrency Risk Assessment
