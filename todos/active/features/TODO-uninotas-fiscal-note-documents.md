@@ -289,11 +289,11 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 - **Why this decision:** TODO medium/cross-stack com contrato público e URL fiscal externa.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `fdddcc97f29e3a03993161e0384ce45055c129e5`
+- **Baseline commit:** `10a30d3dc8fa8603b6e2cd70a55247313311f706`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** `baselines de7ef48 e 7029e90 foram criticados; CRIT-DOC-001..006 e CRIT-DOC-001-R2 foram integrados, incluindo matriz HTTP total e pcv-1; o contrato foi recongelado antes da terceira crítica; nenhuma implementação foi incluída`.
-- **Evidence / reference:** `uninotas-foundation@fdddcc97f29e3a03993161e0384ce45055c129e5`, publicado em `origin/main` via Windows Git Credential Manager após o Git WSL não encontrar credencial.
+- **Findings summary:** `três rounds foram integrados; HTTP inclui outcomes upstream/local/auth, pcv-1 usa registries fechados e preflight possui schema completo; contrato recongelado antes do quarto round; nenhuma implementação foi incluída`.
+- **Evidence / reference:** `uninotas-foundation@10a30d3dc8fa8603b6e2cd70a55247313311f706`, publicado em `origin/main` via Windows Git Credential Manager após o Git WSL não encontrar credencial.
 - **Waiver authority / reference:** `n/a`.
 - **Pre-freeze packet-prep rule:** `planning rows remain prepared-pre-freeze until the pushed baseline exists`.
 
@@ -304,9 +304,9 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 - **Trigger stage:** `after critique convergence and before APROVADO`
 - **Guard scope:** `A-01,A-02,A-03,A-04,A-05`
 - **Guard command:** `python3 delphi-ai/tools/assumption_code_coherence_guard.py --todo uninotas-foundation/todos/active/features/TODO-uninotas-fiscal-note-documents.md`
-- **Gate status:** `not_run`
-- **Findings summary:** `pending pushed freeze and planning review`.
-- **Evidence / reference:** `pending`.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** `A-01 confirma adapter/service/React de detalhe já existentes; A-05 confirma disclosure React/CSS sem biblioteca e manifest sem dependência de menu. A-02/A-03/A-04 foram promovidas ao contrato/decisões`.
+- **Evidence / reference:** `assumption_code_coherence_guard.py` retornou `Overall outcome: go`; 2 live assumptions checked.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Review Scope Drift
@@ -334,11 +334,11 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 
 | Assumption ID | Assumption | Evidence | If False | Confidence | Handling |
 | --- | --- | --- | --- | --- | --- |
-| `A-01` | detalhe já chama endpoint oficial e tem 27 propriedades públicas | adapter/service/DetalheNota + módulo | reabre escopo de detalhe | `High` | `Keep as Assumption` |
+| `A-01` | detalhe já chama endpoint oficial e tem 27 propriedades públicas | `backend/src/fiscal-notes/smart-notas.adapter.ts`; `backend/src/fiscal-notes/fiscal-notes.service.ts`; `frontend/src/notas/normalizacaoFiscal.ts`; `frontend/src/paginas/DetalheNota.tsx` | reabre escopo de detalhe | `High` | `Keep as Assumption` |
 | `A-02` | PDF e XML devolvem `{url}` em 200 e `{mensagem}` em 202 | OpenAPI oficial, hash congelado | decoder/contrato precisam revisão | `High` | `Promote to D-04` |
 | `A-03` | URL pode ser entregue ao browser sem fetch server-side | contrato oficial descreve URL de download | proxy vira decisão material e exige nova aprovação | `High` | `Promote to D-05` |
 | `A-04` | mesmos quatro leitores podem acessar documentos | direção prévia “todos os setores podem visualizar”; contratos atuais | exige decisão de autorização | `High` | `Promote to Contract Boundary` |
-| `A-05` | menu pode ser adicionado sem biblioteca | React/CSS atual já implementam disclosure do header | dependência nova seria fora de escopo | `High` | `Keep as Assumption` |
+| `A-05` | menu pode ser adicionado sem biblioteca | `frontend/src/componentes/Cabecalho.tsx`; `frontend/src/estilos/layout.css`; `frontend/package.json` | dependência nova seria fora de escopo | `High` | `Keep as Assumption` |
 
 ## Execution Plan
 
@@ -436,14 +436,14 @@ Every public JSON property above is required. `url` is non-null only for `availa
 
 ## Plan Review Gate
 
-- **Gate status:** `prepared-pre-freeze`.
-- [ ] Architecture
-- [ ] Code Quality
-- [ ] Tests
-- [ ] Performance
-- [ ] Security
-- [ ] Elegance
-- [ ] Structural Soundness
+- **Gate status:** `no_material_findings after four fresh no-context rounds; all prior findings integrated`.
+- [x] Architecture
+- [x] Code Quality
+- [x] Tests
+- [x] Performance
+- [x] Security
+- [x] Elegance
+- [x] Structural Soundness
 
 ### Issue Cards
 
@@ -502,16 +502,16 @@ Every public JSON property above is required. `url` is non-null only for `availa
 | `CRIT-DOC-001-R3` outcomes locais herdados ausentes | `medium` | `Integrated` | matriz HTTP inclui JWT 401, capability disabled 503 e credencial runtime ausente 502 |
 | `CRIT-DOC-007` preflight incompleto | `medium` | `Integrated` | ingestion table com cinco campos e routing tuple canônico; guard será executado somente após convergência |
 
-- **Critique status:** `round-1 findings integrated; round-2 findings integrated; affected gates must reconverge before APROVADO`.
-- **Critique evidence:** reviewers `fresh-no-context-plan-critic` e `fresh-no-context-plan-critic-r2`; dispatches `/tmp/uninotas-documents-critique.dispatch.json` e `/tmp/uninotas-documents-critique-r2.dispatch.json`; baselines `de7ef48` e `7029e90`.
+- **Critique status:** `no_material_findings`; rounds 1–3 findings integrados e round 4 convergiu sem findings.
+- **Critique evidence:** reviewers `fresh-no-context-plan-critic`, `r2`, `r3`, `r4`; dispatches `/tmp/uninotas-documents-critique*.dispatch.json`; baseline final `10a30d3dc8fa8603b6e2cd70a55247313311f706`; r4 classificou performance/elegância/solidez como `strong_positive` e operational fit como `acceptable`.
 
 ## Additional Architectural Opinions
 
-- **Needed:** `pending audit guard`.
-- **Why ambiguity remains:** `nenhuma material após D-01..D-08; guard decide floor`.
-- **Opinion count:** `0 pending guard`.
+- **Needed:** `no`.
+- **Why ambiguity remains:** `n/a; critique convergiu e architecture governance não foi acionada`.
+- **Opinion count:** `0`.
 - **Package mode:** `bounded-summary`.
-- **Internal reviewer mandate:** `pending audit guard`.
+- **Internal reviewer mandate:** `not_needed`.
 - **Required lenses:** `correctness|performance|elegance|structural-soundness|operational-fit`.
 
 ## Audit Trigger Matrix
