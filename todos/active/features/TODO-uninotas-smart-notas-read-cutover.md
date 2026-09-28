@@ -40,7 +40,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** repetir arquitetura sobre as refs round 26 atestadas; a crítica independente só inicia após convergência arquitetural. Nenhuma implementação ou mutação Railway está autorizada.
+- **Next exact step:** executar crítica independente fresca sobre o baseline round 26 arquiteturalmente aprovado; nenhuma implementação ou mutação Railway está autorizada.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -620,8 +620,8 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 - **Decision review lifecycle:** `after review baseline freeze and before APROVADO`
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set: TODO + topology/dependency artifacts + railway/Docker/config/health/fiscal boundaries`
-- **Decision review status:** `round-25 blocked; findings integrated in round-26 candidate`
-- **Decision review evidence / resolution:** arquitetura round 25 provou refs/drift e aceitou a direção R24, mas bloqueou prazo fiscal dependente de relógio/RTT, paths frontend ausentes do strict diff e ausência do cenário composto control+DB-loss. `D-CUT-23/25`, Expected Changed Paths e DOD/VAL round 26 integram os três; nova publicação/attestation/revisão é obrigatória.
+- **Decision review status:** `no_material_findings; round-26 architecture approval-ready`
+- **Decision review evidence / resolution:** reviewer fresco `round26-architecture-no-context` verificou material Foundation `93408c8a53272132ed6577d5fe4dcabc1dfcdfb3`, attestation `a9b3a2b87383888ce7bb001a638c1b0170bd9c86`, root material `ef05341bff43c7059135b35cc94c9d75b64a3adf`, carrier `3cd328614f2fb0e1734202cbcabd2d7cac11d5b3`, ancestry e drift `0/23`; aceitou deadline fiscal monotônico, paths frontend, falha composta control/DB, matriz PostgreSQL, recovery e consumers sem achados. Dispatch `/tmp/uninotas-cutover-round26-architecture.FTQRZl/dispatch.json`.
 
 | Finding ID | Severity | Approval-material | Resolution | Evidence in evolved plan |
 | --- | --- | --- | --- | --- |
@@ -812,7 +812,7 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 ## Plan Review Gate
 
 - **Review decision:** `required`
-- **Review status:** `round-26 material will be frozen by this publication; metadata-only attestation and architecture confirmation pending`
+- **Review status:** `round-26 material frozen/attested; architecture no_material_findings; fresh independent critique pending`
 - **Required lenses:** architecture, operations, rollback, security, tests, performance, observability and structural soundness.
 - **Known plan finding:** o health atual retorna HTTP 2xx quando o banco está degradado; `D-CUT-10` agora exige readiness separada não-2xx e mantém Smart Notas fora do loop.
 - **Approval request condition:** nova revisão confirma `D-CUT-06..25`, crítica converge, baseline é atualizado e guards retornam `go/preflight-go`.
@@ -1063,7 +1063,7 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 - **Independent test-quality audit:** `required before Stage cutover`.
 - **Independent final review:** `required after implementation and before Stage cutover`.
 - **Dedicated triple review:** `required because release-critical + secrets + external provider`.
-- **Current status:** `round-25 findings integrated and round-26 material published/attested; architecture confirmation pending before critique`.
+- **Current status:** `round-26 material published/attested and architecture clean; fresh independent critique pending`.
 
 ## Audit Trigger Matrix (Required Before Audit Decisions Are Trusted)
 
