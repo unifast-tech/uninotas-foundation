@@ -628,18 +628,18 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 - **Gate decision:** `required`
 - **Baseline branch:** `uninotas-foundation/main`
-- **Baseline commit:** `e0c41fe856bd16d735be971303bdf9e63c198b0a`
+- **Baseline commit:** `8223b34abee5f41aa3cb29b2fe294b3ee0e50454`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** o baseline R12 material permanece intacto; o commit atualizado registra apenas o closeout UX, os novos SHAs de comparação, a autoridade já aprovada e a admissão package-first/capability.
-- **Evidence / reference:** `origin/main` contém `e0c41fe856bd16d735be971303bdf9e63c198b0a`; rota, filtros, CSV, limites, autorização, clocks e lifecycle não mudaram no rebaseline.
+- **Findings summary:** o baseline R12 material permanece intacto; a renovação aprovada adiciona apenas o helper `frontend/src/notas/exportacaoFiscal.ts` como owner explícito do lifecycle do download, sem mudar rota, filtros, CSV, limites, autorização ou clocks.
+- **Evidence / reference:** `origin/main` contém `8223b34abee5f41aa3cb29b2fe294b3ee0e50454`, commit que registra a renovação explícita do diff boundary e sua aprovação.
 
 ## Gate: Review Scope Drift
 
 - **Gate decision:** `required`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-filtered-csv-export.md`
 - **Gate status:** `no_material_findings`
-- **Evidence / reference:** `review_scope_drift_guard.py` sobre o baseline pós-UX `e0c41fe856bd16d735be971303bdf9e63c198b0a`: `go`, `0/23` seções materiais alteradas; rebaseline administrativo, sem renovação material de escopo.
+- **Evidence / reference:** `review_scope_drift_guard.py` sobre o baseline renovado `8223b34abee5f41aa3cb29b2fe294b3ee0e50454`: `go`, `0/23` seções materiais alteradas; attestation administrativa após a aprovação explícita do helper.
 
 ## Audit Trigger Matrix
 
