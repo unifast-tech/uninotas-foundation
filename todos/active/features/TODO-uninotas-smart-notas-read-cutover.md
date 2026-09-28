@@ -39,13 +39,13 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 ## Delivery Status Canon (Required)
 
 - **Current delivery stage:** `Pending`
-- **Qualifiers:** `Provisional+Blocked`
-- **Next exact step:** o usuário autoriza o checkpoint/push proposto para congelar o baseline de revisão; depois Delphi executa a revisão arquitetural formal e busca `preflight-go`.
+- **Qualifiers:** `Provisional`
+- **Next exact step:** executar a revisão arquitetural formal sobre o baseline publicado e buscar `preflight-go`; nenhuma mutação Railway está autorizada.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
-- **Work state:** `blocked`
-- **Why this state now:** a topologia customer-facing está confirmada; falta baseline commitado/publicado para a revisão arquitetural formal.
+- **Work state:** `review`
+- **Why this state now:** a topologia customer-facing e o baseline Git estão confirmados; a revisão arquitetural formal é o gate corrente.
 - **Exit condition:** fatos remotos confirmados, decisões `D-CUT-06..08` congeladas, revisão pré-aprovação limpa e `todo_authority_guard.py --pre-approval` em `preflight-go`.
 
 ## Provisional Notes
@@ -56,9 +56,9 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 ## Blocker Notes
 
-- **Blocker:** baseline de código/documentação ainda não foi commitado e publicado.
-- **Why blocked now:** a revisão formal não pode usar working trees não publicados, e commit/push não foram autorizados explicitamente.
-- **What unblocks it:** resposta `COMMIT E PUSH APROVADOS` para os dois checkpoints propostos; isso não autoriza deploy.
+- **Blocker:** nenhuma mutação Railway pode ocorrer antes da revisão formal, `preflight-go` e nova aprovação operacional específica.
+- **Why blocked now:** o checkpoint está publicado, mas os gates pré-cutover ainda não convergiram.
+- **What unblocks it:** revisão arquitetural sem achados bloqueadores, guards em `preflight-go` e resposta explícita `APROVADO` ao plano operacional congelado.
 - **Owner / source:** project Owner confirmado privadamente / painel Railway; o identificador pessoal não é persistido na Foundation.
 - **Last confirmed truth:** `Unifast Products / Stage / MonitorNotes / US East / main / Pro`, domínio `https://monitornotes-stage.up.railway.app` e project Owner operador foram confirmados; retenção de 30 dias e janela 20:00–22:00 foram aceitas; health respondeu HTTP 200 com aplicação/banco `ok`.
 
@@ -69,12 +69,12 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 - [x] `SMART_NOTAS_READ_ENABLED` permanece desligada por padrão no código.
 - [x] Nenhum segredo ou identificador fiscal foi versionado nos candidatos.
 - [x] Contratos locais distinguem `unifast` e `prosperar` sem agregação.
-- [ ] Estado candidato exato recebe checkpoint Git publicável antes de qualquer deploy.
+- [x] Estado candidato exato recebe checkpoint Git publicável antes de qualquer deploy.
 - [x] Alvo remoto customer-facing confirmado: `MonitorNotes`, `Stage`, US East, uma réplica, Pro, source `main`.
 
 ## Scope
 
-- [ ] `CUT-01` Criar checkpoint publicável e reproduzível dos candidatos backend/frontend e da documentação operacional correspondente.
+- [x] `CUT-01` Criar checkpoint publicável e reproduzível dos candidatos backend/frontend e da documentação operacional correspondente.
 - [ ] `CUT-02` Injetar no secret store Railway os pares independentes token/CNPJ, a chave HMAC e os budgets aprovados, sem imprimir valores.
 - [ ] `CUT-03` Executar probe redatado `/empresa`, lista e detalhe para os dois contextos e bloquear mismatch antes de tráfego de usuário.
 - [ ] `CUT-04` Calibrar timeout, concorrência, rate budgets e memória para `réplicas × limite local`, quota observável e respostas válidas próximas do limite de 2 MiB.
@@ -98,8 +98,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Scope Item | Local Branch/Commit | PR / Main | Validation Environment | Production | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Backend + frontend read-only | `delphi-and-foundation@pending-checkpoint` | `pending` | `pending target confirmation` | `pending` | `local candidates only` |
-| Foundation cutover contract | `main@0b36337ed963348aa112be29416b4b5b99cb7ce5 + working tree` | `n/a` | `n/a` | `pending promotion` | `planning` |
+| Backend + frontend read-only | `delphi-and-foundation@31712a042cab3c796d5daca7350c6c58453e1c73` | `pending promotion to main` | `pending` | `pending` | `published review candidate` |
+| Foundation cutover contract | `main@38c0771aa6b44f56b81d6a08eecd9111c37ae8af` | `n/a` | `n/a` | `pending promotion` | `published review baseline` |
 
 ## Out of Scope
 
@@ -141,7 +141,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 ## Diff Expectation Contract
 
-- **Contract status:** `required; baseline checkpoint pending`
+- **Contract status:** `required; baseline checkpoint frozen`
 - **Policy:** `strict; unclassified or forbidden paths block delivery`
 - **User validation:** `required on deviation`
 - **Comparison mode:** `working_tree after candidate checkpoint`
@@ -150,8 +150,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Repository | Path | Baseline ref | Comparison mode |
 | --- | --- | --- | --- |
-| `MonitorNotes` | `.` | `pending checkpoint; current HEAD 5b4f5aeb1ef13b5b810f0b524d12c582954fadbf does not contain current candidates` | `working_tree` |
-| `uninotas-foundation` | `foundation_documentation` | `pending checkpoint; current HEAD 0b36337ed963348aa112be29416b4b5b99cb7ce5 has later working-tree closeout changes` | `working_tree` |
+| `MonitorNotes` | `.` | `31712a042cab3c796d5daca7350c6c58453e1c73` | `committed_diff` |
+| `uninotas-foundation` | `foundation_documentation` | `38c0771aa6b44f56b81d6a08eecd9111c37ae8af` | `committed_diff` |
 
 ### Expected Changed Paths
 
@@ -362,8 +362,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 - **Decision review lifecycle:** `after review baseline freeze and before APROVADO`
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set: TODO + topology/dependency artifacts + railway/Docker/config/health/fiscal boundaries`
-- **Decision review status:** `prepared-pre-freeze`
-- **Decision review evidence / resolution:** `not run; review baseline has not been committed/pushed`.
+- **Decision review status:** `ready`
+- **Decision review evidence / resolution:** `baseline commits published and remote SHAs verified; formal review is the next gate`.
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before cutover closeout`
 - **Adherence review kind:** `architecture_adherence`
@@ -377,11 +377,11 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 - **Why this decision:** release, segredos, dois contextos e promoção canônica exigem revisão reproduzível.
 - **Trigger stage:** `before first planning-side review or guard run`
 - **Baseline branch:** `MonitorNotes:delphi-and-foundation` + `uninotas-foundation:main`
-- **Baseline commit:** `pending`
-- **Baseline push reference:** `pending`
-- **Gate status:** `blocked`
-- **Findings summary:** código backend/frontend e documentação estão em working trees não publicados; nenhum review formal pode ser chamado de passado.
-- **Evidence / reference:** root HEAD `5b4f5aeb1ef13b5b810f0b524d12c582954fadbf` não contém os candidatos; Foundation HEAD `0b36337ed963348aa112be29416b4b5b99cb7ce5` não contém o pacote atual.
+- **Baseline commit:** `MonitorNotes@31712a042cab3c796d5daca7350c6c58453e1c73` + `uninotas-foundation@38c0771aa6b44f56b81d6a08eecd9111c37ae8af`
+- **Baseline push reference:** `MonitorNotes/delphi-and-foundation` + `origin/main`; ambos resolvidos remotamente para os SHAs do baseline em 2026-09-27.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** checkpoint funcional e contrato Foundation foram publicados sem incluir segredos nem `artifacts/` temporários; os SHAs locais e remotos coincidem.
+- **Evidence / reference:** push Foundation `0b36337..38c0771`; push MonitorNotes `5b4f5ae..31712a0`; verificação `rev-parse`/`ls-remote` confirmou igualdade.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Review Scope Drift
@@ -506,11 +506,11 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 ## Early Approval Signal
 
-- **Received:** `Aprovado`, em 2026-09-27.
-- **Accepted decisions:** `D-CUT-07` e intenção de avançar o cutover.
-- **Authority effect:** `none yet`; o sinal chegou antes do `preflight-go` e não substitui os fatos remotos pendentes nem a aprovação operacional pós-preflight.
+- **Received:** `Aprovado`, em 2026-09-27, incluindo autorização contextual para os checkpoints Git propostos.
+- **Accepted decisions:** `D-CUT-07`, avanço do cutover e commit/push do candidato para revisão.
+- **Authority effect:** `checkpoint Git concluído`; não autoriza deploy, alteração de variáveis Railway nem tráfego fiscal.
 
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
-- **Reason:** contrato refinado, mas bloqueado por topologia remota e sem autorização de implementação/deploy.
+- **Reason:** contrato e checkpoint publicados; revisões e gates operacionais ainda precedem qualquer implementação remota/deploy.
