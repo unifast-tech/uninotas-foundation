@@ -53,8 +53,11 @@ todos/ephemeral/.gitignore
 todos/ephemeral/.gitkeep
 todos/promotion_lane/.gitkeep
 artifacts/feature-briefs/uninotas-smart-notas-central.md
+artifacts/feature-briefs/uninotas-fiscal-workspace-improvements.md
 todos/completed/process/TODO-uninotas-canonical-foundation-transition.md
 todos/active/process/TODO-uninotas-smart-notas-api-and-fiscal-context-discovery.md
 todos/completed/features/TODO-uninotas-smart-notas-read-backend.md
 todos/active/features/TODO-uninotas-smart-notas-read-cutover.md
 todos/completed/features/TODO-uninotas-smart-notas-read-frontend.md
+todos/active/features/TODO-uninotas-filtered-csv-export.md
+todos/active/features/TODO-uninotas-fiscal-workspace-ux.md
