@@ -754,7 +754,7 @@ Todos os campos abaixo são propriedades obrigatórias no JSON. `string|null` ac
 - **Disposition:** `move-completed`
 - **Disposition reason:** implementação, documentação, suites, browser, auditorias e guards concluídos no checkout principal; a revisão final encontrou zero bloqueadores de produto.
 - **Delivered state:** `Local-Implemented`, sem deploy; provider smoke e promoção permanecem no TODO de cutover.
-- **Post-commit/push status:** `Foundation evidence commit 1af7c0a local; origin push blocked by missing GitHub credentials; produto será commitado localmente sem push/merge/deploy`.
+- **Post-commit/push status:** `Foundation evidence/closeout e produto commitados localmente; origin push da Foundation bloqueado por credenciais GitHub ausentes; nenhum push/merge/deploy de produto`.
 - **Next path/status action:** concluído em `todos/completed/features/`; promoção/smoke seguem exclusivamente no TODO de cutover.
 
 ## Commands (Run Locally)
