@@ -45,7 +45,7 @@ This scaffold can surface repository evidence and documentation hints, but it do
 | nestjs | experimental | candidate | backend/package.json [dependencies:@nestjs/core] | high | confirmed_by_repository_and_release_contract |
 | react | experimental | candidate | frontend/package.json [dependencies:react-dom] | high | confirmed_by_repository_and_release_contract |
 | vite | experimental | candidate | frontend/package.json [devDependencies:vite] | high | confirmed_by_repository_and_release_contract |
-| postgresql | experimental | unknown | No postgresql registry marker found | low | n/a |
+| postgresql | experimental | observed active dependency | Prisma schema, `DATABASE_URL`, health query and Railway health response | high | confirmed_by_repository_and_public_health; exact service binding pending cutover attestation |
 | prisma | experimental | candidate | backend/package.json [dependencies:@prisma/client], backend/package.json [dependencies:prisma], backend/prisma/schema.prisma | high | confirmed_by_repository_and_release_contract |
 | railway | experimental | candidate | railway.json + project-owner target confirmation | high | confirmed_target_runtime_attestation_pending |
 
