@@ -40,7 +40,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** publicar a attestation round34 sobre o material Foundation `f7bedfcebbfd12e83e853bbac94ab4eba112bd78` / carrier root `769f1d8f6922c84efd74dad479d124aaa30c9f1d`, então repetir arquitetura; crítica/coherence/drift continuam bloqueados até arquitetura limpa. Nenhuma implementação ou mutação Railway está autorizada.
+- **Next exact step:** repetir arquitetura round34 com vínculo explícito ao material/attestation Foundation `f7bedfcebbfd12e83e853bbac94ab4eba112bd78`/`eaf9428a1824dbb4cd79451aae755591b60b130d` e carriers root `769f1d8f6922c84efd74dad479d124aaa30c9f1d`/`dcd6eecd6557b87f90d453238889d68568a08f9c`; crítica/coherence/drift continuam bloqueados até arquitetura limpa. Nenhuma implementação ou mutação Railway está autorizada.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -57,7 +57,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 ## Blocker Notes
 
 - **Blocker:** nenhuma mutação Railway pode ocorrer antes da revisão formal, `preflight-go` e nova aprovação operacional específica.
-- **Why blocked now:** o material round34 está publicado e integra `R33-ARCH-OPS-01/02`; attestation e reviews correntes ainda precisam ocorrer na ordem causal.
+- **Why blocked now:** round34 está publicado/atestado; a primeira opinião arquitetural confirmou o material, mas ficou provisória porque o pacote ainda dizia `attestation pending`. O binding foi corrigido sem mudar material e a revisão deve ser repetida.
 - **What unblocks it:** round34 publicado/atestado, arquitetura/crítica limpas, coherence/drift rerodados depois da crítica e vinculados aos dispatches correntes, capacidade e probes do prior preflighted, guards `preflight-go` e `APROVADO` explícito.
 - **Owner / source:** project Owner confirmado privadamente / painel Railway; o identificador pessoal não é persistido na Foundation.
 - **Last confirmed truth:** `Unifast Products / Stage / MonitorNotes / US East / main / Pro`, domínio `https://monitornotes-stage.up.railway.app` e project Owner operador foram confirmados; retenção de 30 dias e janela 20:00–22:00 foram aceitas; health respondeu HTTP 200 com aplicação/banco `ok`.
@@ -123,8 +123,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Scope Item | Local Branch/Commit | Main / Authority | Local Source/Build Validation | Single Remote Target: Stage Customer-Facing | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Backend + frontend read-only | round34 material carrier `769f1d8f6922c84efd74dad479d124aaa30c9f1d`; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73`; attestation pending | `pending promotion to main` | `pending final cutover suite` | `pre-implementation capacity hard stop; otherwise direct fiscal cutover` | `round34 material published; attestation pending` |
-| Foundation cutover contract | round34 material `f7bedfcebbfd12e83e853bbac94ab4eba112bd78`; attestation pending | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round34 material published; attestation pending` |
+| Backend + frontend read-only | round34 material/attestation carriers `769f1d8f6922c84efd74dad479d124aaa30c9f1d`/`dcd6eecd6557b87f90d453238889d68568a08f9c`; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73` | `pending promotion to main` | `pending final cutover suite` | `pre-implementation capacity hard stop; otherwise direct fiscal cutover` | `round34 published/attested; architecture rerun pending` |
+| Foundation cutover contract | round34 material/attestation `f7bedfcebbfd12e83e853bbac94ab4eba112bd78`/`eaf9428a1824dbb4cd79451aae755591b60b130d` | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round34 published/attested; architecture rerun pending` |
 
 ## Out of Scope
 
@@ -739,7 +739,7 @@ Transições não pulam evidência: REC-2B exige nenhum Active; REC-3A exige rev
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set: TODO + topology/dependency artifacts + railway/Docker/config/health/fiscal boundaries`
 - **Decision review status:** `not_run`
-- **Decision review evidence / resolution:** arquitetura round33 bloqueou com dois achados high, integrados no candidato round34 como D-CUT-40/41 e refinamentos D-CUT-38/39. Dispatch `/tmp/uninotas-cutover-round33-architecture.87f15q/dispatch.json`, SHA-256 `75bf51f93140d60ce475db6b165349ea5fbbd5fe2676f0881c0744e63b067c69`; refs material/attestation Foundation `9dfd94a2044a8d5fa756da65b4f9bbf4d524a53b`/`6d6362c542c9753159a4924f8cafb0c9d2109abe`, root `8c84cd5c3df4351a5db8cac97fe8ba0aea33cec3`/`33c6800fca1038cf8ca3f56e0ff45b38cc460159`. Reviewer fresco round34 será exigido após nova publication+attestation.
+- **Decision review evidence / resolution:** arquitetura round33 bloqueou com dois achados high, integrados no material round34. A primeira opinião round34 confirmou D-CUT-40/41 e não encontrou novo defeito material, mas `R34-GOV-01` tornou o resultado provisório porque o pacote ainda exibia attestation pendente; dispatch `/tmp/uninotas-cutover-round34-architecture.WV6P3a/dispatch.json`, SHA-256 `63008af84654a9d7ec2a1a2fb20366dac6bdb5e718c0061ebc59288e239591c4`. O binding agora registra material/attestation Foundation `f7bedfcebbfd12e83e853bbac94ab4eba112bd78`/`eaf9428a1824dbb4cd79451aae755591b60b130d` e root `769f1d8f6922c84efd74dad479d124aaa30c9f1d`/`dcd6eecd6557b87f90d453238889d68568a08f9c`; repetir reviewer fresco sem mudar material.
 
 | Finding ID | Severity | Approval-material | Resolution | Evidence in evolved plan |
 | --- | --- | --- | --- | --- |
@@ -860,6 +860,7 @@ Transições não pulam evidência: REC-2B exige nenhum Active; REC-3A exige rev
 | `R31-ARCH-OPS-02` | high | yes | `Integrated in round32 candidate` | REC-2A roteia reviewed never-Active+extra Active explicitamente a REC-3B remove-only; VAL-CUT-35 inclui a fixture. |
 | `R33-ARCH-OPS-01` | high | yes | `Integrated in round34 candidate` | D-CUT-38/41 separam runtime polling de configuração, exigem ten-key changeset/activity cursor/zero staged em transições e negativo value-only sem persistir valores/hashes. |
 | `R33-ARCH-OPS-02` | high | yes | `Integrated in round34 candidate` | D-CUT-39/40 congelam probe do exact prior: `/saude` body ok/ok, auth/read legado e SELECT1; REC-3C não exige `/prontidao` da imagem anterior. |
+| `R34-GOV-01` | medium | yes | `Integrated as metadata-only binding` | material e attestation round34 agora aparecem com refs exatas no pacote; a primeira opinião permanece provisória e será repetida por reviewer fresco. |
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before cutover closeout`
 - **Adherence review kind:** `architecture_adherence`
@@ -877,7 +878,7 @@ Transições não pulam evidência: REC-2B exige nenhum Active; REC-3A exige rev
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
 - **Findings summary:** `R33-ARCH-OPS-01/02` foram integrados, validados e publicados como material imutável round34; a attestation registra essas refs sem alterar as seções materiais.
-- **Evidence / reference:** `reviewRound=34`; Foundation `origin/main@f7bedfcebbfd12e83e853bbac94ab4eba112bd78`; root `MonitorNotes/delphi-and-foundation@769f1d8f6922c84efd74dad479d124aaa30c9f1d`; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73`; `todo_deterministic_validator.py=PASS`; `validate_foundation.py=PASS`; drift diagnóstico `go`, `0/23`, mas deliberadamente não satisfaz o gate causal antes da crítica conforme D-CUT-36.
+- **Evidence / reference:** `reviewRound=34`; Foundation material/attestation `origin/main@f7bedfcebbfd12e83e853bbac94ab4eba112bd78`/`eaf9428a1824dbb4cd79451aae755591b60b130d`; root material/attestation carriers `MonitorNotes/delphi-and-foundation@769f1d8f6922c84efd74dad479d124aaa30c9f1d`/`dcd6eecd6557b87f90d453238889d68568a08f9c`; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73`; `todo_deterministic_validator.py=PASS`; `validate_foundation.py=PASS`; drift diagnóstico `go`, `0/23`, mas deliberadamente não satisfaz o gate causal antes da crítica conforme D-CUT-36.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Review Scope Drift
@@ -942,7 +943,7 @@ Transições não pulam evidência: REC-2B exige nenhum Active; REC-3A exige rev
 ## Plan Review Gate
 
 - **Review decision:** `required`
-- **Review status:** `round34 candidate integrates R33 architecture findings; publication/attestation/current architecture/critique pending`
+- **Review status:** `round34 published/attested with exact refs; architecture rerun and critique pending`
 - **Required lenses:** architecture, operations, rollback, security, tests, performance, observability and structural soundness.
 - **Known plan finding:** o health atual retorna HTTP 2xx quando o banco está degradado; `D-CUT-10` agora exige readiness separada não-2xx e mantém Smart Notas fora do loop.
 - **Approval request condition:** nova revisão confirma `D-CUT-06..41`, crítica limpa e somente depois coherence/drift convergem com refs/digest round34; preflight D-CUT-32/34/35/37/38/40/41 é conclusivo e guards `go/preflight-go`.
