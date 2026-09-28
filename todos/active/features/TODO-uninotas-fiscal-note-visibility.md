@@ -274,16 +274,16 @@ Todos os campos abaixo são propriedades obrigatórias no JSON. `string|null` ac
 | signed route identity | `D-15` | detail route | preserva integridade/context binding sem alegar confidencialidade nem aceitar ID bruto como autoridade de entrada |
 | split internal records | `D-19` | list/export vs detail | impede PII detail-only no acumulador de exportação |
 
-### Anti-Patterns To Prohibit
-| Anti-Pattern | Prohibited Surface | Protection Harness |
-| --- | --- | --- |
-| espalhar payload bruto do Smart Notas | adapter/DTO/frontend | contract tests e normalização allowlisted |
-| introduzir pesquisa por número disfarçada | React/adapter | diff review e contract tests dos filtros permitidos |
-| persistir PII/compra/chaves | URL/browser/db/logs | testes de URL/cache/logout e security review; `noteId` assinado decodificável é exceção existente apenas para ID interno |
-| remover canário global para fazer E2E passar | browser tests | separar visibilidade permitida de sinks proibidos e manter ambas as asserções |
-| aceitar campo público ausente como `null` | frontend normalizer | contract tests strict list/detail |
-| espalhar PII de detalhe para resumo/CSV | service/serializer | exact-key list/detail tests plus golden CSV |
-| usar exemplo real como fixture | tests/docs/artifacts | privacy scan and manual diff review |
+### Prohibited Anti-Patterns
+| Anti-Pattern / Wrong Path | Detection Signal | Why It Is Forbidden After Cutover | Exception Policy |
+| --- | --- | --- | --- |
+| espalhar payload bruto do Smart Notas | chaves extras em testes exact-key/normalização | expõe campos não aprovados e acopla UI ao provedor | `none` |
+| introduzir pesquisa por número disfarçada | query param novo, filtro parcial ou page walking | cria resultado enganoso/caro sem suporte do provedor | `none` |
+| persistir PII/compra/chaves | canário em URL/storage/db/logs/telemetria | viola o contrato efêmero e aumenta vazamento | somente o ID interno embutido no `noteId` assinado/decodificável já existente |
+| remover canário global para fazer E2E passar | desaparecimento de asserções por sink | enfraquece a prova de privacidade ao liberar valores visíveis | `none` |
+| aceitar campo público ausente como `null` | normalizador aceita ausência/tipo incorreto | oculta quebra de contrato backend como fallback visual | `none` |
+| espalhar PII de detalhe para resumo/CSV | campos detail-only em summary/export record ou CSV | amplia exposição e memória fora da necessidade do card | `none` |
+| usar exemplo real como fixture | valor real detectado em diff/artifact/teste | persiste PII e identificadores fornecidos transitoriamente | `none` |
 
 ### Architecture Protection Harness
 | Harness Type | Surface | Command / Rule / Artifact | Regression It Must Catch | Adoption Timing | Evidence Plan / Follow-up |
@@ -521,9 +521,9 @@ Todos os campos abaixo são propriedades obrigatórias no JSON. `string|null` ac
 - **Trigger stage:** `after critique convergence and before APROVADO`
 - **Guard scope:** `A-01,A-02,A-03,A-04,A-05`
 - **Guard command:** `python3 delphi-ai/tools/assumption_code_coherence_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-fiscal-note-visibility.md`
-- **Gate status:** `not_run`
-- **Findings summary:** new A-05 and expanded A-02 require rerun after fresh reviews.
-- **Evidence / reference:** previous coherence guard was green before expanded detail scope; new run pending.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** somente A-03/A-04 permanecem live; `smart-notas.adapter.ts` mantém compra/chave completas, `normalizacaoFiscal.ts`/`ListaNotas.tsx` aplicam apenas máscara visual, e o adapter encaminha somente os filtros documentados sem número da nota. A-01/A-02/A-05 foram promovidas às decisões D-01/D-02/D-14.
+- **Evidence / reference:** `assumption_code_coherence_guard.py` returned `Overall outcome: go`; 2 live assumptions checked.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Baseline Freeze
@@ -548,32 +548,41 @@ Todos os campos abaixo são propriedades obrigatórias no JSON. `string|null` ac
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-fiscal-note-visibility.md`
 - **No-go handling rule:** `return to review, revalidate material changes with the user and refresh the pushed baseline`
 - **Gate status:** `not_run`
-- **Findings summary:** user explicitly revalidated and expanded the scope in the current request; baseline refresh and full rerun are pending.
-- **Evidence / reference:** prior `no-go` is superseded by the user's expanded field-list request; no approval authority is inferred.
+- **Findings summary:** o primeiro run foi `go`, mas o preflight exigiu reformatação canônica da tabela de anti-patterns dentro da seção arquitetural; baseline/evidence refresh e rerun são necessários, sem mudança funcional.
+- **Evidence / reference:** run anterior contra `2d4bb67` teve changed material sections: 0; novo run pendente após refresh estrutural.
 - **Waiver authority / reference:** `n/a`
 
 ## Questions To Close
 - [x] Nenhuma pergunta material permanece; o filtro por número foi explicitamente cancelado.
 
 ## Rules Acknowledgement / Ingestion
-| Rule / Workflow / Skill | Why It Applies | Pre-Approval Status |
-| --- | --- | --- |
-| `delphi-ai/rules/core/todo-driven-execution-model-decision.md` | autoridade e gates | `prepared` |
-| `delphi-ai/workflows/docker/todo-driven-execution-method.md` | estado do TODO | `prepared` |
-| `delphi-ai/workflows/react/change-ui-boundary-method.md` | Geral/detalhe/filtros | `prepared` |
-| `delphi-ai/workflows/nestjs/change-application-boundary-method.md` | DTO/query/serviço | `prepared` |
-| `delphi-ai/skills/package-first-verification/SKILL.md` | package-first | `ingested` |
-| `delphi-ai/skills/test-creation-standard/SKILL.md` | cobertura cross-stack | `prepared` |
-| `delphi-ai/skills/security-adversarial-review/SKILL.md` | PII/identificadores | `prepared` |
+| Source | Why It Applies Now | Must Preserve | Must Avoid | Execution Impact |
+| --- | --- | --- | --- | --- |
+| `delphi-ai/rules/core/todo-driven-execution-model-decision.md` | implementação dirigida por TODO | gates e autoridade explícita | código antes de `APROVADO` | revalidar autoridade antes da escrita de produto |
+| `delphi-ai/workflows/docker/todo-driven-execution-method.md` | TODO ativo governa a entrega | estados/evidências canônicos | saltar fases ou declarar conclusão antecipada | registrar progresso e closeout no TODO |
+| `delphi-ai/workflows/react/change-ui-boundary-method.md` | Geral e detalhe React mudam | contrato tipado, acessibilidade e responsividade | payload bruto/tolerância silenciosa | testes unitários, build, lint e browser fresco |
+| `delphi-ai/workflows/nestjs/change-application-boundary-method.md` | DTO/adapter/service NestJS mudam | allowlists, guards e erros existentes | `Omit` público e PII extra | contract/application/full-suite obrigatórios |
+| `delphi-ai/skills/package-first-verification/SKILL.md` | avaliar reutilização antes do host local | decisão Local já evidenciada | pacote novo sem necessidade | implementar no módulo fiscal existente |
+| `delphi-ai/skills/test-creation-standard/SKILL.md` | contrato público e fluxo crítico mudam | test-first e fixtures sintéticas | teste frágil ou dado real | cobertura unit/contract/browser e suites completas |
+| `delphi-ai/skills/security-adversarial-review/SKILL.md` | PII e identificadores são ampliados | minimização, auth e sinks seguros | logs/storage/URL/CSV com PII nova | revisão adversarial requerida antes de Completed |
 
 ## Agent Routing Preflight
-- **Status:** `planned`
-- **Execution surface:** `product-code`
-- **Role:** `operational-coder`
-- **Model / effort:** `inherited / implementation-focused`
-- **Topology:** `primary-checkout-single-writer`
-- **Subagent / delegation authorization:** `not_authorized_for_implementation`
-- **Git isolation authorization:** `not_authorized`; worktrees/auxiliary checkouts remain forbidden.
+- **Client surface:** `codex`
+- **Current governed action:** `implementation`
+- **Selected role:** `routine-executor`
+- **Selected model:** `gpt-5.6-terra`
+- **Selected effort:** `medium`
+- **Proof mode:** `declared`
+- **Exception reason:** `n/a`
+- **Subagent / delegation authorization:** `not-requested`
+- **Execution topology:** `primary-checkout-single-writer`
+- **Worktree / auxiliary-checkout authorization:** `not-authorized`
+- **Worktree authorization evidence:** `n/a`
+- **Writer scheduling policy:** `single-writer-serialized`
+- **Guard outcome:** `go`
+- **Waiver / exception reference:** `n/a`
+- **Guard evidence:** `agent_role_routing_guard.py` returned `Overall outcome: go` for the declared implementation tuple; max concurrent writers `1`.
+- **Pre-approval authority evidence:** `todo_authority_guard.py --pre-approval` returned `Overall outcome: preflight-go`; zero violations; no execution authority granted.
 
 ## Approval
 - **Status:** `not_requested`
