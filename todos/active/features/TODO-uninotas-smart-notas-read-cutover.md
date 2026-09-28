@@ -40,18 +40,18 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** concluir sync/attestation do freeze round 13 e executar nova confirmação arquitetural independente; nenhuma mutação Railway está autorizada.
+- **Next exact step:** publicar e atestar o material round 14 com a política `pcv-1` e a concorrência dos tratamentos corrigidas, então executar nova confirmação arquitetural independente; nenhuma mutação Railway está autorizada.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
 - **Work state:** `review`
 - **Why this state now:** a topologia customer-facing e o baseline Git estão confirmados; a revisão arquitetural formal é o gate corrente.
-- **Exit condition:** fatos remotos confirmados, decisões `D-CUT-06..22` congeladas, revisão pré-aprovação limpa e `todo_authority_guard.py --pre-approval` em `preflight-go`.
+- **Exit condition:** fatos remotos confirmados, decisões `D-CUT-06..23` congeladas, revisão pré-aprovação limpa e `todo_authority_guard.py --pre-approval` em `preflight-go`.
 
 ## Provisional Notes
 
 - **Missing for production-ready:** implementação reconvergida, configuração remota, probes reais, carga local do build candidato, attestation do rollback target, rebuild/cutover/smoke no Stage e promoção Foundation.
-- **Revisit criteria:** concluir `DOD-CUT-01..20` com evidência redatada da deployment exata.
+- **Revisit criteria:** concluir `DOD-CUT-01..21` com evidência redatada da deployment exata.
 - **Dependencies unblocked:** o código local permite preparar o cutover sem redesenhar contratos de lista/detalhe.
 
 ## Blocker Notes
@@ -90,6 +90,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 - [ ] `CUT-14` Manter `uninotas-foundation:main` como autoridade independente após a promoção canônica; não sincronizar o gitlink documental em `MonitorNotes:main` neste closeout para evitar segundo auto-deploy. Registrar follow-up para o próximo release aprovado.
 - [ ] `CUT-15` Antes do merge, migrar/atestar o consumidor UptimeRobot para `x-monitor-token` na release corrente sem rotacionar token; se o token não estiver configurado, atestar modo público. Consumidor/configuração desconhecidos bloqueiam o corte.
 - [ ] `CUT-16` Endurecer export CSV e inputs legados: neutralizar fórmulas em todo texto externo, limitar `refId` a 1..64 após trim e token de monitoramento a 1..200, e coalescer bursts de tratamentos realtime no frontend.
+- [ ] `CUT-17` Serializar tratamentos concorrentes por `refId` no PostgreSQL, com locks adquiridos em ordem lexical no lote, timestamp obtido após o lock, desempate estável por `id`, revalidação de elegibilidade dentro da transação e SSE somente após commit; validar sobreposição real em níveis 5/10/20.
 
 ## Execution Lane Tracking (Required)
 
@@ -103,13 +104,13 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Scope Item | Local Branch/Commit | Main / Authority | Local Source/Build Validation | Single Remote Target: Stage Customer-Facing | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Backend + frontend read-only | round-13 material root `9c136fa7dc6e80c2ceccaf1405510460b3b28685`; code-origin `31712a0` | `pending promotion to main` | `pending final cutover suite` | `pending one direct cutover` | `planning freeze/attestation governed by review gate` |
-| Foundation cutover contract | round-13 material `4ab7e1d6c03ca2e13f0cf7702228d240a793d06e` | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round-13 material frozen; this checkpoint records its attestation` |
+| Backend + frontend read-only | round-13 predecessor material root `9c136fa7dc6e80c2ceccaf1405510460b3b28685` / attestation carrier `5737ae7`; round-14 root irá ao review gate; code-origin `31712a0` | `pending promotion to main` | `pending final cutover suite` | `pending one direct cutover` | `planning round 14 material publication pending` |
+| Foundation cutover contract | round-13 predecessor material `4ab7e1d6c03ca2e13f0cf7702228d240a793d06e` / attestation `4a4ecaa`; round-14 material irá ao review gate | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round-14 material publication pending` |
 
 ## Out of Scope
 
 - Emissão/cancelamento, DANFE/XML e novos relatórios/exportações fiscais Smart Notas; a exportação legada de `/eventos` permanece em escopo apenas para restringi-la a erros.
-- Alteração de schema Prisma/PostgreSQL ou persistência de espelho/cache de notas.
+- Alteração de schema Prisma/PostgreSQL ou persistência de espelho/cache de notas; a serialização usa advisory transaction locks e o schema existente.
 - Agregação “Todos”, polling, webhook ou retry automático da Smart Notas.
 - Detecção realtime de inserts externos em `logs`: neste corte, novos erros aparecem ao abrir/atualizar a tela; o stream cobre somente tratamentos gravados pela API e heartbeat.
 - Mudança de escrita das falhas Routerfy/n8n; o boundary `/eventos` será restrito somente a linhas cuja classificação original é `ERRO`, tratadas ou não. `PENDENTE` e `SUCESSO` deixam de ser elegíveis.
@@ -143,6 +144,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 | `D-CUT-20` | A rejeição de token em query do monitor só entra após migração comprovada do UptimeRobot na release atual: se `MONITORAMENTO_TOKEN` estiver configurado, cadastrar `x-monitor-token`, remover credential da URL e provar 200/401 sem revelar/rotacionar o valor; se ausente, atestar modo público. Estado/consumer desconhecido bloqueia merge. A rotação não pertence ao changeset de dez chaves. | Evita derrubar o monitor durante o hard cut e mantém segredo fora da URL sem criar segunda mudança Railway. | `frozen; approval-material` |
 | `D-CUT-21` | Todo `refId` de path/lote é trimado, deve ter 1..64 caracteres e falha 400 se branco/oversize; só ref válido inexistente/inelegível retorna 404. `MONITORAMENTO_TOKEN` configurado e header oferecido devem ter 1..200 caracteres; config fora do bound falha startup e header fora do bound retorna 400. Export CSV prefixa `'` em todo scalar textual externo cujo primeiro caractere seja `=`, `+`, `-`, `@`, TAB ou CR antes do escaping CSV. | Alinha varchar persistido, limita inputs e neutraliza spreadsheet formula injection. | `frozen; approval-material` |
 | `D-CUT-22` | O consumidor React coalesce eventos `evento.tratado` em janela trailing de 250 ms: qualquer burst produz no máximo um refetch de lista e um de resumo por janela, mantendo o refetch idempotente. Um lote síncrono de 500 refs deve produzir exatamente um par de invalidações após aquietar. | Evita tempestade de até 1.000 requests por tratamento em lote sem alterar o contrato SSE. | `frozen; approval-material` |
+| `D-CUT-23` | Tratamentos unitário e em lote seguem política `serialize` por `refId`: transação PostgreSQL adquire advisory locks pelas refs normalizadas em ordem lexical, revalida erro original elegível sob lock, obtém `criado_em` por relógio do banco após o lock e persiste um append por comando aceito. A situação efetiva é a do último append na ordem estável `criado_em DESC, id DESC`; comandos concorrentes não se perdem. SSE só é publicado após commit, no máximo uma vez por append no processo, e ausência/duplicação transitória do sinal não altera a verdade persistida nem substitui refresh. | Elimina lost update e deadlock entre lotes sobrepostos sem novo schema; preserva histórico append-only e torna o resultado concorrente verificável. | `frozen; approval-material` |
 
 ## Required Operational Decisions Before Approval
 
@@ -164,7 +166,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 ## Diff Expectation Contract
 
-- **Contract status:** `required; round-13 material baseline frozen by this checkpoint`
+- **Contract status:** `required; round-14 material candidate pending publication`
 - **Policy:** `strict; unclassified or forbidden paths block delivery`
 - **User validation:** `required on deviation`
 - **Comparison mode:** `working_tree after candidate checkpoint`
@@ -173,7 +175,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Repository | Path | Baseline ref | Comparison mode |
 | --- | --- | --- | --- |
-| `MonitorNotes` | `.` | round-13 material root `9c136fa7dc6e80c2ceccaf1405510460b3b28685` | `committed_diff`; `31712a0` remains code-origin; attestation-only carrier não é implementação |
+| `MonitorNotes` | `.` | round-13 predecessor material root `9c136fa7dc6e80c2ceccaf1405510460b3b28685`; round-14 material root será registrado no freeze | `committed_diff`; `31712a0` remains code-origin; attestation-only carrier não é implementação |
 | `uninotas-foundation` | `foundation_documentation` | `Gate: Review Baseline Freeze -> Baseline commit` | `committed_diff` |
 
 ### Expected Changed Paths
@@ -189,7 +191,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 | `MonitorNotes` | `backend/src/common/**` | `M` | propagar correlation ID único até logs/erros |
 | `MonitorNotes` | `backend/src/fiscal-notes/**` | `M` | bounded probe/capacity/rotation changes |
 | `MonitorNotes` | `backend/src/config/**` | `M` | bounded runtime validation |
-| `MonitorNotes` | `backend/src/logs/**` | `M` | tornar `/eventos` error-only e testar bloqueio de sucessos |
+| `MonitorNotes` | `backend/src/logs/**` | `M` | tornar `/eventos` error-only, serializar tratamentos por ref e testar bloqueio de sucessos/overlap |
 | `MonitorNotes` | `backend/src/monitoramento/**` | `M` | remover sucesso da projeção operacional baseada em logs |
 | `MonitorNotes` | `backend/src/realtime/**` | `M` | remover polling/LISTEN/JWT em query e manter stream autenticado somente para tratamentos elegíveis/heartbeat |
 | `MonitorNotes` | `backend/package.json` | `M` | remover dependência direta `pg` não usada após retirar LISTEN |
@@ -223,6 +225,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 | `uninotas-foundation` | `policies/scope_subscope_governance.md` | `M` | promover capabilities e transitions atomicamente |
 | `uninotas-foundation` | `artifacts/dependency-readiness.md` | `A|M` | dependency state |
 | `uninotas-foundation` | `artifacts/environment-topology.md` | `A|M` | validated Railway topology |
+| `uninotas-foundation` | `artifacts/tmp/uninotas-cutover-pcv/**` | `A|M` | evidência JSON/hash canônica das quatro lanes `pcv-1`; somente conteúdo redatado |
 
 ### Not Expected Changed Paths
 
@@ -262,9 +265,9 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 ## Execution Plan
 
 1. Confirmar topologia e obter inventário/attestation do Owner sobre consumidores externos de `/eventos`/`logs` e modo atual do UptimeRobot/`MONITORAMENTO_TOKEN`; consumidor ou monitor mode desconhecido bloqueia deploy.
-2. Obter `APROVADO`, carregar regras e implementar na branch de trabalho: budgets fail-closed `10 s/4/15/60`, readiness PostgreSQL-aware, correlation ID ponta a ponta, boundary error-only central e runbook.
-3. Executar testes focados, revisar o diff e congelar um novo checkpoint candidato contendo toda a implementação; registrar SHA e tree OID. Nenhum build anterior é evidência de entrega.
-4. Sobre essa tree exata, executar CI-equivalent completo e build Docker local como evidência source-level, além de startup/readiness negativo, probes redatados dos dois emissores, carga near-limit e browser smoke autenticado. Não alegar OCI idêntico ao rebuild Railway.
+2. Obter `APROVADO`, carregar regras e implementar na branch de trabalho: budgets fail-closed `10 s/4/15/60`, readiness PostgreSQL-aware, correlation ID ponta a ponta, boundary error-only central, serialização PostgreSQL de tratamentos conforme `D-CUT-23` e runbook.
+3. Executar testes focados, incluindo os probes BCI 5/10/20 de unitário/lote sobrepostos e validação de histórico/situação/SSE; revisar o diff e congelar um novo checkpoint candidato contendo toda a implementação; registrar SHA e tree OID. Nenhum build anterior é evidência de entrega.
+4. Sobre essa tree exata, executar CI-equivalent completo e build Docker local como evidência source-level, além de startup/readiness negativo, probes redatados dos dois emissores, lanes `pcv-1` com JSON/hash canônicos, carga near-limit e browser smoke autenticado. Não alegar OCI idêntico ao rebuild Railway.
 5. Concluir auditorias delivery-side; rebasear somente se `main` mudou e, nesse caso, invalidar/repetir o checkpoint/validação. Preparar PR cuja tree final prevista seja idêntica à tree validada.
 6. Ainda sobre a release corrente, se `MONITORAMENTO_TOKEN` estiver configurado, cadastrar `x-monitor-token` no UptimeRobot, remover token da URL e provar request autorizado 200/503 e request sem header 401; se ausente, atestar modo público. Não rotacionar valor. Falta de acesso/evidência aborta antes do merge.
 7. Dentro de 20:00–22:00, criar um único changeset Railway com dez variáveis: cinco valores sensíveis/bindings, quatro budgets exatos e `SMART_NOTAS_READ_ENABLED=true`; revisar presença/escopo sem imprimir valores e usar commit staged sem redeploy. A deployment anterior continua servindo; se atomicidade não for comprovada, abortar antes do merge.
@@ -287,8 +290,8 @@ Regras comuns: `/eventos/**` e `/realtime/eventos` exigem `Authorization: Bearer
 | `GET /eventos/exportar` | aceita somente `situacao=TODOS|ERRO|TRATADOS` (default `ERRO`), `busca<=120`, `produto<=200`, `dataInicio/dataFim` ISO; rejeita `pagina,limite,direcao`; teto interno fixo 20.000 | 200 CSV UTF-8/BOM com colunas exatas `refId;idTransacao;eventAt;situacao;mensagem;idSmartNotas;clienteNome;clienteDocumento;clienteEmail;produto;codProduto;valorVenda;meioPagamento`, somente erro original; antes de quote/escape, cada scalar textual externo iniciado por `=,+,-,@,TAB,CR` recebe prefixo `'` | `Content-Type: text/csv; charset=utf-8`; `Content-Disposition` sanitizado; 400/401 |
 | `GET /eventos/:refId` | path decodificado/trimado deve ter 1..64 caracteres; branco/oversize = 400; ref válida deve ser original-`ERRO` | 200 `LogDetalheDto`: campos de `LogResumoDto` mais `orientacao,origem,cliente,venda,produtor,historico,camposPendentes,payload,resposta`; cada tentativa mantém `em,mensagem,ok,autorNome`, mas histórico contém somente linhas originais `ERRO` | 400 input; 401; 404 ref válida inexistente/inelegível |
 | `GET /eventos/:refId/payload` | mesmo bound 1..64/trim; ref elegível original-`ERRO` | 200 exatamente `{enviado,resposta}` | 400 input; 401; 404 válida inexistente/inelegível |
-| `PATCH /eventos/:refId/tratamento` | mesmo bound 1..64/trim; body exatamente `{situacao: RESOLVIDO|IGNORADO|PENDENTE, observacao?: string<=1000}`; ref elegível | 200 `LogDetalheDto`; `PENDENTE` reabre para situação efetiva `ERRO` | 400 input/body; 401/403; 404 válida inexistente/inelegível |
-| `POST /eventos/tratar-lote` | body `{refIds: string[1..500], situacao, observacao?}`; cada ref é trimada, deve ter 1..64 e ser única após trim; branca/oversize/duplicata rejeita todo lote com 400; mesma enum/regra do unitário | 200 exatamente `{solicitados,aplicados,ignorados}`; `solicitados` é tamanho validado/único; `ignorados` ecoa somente refs válidas não aplicadas, sem distinguir inexistente de inelegível | 400/401/403 |
+| `PATCH /eventos/:refId/tratamento` | mesmo bound 1..64/trim; body exatamente `{situacao: RESOLVIDO|IGNORADO|PENDENTE, observacao?: string<=1000}`; ref elegível; overlap na mesma ref é serializado por `D-CUT-23` | 200 `LogDetalheDto`; `PENDENTE` reabre para situação efetiva `ERRO`; cada comando aceito gera exatamente um append, sem lost update | 400 input/body; 401/403; 404 válida inexistente/inelegível |
+| `POST /eventos/tratar-lote` | body `{refIds: string[1..500], situacao, observacao?}`; cada ref é trimada, deve ter 1..64 e ser única após trim; branca/oversize/duplicata rejeita todo lote com 400; mesma enum/regra do unitário; locks de refs em ordem lexical | 200 exatamente `{solicitados,aplicados,ignorados}`; `solicitados` é tamanho validado/único; `ignorados` ecoa somente refs válidas não aplicadas, sem distinguir inexistente de inelegível; batch é atômico e não perde append em overlap unitário/lote | 400/401/403 |
 | `GET /monitoramento/erros` | `MONITORAMENTO_TOKEN`, se configurado, deve ter 1..200 ou startup falha; aceita somente header `x-monitor-token` 1..200, oversize/branco = 400; query `token` inválida; `minutos` inteiro 1..1440 default 60, `atencao` >=1 default 1, `critico` >=1 default 6, `alertarEm=atencao|critico`; demais chaves rejeitadas | 200 exatamente `{status,cor,erros,pendentes,sucessos,total,ultima_verificacao,janela:{inicio,fim,minutos},limites:{atencao,critico},detalhe}`; `erros=total` conta ativos/reabertos, tratados não contam, `pendentes=0`, `sucessos=0` | `Cache-Control: no-store`; 400 input; 401 token ausente/incorreto quando configurado; 503 banco indisponível ou severidade >= `alertarEm`, mesmo shape |
 | `GET /realtime/eventos` | header Bearer obrigatório; nenhum token/query; consumidor usa `fetch` streaming e reconecta após término normal | 200 `text/event-stream`; apenas `evento.tratado` com `refId,situacao,origem='api',em` e `heartbeat` com `origem='sistema',em`; servidor encerra em <=30 s; sem polling/NOTIFY/`evento.novo` | 401 ausente/inválido/inativo a cada conexão; cancelar em logout/unmount; `Cache-Control: no-store`; nenhum JWT em URL/log |
 
@@ -352,6 +355,7 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 - [ ] `DOD-CUT-18` Lista, resumo, produtos, exportação, detalhe, payload, tratamentos, monitoramento e SSE respeitam métodos, allowlists, defaults, bounds 1..64/1..200, campos, envelope, códigos, headers e negações; frontend types/README não expõem contratos removidos.
 - [ ] `DOD-CUT-19` Modo atual de `MONITORAMENTO_TOKEN`/UptimeRobot é atestado; se configurado, consumidor usa header e URL está limpa antes do merge, provado contra a release corrente; nenhuma rotação/11ª chave ocorre.
 - [ ] `DOD-CUT-20` Todo campo textual externo do CSV neutraliza inícios `=,+,-,@,TAB,CR` antes do escaping, com testes adversariais coluna a coluna; `pg`/`@types/pg` são removidos de manifest/lockfile.
+- [ ] `DOD-CUT-21` Tratamentos concorrentes unitário/lote são serializados por ref sem deadlock ou lost update: cada comando aceito deixa um append, situação efetiva corresponde ao último append pela ordem estável, lote é atômico, inelegíveis não são gravados e SSE ocorre somente pós-commit; BCI 5/10/20 passa com evidência `pcv-1` canônica.
 
 ## Validation Steps
 
@@ -374,6 +378,7 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 - [ ] `VAL-CUT-17` Gerar com seed versionada fixture local de exatamente 20.000 logs (80% originais `PENDENTE/SUCESSO`, 20% `ERRO`; entre erros, 25% `RESOLVIDO/IGNORADO` e casos reabertos), registrar versão/config PostgreSQL e estatísticas. Workloads HTTP fixos, isolados e nesta ordem: `GET /eventos?situacao=ERRO&pagina=1&limite=25&direcao=desc`, `GET /eventos?situacao=TRATADOS&pagina=1&limite=25&direcao=desc`, `GET /eventos/resumo`, `GET /eventos/produtos`, `GET /eventos/exportar?situacao=TODOS`; o harness SQL usa filtros equivalentes sem inventar query keys. Para **cada** workload: 5 warm-ups descartados, um `EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)` redatado e 30 execuções SQL sequenciais; depois, processo endpoint separado/reiniciado, 5 warm-ups e 50 requests medidos com concorrência 4 para cada workload não-export, e 5 warm-ups + 20 requests com concorrência 1 para export. Por série ordenar wall-clock e calcular nearest-rank `p95 = amostra[ceil(0.95*n)-1]`; não misturar séries. Bloquear se filtro vier após limit/window/group, houver scan correlacionado por linha, lista/resumo/produtos >`3 s` ou export >`8 s`. Falha exige TODO separado de schema/índice e nova aprovação.
 - [ ] `VAL-CUT-18` Antes do changeset/merge, inspecionar apenas presença/bound do `MONITORAMENTO_TOKEN` sem valor; se presente, provar UptimeRobot com `x-monitor-token`, URL sem query credential, current release 200/503 com header e 401 sem ele; se ausente, provar modo público. Desconhecido bloqueia corte; não rotacionar.
 - [ ] `VAL-CUT-19` Para cada coluna textual externa do CSV, testar valores iniciados individualmente por `=`, `+`, `-`, `@`, TAB e CR; output deve conter prefixo `'` dentro do valor CSV escapado, preservar BOM/headers e não alterar números seguros.
+- [ ] `VAL-CUT-20` Executar concorrência real contra PATCH unitário, lotes com refs sobrepostas e unitário versus lote em níveis `5 x 2 batches`, `10 x 3` e `20 x 5`; usar situações conflitantes e elegíveis/inelegíveis. Exigir zero deadlock/5xx, um append por comando aceito/ref aplicada, nenhum append inelegível, lote transacional, história sem perda, situação efetiva igual ao último append em `criado_em DESC, id DESC` e nenhum SSE antes de commit ou acima de um por append no processo. Gerar JSON `pcv-1` BCI com hash SHA-256 canônico; resposta HTTP isolada não satisfaz o gate.
 
 ## Completion Evidence Matrix
 
@@ -399,7 +404,8 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 | `DOD-CUT-18` | Definition of Done | public HTTP contract | contract/browser | métodos/campos/status/headers/negações exatos | local backend/frontend | `planned` | frontend types e OpenAPI coerentes |
 | `DOD-CUT-19` | Definition of Done | monitor consumer migration | ops/security | mode attestation + header-only current-release probe | UptimeRobot/current Stage | `planned` | sem token value/rotation |
 | `DOD-CUT-20` | Definition of Done | CSV/dependency hardening | test/security/manifest | adversarial columns + manifest/lock diff | local backend | `planned` | formula prefix + pg removal |
-| `VAL-CUT-01..19` | Validation Steps | validações | mixed | preencher cada evidência durante execução | mixed | `planned` | agregado não substitui linhas no closeout |
+| `DOD-CUT-21` | Definition of Done | tratamento concorrente | concurrency/domain | BCI 5/10/20 + histórico/situação/SSE + JSON/hash `pcv-1` | local PostgreSQL/backend | `planned` | serialize per-ref; HTTP-only evidence inválida |
+| `VAL-CUT-01..20` | Validation Steps | validações | mixed | preencher cada evidência durante execução | mixed | `planned` | agregado não substitui linhas no closeout |
 
 ## External Dependency Readiness
 
@@ -510,6 +516,7 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 | security/test | CSV export | per-column formula-prefix fixture for `=,+,-,@,TAB,CR` | spreadsheet formula injection or numeric corruption | `implement-in-this-todo` | `VAL-CUT-19` antes do deploy |
 | ops/consumer | UptimeRobot | current-release header migration/public-mode attestation | query credential breakage or false outage | `manual pre-merge gate` | `VAL-CUT-18` antes do changeset/merge |
 | race/load | treatment SSE consumer | fake-time burst of 500 events | unbounded list/summary refetch storm | `implement-in-this-todo` | `VAL-CUT-16` antes do deploy |
+| concurrency/domain | treatment mutations | advisory transaction locks ordered by normalized ref + BCI 5/10/20 | lost update, deadlock, partial batch, unstable effective status or pre-commit/duplicate SSE | `implement-in-this-todo` | `VAL-CUT-20` antes de Local-Implemented |
 | explain/performance | logs query family | redacted JSON plans on representative high-ineligible dataset | predicate late, correlated per-row scan or p95 above promotion budget | `implement-in-this-todo` | `VAL-CUT-17` antes do deploy |
 | config test | bootstrap variables | configuration specs with flag false/true-invalid | enable sem pares fiscais/HMAC ou valores fora de bound | `already-enforced` | rerun obrigatório em `VAL-CUT-03` |
 | read-only runtime probe | Smart Notas binding | `smart-notas-live.probe.spec.ts` | token/CNPJ mismatch, lista/detail indisponível | `already-enforced` | execução real obrigatória em `VAL-CUT-04` |
@@ -523,8 +530,8 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 - **Decision review lifecycle:** `after review baseline freeze and before APROVADO`
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set: TODO + topology/dependency artifacts + railway/Docker/config/health/fiscal boundaries`
-- **Decision review status:** `round-13 confirmation pending`
-- **Decision review evidence / resolution:** doze revisores independentes retornaram `BLOCKED` em rodadas sucessivas. Round 12 confirmou realtime/auth, HMAC e SQL; encontrou estado pós-merge sem record/approval, migração UptimeRobot, CSV injection, bounds de ref/token, burst de refetch, URI de benchmark, cleanup `pg` e metadata. Todos estão integrados neste baseline round 13; nova confirmação independente é obrigatória.
+- **Decision review status:** `round-14 material publication pending`
+- **Decision review evidence / resolution:** treze revisores independentes retornaram `BLOCKED` em rodadas sucessivas. Round 13 encerrou todos os achados R12, mas encontrou matriz `pcv-1` inválida e BCI omitido apesar das mutations unitária/lote. `D-CUT-23`, `VAL-CUT-20` e a matriz canônica integram a correção; publicação e nova confirmação independente são obrigatórias.
 
 | Finding ID | Severity | Approval-material | Resolution | Evidence in evolved plan |
 | --- | --- | --- | --- | --- |
@@ -599,6 +606,7 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 | `R12-PERF-02` | medium | no | `Integrated` | workloads usam URIs portuguesas exatas e filtros SQL equivalentes separados. |
 | `R12-STRUCT-01` | medium | no | `Integrated` | whitelist inclui backend manifest/lock e exige remover `pg`/`@types/pg`. |
 | `R12-DOC-01` | low | no | `Integrated` | round-12 refs exatas registradas e estados avançam para round 13. |
+| `R13-PCV-01` | high | yes | `Integrated` | quatro rows usam registros/estados/deadlines/evidence rules fechados `pcv-1`; BCI é required/high com `serialize`, invariant e probes 5/10/20 que validam persistência, estado e SSE. |
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before cutover closeout`
 - **Adherence review kind:** `architecture_adherence`
@@ -612,11 +620,11 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 - **Why this decision:** release, segredos, dois contextos e promoção canônica exigem revisão reproduzível.
 - **Trigger stage:** `before first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `4ab7e1d6c03ca2e13f0cf7702228d240a793d06e`
+- **Baseline commit:** `pending round-14 material publication`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `no_material_findings`
-- **Findings summary:** `R12-OPS-01..02`, `R12-SEC-01`, `R12-ARCH-01`, `R12-PERF-01..02`, `R12-STRUCT-01` e `R12-DOC-01` foram integrados e publicados no material round 13; confirmação independente permanece pendente.
-- **Evidence / reference:** Foundation material `origin/main@4ab7e1d6c03ca2e13f0cf7702228d240a793d06e`; root material `MonitorNotes/delphi-and-foundation@9c136fa7dc6e80c2ceccaf1405510460b3b28685`; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73`; Delphi guard `ee9b448`.
+- **Gate status:** `not_run`
+- **Findings summary:** `R13-PCV-01` foi integrado no material candidato round 14; publicação, sync e attestation ainda pendem.
+- **Evidence / reference:** predecessor Foundation material/attestation `4ab7e1d6c03ca2e13f0cf7702228d240a793d06e`/`4a4ecaaf1da766b7ee475186b691356f82e35862`; predecessor root material/carrier `9c136fa7dc6e80c2ceccaf1405510460b3b28685`/`5737ae7`; novo SHA será registrado após commit/push.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Review Scope Drift
@@ -628,8 +636,8 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 - **Material sections compared:** `canonical defaults, incluindo Diff Expectation Contract, Module Decision Baseline Snapshot e Decision Baseline (Frozen Before Implementation)`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-cutover.md`
 - **Gate status:** `not_run`
-- **Findings summary:** achados round 12 alteraram material de aprovação; scope drift só pode ser atestado após publicar e revisar o freeze round 13.
-- **Evidence / reference:** baseline congelado em `uninotas-foundation:main@4ab7e1d6c03ca2e13f0cf7702228d240a793d06e`; execução aguarda convergência da confirmação round 13.
+- **Findings summary:** `R13-PCV-01` alterou material de aprovação; scope drift só pode ser atestado após publicar e revisar o freeze round 14.
+- **Evidence / reference:** predecessor em `uninotas-foundation:main@4ab7e1d6c03ca2e13f0cf7702228d240a793d06e`; nova evidência virá após convergência round 14.
 - **Waiver authority / reference:** `n/a`.
 
 ## Frontend / Consumer Matrix
@@ -640,7 +648,7 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 | `GET /api/v1/notas/:noteId` | React `/notas/:noteId`, `DetalheNota` | `implemented candidate; final tree validation pending` | opaque-ID/detail/error tests + Stage smoke |
 | `/api/v1/eventos` list/resumo/produtos/export/detalhe/payload/history | React `/erros` + `/eventos/:refId`; external consumers unknown | `final contract frozen in D-CUT-17..19; implementation planned` | exact method/request/DTO/status/header matrix; SQL predicate incl. pagination/correlated attempts; Owner attestation before deploy; no waiver |
 | `/api/v1/eventos` contract documentation | `backend/README.md` + `frontend/README.md` + Swagger/OpenAPI decorators in `backend/src/logs/logs.controller.ts` + global description in `backend/src/main.ts` | `known contract consumers; update required` | docs remove five-tab/log-success/EventSource claims and describe error-only + refresh + fetch/Bearer treatment stream |
-| `/api/v1/eventos/*/tratamento` unitário/lote | React error-treatment flows | `producer guard planned; behavior preserved only when original class is ERRO` | mutation tests deny `PENDENTE`/`SUCESSO` without existence disclosure |
+| `/api/v1/eventos/*/tratamento` unitário/lote | React error-treatment flows | `producer guard + D-CUT-23 serialization planned; behavior preserved only when original class is ERRO` | mutation tests deny `PENDENTE`/`SUCESSO` without existence disclosure; BCI 5/10/20 proves append/state/SSE invariants |
 | `GET /api/v1/realtime/eventos` | React `useTempoReal`/fetch streaming somente em `/erros` | `D-CUT-19 frozen; producer/consumer change planned` | Bearer/global guard/inactive-user negatives, no query JWT/log, treatment-only stream, cancel/refetch; Geral/detalhe fiscal não conectam |
 | `GET /api/v1/monitoramento/erros` | UptimeRobot | `exact shape frozen; consumer migration required before merge by D-CUT-20` | current-release header migration/URL cleanup or public-mode attestation; 200/400/401/503 + no-store; tratados excluídos |
 | `GET /api/v1/prontidao` | Railway deployment healthcheck | `new producer/config consumer planned` | PostgreSQL-down non-2xx test + `railway.json` exact path + deployed readiness evidence |
@@ -652,7 +660,7 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 
 - **Strategy (`test-first|test-after|not-applicable`):** `test-first`.
 - **Why:** budgets fail-closed, readiness e predicado error-only alteram contratos de segurança/produção; cada mudança começa por um teste negativo reproduzível antes do código.
-- **Fail-first targets:** budgets/readiness; SQL predicate/paginação/histórico; contratos `D-CUT-17..22`; ref/token whitespace/oversize/duplicata; CSV formula chars por coluna; monitor ainda em query token; merge sem deployment record/approval; JWT query/inactive SSE/polling; lote 500 sem coalescing; correlation/context/cache/HMAC/probe envelope.
+- **Fail-first targets:** budgets/readiness; SQL predicate/paginação/histórico; contratos `D-CUT-17..23`; ref/token whitespace/oversize/duplicata; CSV formula chars por coluna; monitor ainda em query token; merge sem deployment record/approval; JWT query/inactive SSE/polling; lote 500 sem coalescing; tratamento concorrente sem serialização/ordem/atomicidade; correlation/context/cache/HMAC/probe envelope.
 - **External read-only:** `/empresa`, lista e detalhe nos dois contextos, sem mutação fiscal e com saída redatada.
 - **Browser:** build local da source tree com interceptação controlada; depois smoke imediato dos bits reconstruídos no único `Stage` customer-facing.
 - **Capacity:** latência, quota, concorrência e memória near-limit; planos `EXPLAIN` redatados e p95 query-side cumprem `VAL-CUT-17` antes de promoção.
@@ -664,6 +672,7 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | backend NestJS | fiscal/config/readiness/error-only/correlation/auth mudam | startup fail-closed; DB-negative readiness; exact HTTP contract; SQL predicate before count/group/order/limit/mutations; high-ineligible pagination; correlated history; fetch-SSE global auth/no polling; same correlation ID | Node 22 host Windows; fixtures Jest determinísticas/Prisma SQL assertions; nenhum token live | no diretório `backend`: `npm test -- --runInBand && npm run lint && git diff --exit-code && npm run build`; se lint autofixar, invalidar/refazer freeze e toda validação | `Local-Implemented` | `planned` | output + SHA/tree antes/depois | `npm run lint` contém `--fix`; zero diff é obrigatório |
 | backend SQL plan/performance | error-only muda todas as queries críticas | workloads fixos lista ERRO/TRATADOS, resumo, produtos, export; predicate placement; p95 SQL/HTTP 3 s/8 s | seed 20k: 80% inelegível/20% erro; 25% erros tratados; PG version/config; ordem/isolamento de `VAL-CUT-17` | por workload: 5 warmups + EXPLAIN + 30 SQL; novo processo: 5 warmups + 50 HTTP concurrency 4, ou 20 export concurrency 1; nearest-rank por série | `Local-Implemented` | `planned` | seed + JSON plans redatados + séries/p95 separados | falha abre TODO de schema/index; não amplia este diff |
+| backend BCI treatment overlap | PATCH/lote gravam na mesma ref | PATCH/PATCH, lote/lote e PATCH/lote 5/10/20; append, atomicidade, estado e SSE pós-commit | PostgreSQL local; refs elegíveis/inelegíveis; situações conflitantes; clock/ordem observáveis | no diretório `backend`: runner Jest dedicado de `VAL-CUT-20`, orquestrado pelo helper `backend_concurrency_probe.sh` quando aplicável | `Local-Implemented` | `planned` | `foundation_documentation/artifacts/tmp/uninotas-cutover-pcv/bci-pcv1.json` + SHA-256 | `BCI-SP-H`/`BCI-A1`; HTTP-only evidence inválida |
 | backend near-limit | envelope externo/memória | 2 MiB, fairness, semaphore 4, rates 15/60, timeout/abort/recovery | loopback stub only; `RLS_OUTPUT_DIR` redatado | no diretório `backend`: `RLS_OUTPUT_DIR=../artifacts/cutover-rls npm test -- --runInBand --runTestsByPath src/fiscal-notes/__tests__/smart-notas-load.spec.ts` | `Local-Implemented` | `planned` | `artifacts/cutover-rls` redatado | sem tráfego provider real |
 | frontend React/Vite unit/race | context/cache/contract mudam | Geral/detalhe/Erros, troca rápida de contexto, logout/401 cache purge e error-only | Node 22 host Windows; fixtures locais dos scripts | no diretório `frontend`: `npm run test:notas && npm run test:notas:race && npm run lint && npm run build` | `Local-Implemented` | `planned` | output dos cinco comandos | bundle same-origin |
 | frontend Playwright intercepted | jornada visível muda | login -> Geral -> detalhe -> Erros -> Geral; ambos contextos; nenhuma origem externa; `/eventos` só erro | `npm run dev` em loopback; Chrome/Chromium local em `CHROME`; todas as APIs interceptadas pelo runner | no diretório `frontend`: `ALVO=http://127.0.0.1:5173 CHROME=<chromium-local> npm run e2e:notas` | `Local-Implemented` | `planned` | relatório console redatado | adicionar negativas do history/error-only neste TODO |
@@ -675,10 +684,10 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 ## Plan Review Gate
 
 - **Review decision:** `required`
-- **Review status:** `round-13 material frozen; sync/attestation and architecture confirmation pending`
+- **Review status:** `round-14 material candidate; publication/sync/attestation and architecture confirmation pending`
 - **Required lenses:** architecture, operations, rollback, security, tests, performance, observability and structural soundness.
 - **Known plan finding:** o health atual retorna HTTP 2xx quando o banco está degradado; `D-CUT-10` agora exige readiness separada não-2xx e mantém Smart Notas fora do loop.
-- **Approval request condition:** nova revisão confirma `D-CUT-06..22`, crítica converge, baseline é atualizado e guards retornam `go/preflight-go`.
+- **Approval request condition:** nova revisão confirma `D-CUT-06..23`, crítica converge, baseline é atualizado e guards retornam `go/preflight-go`.
 
 ### Review Sections
 
@@ -826,15 +835,40 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 
 - **Policy schema version:** `pcv-1`
 - **Global sensitivity level:** `high`
-- **Why this level:** cada réplica multiplica concorrência/rate contra API externa; payload aceito pode chegar a 2 MiB.
+- **Why this level:** cada réplica multiplica concorrência/rate contra API externa; payload aceito pode chegar a 2 MiB; tratamento unitário/lote e realtime alteram uma superfície de escrita sobreposta.
 - **Current delivery stage at review time:** `Pending, Provisional, review`
 
-| Lane ID | Lane | Trigger Result | Trigger Severity | Trigger Reason Code | Gate Deadline | Minimum Evidence Rule | State | Residual Risk | Uncertainty Reason Code |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `EPS` | `endpoint-performance-scrutiny` | `required` | `high` | `EPS-EXTERNAL-DATA-PATH` | `before_enable` | provider latency/body evidence | `planned` | quota unknown | `external_topology_unknown` |
-| `FRC` | `frontend-race-condition-validation` | `required` | `medium` | `FRC-REAL-BACKEND-CUTOVER` | `before_production` | real browser context/cache switch | `planned` | mocks passed | `runtime_target_unknown` |
-| `BCI` | `backend-concurrency-idempotency-validation` | `not_needed` | `low` | `BCI-READ-ONLY` | `n/a` | policy justification | `not_applicable` | no write | `none` |
-| `RLS` | `runtime-load-stress-validation` | `required` | `high` | `RLS-REPLICA-EXTERNAL-QUOTA-MEMORY` | `before_enable` | production-like load/recovery/body | `planned` | provider quota unknown | `provider_quota_unknown` |
+| Policy Schema Version | Lane ID | Lane | Trigger Result | Trigger Severity | Trigger Reason Code | Trigger Rationale | Gate Deadline | Minimum Evidence Rule | State | Residual Risk | Uncertainty Reason Code | Recorded At UTC | Executor ID |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `pcv-1` | `EPS` | `endpoint-performance-scrutiny` | `required` | `high` | `EPS-QUERY-SHAPE-CHANGED` | queries de lista/agregação/export/detalhe/histórico mudam eligibility, paginação e ordenação; paths fiscais externos permanecem materiais | `before_local_implemented` | `EPS-E2` | `pending` | seletividade real de Stage e quota Smart Notas permanecem desconhecidas até evidência autorizada | `none` | `2026-09-28T04:01:17Z` | `codex-primary` |
+| `pcv-1` | `FRC` | `frontend-race-condition-validation` | `required` | `high` | `FRC-STALE-RESPONSE` | troca de contexto/cache, reconexão fetch-SSE, logout/unmount e burst de 500 tratamentos podem sobrepor reads e invalidações | `before_local_implemented` | `FRC-E3` | `pending` | navegador Stage customer-facing só é provado no cutover | `none` | `2026-09-28T04:01:17Z` | `codex-primary` |
+| `pcv-1` | `BCI` | `backend-concurrency-idempotency-validation` | `required` | `high` | `BCI-LOST-UPDATE-RISK` | PATCH e lote podem gravar comandos conflitantes sobre a mesma ref e publicar invalidações concorrentes | `before_local_implemented` | `BCI-E3` | `pending` | replay de transporte sem chave de idempotência é um novo comando; frontend não faz retry automático e serialização impede perda/corrupção | `none` | `2026-09-28T04:01:17Z` | `codex-primary` |
+| `pcv-1` | `RLS` | `runtime-load-stress-validation` | `required` | `high` | `RLS-SLO-CLAIM` | há SLOs explícitos, bulk 500, SSE, limite 2 MiB, budgets externos e pressão de memória/concorrência | `before_local_implemented` | `RLS-E3` | `pending` | quota real do provedor e pressão do OCI Railway permanecem até probe/observação | `none` | `2026-09-28T04:01:17Z` | `codex-primary` |
+
+### EPS planned evidence
+
+- **Access-pattern classification:** `bounded-list|aggregation|exact-lookup|mutation`; o predicado original-`ERRO` deve entrar no SQL antes de count/group/order/limit/mutation, e lookup por ref permanece direto e bounded.
+- **Evidence contract:** `EPS-SP-STRONG` / `EPS-A2`; touched-path audit, anti-pattern audit, planos `EXPLAIN` JSON redatados e benchmarks separados de `VAL-CUT-17` em `foundation_documentation/artifacts/tmp/uninotas-cutover-pcv/eps-pcv1.json`.
+
+### FRC planned evidence
+
+- **Concurrency policies:** `cancel previous` para troca de contexto/lista; `drop duplicate` para submit enquanto mutation está em flight; `last-write-wins` somente para invalidação/refetch coalescida; cancelamento obrigatório no logout/unmount.
+- **Evidence contract:** `FRC-SP-H` / `FRC-A1`; runner determinístico nos bursts 5/10/20, troca rápida/out-of-order/lifecycle e lote de 500 em `foundation_documentation/artifacts/tmp/uninotas-cutover-pcv/frc-pcv1.json`.
+
+### BCI planned evidence
+
+- **Invariant ID:** `CUT-TREATMENT-SERIAL-APPEND-01` — para cada ref elegível, todo comando aceito persiste exatamente um append; nenhum append inelegível ocorre; a situação efetiva é o último append pela ordem estável; lote é atômico; SSE nunca antecede commit nem excede um sinal por append no processo.
+- **Concurrency policy:** `serialize` por advisory transaction lock PostgreSQL; lotes normalizam/deduplicam antes da transação e adquirem refs em ordem lexical. O clock do banco é lido depois do lock e consultas usam `criado_em DESC, id DESC`.
+- **Evidence contract:** `BCI-SP-H` / `BCI-A1`; PATCH/PATCH, lote/lote e PATCH/lote nos níveis 5 x 2, 10 x 3 e 20 x 5, validando respostas, linhas persistidas, ordem efetiva, atomicidade e sinais SSE em `foundation_documentation/artifacts/tmp/uninotas-cutover-pcv/bci-pcv1.json`.
+
+### RLS planned evidence
+
+- **Workload model:** `RLS-SP-H` com load, stress e recovery sobre stub loopback, budgets `10 s/4/15/60`, payload near-2MiB, bulk 500 e stream; nenhuma carga destrutiva alcança Smart Notas/Stage.
+- **Evidence contract:** `RLS-A1`; thresholds/métricas de `VAL-CUT-05`, incluindo p50/p95/p99, throughput, status, RSS/heap, saturação e recovery em `foundation_documentation/artifacts/tmp/uninotas-cutover-pcv/rls-pcv1.json`.
+
+### Common `pcv-1` artifact rule
+
+- Cada lane em `running|passed` deve registrar no TODO o evidence object completo. O JSON machine-checkable inclui todos os campos obrigatórios do `pcv-1`; `artifact_sha256` é SHA-256 da serialização JSON UTF-8 com chaves recursivamente ordenadas, arrays preservados e sem whitespace, excluindo o próprio campo durante o cálculo. Evidência somente em prosa ou somente por status HTTP não satisfaz o gate.
 
 ## Audit and Independent Review Gates
 
