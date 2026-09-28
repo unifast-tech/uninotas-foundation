@@ -40,7 +40,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** publicar o material round 22 com `R21-OPS-BCI-01`, `R21-PERF-01`, `R21-OPS-02` e `R21-ADH-01` integrados, atestar sem alterar material e repetir arquitetura + crítica independente; nenhuma mutação Railway está autorizada.
+- **Next exact step:** concluir a attestation metadata-only do material round 22 e repetir arquitetura + crítica independente; nenhuma mutação Railway está autorizada.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -105,8 +105,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Scope Item | Local Branch/Commit | Main / Authority | Local Source/Build Validation | Single Remote Target: Stage Customer-Facing | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Backend + frontend read-only | round-21 predecessor material root `94f3d9446a3abbf96e74887ba6430a63eaa5db28`; round-21 carrier `298cfe399d3767be0535a8c69d07ae2f2f6b38fb`; round-22 refs pending; code-origin `31712a0` | `pending promotion to main` | `pending final cutover suite` | `pending one direct cutover` | `round-22 material publication pending` |
-| Foundation cutover contract | round-21 predecessor material `5e9c003c083d5492ffed8df210674f86aaaa0c39`; round-21 attestation `c6b9018dbfd9981dec31c2c227c9830454b36345`; round-22 refs pending | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round-22 material publication pending` |
+| Backend + frontend read-only | round-22 material root `9269d9fccca7c9f1628741ba390644b5e0d18fa8`; code-origin `31712a0`; attestation carrier pending | `pending promotion to main` | `pending final cutover suite` | `pending one direct cutover` | `round-22 material frozen; metadata attestation pending` |
+| Foundation cutover contract | round-22 material `3cbfac6cb5bdcdf0a342eb74fa8994b8dd6c76ba`; attestation pending | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round-22 material frozen; metadata attestation pending` |
 
 ## Out of Scope
 
@@ -566,7 +566,7 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 - **Decision review lifecycle:** `after review baseline freeze and before APROVADO`
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set: TODO + topology/dependency artifacts + railway/Docker/config/health/fiscal boundaries`
-- **Decision review status:** `round-22 material publication pending`
+- **Decision review status:** `round-22 confirmations pending`
 - **Decision review evidence / resolution:** a arquitetura round 21 retornou `CLEAN/APROVÁVEL` nas refs congeladas, mas a crítica no-context obrigatória encontrou quatro riscos novos: snapshot sem fence persistente, headroom não reservado, runner tardio e mistura entre ensaio/ação real. O candidato round 22 integra writer session fence, clients `4/1/1`, runner pre-merge e `VAL-CUT-08/22` separados; publicação e novas confirmações são obrigatórias.
 
 | Finding ID | Severity | Approval-material | Resolution | Evidence in evolved plan |
@@ -676,11 +676,11 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 - **Why this decision:** release, segredos, dois contextos e promoção canônica exigem revisão reproduzível.
 - **Trigger stage:** `before first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `5e9c003c083d5492ffed8df210674f86aaaa0c39`
+- **Baseline commit:** `3cbfac6cb5bdcdf0a342eb74fa8994b8dd6c76ba`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `running`
-- **Findings summary:** candidato material round 22 integra os quatro achados da crítica R21; baseline resolvível permanece temporariamente o predecessor round 21 até a nova publicação.
-- **Evidence / reference:** predecessor Foundation material `origin/main@5e9c003c083d5492ffed8df210674f86aaaa0c39`; predecessor root material `MonitorNotes/delphi-and-foundation@94f3d9446a3abbf96e74887ba6430a63eaa5db28`; round-22 refs pending; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73`; Delphi guard `ee9b448`.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** os quatro achados R21 foram integrados e publicados no material round 22; esta attestation não altera seções materiais; confirmações independentes permanecem pendentes.
+- **Evidence / reference:** Foundation material `origin/main@3cbfac6cb5bdcdf0a342eb74fa8994b8dd6c76ba`; root material `MonitorNotes/delphi-and-foundation@9269d9fccca7c9f1628741ba390644b5e0d18fa8`; refs verificadas com `git rev-parse --verify`; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73`; Delphi guard `ee9b448`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Review Scope Drift
@@ -691,9 +691,9 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 - **Baseline source:** `Review Baseline Freeze -> Baseline commit`
 - **Material sections compared:** `canonical defaults, incluindo Diff Expectation Contract, Module Decision Baseline Snapshot e Decision Baseline (Frozen Before Implementation)`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-cutover.md`
-- **Gate status:** `not_run`
-- **Findings summary:** round 22 contém alterações materiais intencionais para os achados R21; executar somente após publicar o novo material e durante a attestation metadata-only.
-- **Evidence / reference:** round-22 material pending; resultado esperado na attestation: `go`, `0/23` seções materiais alteradas.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** attestation round 22 preserva todas as seções materiais do baseline publicado; arquitetura e crítica ainda devem confirmar o pacote.
+- **Evidence / reference:** `review_scope_drift_guard.py` contra `uninotas-foundation:main@3cbfac6cb5bdcdf0a342eb74fa8994b8dd6c76ba`; resultado esperado `go`, `0/23` seções materiais alteradas.
 - **Waiver authority / reference:** `n/a`.
 
 ## Frontend / Consumer Matrix
@@ -741,7 +741,7 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 ## Plan Review Gate
 
 - **Review decision:** `required`
-- **Review status:** `round-22 material publication pending`
+- **Review status:** `round-22 material frozen; metadata-only attestation and independent confirmations pending`
 - **Required lenses:** architecture, operations, rollback, security, tests, performance, observability and structural soundness.
 - **Known plan finding:** o health atual retorna HTTP 2xx quando o banco está degradado; `D-CUT-10` agora exige readiness separada não-2xx e mantém Smart Notas fora do loop.
 - **Approval request condition:** nova revisão confirma `D-CUT-06..24`, crítica converge, baseline é atualizado e guards retornam `go/preflight-go`.
