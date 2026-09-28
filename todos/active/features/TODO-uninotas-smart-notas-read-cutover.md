@@ -40,7 +40,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** publicar/fixar round 6, executar confirmação arquitetural e crítica independente, depois scope/coherence/authority guards e `preflight-go`; nenhuma mutação Railway está autorizada.
+- **Next exact step:** executar confirmação arquitetural e crítica independente sobre round 6, depois scope/coherence/authority guards e `preflight-go`; nenhuma mutação Railway está autorizada.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -102,7 +102,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 | Scope Item | Local Branch/Commit | Main / Authority | Local Source/Build Validation | Single Remote Target: Stage Customer-Facing | Current Status |
 | --- | --- | --- | --- | --- | --- |
 | Backend + frontend read-only | `delphi-and-foundation@31712a042cab3c796d5daca7350c6c58453e1c73` | `pending promotion to main` | `pending final cutover suite` | `pending one direct cutover` | `published review candidate` |
-| Foundation cutover contract | `main@dbefd833e5c8da095ccfcae748663d066be1eb99` | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `published round-5 review baseline` |
+| Foundation cutover contract | `main@f922eae7eb931075b1a380c65a776853dfd1bc96` | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `published round-6 review baseline` |
 
 ## Out of Scope
 
@@ -150,7 +150,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 ## Diff Expectation Contract
 
-- **Contract status:** `required; round-6 refresh pending after artifact/domain/topology findings`
+- **Contract status:** `required; round-6 baseline checkpoint frozen`
 - **Policy:** `strict; unclassified or forbidden paths block delivery`
 - **User validation:** `required on deviation`
 - **Comparison mode:** `working_tree after candidate checkpoint`
@@ -160,7 +160,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 | Repository | Path | Baseline ref | Comparison mode |
 | --- | --- | --- | --- |
 | `MonitorNotes` | `.` | `31712a042cab3c796d5daca7350c6c58453e1c73` | `committed_diff` |
-| `uninotas-foundation` | `foundation_documentation` | `dbefd833e5c8da095ccfcae748663d066be1eb99` | `committed_diff` |
+| `uninotas-foundation` | `foundation_documentation` | `f922eae7eb931075b1a380c65a776853dfd1bc96` | `committed_diff` |
 
 ### Expected Changed Paths
 
@@ -461,11 +461,11 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 - **Why this decision:** release, segredos, dois contextos e promoção canônica exigem revisão reproduzível.
 - **Trigger stage:** `before first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `pending round-6 Foundation checkpoint`; round 5 `dbefd833e5c8da095ccfcae748663d066be1eb99` está superseded pelos findings integrados.
-- **Baseline push reference:** `pending origin/main refresh`
-- **Gate status:** `blocked`
-- **Findings summary:** `R5-ARCH-01..04` mudaram materialmente artifact identity, error domain e pós-cutover topology; novo freeze é obrigatório.
-- **Evidence / reference:** implementation candidate permanece separado em `MonitorNotes@31712a042cab3c796d5daca7350c6c58453e1c73`; novo Foundation SHA será registrado após push.
+- **Baseline commit:** `f922eae7eb931075b1a380c65a776853dfd1bc96`
+- **Baseline push reference:** `origin/main`
+- **Gate status:** `no_material_findings`
+- **Findings summary:** `R5-ARCH-01..04` foram integrados e publicados; round 6 governa os reviews.
+- **Evidence / reference:** `origin/main@f922eae7eb931075b1a380c65a776853dfd1bc96`; implementation candidate separado `MonitorNotes@31712a042cab3c796d5daca7350c6c58453e1c73`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Review Scope Drift
@@ -476,9 +476,9 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 - **Baseline source:** `Review Baseline Freeze -> Baseline commit`
 - **Material sections compared:** `Context|Contract Boundary|Scope|Out of Scope|Definition of Done|Validation Steps|Execution Lane Tracking|Decision Baseline|Architecture Change Governance|Assumptions Preview|Execution Plan|Security Risk Assessment|Performance & Concurrency Risk Assessment`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-cutover.md`
-- **Gate status:** `blocked`
-- **Findings summary:** round 5 introduziu drift material necessário; rerun somente após round-6 freeze e reviews.
-- **Evidence / reference:** reviewer `/root/cutover_architecture_round5`; `R5-ARCH-01..04` integrados, refresh pendente.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** nenhum drift nas 22 seções materiais entre `f922eae` e a attestation metadata corrente.
+- **Evidence / reference:** `review_scope_drift_guard.py`; `Overall outcome: go`; baseline `uninotas-foundation:main@f922eae7eb931075b1a380c65a776853dfd1bc96`, push ref `origin/main`, changed material sections `0`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Frontend / Consumer Matrix
@@ -519,7 +519,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 ## Plan Review Gate
 
 - **Review decision:** `required`
-- **Review status:** `round-5 findings integrated; round-6 freeze and confirmation pending`
+- **Review status:** `round-6 frozen; architecture confirmation and independent critique pending`
 - **Required lenses:** architecture, operations, rollback, security, tests, performance, observability and structural soundness.
 - **Known plan finding:** o health atual retorna HTTP 2xx quando o banco está degradado; `D-CUT-10` agora exige readiness separada não-2xx e mantém Smart Notas fora do loop.
 - **Approval request condition:** nova revisão confirma `D-CUT-06..12`, crítica converge, baseline é atualizado e guards retornam `go/preflight-go`.
