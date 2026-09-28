@@ -40,7 +40,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** publicar e atestar o material round 17 com barreira cross-version de mutations, então executar nova confirmação arquitetural independente; nenhuma mutação Railway está autorizada.
+- **Next exact step:** concluir a atestação metadata-only do freeze round 17 e executar nova confirmação arquitetural independente; nenhuma mutação Railway está autorizada.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -105,8 +105,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Scope Item | Local Branch/Commit | Main / Authority | Local Source/Build Validation | Single Remote Target: Stage Customer-Facing | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Backend + frontend read-only | round-16 predecessor material root `5fa6ef7270b438a660e8add19cc677b708b61287` / attestation carrier `b3f30a376814e663f288490f5b803ac7a4bb876d`; round-17 root irá ao review gate; code-origin `31712a0` | `pending promotion to main` | `pending final cutover suite` | `pending one direct cutover` | `planning round 17 material publication pending` |
-| Foundation cutover contract | round-16 predecessor material `739ca313f1a73715e3ed0f6b53cd537bb927d9a2` / attestation `9c65316bb812262a20f5c6a1111c8dae1c8961ec`; round-17 material irá ao review gate | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round-17 material publication pending` |
+| Backend + frontend read-only | round-17 material root `58432604d3a3c89c589d9550fa9391f336b412ab`; code-origin `31712a0` | `pending promotion to main` | `pending final cutover suite` | `pending one direct cutover` | `planning freeze/attestation governed by review gate` |
+| Foundation cutover contract | round-17 material `b3d789d59d2a6b3e4e3db879cad7bd98b3839b6f` | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round-17 material frozen; this checkpoint records metadata-only attestation` |
 
 ## Out of Scope
 
@@ -548,7 +548,7 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no merge; `RE
 - **Decision review lifecycle:** `after review baseline freeze and before APROVADO`
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set: TODO + topology/dependency artifacts + railway/Docker/config/health/fiscal boundaries`
-- **Decision review status:** `round-17 material publication pending`
+- **Decision review status:** `round-17 confirmation pending`
 - **Decision review evidence / resolution:** dezesseis revisores independentes retornaram `BLOCKED` em rodadas sucessivas. Round 16 encerrou `R15-GOV-01` e o steady-state de `R15-BCI-01`, mas encontrou overlap do writer legado no switch/rollback. `D-CUT-24`, teardown 0/20, barrier 21 e rollback quiescido integram a correção; publicação e nova confirmação são obrigatórias.
 
 | Finding ID | Severity | Approval-material | Resolution | Evidence in evolved plan |
@@ -643,11 +643,11 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no merge; `RE
 - **Why this decision:** release, segredos, dois contextos e promoção canônica exigem revisão reproduzível.
 - **Trigger stage:** `before first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `pending round-17 material publication`
+- **Baseline commit:** `b3d789d59d2a6b3e4e3db879cad7bd98b3839b6f`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `not_run`
-- **Findings summary:** `R16-OPS-BCI-01` foi integrado no material candidato round 17; publicação, sync e attestation ainda pendem.
-- **Evidence / reference:** predecessor Foundation material/attestation `739ca313f1a73715e3ed0f6b53cd537bb927d9a2`/`9c65316bb812262a20f5c6a1111c8dae1c8961ec`; predecessor root material/carrier `5fa6ef7270b438a660e8add19cc677b708b61287`/`b3f30a376814e663f288490f5b803ac7a4bb876d`; novo SHA será registrado após commit/push.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** `R16-OPS-BCI-01` foi integrado e publicado no material round 17; a attestation não altera seções materiais; confirmação independente permanece pendente.
+- **Evidence / reference:** Foundation material `origin/main@b3d789d59d2a6b3e4e3db879cad7bd98b3839b6f`; root material `MonitorNotes/delphi-and-foundation@58432604d3a3c89c589d9550fa9391f336b412ab`; refs verificadas com `git rev-parse --verify`; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73`; Delphi guard `ee9b448`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Review Scope Drift
@@ -660,7 +660,7 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no merge; `RE
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-cutover.md`
 - **Gate status:** `not_run`
 - **Findings summary:** `R16-OPS-BCI-01` alterou material de aprovação; scope drift só pode ser atestado após publicar/revisar o freeze round 17 e comprovar attestation metadata-only.
-- **Evidence / reference:** predecessor em `uninotas-foundation:main@739ca313f1a73715e3ed0f6b53cd537bb927d9a2`; nova evidência virá após convergência round 17.
+- **Evidence / reference:** baseline congelado em `uninotas-foundation:main@b3d789d59d2a6b3e4e3db879cad7bd98b3839b6f`; attestation metadata-only será verificada pelo guard após convergência round 17.
 - **Waiver authority / reference:** `n/a`.
 
 ## Frontend / Consumer Matrix
@@ -708,7 +708,7 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no merge; `RE
 ## Plan Review Gate
 
 - **Review decision:** `required`
-- **Review status:** `round-17 material candidate; publication/sync/attestation and architecture confirmation pending`
+- **Review status:** `round-17 material frozen; metadata-only attestation and architecture confirmation pending`
 - **Required lenses:** architecture, operations, rollback, security, tests, performance, observability and structural soundness.
 - **Known plan finding:** o health atual retorna HTTP 2xx quando o banco está degradado; `D-CUT-10` agora exige readiness separada não-2xx e mantém Smart Notas fora do loop.
 - **Approval request condition:** nova revisão confirma `D-CUT-06..24`, crítica converge, baseline é atualizado e guards retornam `go/preflight-go`.
