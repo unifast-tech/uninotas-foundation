@@ -185,7 +185,7 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `DOD-DOC-01` | `Definition of Done` | detalhe de 27 campos preservado | `test+browser` | exact-key tests + `e2e:notas` detalhe | `local browser` | `planned` | regressão, sem nova rota |
 | `DOD-DOC-02` | `Definition of Done` | identidade/contexto protegidos | `integration-test` | Nest application/contract matrices | `backend local` | `planned` | inclui tamper/raw ID/cross-context |
-| `DOD-DOC-03` | `Definition of Done` | contrato 200/202 e falhas | `adapter-test` | SmartNotas adapter fixtures | `backend local` | `planned` | URL nunca impressa |
+| `DOD-DOC-03` | `Definition of Done` | contrato 200/202 e falhas | `adapter+application/controller-test` | adapter fixtures + HTTP assertions de status/body/headers | `backend local` | `planned` | inclui 201/204/206, exact keys e URL nunca impressa |
 | `DOD-DOC-04` | `Definition of Done` | zero retenção/vazamento | `test+review` | canários de log/storage/cache | `local` | `planned` | privacy boundary |
 | `DOD-DOC-05` | `Definition of Done` | menu/consulta sob demanda | `browser` | `frontend/e2e/notas.mjs` | `Chrome local` | `planned` | uma chamada por escolha |
 | `DOD-DOC-06` | `Definition of Done` | acessibilidade e navegação | `browser` | teclado/Escape/foco/click propagation | `Chrome local` | `planned` | desktop/mobile |
@@ -269,18 +269,18 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 
 ## Architecture Review Gates
 
-- **Architecture decision review:** `pending audit guard`
-- **Decision review lifecycle:** `after diagnosis is closed and before APROVADO`
-- **Decision review kind:** `architecture_opinion or n/a per guard`
-- **Decision review package:** `bounded-summary`
-- **Decision review status:** `not_run`
-- **Decision review evidence / resolution:** `pending`
-- **Architecture adherence review:** `pending audit guard`
-- **Adherence review lifecycle:** `after implementation and before Completed`
-- **Adherence review kind:** `architecture_adherence or n/a per guard`
-- **Adherence review package:** `bounded-file-set`
-- **Adherence review status:** `not_run`
-- **Adherence review evidence / resolution:** `pending`
+- **Architecture decision review:** `not_needed`
+- **Decision review lifecycle:** `n/a`
+- **Decision review kind:** `n/a`
+- **Decision review package:** `n/a`
+- **Decision review status:** `n/a`
+- **Decision review evidence / resolution:** `audit_escalation_guard: ARCHITECTURE-GOVERNANCE-NOT-TRIGGERED`
+- **Architecture adherence review:** `not_needed`
+- **Adherence review lifecycle:** `n/a`
+- **Adherence review kind:** `n/a`
+- **Adherence review package:** `n/a`
+- **Adherence review status:** `n/a`
+- **Adherence review evidence / resolution:** `audit_escalation_guard: ARCHITECTURE-GOVERNANCE-NOT-TRIGGERED`
 - **No-go handling:** `retornar ao loop afetado e não alegar aprovação/conclusão`.
 
 ## Gate: Review Baseline Freeze
@@ -289,11 +289,11 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 - **Why this decision:** TODO medium/cross-stack com contrato público e URL fiscal externa.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `de7ef48935f76ab9d9475d835e6f53306b9e93f0`
+- **Baseline commit:** `7029e90ab8501a0d7e2ebe9ecc335b8ff1015ccd`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** `feature brief, tactical TODO e manifesto coerente foram congelados antes da primeira review/guard; nenhuma implementação foi incluída`.
-- **Evidence / reference:** `uninotas-foundation@de7ef48935f76ab9d9475d835e6f53306b9e93f0`, publicado em `origin/main` via Windows Git Credential Manager após o Git WSL não encontrar credencial.
+- **Findings summary:** `baseline inicial de7ef48 foi criticado; findings CRIT-DOC-001..005 foram integrados e o contrato material refinado foi recongelado antes da segunda crítica; nenhuma implementação foi incluída`.
+- **Evidence / reference:** `uninotas-foundation@7029e90ab8501a0d7e2ebe9ecc335b8ff1015ccd`, publicado em `origin/main` via Windows Git Credential Manager após o Git WSL não encontrar credencial.
 - **Waiver authority / reference:** `n/a`.
 - **Pre-freeze packet-prep rule:** `planning rows remain prepared-pre-freeze until the pushed baseline exists`.
 
@@ -350,7 +350,7 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 
 ### Ordered Steps
 
-1. Criar testes fail-first backend para port/adapter/service/controller: PDF/XML, 200/202, auth, `noteId`, URL inválida, limites/cancelamento/redaction.
+1. Criar testes fail-first backend para port/adapter/service/controller: PDF/XML, 200/202 públicos com body/headers exatos, 201/204/206 inválidos, auth, `noteId`, URL inválida, limites/cancelamento/redaction.
 2. Implementar resolução documental no port/adapter e application service; manter controller fino e contrato público exato.
 3. Criar testes fail-first frontend para normalização, ownership, duplicidade, pending/error, resultado tardio e cleanup.
 4. Implementar disclosure `⋮` reutilizável, integrar Geral/detalhe e garantir que a ação não navegue a linha.
@@ -398,6 +398,7 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 | --- | --- | --- | --- | --- |
 | upstream `200 {url}` valid | `200` | `{documentType:'pdf'|'xml', availability:'available', url:string}` | `Cache-Control: private, no-store`; `Pragma: no-cache`; `X-Content-Type-Options: nosniff` | exact three keys; URL ≤ 8 KiB and origin allowlisted |
 | upstream `202 {mensagem}` valid | `202` | `{documentType:'pdf'|'xml', availability:'pending', url:null}` | same | message required/bounded at adapter, never echoed |
+| upstream `201|204|206` ou qualquer status não listado | `502` | `SmartNotasContratoInvalido` | global error contract | somente `200|202` são sucessos documentais |
 | invalid/tampered/raw `noteId` | `400` | `ConsultaDeNotasInvalida` | global error contract | no upstream call |
 | local user/context rate limit | `429` | `LimiteDeConsultaExcedido` | global error contract + existing `Retry-After` | same coordinator semantics |
 | upstream `404` | `404` | `NotaFiscalNaoEncontrada` | global error contract | no provider body echo |
@@ -492,9 +493,11 @@ Every public JSON property above is required. `url` is non-null only for `availa
 | `CRIT-DOC-003` qualquer HTTPS e limites vagos | `medium` | `Integrated` | D-05, origin allowlist, body 16 KiB, URL 8 KiB e retenção controlada explícita; probe redatado registrado |
 | `CRIT-DOC-004` concorrência UI ambígua | `medium` | `Integrated` | D-07/DOD-DOC-05 definem owner único, drop enquanto pending, abort lifecycle e burst 5/10/20 |
 | `CRIT-DOC-005` anchor auth inexistente | `low` | `Integrated` | secondary module removido; perfis preservados no módulo fiscal |
+| `CRIT-DOC-006` contrato pcv-1 ausente | `high` | `Integrated` | matriz `pcv-1` com exatamente EPS/FRC/BCI/RLS, deadlines, estados e evidence plans |
+| `CRIT-DOC-001-R2` HTTP 2xx inesperado/evidência pública | `medium` | `Integrated` | catch-all 201/204/206/unlisted e DOD-DOC-03 exige adapter + controller/application status/body/headers |
 
-- **Critique status:** `findings_integrated; affected re-critique required before APROVADO`.
-- **Critique evidence:** reviewer `fresh-no-context-plan-critic`, dispatch `/tmp/uninotas-documents-critique.dispatch.json`, baseline `de7ef48935f76ab9d9475d835e6f53306b9e93f0`.
+- **Critique status:** `round-1 findings integrated; round-2 findings integrated; affected gates must reconverge before APROVADO`.
+- **Critique evidence:** reviewers `fresh-no-context-plan-critic` e `fresh-no-context-plan-critic-r2`; dispatches `/tmp/uninotas-documents-critique.dispatch.json` e `/tmp/uninotas-documents-critique-r2.dispatch.json`; baselines `de7ef48` e `7029e90`.
 
 ## Additional Architectural Opinions
 
@@ -525,6 +528,21 @@ Every public JSON property above is required. `url` is non-null only for `availa
 | `high_severity_plan_review_issue` | `yes` | URL fiscal externa requer decisão explícita SEC-01 |
 | `explicit_three_lane_request` | `no` | usuário não solicitou auditoria paralela específica |
 
+### Derived Audit Floor
+
+| Lane | Decision | Deadline | Planned Handling |
+| --- | --- | --- | --- |
+| independent critique | `required / expanded` | `before_aprovado` | rounds independentes até convergência + assumption/scope guards |
+| test quality audit | `required / full` | `before_completed` | reviewer técnico independente sobre testes entregues |
+| final review | `required / expanded` | `before_completed` | reviewer final independente |
+| triple review | `required / additive` | `before_completed` | performance + test-quality + final conforme protocolo dedicado |
+| security review | `required` | `before_completed` | adversarial review de auth/context/URL/sinks |
+| performance/concurrency | `recommended` | `per_pcv1_gate_deadlines` | EPS/FRC classificados required pelo pcv-1; BCI/RLS n/a |
+| verification debt | `required` | `before_completed` | audit de débitos/waivers/evidências |
+| architecture decision/adherence | `not_needed` | `n/a` | extensão aderente; governance não acionada |
+
+- **Audit guard evidence:** `Overall outcome: go`, trigger fingerprint `f37acaea8184`; rerun obrigatório se triggers mudarem.
+
 ## Security Risk Assessment
 
 - **Risk:** `high` pela combinação URL externa, documentos fiscais, PII e credenciais de dois contextos.
@@ -533,9 +551,26 @@ Every public JSON property above is required. `url` is non-null only for `availa
 
 ## Performance & Concurrency Risk Assessment
 
-- **Risk:** `medium`; cada escolha adiciona uma chamada SmartNotas, sem download/proxy pelo backend.
-- **Controls:** zero prefetch, uma chamada por ação, reuse de rate/concurrency, abort/invalidation, disabled while pending.
-- **Load claim:** nenhuma; targeted deterministic concurrency/race evidence e suites completas.
+- **Policy schema version:** `pcv-1`
+- **Global sensitivity level:** `medium`
+- **Why this level:** duas leituras exatas externas são novas e a ação React é retriggerable/lifecycle-sensitive; não há mutation, batch, fila ou claim de SLO.
+- **Current delivery stage at review time:** `Pending`
+
+| Policy | Lane ID | Lane | Trigger Result | Trigger Severity | Trigger Reason Code | Trigger Rationale | Gate Deadline | Min Evidence Rule ID | State | Residual Risk | Uncertainty Reason Code | Recorded At UTC | Executor ID |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `pcv-1` | `EPS` | `endpoint-performance-scrutiny` | `required` | `medium` | `EPS-EXACT-LOOKUP-SURFACE-CHANGED` | novas rotas fazem lookup direto por noteId/provider ID e não podem page-walk/list-filter | `before_local_implemented` | `EPS-E2` | `pending` | chamada externa direta ainda consome quota/latência | `none` | `2026-09-28T22:18:45Z` | `root-operational-coder` |
+| `pcv-1` | `FRC` | `frontend-race-condition-validation` | `required` | `medium` | `FRC-LIFECYCLE-ASYNC-EFFECT` | menu dispara read assíncrono com close/navigation/logout/unmount e efeito visível externo | `before_local_implemented` | `FRC-E2` | `pending` | browser pode bloquear nova aba; fallback permanece | `none` | `2026-09-28T22:18:45Z` | `root-operational-coder` |
+| `pcv-1` | `BCI` | `backend-concurrency-idempotency-validation` | `not_needed` | `low` | `n/a` | nenhuma escrita, mutation ou efeito backend irreversível muda | `before_local_implemented` | `n/a` | `not_applicable` | `none` | `none` | `2026-09-28T22:18:45Z` | `root-operational-coder` |
+| `pcv-1` | `RLS` | `runtime-load-stress-validation` | `not_needed` | `low` | `n/a` | sem batch/bulk/fila/realtime/cache-index sensível ou compromisso de SLO/capacidade | `before_production_ready` | `n/a` | `not_applicable` | `none` | `none` | `2026-09-28T22:18:45Z` | `root-operational-coder` |
+
+### Planned pcv-1 Evidence Contracts
+
+| Lane | Sample Profile | Acceptance Rule | Planned Machine Artifact | Required Payload |
+| --- | --- | --- | --- | --- |
+| `EPS` | `EPS-SP-STRONG` | `EPS-A2` | `artifacts/tmp/uninotas-fiscal-documents/pcv/eps.json`, canonical JSON + SHA-256 | access pattern, touched-path audit, direct-call/count benchmark-equivalent; zero list/page-walk |
+| `FRC` | `FRC-SP-M` plus explicit bursts `5|10|20` | `FRC-A1` | `artifacts/tmp/uninotas-fiscal-documents/pcv/frc.json`, canonical JSON + SHA-256 | `concurrency_policy=drop duplicate`, burst/repetitions, runner path, one accepted call/effect, lifecycle abort/late suppression |
+
+Artifacts in `running|passed` must carry every `pcv-1` evidence field, including environment/run IDs, schema, executor/reviewer IDs, sample/acceptance IDs, summary and canonical hash. Prose or generic suite passes do not satisfy EPS/FRC.
 
 ## Package-First Verification
 
