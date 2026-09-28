@@ -40,7 +40,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** publicar o baseline estrutural round 7, executar confirmação arquitetural e crítica independente, depois scope/coherence/authority guards e `preflight-go`; nenhuma mutação Railway está autorizada.
+- **Next exact step:** executar confirmação arquitetural round 7 e crítica independente sobre o baseline publicado, depois coherence/authority guards e `preflight-go`; nenhuma mutação Railway está autorizada.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -101,8 +101,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Scope Item | Local Branch/Commit | Main / Authority | Local Source/Build Validation | Single Remote Target: Stage Customer-Facing | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Backend + frontend read-only | `delphi-and-foundation@31712a042cab3c796d5daca7350c6c58453e1c73` | `pending promotion to main` | `pending final cutover suite` | `pending one direct cutover` | `published review candidate` |
-| Foundation cutover contract | `main@f922eae7eb931075b1a380c65a776853dfd1bc96` | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `published round-6 review baseline` |
+| Backend + frontend read-only | implementation baseline `delphi-and-foundation@922957f`; code-origin `31712a0` | `pending promotion to main` | `pending final cutover suite` | `pending one direct cutover` | `published round-7 implementation baseline` |
+| Foundation cutover contract | `main@cdf6fb1a1308e462d137e12b3c48c9b6d080f0f5` | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `published round-7 material baseline` |
 
 ## Out of Scope
 
@@ -436,7 +436,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 - **Decision review lifecycle:** `after review baseline freeze and before APROVADO`
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set: TODO + topology/dependency artifacts + railway/Docker/config/health/fiscal boundaries`
-- **Decision review status:** `findings_integrated`
+- **Decision review status:** `round-7 confirmation pending`
 - **Decision review evidence / resolution:** seis revisores independentes retornaram `BLOCKED` em rodadas sucessivas. Round 6 confirmou o conteúdo operacional e encontrou cinco lacunas estruturais: ordem da revision Railway, baseline/gitlink, cobertura do scope-drift, snapshot 1:1 de módulos e schema completo de aprovação. Todas foram integradas; round-7 freeze/confirmação limpa ainda são obrigatórios.
 
 | Finding ID | Severity | Approval-material | Resolution | Evidence in evolved plan |
@@ -487,11 +487,11 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 - **Why this decision:** release, segredos, dois contextos e promoção canônica exigem revisão reproduzível.
 - **Trigger stage:** `before first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `f922eae7eb931075b1a380c65a776853dfd1bc96`
+- **Baseline commit:** `cdf6fb1a1308e462d137e12b3c48c9b6d080f0f5`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `blocked`
-- **Findings summary:** `R6-ARCH-01..05` integrados localmente; o round-7 material ainda precisa ser publicado antes da confirmação.
-- **Evidence / reference:** último baseline publicado `origin/main@f922eae7eb931075b1a380c65a776853dfd1bc96`; code-origin `MonitorNotes@31712a042cab3c796d5daca7350c6c58453e1c73`; baseline final de implementação pendente do sync round 7.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** `R6-ARCH-01..05` integrados e publicados; round 7 governa a confirmação e a crítica.
+- **Evidence / reference:** `origin/main@cdf6fb1a1308e462d137e12b3c48c9b6d080f0f5`; implementation baseline `MonitorNotes@922957f`; code-origin separado `MonitorNotes@31712a0`; Delphi guard `ee9b448`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Review Scope Drift
@@ -500,11 +500,11 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 - **Why this decision:** impede alteração material entre o pacote revisado e o aprovado.
 - **Trigger stage:** `after review convergence and before APROVADO`
 - **Baseline source:** `Review Baseline Freeze -> Baseline commit`
-- **Material sections compared:** `Context|Contract Boundary|Scope|Out of Scope|Definition of Done|Validation Steps|Execution Lane Tracking|Decision Baseline|Architecture Change Governance|Assumptions Preview|Execution Plan|Security Risk Assessment|Performance & Concurrency Risk Assessment`
+- **Material sections compared:** `canonical defaults, incluindo Diff Expectation Contract, Module Decision Baseline Snapshot e Decision Baseline (Frozen Before Implementation)`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-cutover.md`
-- **Gate status:** `blocked`
-- **Findings summary:** o round 6 exigiu mudança material e ampliação do guard; reexecutar somente depois do novo freeze round 7.
-- **Evidence / reference:** `review_scope_drift_guard.py` agora cobre também `Diff Expectation Contract`; baseline round 7 pendente.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** nenhum drift material entre o checkpoint round 7 e esta attestation metadata.
+- **Evidence / reference:** `review_scope_drift_guard.py@ee9b448`; baseline `uninotas-foundation:main@cdf6fb1a1308e462d137e12b3c48c9b6d080f0f5`; implementation baseline `MonitorNotes@922957f`; `Overall outcome: go`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Frontend / Consumer Matrix
@@ -547,7 +547,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 ## Plan Review Gate
 
 - **Review decision:** `required`
-- **Review status:** `round-6 findings being integrated; round-7 confirmation and independent critique pending`
+- **Review status:** `round-7 frozen; architecture confirmation and independent critique pending`
 - **Required lenses:** architecture, operations, rollback, security, tests, performance, observability and structural soundness.
 - **Known plan finding:** o health atual retorna HTTP 2xx quando o banco está degradado; `D-CUT-10` agora exige readiness separada não-2xx e mantém Smart Notas fora do loop.
 - **Approval request condition:** nova revisão confirma `D-CUT-06..12`, crítica converge, baseline é atualizado e guards retornam `go/preflight-go`.
