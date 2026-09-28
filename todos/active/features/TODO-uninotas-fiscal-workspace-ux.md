@@ -104,6 +104,8 @@ A validação visual da primeira versão do UniNotas mostrou selects ilegíveis 
 | `MonitorNotes` | `artifacts/**` | `??` | estado preexistente do usuário; aceitar no diff, nunca stagear/alterar |
 | `uninotas-foundation` | `todos/active/features/TODO-uninotas-fiscal-workspace-ux.md` | `M, D` | evidência e closeout |
 | `uninotas-foundation` | `todos/completed/features/TODO-uninotas-fiscal-workspace-ux.md` | `A` | destino de closeout |
+| `uninotas-foundation` | `todos/active/features/TODO-uninotas-filtered-csv-export.md` | `M` | coordenação/rebaseline serial entre histórias |
+| `uninotas-foundation` | `artifacts/feature-briefs/uninotas-fiscal-workspace-improvements.md` | `M` | coordenação do objetivo de release |
 | `uninotas-foundation` | `modules/fiscal-notes-and-documents.md` | `M` | navegação/UX estável no closeout |
 | `uninotas-foundation` | `artifacts/publication-manifest.txt` | `M` | publicação dos paths finais |
 
@@ -215,17 +217,18 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 - **Gate decision:** `required`
 - **Baseline branch:** `uninotas-foundation/main`
-- **Baseline commit:** `pending material R3 commit`
-- **Baseline push reference:** `pending`
-- **Gate status:** `not_run`
-- **Findings summary:** R2 gerou mudanças materiais integradas; novo freeze será publicado antes de R3.
-- **Evidence / reference:** `pending R3 material commit`.
+- **Baseline commit:** `ed3b774e73e36fd4fc588aba866cbde1f6a423ba`
+- **Baseline push reference:** `origin/main`
+- **Gate status:** `no_material_findings`
+- **Findings summary:** findings R2 foram integrados em baseline material isolado e publicado.
+- **Evidence / reference:** `origin/main` contém `ed3b774e73e36fd4fc588aba866cbde1f6a423ba`; somente brief e dois TODOs compõem o commit material.
 
 ## Gate: Review Scope Drift
 
 - **Gate decision:** `required`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-fiscal-workspace-ux.md`
 - **Gate status:** `not_run`
+- **Evidence / reference:** `pending after clean R3 reviews`.
 
 ## Audit Trigger Matrix
 
@@ -255,7 +258,8 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 - **Gate decision:** `required`
 - **Guard scope:** `UX-A-01,UX-A-02,UX-A-03,UX-A-04`
 - **Guard command:** `python3 delphi-ai/tools/assumption_code_coherence_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-fiscal-workspace-ux.md`
-- **Gate status:** `not_run`
+- **Gate status:** `no_material_findings`
+- **Evidence / reference:** paths `frontend/src/App.tsx`, `frontend/src/hooks/useTema.ts`, `frontend/src/componentes/Cabecalho.tsx`, `frontend/src/paginas/ListaNotas.tsx`, `frontend/src/contextos/NotasFiscaisContexto.tsx` e `frontend/src/notas/cacheFiscal.ts` resolvidos; `UX-A-04` promovida a decisão.
 
 ## Approval
 

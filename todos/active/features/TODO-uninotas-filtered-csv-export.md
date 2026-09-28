@@ -205,8 +205,10 @@ Não registrar filtros, documento, ID da compra, número/chave fiscal, provider 
 
 | Repository | Path | Baseline ref | Comparison mode |
 | --- | --- | --- | --- |
-| `MonitorNotes` | `.` | `release/uninotas-smart-notas@a4b5a0eb6ae96291ffe5c6e16f297b64dcd62f29` | `working_tree`; mandatory rebaseline after UX closeout |
-| `uninotas-foundation` | `foundation_documentation` | `main@feaf2e090927aa15087ee9ea4185886f749586e6` | `working_tree`; mandatory rebaseline after UX closeout |
+| `MonitorNotes` | `.` | `release/uninotas-smart-notas@a4b5a0eb6ae96291ffe5c6e16f297b64dcd62f29` | `working_tree` |
+| `uninotas-foundation` | `foundation_documentation` | `main@feaf2e090927aa15087ee9ea4185886f749586e6` | `working_tree` |
+
+Antes de executar `ST-EXPORT`, ambos os baselines serão obrigatoriamente refeitos sobre o closeout consolidado de `ST-UX`; coherence, diff, drift e authority serão repetidos. Mudança material reabre review/aprovação.
 
 ### Expected Changed Paths
 
@@ -227,6 +229,8 @@ Não registrar filtros, documento, ID da compra, número/chave fiscal, provider 
 | `MonitorNotes` | `artifacts/**` | `??` | estado preexistente do usuário; aceitar no diff, nunca stagear/alterar |
 | `uninotas-foundation` | `todos/active/features/TODO-uninotas-filtered-csv-export.md` | `M, D` | evidência/closeout |
 | `uninotas-foundation` | `todos/completed/features/TODO-uninotas-filtered-csv-export.md` | `A` | destino de closeout |
+| `uninotas-foundation` | `todos/active/features/TODO-uninotas-fiscal-workspace-ux.md` | `M` | coordenação/rebaseline serial entre histórias |
+| `uninotas-foundation` | `artifacts/feature-briefs/uninotas-fiscal-workspace-improvements.md` | `M` | coordenação do objetivo de release |
 | `uninotas-foundation` | `modules/fiscal-notes-and-documents.md` | `M` | contrato estável, antes do código como primeiro passo aprovado |
 | `uninotas-foundation` | `artifacts/publication-manifest.txt` | `M` | publicação dos paths finais |
 
@@ -366,17 +370,18 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 - **Gate decision:** `required`
 - **Baseline branch:** `uninotas-foundation/main`
-- **Baseline commit:** `pending material R3 commit`
-- **Baseline push reference:** `pending`
-- **Gate status:** `not_run`
-- **Findings summary:** R2 gerou mudanças materiais integradas; novo freeze será publicado antes de R3.
-- **Evidence / reference:** `pending R3 material commit`.
+- **Baseline commit:** `ed3b774e73e36fd4fc588aba866cbde1f6a423ba`
+- **Baseline push reference:** `origin/main`
+- **Gate status:** `no_material_findings`
+- **Findings summary:** findings R2 foram integrados em baseline material isolado e publicado.
+- **Evidence / reference:** `origin/main` contém `ed3b774e73e36fd4fc588aba866cbde1f6a423ba`; somente brief e dois TODOs compõem o commit material.
 
 ## Gate: Review Scope Drift
 
 - **Gate decision:** `required`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-filtered-csv-export.md`
 - **Gate status:** `not_run`
+- **Evidence / reference:** `pending after clean R3 reviews`.
 
 ## Audit Trigger Matrix
 
@@ -406,7 +411,8 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 - **Gate decision:** `required`
 - **Guard scope:** `EX-A-01,EX-A-02,EX-A-03,EX-A-04,EX-A-05`
 - **Guard command:** `python3 delphi-ai/tools/assumption_code_coherence_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-filtered-csv-export.md`
-- **Gate status:** `not_run`
+- **Gate status:** `no_material_findings`
+- **Evidence / reference:** paths do adapter/types/config/service/controller/downloader/session/eventos resolvidos no checkout e sustentam `EX-A-01..05`.
 
 ## Approval
 
