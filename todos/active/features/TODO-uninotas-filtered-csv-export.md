@@ -78,14 +78,14 @@ Smart Notas evidencia paginação numérica, mas não cursor/snapshot nem ordena
 | --- | --- | --- |
 | rows | `20,000` | após primeira página; `total` maior retorna 422 antes de buscar páginas seguintes |
 | provider pages | `200` | após primeira página; `totalPages` maior retorna 422 |
-| whole export deadline | `180s` | deadline absoluto monotônico; AbortController cobre espera/I/O e o serializer confere o deadline por chunks |
+| server-side generation deadline | `180s` | do precheck até o check final imediatamente antes de devolver o Buffer; expira quando `monotonicNow >= deadline`; não inclui transmissão HTTP |
 | CSV payload | `24 MiB` incluindo BOM | contador UTF-8 durante serialização; exceder retorna 422 sem response body CSV |
 | exports per fiscal context | `1` ativo por instância | admission guard fail-fast; libera em success/error/abort |
 | exports globally | `min(2, maxConcurrency - 1)` por instância, com máximo absoluto `2` | com default `8`, são `2`; com `maxConcurrency=2`, é `1`; abaixo disso a exportação fica indisponível |
 | export per actor | `1` ativo globalmente por instância e no máximo `1` início por rolling minute | start consome uma unidade de `ratePerUserMinute`; pages não duplicam user charge; cooldown impede reacquisition imediata |
 | upstream calls per export | `<= 200`, sequenciais | uma chamada ativa por export |
-| shared provider-call budget | cada list/detail page e cada export page consome o mesmo budget configurado por contexto | contador/scheduler único; export nunca contorna `ratePerContextMinute` |
-| export share of context budget | no máximo `floor(ratePerContextMinute * 0.75)` chamadas/minuto, mínimo 1 somente quando o budget total >=2 | reserva pelo menos 25% do budget configurado para chamadas interativas; export espera token até deadline |
+| shared provider-call budget | cada list/detail request e cada export page consome o mesmo budget configurado por contexto | coordinator único; export nunca contorna `ratePerContextMinute` |
+| export share of context budget | `ratePerContextMinute < 2 ? 0 : floor(ratePerContextMinute * 0.75)` chamadas/minuto | fórmula única; reserva pelo menos 25% para chamadas interativas; export espera token até deadline |
 | provider pacing | intervalo mínimo derivado de `ceil(60_000 / exportShare)` entre inícios de páginas do mesmo export | usa configuração efetiva e relógio injetável; sem retry |
 | provider concurrency reserved for interactive paths | limite global de exports `min(2, maxConcurrency - 1)`; export indisponível quando `maxConcurrency < 2` | reserva efetivamente pelo menos um slot; com default 8, no máximo 2 exports e 6 slots permanecem |
 | frontend active export | `1` por tela/sessão | ref síncrona + CTA disabled; duplicatas são descartadas |
@@ -114,7 +114,7 @@ Query opcional:
 
 ### Success / Empty
 
-- `200` somente quando existe ao menos uma linha e o arquivo inteiro está pronto.
+- `200` somente quando existe ao menos uma linha e o Buffer inteiro passou pelo check final de signal/deadline.
 - `204` quando `total=0`; nenhum Blob/download; frontend informa “Nenhuma nota encontrada para exportar.”
 - Headers do `200`:
   - `Content-Type: text/csv; charset=utf-8`
@@ -135,18 +135,18 @@ Query opcional:
 | `429` | `ExportacaoFiscalOcupada` | configuração incapaz, contexto/global/actor admission ou rolling cooldown; `Retry-After` segue a precedência abaixo |
 | `429` | `LimiteDeConsultaExcedido` | `ratePerUserMinute` esgotado ou `MAX_ACTOR_BUCKETS` cheio para novo ator; `Retry-After` é o restante da janela fixa existente |
 | `502` | `ExportacaoFiscalPaginacaoInconsistente` | metadata, tamanho, contagem ou ID duplicado diverge |
-| `504` | `ExportacaoFiscalPrazoExcedido` | deadline total de 180s |
+| `504` | `ExportacaoFiscalPrazoExcedido` | deadline de geração server-side de 180s |
 | existing mapped status | existing provider code | credencial, contrato, indisponibilidade, quota externa ou timeout de uma página |
 
-Abort por desconexão do cliente encerra o trabalho e não tenta responder. O `AbortSignal` e o deadline monotônico são conferidos antes e depois de cada yield/chunk do serializer, além de cobrirem espera e I/O. Não há retry.
+Signal já abortado antes do precheck não admite nem cobra nada. Abort durante geração encerra o trabalho e não tenta responder. O `AbortSignal` e o deadline monotônico são conferidos antes/depois de cada espera, I/O e yield/chunk, e novamente imediatamente antes de devolver o Buffer. Em `monotonicNow === deadline`, falha 504. Se a conexão encerrar depois do Buffer pronto mas antes do início da resposta, o Buffer é descartado e leases são liberados; depois que a transmissão HTTP começa, falhas de rede/proxy podem truncar o transporte e não são vendidas como atomicidade no fio. O frontend somente cria/clica o download após `fetch` e `blob()` terminarem e a generation continuar válida. Não há retry.
 
 ### Atomic Admission and `Retry-After`
 
 Antes da primeira chamada provider, uma seção crítica síncrona por instância amostra `wallNow` e `monotonicNow` exatamente uma vez e avalia, sem mutação, configuração mínima, actor ativo/cooldown, contexto ativo, limite global, user fixed-window budget e `MAX_ACTOR_BUCKETS` para novo ator. A visão projetada ignora buckets fora da janela efetiva, mas não os remove. Se qualquer condição rejeitar, o estado bruto inteiro — buckets inclusive — permanece byte-for-byte equivalente.
 
-Somente quando todas passam, a mesma seção crítica faz um único commit atômico: remove buckets fora da janela efetiva; avança o high-water da janela; consome exatamente uma unidade do user budget; grava o início do rolling cooldown de 60s; e adquire leases de actor/context/global. A primeira aceitação de uma janela executa o cleanup uma vez; rejeições nunca o executam. O cooldown conta do start aceito e permanece consumido mesmo se a chamada posterior falhar, pois o trabalho foi admitido. Leases ativos são liberados em success/error/abort. Cada provider page consome depois o scheduler/budget de contexto; falta temporária de token do contexto não é bloqueio pré-admissão: exatamente um contender elegível é admitido, espera até o deadline e termina em 504 se não houver tempo, sem segunda cobrança de usuário. `exportShare=0` continua configuração incapaz e aceita zero.
+Somente quando todas passam, a mesma seção crítica faz um único commit atômico do start de export: remove estado expirado; avança o high-water da janela; consome exatamente uma unidade do user budget; grava o início do rolling cooldown de 60s; e adquire leases de actor/context/global. A primeira operação aceita de uma janela executa o cleanup uma vez; rejeições nunca o executam. O cooldown conta do start aceito e permanece consumido mesmo se a chamada posterior falhar, pois o trabalho foi admitido. Leases ativos são liberados em success/error/abort. Cada provider page consome depois o scheduler/budget de contexto; falta temporária de token do contexto não é bloqueio pré-admissão: exatamente um contender elegível é admitido, espera até o deadline e termina em 504 se não houver tempo, sem segunda cobrança de usuário. `exportShare=0` continua configuração incapaz e aceita zero.
 
-Relógios têm papéis separados. Para cada decisão, `rawWindow=floor(wallNow/60_000)` e `effectiveWindow=max(lastCommittedWindow, rawWindow)`; o high-water só muda num start aceito, logo regressão do wall clock nunca reabre budget já consumido. `monotonicNow` governa cooldown, pacing e deadline e nunca retrocede. Cooldown expira quando `monotonicNow >= acceptedStart + 60_000`. Todo `Retry-After` usa `max(1, ceil(remainingMs/1000))`; para budget/capacidade fixa, `remainingMs=(effectiveWindow+1)*60_000-wallNow`, que pode exceder 60s sob regressão e permanece fail-closed.
+Relógios têm papéis separados. Para cada decisão, `rawWindow=floor(wallNow/60_000)` e `effectiveWindow=max(lastCommittedWindow, rawWindow)`; o high-water só muda numa operação de budget aceita, seja list, detail, export start ou export page, logo regressão do wall clock nunca reabre budget já consumido. `monotonicNow` governa cooldown, pacing e deadline e nunca retrocede. Cooldown expira quando `monotonicNow >= acceptedStart + 60_000`. Todo `Retry-After` usa `max(1, ceil(remainingMs/1000))`; para budget/capacidade fixa, `remainingMs=(effectiveWindow+1)*60_000-wallNow`, que pode exceder 60s sob regressão e permanece fail-closed.
 
 Mapeamento determinístico quando uma tentativa é rejeitada:
 
@@ -157,11 +157,25 @@ Mapeamento determinístico quando uma tentativa é rejeitada:
 
 Buckets de ator pertencem à janela efetiva em que foram aceitos. O precheck usa uma projeção read-only que descarta logicamente buckets de outra janela; somente o commit aceito remove esses buckets fisicamente. Um ator já presente não precisa de novo slot; ator novo é comparado com a contagem projetada. Testes observam estado bruto e cobrem: rejeição sem qualquer mutação; virada com cleanup somente no primeiro aceito; salto/regressão de wall clock; uma amostra de cada relógio por decisão; fronteira exata; expiração monotônica exata; arredondamento/minimum-one; `MAX_ACTOR_BUCKETS`; e liberação de leases em todos os exits. Cooldown aceito permanece após success/error/abort; leases sempre são liberados.
 
+### Shared Rate Coordinator Contract
+
+Um único provider singleton local ao módulo fiscal possui `lastCommittedWindow`, actor buckets, context-total buckets, context-export buckets, cooldowns e leases. List, detail, export start e export page passam por sua mesma seção crítica; não existem high-waters ou rate maps paralelos.
+
+| Operation | Read-only precheck | Atomic commit when accepted | Rejection / later failure |
+| --- | --- | --- | --- |
+| list/detail | enabled, user budget/cap e context-total budget | cleanup/high-water + `+1` user + `+1` context-total antes do provider | qualquer rejeição muta zero; provider error/abort não devolve unidades já aceitas |
+| export start | signal/config, user budget/cap, cooldown e actor/context/global leases | cleanup/high-water + `+1` user + cooldown + leases | rejeição muta zero; falha/abort posterior mantém user/cooldown e libera leases uma vez |
+| export page | signal/deadline, context-total token, context-export-share token e pacing | cleanup/high-water + `+1` context-total + `+1` context-export imediatamente antes do provider | indisponibilidade espera read-only; provider error/abort não devolve token aceito; exit libera leases do export |
+
+List/detail continuam fail-fast quando seu user ou context-total budget está esgotado. Export page espera porque já existe um export admitido. Um list/detail aceito pode consumir a reserva interativa enquanto export espera; export jamais usa além de `exportShare`, e o total combinado jamais excede `ratePerContextMinute`. O cleanup atômico de uma operação aceita remove buckets de user/context/export-share de janelas anteriores e cooldowns monotonicamente expirados; rejeições deixam inclusive stale entries intactos. Estado transitório permanece bounded: actor buckets/cooldowns no máximo `MAX_ACTOR_BUCKETS`, contexts fixos em dois e leases globais no máximo dois.
+
+O BCI misto obrigatório prova `list/detail aceito em W10 → wall W9 → export start/list/detail` sem reabrir unidades de W10, além de interleavings nos quais uma rejeição de contexto não cobra user budget. `rateSnapshot()` será estendido por test-only observation do estado bruto; não será exportado pelo módulo de produção.
+
 ## Pagination Consistency Contract
 
-Após a primeira página válida, congelar `perPage`, `total`, `totalPages`. Se `total=0`, exigir `totalPages=0` e `items=[]`, retornar 204 e não aplicar regras de página final. Para `total>0`, exigir:
+Toda página deve satisfazer `returned.page === requestedPage`. A primeira requisição é sempre `requestedPage=1`. Após a primeira página válida, congelar `perPage`, `total`, `totalPages`. Se `total=0`, exigir também `returned.page=1`, `totalPages=0`, `items=[]`, executar zero chamadas subsequentes, retornar 204 e não aplicar regras de tamanho da página final. Para `total>0`, exigir:
 
-1. `returned.page === requestedPage`;
+1. `returned.page === requestedPage` em todas as páginas;
 2. os três metadados congelados (`perPage`, `total`, `totalPages`) permanecem idênticos; `page` varia e já é validado pela regra 1;
 3. `totalPages === Math.ceil(total / perPage)`;
 4. página não-final contém exatamente `perPage` itens;
@@ -206,7 +220,7 @@ Um evento estruturado por exportação registra somente:
 
 Não registrar filtros, documento, ID da compra, número/chave fiscal, provider IDs, token/CNPJ, payload ou CSV. As chamadas do adapter podem manter logs por página, mas recebem/propagam o correlation ID do export para correlação, sem conteúdo sensível.
 
-`ratePerUserMinute` continua sendo orçamento de ações autenticadas: list/detail consomem uma unidade por request e export consome uma unidade no start. A amplificação de páginas é governada pelo budget do contexto; o ator também fica limitado a um export ativo e um início por minuto. Cada page call permanece atribuída ao `actorId` no evento agregado, sem cobrar novamente o contador de ações.
+`ratePerUserMinute` continua sendo orçamento de ações autenticadas: list/detail consomem uma unidade por request aceito e export consome uma unidade no start aceito. A amplificação de páginas é governada pelo budget do contexto; o ator também fica limitado a um export ativo e um início por minuto. Cada page call permanece atribuída ao `actorId` no evento agregado, sem cobrar novamente o contador de ações.
 
 ## Execution Lane Tracking (Required)
 
@@ -275,20 +289,27 @@ Antes de executar `ST-EXPORT`, ambos os baselines serão obrigatoriamente refeit
 
 O serializer fica em `backend/src/fiscal-notes/`; não criar `common/csv.ts` enquanto o CSV legado de logs estiver fora do escopo. Abrir item separado para hardening do legado, sem bloquear esta feature.
 
+## Canonical Module Anchors
+
+- **Primary module doc:** `foundation_documentation/modules/fiscal-notes-and-documents.md`
+- **Secondary module docs:** `none`
+- **Planned decision promotion targets:** `Canonical Decision Register`; `API Endpoint Definitions`.
+- **Module decision consolidation targets:** export request/success/traversal/CSV/errors/limits and admission.
+
 ## Definition of Done
 
 - [ ] `DOD-EX-01` A rota aceita exatamente filtros fiscais sem `pagina`, um contexto e todos os leitores existentes.
 - [ ] `DOD-EX-02` Um filtro vazio retorna 204 sem download; um filtro válido baixa todas as linhas atravessadas, não apenas a página atual.
 - [ ] `DOD-EX-03` Rows/pages/deadline I/O+CPU/bytes/admission, actor start/cooldown e context budget/pacing derivados da configuração são aplicados e testados; nenhum limite trunca silenciosamente.
-- [ ] `DOD-EX-04` Metadata/count/duplicidade são verificadas; erro intermediário/inconsistência/abort nunca produz arquivo parcial.
+- [ ] `DOD-EX-04` Metadata/count/duplicidade são verificadas; erro de geração/inconsistência/abort não inicia CSV, e o cliente só comita download após Blob completo; truncamento de transporte não recebe claim de atomicidade.
 - [ ] `DOD-EX-05` CSV e headers seguem exatamente os contratos acima, inclusive injection/PII/identificadores/null/datas/decimais.
 - [ ] `DOD-EX-06` CTA usa filtros aplicados, ignora página, evita duplicata e cancela por filtro/navegação/logout/unmount sem download tardio.
 - [ ] `DOD-EX-07` List/detail continuam uma chamada upstream por request e mantêm resposta/contrato existentes.
-- [ ] `DOD-EX-08` BCI/carga em bursts 5/10/20 e configurações incapable/mínima/default/saturada prova exact-once admission, wall/monotonic clocks, um export por contexto, um ativo e um start/min por ator, limite global `min(2,maxConcurrency-1)`, context budget comum, reserva interativa e recuperação de list/detail.
+- [ ] `DOD-EX-08` BCI `5x2/10x3/20x5`, mixed-budget probes e RLS-E2 nos dois stages congelados provam coordinator único, exact-once admission, clocks, caps, context budget/share, reserva interativa, memória e recuperação de list/detail.
 - [ ] `DOD-EX-09` Módulo fiscal e READMEs documentam contrato, limites e ausência de snapshot forte; nenhuma alegação de deploy.
 - [ ] `DOD-EX-10` Local Verification, PCV, segurança, test-quality, arquitetura, final, triple review e guards passam.
 
-## Decisions
+## Decision Baseline (Frozen Before Implementation)
 
 - [x] `EX-D-01` Exportar todo o filtro aplicado, não a página; um único contexto; sem agregado.
 - [x] `EX-D-02` Backend-owned sequential page walk; frontend faz uma requisição.
@@ -299,30 +320,66 @@ O serializer fica em `backend/src/fiscal-notes/`; não criar `common/csv.ts` enq
 - [x] `EX-D-07` Exportação assíncrona/persistida fica fora; filtros acima do envelope precisam ser reduzidos.
 - [x] `EX-D-08` Raw `idCompra`/`chaveAcesso` entram no arquivo para leitores autenticados; não logar esses valores.
 
-## Module Decision Consistency Gate
+## Module Decision Baseline Snapshot (1-1 Mandatory Before APROVADO)
 
 - **Primary module:** `foundation_documentation/modules/fiscal-notes-and-documents.md`
 - **Gate status:** `no_material_findings`
 
-| Module decision | Disposition | TODO alignment |
-| --- | --- | --- |
-| Smart Notas é a única autoridade de notas | `Preserve` | export lê somente Smart Notas; PostgreSQL/logs não participa |
-| contexto fiscal é único por operação | `Preserve` | `contextoFiscal` obrigatório; agregado permanece fora |
-| perfis leitores existentes compartilham o read boundary | `Preserve` | os quatro perfis podem exportar os mesmos campos já autorizados |
-| list/detail são bounded e sem payload/PII | `Preserve` | export adiciona boundary próprio, limites explícitos e CSV allowlisted |
-| módulo ainda descrevia apenas list/detail | `Supersede` | módulo agora registra `GET /api/v1/notas/exportar` como capacidade planejada |
-| ativação/runtime real depende de cutover | `Preserve` | entrega termina em `Local-Implemented`; nenhum claim de deploy |
-| DANFE/XML, emissão e logs de integração | `Out of Scope` | nenhuma mudança neste TODO |
+| TODO Decision | Module Decision Ref | Current Module Decision | Planned Handling (`Preserve|Supersede (Intentional)|Out of Scope`) | Evidence |
+| --- | --- | --- | --- | --- |
+| `EX-D-01` | `FISC-EX-01` | todo o filtro aplicado, uma conta, sem página/agregado | `Preserve` | module `Canonical Decision Register` + `Export request` |
+| `EX-D-02` | `FISC-EX-02` | page walk sequencial pertence ao backend | `Preserve` | module `Export traversal` |
+| `EX-D-03` | `FISC-EX-03` | Buffer bounded completo antes de iniciar resposta | `Preserve` | module `Export success and transport boundary` |
+| `EX-D-04` | `FISC-EX-04` | consistência detectável sem snapshot forte | `Preserve` | module `Export traversal` |
+| `EX-D-05` | `FISC-EX-05` | HTTP/CSV/errors/observability/lifecycle formam o boundary | `Preserve` | module `API Endpoint Definitions` |
+| `EX-D-06` | `FISC-EX-06` | serializer permanece fiscal-local | `Preserve` | module `CSV schema` |
+| `EX-D-07` | `FISC-EX-07` | síncrono bounded; async exige novo TODO | `Preserve` | module `Limits and admission` |
+| `EX-D-08` | `FISC-EX-08` | raw purchase/access permitidos; internal/PII/secret proibidos | `Preserve` | module `CSV schema` |
+
+## Architecture Change Governance
+
+- **Applicability:** `required`
+- **Why this applies:** export adiciona bulk reads ao mesmo orçamento de user/context já usado por list/detail e exige um único owner atômico.
+- **Deviation / debt being retired:** `FiscalNotesService.consumeBudget()` possui cleanup mutante e clocks múltiplos; não há owner para export share/cooldown/leases.
+- **Target steady-state after closeout:** um coordinator singleton fiscal governa high-water, budgets, pacing e export admission; controller/adapter não possuem rate state paralelo.
+- **Temporary exceptions allowed:** `none`.
+- **Cutover / removal condition:** suites mistas, BCI e RLS provam list/detail/export no coordinator; helpers antigos são removidos ou delegam integralmente a ele.
+
+### Patterns To Enforce
+
+| Pattern / Decision | Source / ID | Scope | Why It Must Hold After Cutover |
+| --- | --- | --- | --- |
+| projected read-only precheck + atomic accepted commit | `FISC-EXPORT-ADMISSION-01` | all fiscal budget operations | rejeição nunca polui state |
+| one non-regressing fixed-window owner | `FISC-EX-05` | list/detail/export | impede reabertura/bypass sob wall regression |
+| page budget separate from export start user charge | `FISC-EX-02` | export traversal | evita multiplicar rate do ator sem furar quota do contexto |
+
+### Prohibited Anti-Patterns
+
+| Anti-Pattern / Wrong Path | Detection Signal | Why Forbidden | Exception Policy |
+| --- | --- | --- | --- |
+| rate maps/high-water paralelos por operação | mixed-budget BCI diverge | permite quota bypass e cleanup conflitante | none |
+| charge user por export page | user counter >1 por start | contradiz public admission contract | none |
+| cleanup em request rejeitado | raw pre/post snapshot difere | quebra rejection atomicity | none |
+| frontend page walk ou CSV streaming antes de validar | >1 browser request ou response inicia antes do final | owner errado/arquivo parcial por geração | none |
+
+### Architecture Protection Harness
+
+| Harness | Owner | TODO disposition | Evidence |
+| --- | --- | --- | --- |
+| mixed list/detail/export budget contract specs | backend Jest | `implement-in-this-todo` | `DOD-EX-08`, `VAL-EX-01`, BCI artifact |
+| raw coordinator state snapshot + clock call counts | backend Jest/BCI harness | `implement-in-this-todo` | `DOD-EX-08`, BCI-E3 |
+| FRC duplicate/filter/session probes | frontend race runner | `implement-in-this-todo` | `DOD-EX-06/08`, `VAL-EX-04` |
+| RLS dual stage with memory metrics | runtime harness | `implement-in-this-todo` | `DOD-EX-08`, `VAL-EX-06`, RLS-E2 |
 
 ## Assumptions Preview
 
 | ID | Assumption | Concrete Evidence | If False | Confidence | Handling |
 | --- | --- | --- | --- | --- | --- |
-| `EX-A-01` | primeira página informa total/perPage/totalPages antes do page walk | `backend/src/fiscal-notes/smart-notas.adapter.ts:247`; `backend/src/fiscal-notes/fiscal-notes.types.ts:24` | impossível rejeitar cedo | `High` | `Keep as Assumption` |
-| `EX-A-02` | provider não oferece snapshot/cursor/order no contrato consumido | `backend/src/fiscal-notes/smart-notas.adapter.ts:28` | contrato poderia ficar mais forte | `High` | `Keep as Assumption` |
-| `EX-A-03` | concorrência e rate são configuráveis e precisam governar list/detail/export em conjunto | `backend/src/config/configuration.ts:74`; `backend/src/fiscal-notes/smart-notas.adapter.ts:79`; `backend/src/fiscal-notes/fiscal-notes.service.ts:157` | reserva/pacing precisam de outro owner | `High` | `Keep as Assumption` |
-| `EX-A-04` | os quatro leitores já recebem raw purchase/access keys pelo endpoint fiscal | `backend/src/fiscal-notes/fiscal-notes.controller.ts:10`; `backend/src/fiscal-notes/fiscal-notes.service.ts`; `frontend/src/api/notas.ts:18`; `frontend/src/paginas/ListaNotas.tsx:24` | export raw amplia autorização | `High` | `Keep as Assumption` |
-| `EX-A-05` | downloader pode evoluir de forma retrocompatível com AbortSignal sem pacote | `frontend/src/api/cliente.ts:119`; `frontend/src/api/eventos.ts:63`; `frontend/src/auth/SessaoContexto.tsx:13` | lifecycle/legado precisa owner diferente | `High` | `Keep as Assumption` |
+| `EX-A-01` | primeira página informa total/perPage/totalPages antes do page walk | `backend/src/fiscal-notes/smart-notas.adapter.ts:240-258`; `backend/src/fiscal-notes/fiscal-notes.types.ts:25-31` | impossível rejeitar cedo | `High` | `Keep as Assumption` |
+| `EX-A-02` | provider não oferece snapshot/cursor/order no contrato consumido | `backend/src/fiscal-notes/smart-notas.adapter.ts:34-49`; `backend/src/fiscal-notes/fiscal-notes.types.ts:33-41` | contrato poderia ficar mais forte | `High` | `Keep as Assumption` |
+| `EX-A-03` | concorrência e rate são configuráveis e precisam governar list/detail/export em conjunto | `backend/src/config/configuration.ts:64-94`; `backend/src/fiscal-notes/smart-notas.adapter.ts:74-89`; `backend/src/fiscal-notes/fiscal-notes.service.ts:157-205` | reserva/pacing precisam de outro owner | `High` | `Keep as Assumption` |
+| `EX-A-04` | os quatro leitores já recebem raw purchase/access keys pelo endpoint fiscal | `backend/src/fiscal-notes/fiscal-notes.controller.ts:10-15`; `backend/src/fiscal-notes/fiscal-notes.service.ts:207-228`; `frontend/src/api/notas.ts:17-33`; `frontend/src/paginas/ListaNotas.tsx:19-24` | export raw amplia autorização | `High` | `Keep as Assumption` |
+| `EX-A-05` | downloader pode evoluir de forma retrocompatível com AbortSignal sem pacote | `frontend/src/api/cliente.ts:79-111`; `frontend/src/api/cliente.ts:122-155`; `frontend/src/api/eventos.ts:63-77`; `frontend/src/auth/SessaoContexto.tsx:7-18`; `frontend/src/auth/SessaoContexto.tsx:30-47` | lifecycle/legado precisa owner diferente | `High` | `Keep as Assumption` |
 
 ## Execution Plan
 
@@ -347,9 +404,9 @@ O serializer fica em `backend/src/fiscal-notes/`; não criar `common/csv.ts` enq
 - [ ] `VAL-EX-01` `cd backend && npm test -- --runInBand`
 - [ ] `VAL-EX-02` `cd backend && npm run build && npx eslint "{src,test}/**/*.ts" --max-warnings=0` (não usar `npm run lint`, pois contém `--fix`).
 - [ ] `VAL-EX-03` `cd frontend && npm run test:notas && npm run lint && npm run build`
-- [ ] `VAL-EX-04` Para `export-duplicate`, `export-cancel-filter`, `export-cancel-session`, executar `DELPHI_RACE_SCENARIO=<scenario> DELPHI_RACE_BURST_LEVEL=<5|10|20> npm run test:notas:race`.
+- [ ] `VAL-EX-04` Para cada `export-duplicate|export-cancel-filter|export-cancel-session`, executar `frontend_race_probe.sh` com perfis `5x2`, `10x3` e `20x5`, passando `npm run test:notas:race` como runner e arquivando todos os repeats.
 - [ ] `VAL-EX-05` Build fresco; iniciar preview, comprovar SHA/bundle servido, executar `ALVO=<preview> CHROME=<local> npm run e2e:notas` com APIs interceptadas/download capturado; encerrar preview.
-- [ ] `VAL-EX-06` Perfil de runtime: exports simultâneos Unifast/Prosperar + tentativas extras + rajadas list/detail; comprovar caps, fail-fast e recuperação.
+- [ ] `VAL-EX-06` Executar RLS-E2 `load 4:180s` default e `stress 2:185s` constrained com mixes/resultados/limites de heap/external/arrayBuffers/RSS congelados; comprovar caps e recuperação.
 - [ ] `VAL-EX-07` Capability audits NestJS/React/Vite, endpoint scrutiny, race, load, security, test-quality, arquitetura, final, triple review e verification-debt.
 - [ ] `VAL-EX-08` Foundation validators/guards e `git diff --check`.
 
@@ -367,6 +424,78 @@ O serializer fica em `backend/src/fiscal-notes/`; não criar `common/csv.ts` enq
 Não há pipeline versionada no repositório; estas evidências são `Local Verification`, não alegação de CI-Equivalent.
 
 ## Plan Review Gate
+
+- **Complexity:** `big`
+- **Checkpoint policy:** `section-by-section`
+- **Why this level:** endpoint bulk cross-stack, contrato público, raw identifiers, rate/admission compartilhados e lifecycle de download.
+- **Review lenses:** Architecture, Code Quality, Tests, Performance, Security, Elegance e Structural Soundness.
+
+### Issue Card `PR-EX-01` — single owner para budgets/admission
+
+- **Severity:** `high`
+- **Evidence:** `backend/src/fiscal-notes/fiscal-notes.service.ts:157-205`; `backend/src/fiscal-notes/smart-notas.adapter.ts:74-89`.
+- **Why now:** export start e pages entram no mesmo limite já usado por list/detail; owners paralelos permitiriam bypass sob regressão de relógio ou cobrança parcial.
+
+| Option | Effort | Risk | Blast radius | Maintenance | Performance | Elegance | Structural soundness |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| A — coordinator fiscal único para list/detail/export (recommended) | medium | low after tests | módulo fiscal | low | O(1) admission; pacing bounded | high | high; one state owner |
+| B — high-waters separados com reconciliação | high | high | service/adapter | high | extra synchronization | low | low; hidden coupling |
+| C — manter maps atuais e adicionar export isolado | low | high | aparentemente local | high | pode exceder quota | low | invalid; budget bypass |
+
+### Issue Card `PR-EX-02` — topologia da exportação completa
+
+- **Severity:** `high`
+- **Evidence:** `backend/src/fiscal-notes/smart-notas.adapter.ts:34-49`; `frontend/src/api/cliente.ts:122-155`.
+- **Why now:** o usuário pediu todo o filtro, enquanto o provider é paginado e credenciais/quota pertencem ao backend.
+
+| Option | Effort | Risk | Blast radius | Maintenance | Performance | Elegance | Structural soundness |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| A — page walk backend sequencial + Buffer bounded (recommended) | medium | bounded memory/quota | NestJS + CTA React | medium | até 200 calls/24MiB/180s | high para o envelope atual | high; clear ownership |
+| B — fila/storage/link assíncrono | high | operational | runtime/infra/UI | high | melhor para volumes grandes | medium | high, mas fora do prazo/escopo |
+| C — browser percorre páginas | low | credential/race/partial file | frontend/provider | high | amplification client-side | low | invalid; wrong owner |
+
+### Issue Card `PR-EX-03` — consistência sem snapshot e fronteira de transporte
+
+- **Severity:** `high`
+- **Evidence:** `backend/src/fiscal-notes/fiscal-notes.types.ts:25-41`; `backend/src/fiscal-notes/smart-notas.adapter.ts:240-258`.
+- **Why now:** Smart Notas não fornece cursor/snapshot/order; “arquivo integral” precisa ser verdadeiro sem prometer atomicidade de rede.
+
+| Option | Effort | Risk | Blast radius | Maintenance | Performance | Elegance | Structural soundness |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| A — metadados/IDs/counts fail-closed + linguagem sem snapshot (recommended) | medium | mutação indetectável residual | service/tests/docs | medium | checks O(rows) | high | high; honest contract |
+| B — declarar snapshot sem suporte do provider | low | critical correctness | product/legal | high | none | low | invalid claim |
+| C — exportar sem consistency checks | low | silent duplicate/missing rows | service | low initially | fastest | low | low; partial data risk |
+
+### Issue Card `PR-EX-04` — ownership do download React
+
+- **Severity:** `medium`
+- **Evidence:** `frontend/src/paginas/ListaNotas.tsx:8-24`; `frontend/src/api/cliente.ts:79-111,140-155`; `frontend/src/auth/SessaoContexto.tsx:30-47`.
+- **Why now:** filtros, logout, unmount e respostas tardias podem competir com Blob/âncora.
+
+| Option | Effort | Risk | Blast radius | Maintenance | Performance | Elegance | Structural soundness |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| A — owner local com ref/generation/AbortController (recommended) | medium | low after races | ListaNotas/client | low | one request, duplicate dropped | high | high; lifecycle explicit |
+| B — estado global de export | medium | medium | context/session | medium | similar | medium | unnecessary coupling |
+| C — apenas disabled visual | low | high | UI | low initially | duplicate calls possible | low | invalid race protection |
+
+### Failure Modes & Edge Cases
+
+- Provider muda total/perPage/totalPages/page, duplica ID, encurta página ou falha no meio: 502/provider error e nenhum response CSV iniciado.
+- Resultado zero, limite `20k/200/24MiB`, deadline exato, abort antes/depois do Buffer e falha de transporte têm branches separados.
+- Wall regression/jump, fixed-window boundary, actor bucket cap, cooldown/lease collisions e context token starvation usam os oráculos BCI congelados.
+- CSV cobre null, CR/LF/quotes/semicolon, fórmula, zeros iniciais e identificadores longos; logs não recebem filtros nem conteúdo fiscal.
+- Repeated click, filter change, page change, logout, unmount, 401 e late Blob são cobertos por FRC `5x2/10x3/20x5`.
+
+### Residual Unknowns / Risks
+
+| Type | Item | Confidence / handling |
+| --- | --- | --- |
+| assumption | provider continua devolvendo metadados numéricos e ID interno único por travessia | high; contract tests + fail-closed |
+| unknown | quota/latência reais podem impedir filtros abaixo dos caps | medium; RLS local + cutover smoke |
+| unknown | mutação da origem pode preservar todos os metadados/IDs e ainda alterar campos | high confidence no risco; não alegar snapshot |
+| risk | Buffer backend + resposta + Blob browser multiplicam memória | high; caps e RSS/external/heap thresholds |
+| risk | coordenação é por instância | high; stage tem uma réplica; reavaliar antes de scale-out |
+| risk | rede/proxy pode truncar transmissão já iniciada | high; contrato limita garantia à geração e commit do Blob cliente |
 
 ### Incorporated Independent Findings
 
@@ -399,8 +528,18 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 | `R7-CR-H03/H05` | `high` | token de contexto e topologias BCI não tinham oráculos exatos | matriz setup/aceitos/erro/delta e distinção admission versus HTTP congeladas |
 | `R7-AR-M02/CR-M01` | `medium` | limite global dizia 2 e fórmula variável | fórmula `min(2,maxConcurrency-1)`, máximo absoluto 2 |
 | `R7-CR-M02` | `medium` | serializer não checava client abort por chunk | signal/deadline antes e depois de todo chunk/yield |
-| `R7-AR-M03/CR-M03` | `medium` | módulo canônico ainda não continha o endpoint planejado | módulo sincronizado + gate `Preserve/Supersede/Out of Scope` |
+| `R7-AR-M03/CR-M03` | `medium` | módulo canônico ainda não continha o endpoint planejado | módulo sincronizado + gate `Preserve/Supersede (Intentional)/Out of Scope` |
 | `R7-CR-M04` | `medium` | ledger usava taxonomia inválida | categorias normalizadas à taxonomia do projeto |
+| `R8-AR-H01/CR-H01` | `high` | high-water/budgets não tinham owner comum para list/detail/export | coordinator singleton, tabela precheck/commit/failure e probes mistos congelados |
+| `R8-CR-H02` | `high` | BCI-E3 não fixava distribuição, headers e estado observável | product/probe policies separadas, fixture/snapshot e 20-op oracles exatos |
+| `R8-AR-H02/CR-M04` | `high` | módulo/gate não eram source-of-truth e 1:1 canônicos | decision register, API Endpoint Definitions e map EX-D/FISC-EX 1:1 |
+| `R8-AR-M01/CR-M01` | `medium` | vazio não validava identidade da página | page identity universal; vazio exige page 1 e zero calls seguintes |
+| `R8-CR-M02` | `medium` | “arquivo integral” misturava geração e transporte | boundary server/client explícito; sem claim de atomicidade no fio |
+| `R8-AR-M02` | `medium` | export share não tinha fórmula única | ternário determinístico congelado |
+| `R8-AR-M03` | `medium` | evidence loci de assumptions estavam imprecisos | ranges exatos do código atual registrados |
+| `R8-CR-M03` | `medium` | FRC/RLS-E2 e memória não tinham workload suficiente | perfis/repetições/stages/resultados e heap/external/RSS congelados |
+| `R8-GOV-M04` | `medium` | Plan Review não possuía issue cards/trade-offs canônicos | cards A/B/C, failure modes e residual unknowns adicionados |
+| `R8-GOV-H03` | `high` | reviewer exigiu que o commit material referencie o próprio SHA | `Challenged`: auto-referência Git é impossível; commit de attestation posterior aponta ao baseline material publicado e drift compara contra ele |
 
 ### Residual Risks
 
@@ -421,18 +560,18 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 - **Gate decision:** `required`
 - **Baseline branch:** `uninotas-foundation/main`
-- **Baseline commit:** `f4d3f185a79a451bda463890d4eedc34bd81d740`
+- **Baseline commit:** `3197b069a2fc1c42e08b25738741906ef321dd14`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** findings R6 de oráculos BCI elegível/pré-bloqueado e lifecycle do limite de actor buckets foram integrados em baseline material isolado e publicado.
-- **Evidence / reference:** `origin/main` contém `f4d3f185a79a451bda463890d4eedc34bd81d740`; material export está congelado nesse commit.
+- **Findings summary:** findings R7 de paginação, admissão transacional, clocks, BCI, abort, módulo e taxonomia foram integrados em baseline material isolado e publicado.
+- **Evidence / reference:** `origin/main` contém `3197b069a2fc1c42e08b25738741906ef321dd14`; material export está congelado nesse commit.
 
 ## Gate: Review Scope Drift
 
 - **Gate decision:** `required`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-filtered-csv-export.md`
 - **Gate status:** `no_material_findings`
-- **Evidence / reference:** `review_scope_drift_guard.py` sobre baseline `03c225d0fe9278b3b594a883b28a929ecbe4d70d`: `go`, `0/23` seções materiais alteradas; repetir após R3 antes do APROVADO.
+- **Evidence / reference:** `review_scope_drift_guard.py` sobre baseline `3197b069a2fc1c42e08b25738741906ef321dd14`: `go`, `0/23` seções materiais alteradas; repetir após o review final antes do `APROVADO`.
 
 ## Audit Trigger Matrix
 
@@ -454,8 +593,8 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 - **Critique decision:** `required`
 - **Critique status:** `running`
-- **Findings summary:** R7 encontrou contradições de cleanup/paginação, clocks, topologias BCI, abort e taxonomia; todas foram integradas ao contrato e módulo, pendentes de fresh rerun.
-- **Evidence / reference:** reviewers `/root/filtered_export_architecture_r7` e `/root/filtered_export_critique_r7`.
+- **Findings summary:** R8 encontrou owner compartilhado incompleto, BCI/FRC/RLS subespecificados, módulo/gate não canônicos e fronteira geração/transporte ambígua; todos foram integrados, pendentes de fresh rerun.
+- **Evidence / reference:** reviewers `/root/filtered_export_architecture_r8` e `/root/filtered_export_critique_r8`.
 - **Isolation:** `fresh internal no-context reviewer; cannot implement`
 - **Lenses:** `correctness|performance|security|elegance|structure|operational fit`.
 
@@ -544,41 +683,45 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 ### FRC planned evidence
 
-- Políticas: `drop duplicate`; `cancel previous` em mudança de filtro; paginação não cancela; logout/unmount/401 abortam; generation suprime estado/download tardio.
-- Bursts `5/10/20` para `export-duplicate`, `export-cancel-filter`, `export-cancel-session`.
+- **Product policies:** `export-duplicate=drop duplicate`; `export-cancel-filter=cancel previous`; `export-cancel-session=cancel previous`; generation guard aplica `last-write-wins` somente ao estado corrente. Paginação não cancela.
+- **Probe policy:** repeated synchronous trigger/barrier followed by controlled late resolve/reject. Executar `FRC-SP-L=5x2`, `FRC-SP-M=10x3` e `FRC-SP-H=20x5` para cada cenário; acceptance requer uma request/download no duplicate, zero download tardio após filtro e zero download/estado tardio após logout/unmount/401.
 - Artifact planejado: `foundation_documentation/artifacts/tmp/uninotas-export-pcv/frc-pcv1.json`.
 
 ### BCI planned evidence
 
-- **Invariant `FISCAL-EXPORT-ADMISSION-01`:** “aceito” significa concessão atômica de admissão/leases, não HTTP 200. Em estado elegível, cada burst concede exatamente as admissões da matriz abaixo; cada aceito consome uma user unit, cria um cooldown e adquire leases uma vez. Todo rejeitado preserva o estado bruto. Success/error/abort liberam leases exatamente uma vez sem apagar budget/cooldown aceitos.
-- **Concurrency policy:** `simultaneous-start/barrier`; cada batch começa de fixture isolada determinística. Executar bursts `5/10/20` e, para evidência `BCI-E3`, `20 operações x 5 batches` por topologia, registrando `concurrency_policy`, setup, accepted count, status/header e delta bruto de estado.
+- **Invariant `FISCAL-EXPORT-ADMISSION-01`:** “aceito” significa concessão atômica de admissão/leases, não HTTP 200. Cada aceito consome exatamente as unidades descritas; cada rejeitado preserva o snapshot bruto; success/error/abort liberam leases uma vez sem apagar budget/cooldown aceitos.
+- **Product `concurrency_policy`:** `serialize atomic admission + reject excess`; **probe synchronization:** `simultaneous-start/barrier`, mantendo winners ativos até registrar todas as 20 decisões. Cada topologia roda `BCI-SP-L=5x2`, `BCI-SP-M=10x3` e `BCI-SP-H=20x5`; cada batch começa de fixture isolada.
+- **Common exact fixture:** default `maxConcurrency=8`, rates `user=30/context=120`, `wallNow=W10+15s`, `monotonicNow=1_000_000`; portanto fixed-window Retry-After=`45`, lease floor=`5`, cooldown iniciado em `970_000` deixa `30`, e cooldown de winner novo deixa `60`. Atores distintos são `A01..A20`; contexto único é Unifast; topologia dual distribui `A01..A10` em Unifast e `A11..A20` em Prosperar; mesmo ator/dual distribui dez starts por contexto.
+- **Canonical raw snapshot:** JSON ordenado contendo `lastCommittedWindow`, actor buckets `[actor,window,count]`, context-total/export-share buckets, cooldowns `[actor,acceptedAtMono]`, actor/context/global leases e scheduler `nextExportAtMono`; counters de `wallNow`, `monotonicNow` e provider calls são evidência separada. Snapshot pós-rejeição deve ser idêntico ao pré; cada admission decision chama cada relógio uma vez.
 
-| Setup / topology | Accepted admissions | Rejected result | Exact state oracle |
+| 20-operation isolated topology | Accepted | Nineteen/twenty result | Post-admission / post-exit oracle |
 | --- | --- | --- | --- |
-| elegível, mesmo ator/contexto | `1` | `429 ExportacaoFiscalOcupada`; precedência/max congelados | `+1` user unit, `+1` cooldown, `+1` actor/context/global lease; losers `delta=0` |
-| elegível, atores distintos/mesmo contexto | `1` | `429 ExportacaoFiscalOcupada`, mínimo lease `Retry-After=5` | um conjunto de charges/leases; losers `delta=0` |
-| elegível, mesmo ator/contextos distintos | `1` | `429 ExportacaoFiscalOcupada`, actor lease/cooldown | um conjunto de charges/leases; losers `delta=0` |
-| elegível, atores distintos/contextos distintos | `min(2,maxConcurrency-1)` limitado aos dois contextos | excedentes `429 ExportacaoFiscalOcupada` | exatamente um charge/cooldown por aceito e leases correspondentes |
-| user fixed-window budget já esgotado | `0` | `429 LimiteDeConsultaExcedido`; segundos até fronteira da janela efetiva | estado bruto idêntico |
-| configuração incapaz (`maxConcurrency<2` ou `exportShare=0`) | `0` | `429 ExportacaoFiscalOcupada; Retry-After=60` | estado bruto idêntico; zero provider call |
-| actor/context/global lease já bloqueia | `0` | `429 ExportacaoFiscalOcupada`; precedência/max congelados | estado bruto idêntico |
-| token de contexto temporariamente indisponível, demais gates elegíveis | mesma contagem do topology elegível | aceito espera; deadline vira `504`, não `429` de admissão | admissão/charge persistem; lease libera no exit |
-| actor bucket em `cap-1`, novo ator elegível | `1` | n/a | projected/raw bucket count chega ao cap |
-| actor buckets no cap, novo ator | `0` | `429 LimiteDeConsultaExcedido`; fronteira efetiva | nenhum bucket criado/removido |
-| actor buckets no cap, ator já existente e sem outro bloqueio | `1` | n/a | nenhum novo slot; unit/cooldown/leases do ator existente |
-| nova janela com buckets stale e tentativa depois rejeitada | `0` | código/header da causa real | estado bruto idêntico; stale permanece |
-| nova janela com buckets stale e tentativa aceita | conforme topology elegível | n/a | stale removido exatamente uma vez no commit; bucket atual criado |
+| mesmo ator/Unifast elegível | `1` | `19 x 429 ExportacaoFiscalOcupada, Retry-After=60` | winner `+1` user/cooldown e 3 leases; losers delta zero; exit remove 3 leases |
+| 20 atores/Unifast elegível | `1` | `19 x 429 ExportacaoFiscalOcupada, Retry-After=5` | somente winner tem user/cooldown/leases; exit remove leases |
+| mesmo ator/10 starts por contexto | `1` | `19 x 429 ExportacaoFiscalOcupada, Retry-After=60` | somente winner cobrado; exit remove leases |
+| 20 atores/10 por contexto | `2` | `18 x 429 ExportacaoFiscalOcupada, Retry-After=5` | um winner/contexto, dois charges/cooldowns, global=2; exit zera leases |
+| user budget do ator esgotado | `0` | `20 x 429 LimiteDeConsultaExcedido, Retry-After=45` | snapshot idêntico; zero provider call |
+| `maxConcurrency=1` ou `ratePerContextMinute=1` | `0` | `20 x 429 ExportacaoFiscalOcupada, Retry-After=60` | snapshot idêntico; zero provider call |
+| context/global lease pré-ocupado sem cooldown/budget collision | `0` | `20 x 429 ExportacaoFiscalOcupada, Retry-After=5` | snapshot idêntico |
+| actor cooldown iniciado em `970_000` | `0` | `20 x 429 ExportacaoFiscalOcupada, Retry-After=30` | snapshot idêntico |
+| context tokens indisponíveis, 20 atores/Unifast | `1` | `19 x busy/5`; winner espera e termina `504` | user/cooldown permanecem; zero provider call; leases zeram no deadline |
+| buckets em `cap-1`, 20 novos atores/Unifast | `1` | `19 x busy/45` pela colisão context lease + cap | winner ocupa último bucket; losers delta zero; exit zera leases |
+| buckets no cap, 20 novos atores | `0` | `20 x LimiteDeConsultaExcedido/45` | nenhum bucket criado/removido |
+| buckets no cap, mesmo ator existente elegível | `1` | `19 x busy/60` | nenhum slot novo; winner cobra unidade/cooldown; exit zera leases |
+| W11 projetada com stale + configuração incapaz | `0` | `20 x busy/60` | stale permanece; high-water/raw state idênticos |
+| W11 projetada com stale + mesmo ator/contexto elegível | `1` | `19 x busy/60` | primeiro commit remove stale uma vez, cria W11, cobra winner; exit zera leases |
 
-- Cobrir amostra única de `wallNow`/`monotonicNow`, ambos os lados e a fronteira fixa exata, monotônico antes/exatamente/depois do expiry, wall regression `W10→W9→W10` sem reabrir W10, wall jump, `MAX_ACTOR_BUCKETS`, colisões de todos os bloqueios e arredondamento `max(1,ceil)`.
+- **Mixed-budget probes:** list e detail aceitos em W10 avançam o mesmo high-water e cobram user+context; em seguida wall W9 e export/list/detail não reabrem W10. Separadamente, context-total esgotado rejeita list/detail com zero user delta. Export page aceita cobra context-total+export-share mesmo se provider falhar; espera sem token não muta até reserva.
+- Cobrir também fronteira fixa exata, monotônico antes/exatamente/depois do expiry, wall regression `W10→W9→W10`, wall jump e colisões; o artifact registra fixture, distribuição das operações, clocks, statuses/headers, provider calls, snapshots pre/post-admission/post-exit e `concurrency_policy` separado de `probe_synchronization`.
 - Artifact planejado: `foundation_documentation/artifacts/tmp/uninotas-export-pcv/bci-pcv1.json`.
 
 ### RLS planned evidence
 
-- **Profile RLS-P1 default:** fake config `maxConcurrency=8`, context rate `120/min`, user rate `30/min`; dois exports de atores distintos (um/contexto) + list/detail controlados; 200 pages/20k rows/24MiB; segundo export do mesmo ator e extra por contexto falham 429.
-- **Profile RLS-P2 constrained/saturated:** fake config `maxConcurrency=2`, context rate `4/min`, user rate `2/min`; somente um export global, um slot interativo reservado; actor/context budgets, cooldown e abort/recovery sob fake clock.
-- **Profile RLS-P3 incapable branches:** `maxConcurrency=1` e, separadamente, context rate `1/min` (export share zero); todas as tentativas retornam erro/Retry-After congelado com zero mutation e zero provider call.
-- **Thresholds:** cada start aceito consome exatamente uma user-budget unit e inicia um cooldown; toda rejeição pré-admissão preserva user/context counters, cooldown e leases; nenhum ator possui >1 export ativo ou >1 start aceito/rolling minute; page calls não alteram user counter; colisões retornam o code/Retry-After da precedência congelada, inclusive fronteira fixa/rolling; export calls nunca ultrapassam `floor(contextRate*0.75)`/min/context; total calls nunca ultrapassam context rate; export concurrency <= `min(2,maxConcurrency-1)`; admitted list/detail error rate `0%`; p95 list/detail <= `2x` baseline do mesmo stub; extras `100%` no erro esperado; ator B pode iniciar quando contexto distinto/global permitem; output <=24MiB; peak heap delta <=96MiB no P1; cleanup/recovery <=1s após abort com fake port; zero late calls após deadline.
-- Capturar p50/p95/p99, throughput, statuses, calls por classe/contexto, active/peak, RSS/heap, bytes, abort/recovery.
+- **RLS-E2 profile 1 / `load`:** config `maxConcurrency=8`, context `120/min`, user `30/min`; stage `4:180s`: dois export clients (um/contexto, 200 pages/20k rows/até 24MiB) e um interactive client por contexto alternando list/detail a 30/min. Esperado: dois CSVs completos <=180s, interactive admitted error rate 0%, nenhum cap excedido.
+- **RLS-E2 profile 2 / `stress`:** config `maxConcurrency=2`, context `4/min`, user `2/min`; stage `2:185s`: um export Unifast de 200 páginas e um client list/detail Unifast a 1/min. Esperado: export admite, faz no máximo 9 page calls e termina 504 sem CSV em 180s; três chamadas interativas admitidas concluem; leases recuperados até 181s.
+- **Functional incapable profile:** `maxConcurrency=1` e, separadamente, context rate `1/min` (`exportShare=0`); 100% dos starts retornam busy/60 com zero mutation/provider call. É BCI/contract evidence, não um terceiro RLS-E2 stage.
+- **Thresholds comuns:** regras de budget/admission BCI; export calls <= fórmula share e total calls <= context rate; concurrency <= `min(2,maxConcurrency-1)`; interactive error rate 0%; p95 list/detail <=2x baseline do mesmo fake provider; output <=24MiB; P1 peak deltas `heapUsed<=96MiB`, `external+arrayBuffers<=64MiB`, `rss<=192MiB`; browser Blob fica como risco separado; cleanup/recovery <=1s; zero provider calls após deadline.
+- Capturar modo, stages `concurrency:duration`, request mix/timeline, p50/p95/p99, throughput, statuses, calls por classe/contexto, active/peak, RSS/heap/external/arrayBuffers, bytes e abort/recovery.
 - Artifact planejado: `foundation_documentation/artifacts/tmp/uninotas-export-pcv/rls-pcv1.json`.
 
 ### Common `pcv-1` artifact rule
@@ -608,10 +751,12 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 | `EX-M01..M03` | `medium` | `release-blocker` | `same TODO` | compatibilidade downloader/auth/audit dentro da feature | `integrated_pending_rerun` | reviews R2-R7 |
 | `R3-EX-H01,R3-EX-M02,R4-EX-H01,R5-H01..H02,R6-H01/M02` | `high, medium` | `release-blocker` | `same TODO` | admissão, clocks, capacidade e owners pertencem ao endpoint | `integrated_pending_rerun` | reviews R3-R7 |
 | `R7-AR-H01,R7-AR-M01..M03,R7-CR-H01..H05,R7-CR-M01..M04` | `high, medium` | `release-blocker` | `same TODO` | contratos de paginação, admissão, BCI, módulo e governança | `integrated_pending_rerun` | architecture/critique R7 |
+| `R8-AR-H01..H02,R8-AR-M01..M03,R8-CR-H01..H02,R8-CR-M01..M04` | `high, medium` | `release-blocker` | `same TODO` | coordinator compartilhado, contrato canônico, BCI/FRC/RLS e transport boundary | `integrated_pending_rerun` | architecture/critique R8 |
+| `R8-GOV-H03` | `high` | `by-design/no-action` | `challenged` | commit material não pode conter seu próprio SHA; attestation não material referencia baseline e drift prova 0 seções materiais | `challenged_with_rationale` | Review Baseline Freeze + Scope Drift |
 | `logs-csv-hardening` | `medium` | `follow-up-hardening` | `split` | serializer legado em `backend/src/logs/**` está fora deste diff | `deferred` | requer TODO próprio antes do closeout se confirmado pelo security gate |
 
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
-- **Reason:** aguardando publicação do baseline R7, fresh reviews finais e aprovação.
+- **Reason:** aguardando publicação do baseline R8, fresh reviews finais e aprovação.
 - **Target after implementation:** `Local-Implemented`, sem deploy.
