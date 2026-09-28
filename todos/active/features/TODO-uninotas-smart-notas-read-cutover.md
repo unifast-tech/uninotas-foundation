@@ -40,7 +40,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** repetir arquitetura sobre as refs round28 atestadas; crítica fresca só após convergência. Nenhuma implementação ou mutação Railway está autorizada.
+- **Next exact step:** executar crítica independente fresca sobre as refs round28 arquiteturalmente aprovadas. Nenhuma implementação ou mutação Railway está autorizada.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -113,8 +113,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Scope Item | Local Branch/Commit | Main / Authority | Local Source/Build Validation | Single Remote Target: Stage Customer-Facing | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Backend + frontend read-only | round28 material root `895121453dca43b8b6379afe2971d40b3003968b`; code-origin `31712a0`; attestation carrier pending | `pending promotion to main` | `pending final cutover suite` | `pre-implementation capacity hard stop; otherwise direct fiscal cutover` | `round28 material frozen; metadata attestation pending` |
-| Foundation cutover contract | round28 material `87f28deee3ef5457dc89fc3cf314e60cb2dfd204`; attestation pending | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round28 material frozen; metadata attestation pending` |
+| Backend + frontend read-only | round28 material root `895121453dca43b8b6379afe2971d40b3003968b`; attestation carrier `d7bb000d54683924e03879bee64e75eb0717cddc`; code-origin `31712a0` | `pending promotion to main` | `pending final cutover suite` | `pre-implementation capacity hard stop; otherwise direct fiscal cutover` | `round28 architecture clean; critique pending` |
+| Foundation cutover contract | round28 material `87f28deee3ef5457dc89fc3cf314e60cb2dfd204`; attestation `e4d065c3b5f38f12479df57d570fb407533e3292` | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round28 architecture clean; critique pending` |
 
 ## Out of Scope
 
@@ -664,8 +664,8 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 - **Decision review lifecycle:** `after review baseline freeze and before APROVADO`
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set: TODO + topology/dependency artifacts + railway/Docker/config/health/fiscal boundaries`
-- **Decision review status:** `round-27 clean; superseded by round28 candidate pending review`
-- **Decision review evidence / resolution:** reviewer round27 aceitou D-CUT-26..29 sem achados, mas a crítica R27 exigiu mudanças materiais em auth completion, fase Active-fechada e capacity sequencing. O candidato round28 integra D-CUT-30..32 e exige nova publicação/attestation/arquitetura.
+- **Decision review status:** `round28 clean; no material findings`
+- **Decision review evidence / resolution:** reviewer fresco `round28-architecture-no-context` confirmou refs exatas, `0/23` drift e coerência de D-CUT-30..32 com uma réplica, D-CUT-23..29 e REC-3A/3B. Evidência: `/tmp/uninotas-cutover-round28-architecture.5qUkD3/dispatch.json`.
 
 | Finding ID | Severity | Approval-material | Resolution | Evidence in evolved plan |
 | --- | --- | --- | --- | --- |
@@ -862,7 +862,7 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 ## Plan Review Gate
 
 - **Review decision:** `required`
-- **Review status:** `round28 material published; metadata attestation in progress; architecture and critique pending`
+- **Review status:** `round28 material published/attested and architecture clean; independent critique pending`
 - **Required lenses:** architecture, operations, rollback, security, tests, performance, observability and structural soundness.
 - **Known plan finding:** o health atual retorna HTTP 2xx quando o banco está degradado; `D-CUT-10` agora exige readiness separada não-2xx e mantém Smart Notas fora do loop.
 - **Approval request condition:** nova revisão confirma `D-CUT-06..32`, crítica converge, preflight D-CUT-32 é conclusivo, baseline é atualizado e guards retornam `go/preflight-go`.
@@ -1115,7 +1115,7 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 - **Independent test-quality audit:** `required before Stage cutover`.
 - **Independent final review:** `required after implementation and before Stage cutover`.
 - **Dedicated triple review:** `required because release-critical + secrets + external provider`.
-- **Current status:** `round-27 findings integrated and round28 material published; metadata attestation in progress, then architecture/critique and capacity preflight pending`.
+- **Current status:** `round-27 findings integrated; round28 material published/attested and architecture clean; independent critique and capacity preflight pending`.
 
 ## Audit Trigger Matrix (Required Before Audit Decisions Are Trusted)
 
