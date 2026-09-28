@@ -40,7 +40,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** executar confirmação arquitetural round 10 sobre `uninotas-foundation@b39d703` / `MonitorNotes@72cfbe7`; nenhuma mutação Railway está autorizada.
+- **Next exact step:** executar confirmação arquitetural round 10 sobre `uninotas-foundation@5e79e96` / `MonitorNotes@d4e6b5c`; nenhuma mutação Railway está autorizada.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -101,8 +101,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Scope Item | Local Branch/Commit | Main / Authority | Local Source/Build Validation | Single Remote Target: Stage Customer-Facing | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Backend + frontend read-only | material root baseline `delphi-and-foundation@72cfbe7`; code-origin `31712a0` | `pending promotion to main` | `pending final cutover suite` | `pending one direct cutover` | `published round-10 baseline; attestation carrier may follow` |
-| Foundation cutover contract | `main@b39d703` material freeze | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `published round-10 material baseline` |
+| Backend + frontend read-only | material root baseline `delphi-and-foundation@d4e6b5c`; code-origin `31712a0` | `pending promotion to main` | `pending final cutover suite` | `pending one direct cutover` | `published round-10 baseline; attestation carrier may follow` |
+| Foundation cutover contract | `main@5e79e96` material freeze | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `published round-10 material baseline` |
 
 ## Out of Scope
 
@@ -562,11 +562,11 @@ Transições não podem pular evidência: `REC-1 -> REC-2` exige merge/tree equi
 - **Why this decision:** release, segredos, dois contextos e promoção canônica exigem revisão reproduzível.
 - **Trigger stage:** `before first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `b39d703d98d28a2cd3e13006739a5eb6076dae97`
+- **Baseline commit:** `5e79e96b2f12e9a7501d091d4c7b957ef4f2fe5b`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
 - **Findings summary:** `R9-ARCH-01..04`, `R9-DOC-01`, `R9-PERF-01` e `R9-OPS-01` integrados e publicados; round 10 governa nova confirmação.
-- **Evidence / reference:** `origin/main@b39d703d98d28a2cd3e13006739a5eb6076dae97`; material root baseline `MonitorNotes@72cfbe77815ee68b266a54356cb8494fa1b14f5b`; code-origin `31712a0`; Delphi guard `ee9b448`.
+- **Evidence / reference:** `origin/main@5e79e96b2f12e9a7501d091d4c7b957ef4f2fe5b`; material root baseline `MonitorNotes@d4e6b5cd4810ac7bcfb650cbf74ba32061e2f581`; code-origin `31712a0`; Delphi guard `ee9b448`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Review Scope Drift
@@ -577,9 +577,9 @@ Transições não podem pular evidência: `REC-1 -> REC-2` exige merge/tree equi
 - **Baseline source:** `Review Baseline Freeze -> Baseline commit`
 - **Material sections compared:** `canonical defaults, incluindo Diff Expectation Contract, Module Decision Baseline Snapshot e Decision Baseline (Frozen Before Implementation)`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-cutover.md`
-- **Gate status:** `not_run`
-- **Findings summary:** achados round 9 alteraram material de aprovação; scope drift só pode ser atestado após publicar e revisar o freeze round 10.
-- **Evidence / reference:** predecessor `uninotas-foundation:main@2851770aaa4fa9e17dd349e24a1cec166fa43f8b`; nova evidência será preenchida depois da convergência round 10.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** nenhum drift material entre o freeze round 10 e esta attestation metadata; confirmação arquitetural independente continua pendente.
+- **Evidence / reference:** `review_scope_drift_guard.py@ee9b448`; baseline `uninotas-foundation:main@5e79e96b2f12e9a7501d091d4c7b957ef4f2fe5b`; material root baseline `MonitorNotes@d4e6b5cd4810ac7bcfb650cbf74ba32061e2f581`; `Overall outcome: go`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Frontend / Consumer Matrix
