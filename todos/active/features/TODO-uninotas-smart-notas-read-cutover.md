@@ -581,11 +581,11 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` exige merge/tree equ
 - **Why this decision:** release, segredos, dois contextos e promoção canônica exigem revisão reproduzível.
 - **Trigger stage:** `before first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `pending round-11 material publication`
+- **Baseline commit:** `0be6ca84631cac567e349c65104b524f0fe15dd1`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `not_run`
-- **Findings summary:** `R10-ARCH-01..03`, `R10-SEC-01`, `R10-STRUCT-01`, `R10-PERF-01` e `R10-DOC-01` integrados; publicação round 11 pendente.
-- **Evidence / reference:** predecessor `origin/main@5e79e96b2f12e9a7501d091d4c7b957ef4f2fe5b`; novo SHA será registrado após commit/push; root predecessor `MonitorNotes@d284673`; code-origin `31712a0`; Delphi guard `ee9b448`.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** `R10-ARCH-01..03`, `R10-SEC-01`, `R10-STRUCT-01`, `R10-PERF-01` e `R10-DOC-01` integrados e publicados; round 11 governa nova confirmação.
+- **Evidence / reference:** `origin/main@0be6ca84631cac567e349c65104b524f0fe15dd1`; material root baseline `MonitorNotes@28f585baadd0b0e814552a7c212dafa030dfddc9`; code-origin `31712a0`; Delphi guard `ee9b448`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Review Scope Drift
@@ -596,9 +596,9 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` exige merge/tree equ
 - **Baseline source:** `Review Baseline Freeze -> Baseline commit`
 - **Material sections compared:** `canonical defaults, incluindo Diff Expectation Contract, Module Decision Baseline Snapshot e Decision Baseline (Frozen Before Implementation)`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-cutover.md`
-- **Gate status:** `not_run`
-- **Findings summary:** achados round 10 alteraram material de aprovação; scope drift só pode ser atestado após publicar e revisar o freeze round 11.
-- **Evidence / reference:** predecessor `uninotas-foundation:main@5e79e96b2f12e9a7501d091d4c7b957ef4f2fe5b`; nova evidência será preenchida depois da convergência round 11.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** nenhum drift material entre o freeze round 11 e esta attestation metadata; confirmação arquitetural independente continua pendente.
+- **Evidence / reference:** `review_scope_drift_guard.py@ee9b448`; baseline `uninotas-foundation:main@0be6ca84631cac567e349c65104b524f0fe15dd1`; material root baseline `MonitorNotes@28f585baadd0b0e814552a7c212dafa030dfddc9`; `Overall outcome: go`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Frontend / Consumer Matrix
