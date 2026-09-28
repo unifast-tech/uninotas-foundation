@@ -27,12 +27,12 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 ## Delivery Status Canon (Required)
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `none`
-- **Next exact step:** refinar e congelar o escopo expandido explicitamente pelo usuário, repetir reviews/guards e solicitar `APROVADO`.
+- **Next exact step:** implementar testes fail-first e o contrato aprovado no backend/frontend do checkout principal.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 - **Work state:** `implementation`
-- **Why this state now:** a solicitação atual validou e ampliou o card de detalhe; o contrato está novamente em preparação pré-aprovação.
-- **Exit condition:** baseline/reviews/guards do escopo expandido convergem e a implementação aprovada é concluída.
+- **Why this state now:** o usuário aprovou explicitamente o contrato congelado; regras foram recarregadas e a execução aguarda apenas o authority guard pós-aprovação.
+- **Exit condition:** implementação, validação, auditorias de entrega e closeout são concluídos.
 
 ## Execution Lane Tracking (Required)
 - **Local implementation branches:** `MonitorNotes:release/uninotas-smart-notas`; `uninotas-foundation:main`
@@ -585,9 +585,10 @@ Todos os campos abaixo são propriedades obrigatórias no JSON. `string|null` ac
 - **Pre-approval authority evidence:** `todo_authority_guard.py --pre-approval` returned `Overall outcome: preflight-go`; zero violations; no execution authority granted.
 
 ## Approval
-- **Status:** `not_requested`
-- **Reason:** expanded detail scope requires refreshed baseline, architecture opinion, critique and deterministic guards.
-- **Renewed approval trigger:** any additional PII/provider field, persistence, source, role, CSV/list expansion or search semantics.
+- **Approved by:** usuário em 2026-09-28, resposta explícita `APROVADO` após baseline/reviews/guards e `preflight-go`.
+- **Approval scope:** implementar nome do tomador na Geral, compra/chaves integrais, DTOs summary/detail 17/27, card com os 21 campos solicitados e quatro campos detail-only existentes, records internos separados, testes e documentação estável.
+- **Execution not authorized by approval:** filtro por número, nova PII/campo, mudança de perfis, CSV com novos campos, persistência, banco/migração, Railway/deploy, nova fonte ou worktree/checkout auxiliar.
+- **Renewed approval required when:** qualquer novo comportamento independente, PII/provider field, persistência, fonte, papel, CSV/list expansion, search semantics, runtime/deploy ou risco material.
 
 ## Security Risk Assessment
 - **Risk level:** `high`
