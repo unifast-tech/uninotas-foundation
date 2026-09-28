@@ -547,9 +547,9 @@ Todos os campos abaixo são propriedades obrigatórias no JSON. `string|null` ac
 - **Material sections compared:** `Context|Contract Boundary|Scope|Out of Scope|Definition of Done|Validation Steps|Execution Lane Tracking|Canonical Module Anchors|Decisions|Decision Baseline|Architecture Change Governance|Questions To Close|Assumptions Preview|Execution Plan|Flow Evidence Planning Matrix|Local CI-Equivalent Suite Matrix|Runtime / Rollout Notes|Security Risk Assessment|Performance & Concurrency Risk Assessment`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-fiscal-note-visibility.md`
 - **No-go handling rule:** `return to review, revalidate material changes with the user and refresh the pushed baseline`
-- **Gate status:** `not_run`
-- **Findings summary:** o primeiro run foi `go`, mas o preflight exigiu reformatação canônica da tabela de anti-patterns dentro da seção arquitetural; baseline/evidence refresh e rerun são necessários, sem mudança funcional.
-- **Evidence / reference:** run anterior contra `2d4bb67` teve changed material sections: 0; novo run pendente após refresh estrutural.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** 23 material sections match canonical final baseline `f4fef68`; the anti-pattern/routing schema normalization introduced no functional drift.
+- **Evidence / reference:** `review_scope_drift_guard.py` returned `Overall outcome: go`; changed material sections: 0.
 - **Waiver authority / reference:** `n/a`
 
 ## Questions To Close
