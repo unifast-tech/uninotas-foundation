@@ -26,13 +26,20 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 
 ## Delivery Status Canon (Required)
 - **Current delivery stage:** `Pending`
-- **Qualifiers:** `none`
-- **Next exact step:** congelar e revisar o contrato, executar os gates pré-aprovação e solicitar `APROVADO`.
+- **Qualifiers:** `Blocked`
+- **Next exact step:** obter validação humana do escopo refinado após a crítica, refrescar o baseline e rerun dos gates antes de solicitar `APROVADO`.
 
 ## Active Work State (Required While TODO Remains In `active/`)
-- **Work state:** `implementation`
-- **Why this state now:** o contrato está em preparação pré-aprovação para a implementação local.
-- **Exit condition:** implementação e validação locais concluídas, seguindo para review/closeout.
+- **Work state:** `blocked`
+- **Why this state now:** o scope-drift guard detectou refinamentos materiais de prova/contrato integrados da crítica e exige validação humana antes de retomar a aprovação.
+- **Exit condition:** usuário confirma o escopo refinado; baseline/reviews/guards são refrescados e convergem.
+
+## Blocker Notes
+- **Blocker:** validação humana do escopo refinado após a crítica independente.
+- **Why blocked now:** o guard registrou mudanças em Scope/DoD/Validation/Decisions/Plan desde `b85d757`, embora preservem o mesmo objetivo funcional.
+- **What unblocks it:** confirmação explícita do usuário de que aceita allowlist positiva, normalização estrita, lista semanticamente rotulada, matriz dos quatro perfis, canários por sink e cache old/new-session.
+- **Owner / source:** responsável do produto nesta conversa.
+- **Last confirmed truth:** filtro por número cancelado; nome do tomador e identificadores completos continuam sendo o único comportamento novo.
 
 ## Execution Lane Tracking (Required)
 - **Local implementation branches:** `MonitorNotes:release/uninotas-smart-notas`; `uninotas-foundation:main`
@@ -48,6 +55,8 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - [ ] `SCOPE-05` Cobrir contrato NestJS, normalização React, estados ausentes e jornada browser da Geral/detalhe.
 - [ ] `SCOPE-06` Atualizar módulo fiscal, feature brief e contratos operacionais estáveis sem registrar valores reais de PII ou identificadores fiscais.
 - [ ] `SCOPE-07` Substituir o tipo público baseado em `Omit<FiscalNoteRecord,...>` por uma allowlist positiva explícita, impedindo que futuros campos internos sejam publicados automaticamente.
+- [ ] `SCOPE-08` Preservar a linha inteira como link por meio de lista semântica de cartões rotulados: colunas visuais no desktop e rótulos por célula no mobile/leitor de tela, sem ARIA de tabela incompleta.
+- [ ] `SCOPE-09` Remover helpers/re-exports de máscara que ficarem sem consumidores e manter canários de privacidade separados por sink.
 
 ## Out of Scope
 - [ ] Alterar perfis, autenticação ou conceder acesso a usuários não autenticados.
@@ -71,6 +80,10 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - [ ] `DOD-06` Testes e documentação provam a ampliação deliberada de PII/identificadores sem persistir exemplos reais.
 - [ ] `DOD-07` `recipientName` é sempre serializado como string normalizada ou `null`; campo presente vazio, somente espaços ou acima de 255 caracteres falha como `SmartNotasContratoInvalido`.
 - [ ] `DOD-08` Testes provam acesso dos quatro perfis atuais, rejeição sem autenticação, exclusão de PII extra/CSV e limpeza do cache enriquecido no logout/disposal.
+- [ ] `DOD-09` O normalizador frontend rejeita `recipientName` ausente, tipo inválido, string vazia ou acima de 255; aceita somente `null` ou string válida em lista e detalhe.
+- [ ] `DOD-10` Desktop e viewport de 390 px provam nome de 255 caracteres, compra/chave/chave referenciada longas sem truncamento ou overflow, rótulos semânticos, link de linha acessível por teclado e texto copiável.
+- [ ] `DOD-11` Canários `allowed-visible-but-forbidden-in-sinks` são visíveis somente na UI fiscal e permanecem ausentes de URL, storage, console, referrer e requests alheios; PII não aprovada permanece `forbidden-everywhere`.
+- [ ] `DOD-12` Cache/logout usa canários distintos por sessão e resposta tardia para provar que objetos enriquecidos antigos não reaparecem antes nem depois da resposta da nova sessão.
 
 ## Validation Steps
 - [ ] `VAL-01` Executar testes unitários/contratuais do adapter, DTO, serviço e controller fiscal com fixtures sintéticas.
@@ -79,6 +92,8 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - [ ] `VAL-04` Executar `cd frontend && npm run e2e:notas` contra bundle fresco, cobrindo nome, valores completos, paginação e exportação sem regressão.
 - [ ] `VAL-05` Executar revisão de segurança sobre PII, identificadores, logs, URL, cache, logout e respostas de erro.
 - [ ] `VAL-06` Executar matriz explícita `ADMIN|GESTOR|ANALISTA|LEITOR|não autenticado`, resposta HTTP allowlisted, CSV sem nome e cache limpo após logout.
+- [ ] `VAL-07` Executar browser desktop e 390 px em Geral e detalhe, verificando `scrollWidth`, conteúdo exato não truncado, labels/semântica, teclado e ausência dos canários nos sinks proibidos.
+- [ ] `VAL-08` Executar teste unitário/race de cache com valores enriquecidos old-session, resposta tardia e valores distintos new-session.
 
 ## Diff Expectation Contract (Required Before Delivery)
 - **Contract status:** `required`
@@ -159,6 +174,10 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - [x] `D-07` O contrato público usa allowlist positiva e não deriva sua superfície de todos os campos de `FiscalNoteRecord` por `Omit`.
 - [x] `D-08` `recipientName` é sempre presente como `string|null`; `nome` ausente/null vira `null`, enquanto presente vazio, somente espaços ou acima de 255 caracteres invalida o contrato do provedor.
 - [x] `D-09` A autorização existente é preservada e provada para os quatro perfis leitores; o acesso sem JWT continua rejeitado.
+- [x] `D-10` O cliente trata `recipientName` como campo público obrigatório e estrito: apenas `null` ou string não vazia de até 255 caracteres; qualquer ausência/tipo/valor inválido falha como resposta incompatível.
+- [x] `D-11` A Geral preserva o link de linha usando lista semântica de cartões/células rotuladas, com cabeçalho visual desktop e rótulos acessíveis/mobile, evitando ARIA de tabela incompleta.
+- [x] `D-12` Valores autorizados visíveis e PII proibida usam conjuntos de canários separados para que remover a máscara nunca enfraqueça provas de URL/storage/log/request/referrer.
+- [x] `D-13` Limpeza de cache/sessão é provada com valores enriquecidos distintos e resposta antiga tardia, não apenas com página vazia ou segunda resposta idêntica.
 
 ## Module Decision Baseline Snapshot (Required Before APROVADO)
 | Module Decision Ref | Current Module Decision | Planned Handling | Evidence |
@@ -177,6 +196,8 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - [x] `D-06` Preservar filtros, cache, paginação e exportação existentes.
 - [x] `D-07` Usar allowlist pública positiva e `recipientName: string|null` com limite 255.
 - [x] `D-08` Provar os quatro perfis, rejeição sem autenticação, exclusão do CSV e limpeza de cache.
+- [x] `D-09` Usar normalização frontend estrita, lista semântica rotulada e testes desktop/mobile/sinks/sessão com canários distintos.
+- [x] `D-10` Remover helpers/re-exports de masking sem consumidores; não manter código morto da política anterior.
 
 ## Architecture Change Governance
 - **Applicability:** `required`
@@ -199,6 +220,8 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 | espalhar payload bruto do Smart Notas | adapter/DTO/frontend | contract tests e normalização allowlisted |
 | introduzir pesquisa por número disfarçada | React/adapter | diff review e contract tests dos filtros permitidos |
 | persistir nome/chaves/compra | URL/browser/db/logs | testes de URL/cache/logout e security review |
+| remover canário global para fazer E2E passar | browser tests | separar visibilidade permitida de sinks proibidos e manter ambas as asserções |
+| aceitar campo público ausente como `null` | frontend normalizer | contract tests strict list/detail |
 
 ### Architecture Protection Harness
 | Harness Type | Surface | Command / Rule / Artifact | Regression It Must Catch | Adoption Timing | Evidence Plan / Follow-up |
@@ -206,6 +229,7 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 | `test` | Smart Notas adapter/DTO | `backend/src/fiscal-notes/smart-notas.adapter.spec.ts`; backend full suite | PII não aprovada atravessando a allowlist | `implement-in-this-todo` | `DOD-03`, `VAL-01`, `VAL-02` |
 | `test` | React normalization/UI | frontend fiscal tests + `npm run e2e:notas` | nome ausente quebrando UI ou identificadores ainda mascarados | `implement-in-this-todo` | `DOD-01`, `DOD-02`, `DOD-05`, `VAL-03`, `VAL-04` |
 | `audit` | contrato de privacidade | `security-adversarial-review` | PII/IDs em URL, storage, logs ou erro | `implement-in-this-todo` | `DOD-06`, `VAL-05` |
+| `test` | browser privacy/cache/accessibility | `frontend/e2e/notas.mjs`; `frontend/e2e/notas-unit.ts` | canário autorizado escapando para sinks, cache antigo reaparecendo ou labels/overflow inválidos | `implement-in-this-todo` | `DOD-09`..`DOD-12`, `VAL-07`, `VAL-08` |
 
 ## Architecture Review Gates (Deterministically Derived From Architecture Change Governance)
 - **Architecture decision review:** `required`
@@ -228,24 +252,29 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 | `A-01` | `nome` é o nome/razão social do tomador | `todos/active/process/TODO-uninotas-smart-notas-api-and-fiscal-context-discovery.md`; observed field matrix | label/semantics must be corrected before implementation | `High` | `Promote to Decision` via `D-01` |
 | `A-02` | leitores atuais são membros da equipe financeira | user confirmation dated 2026-09-28; `frontend/src/paginas/Equipe.tsx` roles | authorization contract must be redesigned | `High` | `Promote to Decision` via `D-02` |
 | `A-03` | compra/chave already arrive complete and are masked only in React | `backend/src/fiscal-notes/smart-notas.adapter.ts`; `frontend/src/notas/normalizacaoFiscal.ts`; `frontend/src/paginas/ListaNotas.tsx` | backend/provider contract work would be required | `High` | `Keep as Assumption` |
-| `A-04` | Smart Notas não oferece filtro por número | official OpenAPI plus redacted probe; discovery search matrix | exclusion remains harmless, but a future TODO may reconsider | `High` | `Keep as Assumption` |
+| `A-04` | Smart Notas não oferece filtro por número | `foundation_documentation/todos/active/process/TODO-uninotas-smart-notas-api-and-fiscal-context-discovery.md`; `backend/src/fiscal-notes/smart-notas.adapter.ts` forwards only documented provider filters | exclusion remains harmless, but a future TODO may reconsider | `High` | `Keep as Assumption` |
 
 ## Execution Plan
 ### Touched Surfaces
 - `backend/src/fiscal-notes/**`
+- `backend/src/fiscal-notes/fiscal-notes.application.spec.ts`
+- `backend/src/fiscal-notes/fiscal-notes.export.spec.ts`
+- `backend/src/fiscal-notes/fiscal-notes.rls.spec.ts`
+- `backend/src/fiscal-notes/__tests__/smart-notas-live.probe.spec.ts`
 - `frontend/src/api/notas.ts`
 - `frontend/src/notas/normalizacaoFiscal.ts`
 - `frontend/src/paginas/ListaNotas.tsx`
 - `frontend/src/paginas/DetalheNota.tsx`
 - `frontend/src/estilos/**`
 - `frontend/e2e/notas.mjs`
+- `frontend/e2e/notas-unit.ts`
 - canonical fiscal module, feature brief and this TODO
 
 ### Ordered Steps
-1. Adicionar testes fail-first para `recipientName`, allowlist pública positiva, quatro perfis e exibição integral.
+1. Adicionar testes fail-first para `recipientName`, allowlist pública positiva, normalização frontend estrita, quatro perfis HTTP reais, sinks/canários, cache de sessão e exibição integral.
 2. Estender adapter, tipos e serviço fiscal sem alterar query/filtros; substituir a projeção pública baseada em `Omit` por interface/`Pick` explícito.
 3. Estender tipos/normalização, Geral e detalhe React.
-4. Ajustar tabela responsiva e preservar a jornada existente de filtros/exportação.
+4. Converter a grade visual em lista semântica de links/células rotuladas, aplicar `min-width: 0`/`overflow-wrap: anywhere` aos valores reais e preservar a jornada existente de filtros/exportação.
 5. Executar testes focados, suites completas, browser fresco e segurança.
 6. Consolidar módulo/feature brief e executar gates de entrega/closeout.
 
@@ -253,7 +282,7 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - **Intent:** `critical-user-journey` e `compatibility`.
 - **Strategy:** `test-first` para DTO/normalização e regressões visuais; fixtures exclusivamente sintéticas.
 - **Why:** a mudança é observável, aditiva no contrato e sensível à privacidade.
-- **Fail-first target(s):** nome presente/ausente/null/vazio/acima de 255, PII extra descartada, quatro perfis/rejeição sem JWT, compra/chave completas, CSV sem nome, cache limpo, quebra visual de valores longos e preservação dos filtros/exportação existentes.
+- **Fail-first target(s):** provider nome presente/ausente/null/vazio/acima de 255; HTTP `recipientName` ausente/tipo inválido/vazio/acima de 255; PII extra descartada; quatro perfis/rejeição sem JWT; compra/chave completas; CSV exato sem nome; cache old/new-session; desktop/mobile labels/teclado/overflow; preservação dos filtros/exportação existentes.
 - **Deliberate exclusions:** nenhum payload real, segredo, CNPJ, nome real ou identificador real será persistido em teste/artifact.
 
 ### Pre-APROVADO RED Evidence Capture
@@ -279,6 +308,8 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 | Geral com tomador/IDs completos | `frontend/e2e/notas.mjs` | bundle fresco e API interceptada com fixtures sintéticas | `planned` |
 | detalhe com tomador/IDs completos | `frontend/e2e/notas.mjs` | bundle fresco e API interceptada com fixtures sintéticas | `planned` |
 | filtro + paginação + exportação sem regressão | unit/race/browser | contratos atuais preservados | `planned` |
+| logout/cache enriquecido old/new-session | `frontend/e2e/notas-unit.ts` + browser | canários distintos e resposta tardia controlada | `planned` |
+| desktop/390px semantics and long values | browser list/detail | nome 255, purchase/key/reference longos | `planned` |
 
 ## Local CI-Equivalent Suite Matrix
 | Owner | Command | Scenario Proved | Preconditions | Status |
@@ -333,10 +364,13 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 
 ### Failure Modes & Edge Cases
 - [x] `nome` ausente/null: renderizar `Não disponível` sem falhar a página.
+- [x] `recipientName` público ausente/tipo inválido/vazio/overbound: falhar normalização em lista e detalhe, sem converter regressão em `null`.
 - [x] compra/chave ausentes: manter `Não disponível` em vez de string vazia.
 - [x] valores longos: permitir quebra/cópia sem alargar indefinidamente a tabela.
 - [x] payload com PII adicional: descartar no adapter/normalizador e provar por teste negativo.
 - [x] CSV existente: não adicionar nome e preservar contrato/ordem atual.
+- [x] canário visível: continuar proibido em URL/storage/console/request/referrer sem confundir com PII proibida em qualquer superfície.
+- [x] logout/resposta tardia: old-session PII/IDs distintos não reaparecem antes ou depois do payload new-session.
 
 ### Residual Unknowns / Risks
 - [x] Uma conta financeira comprometida verá os dados completos autorizados; risco residual aceito para esta superfície autenticada e revisto no gate de segurança.
@@ -392,10 +426,19 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - **Canonical multi-lane audit protocol:** `audit-protocol-triple-review` (required before Completed; additive, not a substitute for planning critique)
 - **Audit session / round evidence:** `delivery-side; pending implementation`
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
-- **Critique status:** `not_run`
-- **Findings summary:** `pending`
-- **Evidence / reference:** `pending`
+- **Critique status:** `findings_integrated`
+- **Findings summary:** six findings integrated: accessible/responsive semantics, sink-specific privacy canaries, enriched cache disposal, real HTTP role proof, strict frontend required-field contract, complete consumer/test inventory and dead-mask cleanup.
+- **Evidence / reference:** fresh no-context reviewer `/root/fiscal_visibility_plan_critique`; conclusion `acceptable_with_changes`, performance acceptable, design elegant and structurally sound after integrations.
 - **Waiver authority / reference:** `n/a`
+
+| Finding ID | Resolution | Usefulness | Formalizable | Candidate Rule Level | Candidate Rule ID | Rationale / Evidence |
+| --- | --- | --- | --- | --- | --- | --- |
+| `CRIT-01` | `Integrated` | `useful` | `partial` | `project` | `n/a` | `D-11`, SCOPE-08, DOD-10 and VAL-07 freeze semantic linked cards, labels, keyboard and desktop/390px overflow proof |
+| `CRIT-02` | `Integrated` | `useful` | `partial` | `project` | `n/a` | `D-12`, DOD-11 and harness split allowed-visible canaries from forbidden-everywhere PII and retain sink assertions |
+| `CRIT-03` | `Integrated` | `useful` | `partial` | `project` | `n/a` | `D-13`, DOD-12 and VAL-08 require distinct old/new-session enriched canaries plus delayed response |
+| `CRIT-04` | `Integrated` | `useful` | `partial` | `project` | `n/a` | touched surfaces and VAL-06 name `fiscal-notes.application.spec.ts` as the real JWT/profile HTTP boundary |
+| `CRIT-05` | `Integrated` | `useful` | `partial` | `project` | `D-10` and DOD-09 make the frontend required field strict for list/detail |
+| `CRIT-06` | `Integrated` | `useful` | `no` | `none` | `n/a` | consumer inventory includes export/RLS/live/application/notas-unit fixtures; SCOPE-09/D-10 remove obsolete mask helpers |
 
 ## Gate: Assumption Code Coherence
 - **Gate decision:** `required`
@@ -403,9 +446,9 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - **Trigger stage:** `after critique convergence and before APROVADO`
 - **Guard scope:** `A-01,A-02,A-03,A-04`
 - **Guard command:** `python3 delphi-ai/tools/assumption_code_coherence_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-fiscal-note-visibility.md`
-- **Gate status:** `not_run`
-- **Findings summary:** `pending`
-- **Evidence / reference:** `pending`
+- **Gate status:** `no_material_findings`
+- **Findings summary:** A-03 and A-04 match the cited adapter, React normalization/list, and discovery evidence; A-01/A-02 are promoted into frozen decisions.
+- **Evidence / reference:** `python3 delphi-ai/tools/assumption_code_coherence_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-fiscal-note-visibility.md`; rerun after concrete-path correction.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Baseline Freeze
@@ -413,7 +456,7 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - **Why this decision:** planning-side reviews must evaluate a committed and pushed scope-bearing contract.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `main`
-- **Baseline commit:** `b85d757f69911d99bec41e1f78e62ef38ac728b8`
+- **Baseline commit:** `b85d7577270f497ab395f4157450f7cc2bffdc93`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
 - **Findings summary:** scope-bearing contract refreshed after architecture-opinion integration; number search remains excluded and the allowlist/null/auth matrix is frozen.
@@ -429,9 +472,9 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - **Material sections compared:** `Context|Contract Boundary|Scope|Out of Scope|Definition of Done|Validation Steps|Execution Lane Tracking|Canonical Module Anchors|Decisions|Decision Baseline|Architecture Change Governance|Questions To Close|Assumptions Preview|Execution Plan|Flow Evidence Planning Matrix|Local CI-Equivalent Suite Matrix|Runtime / Rollout Notes|Security Risk Assessment|Performance & Concurrency Risk Assessment`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-fiscal-note-visibility.md`
 - **No-go handling rule:** `return to review, revalidate material changes with the user and refresh the pushed baseline`
-- **Gate status:** `not_run`
-- **Findings summary:** `pending`
-- **Evidence / reference:** `pending`
+- **Gate status:** `blocked`
+- **Findings summary:** material refinement detected in 10 sections after critique integration; awaiting user scope revalidation before baseline refresh and rerun.
+- **Evidence / reference:** `review_scope_drift_guard.py` returned `Overall outcome: no-go` against `b85d757`, listing Scope, DoD, Validation, Decisions, Decision Baseline, Architecture Governance, Assumptions, Execution Plan, Flow Matrix and Performance assessment.
 - **Waiver authority / reference:** `n/a`
 
 ## Questions To Close
@@ -459,7 +502,7 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 
 ## Approval
 - **Status:** `not_requested`
-- **Reason:** planning reviews and authority preflight are pending.
+- **Reason:** post-critique scope revalidation, refreshed baseline and guard reruns are pending.
 - **Renewed approval trigger:** any new persistence, source, role, export PII or partial-search semantics.
 
 ## Security Risk Assessment
@@ -485,7 +528,7 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 ## Performance & Concurrency Risk Assessment
 - **Policy schema version:** `pcv-1`
 - **Global sensitivity level:** `low`
-- **Why this level:** os mesmos registros e chamadas são mantidos; somente um campo allowlisted adicional e a apresentação deixam de mascarar identificadores já recebidos.
+- **Why this level:** os mesmos registros e chamadas são mantidos; o nome limitado a 255 caracteres aumenta de forma bounded resposta/cache/DOM e também os records transitórios da exportação, sem mudar I/O, query, quota, paginação ou concorrência.
 - **Current delivery stage at review time:** `Pending`
 
 | Lane ID | Lane | Trigger Result | Trigger Severity | Trigger Reason Code | Gate Deadline | Minimum Evidence Rule | State | Residual Risk | Uncertainty Reason Code |
