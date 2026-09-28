@@ -27,12 +27,12 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 ## Delivery Status Canon (Required)
 - **Current delivery stage:** `Local-Implemented`
 - **Qualifiers:** `no-deploy; real-provider smoke remains in cutover`
-- **Next exact step:** concluir guards de closeout e mover este mesmo TODO para `completed/features`.
+- **Next exact step:** nenhuma ação permanece neste TODO; promoção, provider smoke e deploy pertencem ao TODO de cutover.
 
 ## Active Work State (Required While TODO Remains In `active/`)
-- **Work state:** `review`
-- **Why this state now:** implementação, suites e browser passaram; as auditorias e guards finais estão sendo consolidados.
-- **Exit condition:** triple audit, revisão final e guards de closeout retornam sem bloqueador.
+- **Work state:** `complete`
+- **Why this state now:** implementação, suites, browser, auditorias, revisão final e guards concluíram sem bloqueador de produto.
+- **Exit condition:** `achieved`.
 
 ## Execution Lane Tracking (Required)
 - **Local implementation branches:** `MonitorNotes:release/uninotas-smart-notas`; `uninotas-foundation:main`
@@ -179,7 +179,8 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 | `uninotas-foundation` | `modules/fiscal-notes-and-documents.md` | `M` | decisões estáveis |
 | `uninotas-foundation` | `artifacts/feature-briefs/uninotas-fiscal-workspace-improvements.md` | `M` | terceira story e estado |
 | `uninotas-foundation` | `artifacts/reviews/TODO-uninotas-fiscal-note-visibility/**` | `??, A, M` | pacote e resultados dos gates independentes |
-| `uninotas-foundation` | `todos/active/features/TODO-uninotas-fiscal-note-visibility.md` | `A, M, D` | contrato e closeout |
+| `uninotas-foundation` | `todos/active/features/TODO-uninotas-fiscal-note-visibility.md` | `A, M, D, R` | contrato e origem do closeout |
+| `uninotas-foundation` | `todos/completed/features/TODO-uninotas-fiscal-note-visibility.md` | `??, A, M, R` | destino concluído do mesmo contrato após closeout verde |
 
 ### Not Expected Changed Paths
 | Repository | Path glob | Change types | Reason |
@@ -652,11 +653,11 @@ Todos os campos abaixo são propriedades obrigatórias no JSON. `string|null` ac
 - **Why this decision:** planning-side reviews must evaluate a committed and pushed scope-bearing contract.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `main`
-- **Baseline commit:** `f4fef68f088c0ade68650db7803c968dd4c548d2`
-- **Baseline push reference:** `origin/main`
+- **Baseline commit:** `1af7c0a7ad196401613c256960ed152c10d983fb`
+- **Baseline push reference:** `main`
 - **Gate status:** `no_material_findings`
 - **Findings summary:** final scope-bearing contract includes exact 17/27-field DTOs, signed/decodificável route semantics, split list/detail records, bounded export evidence, all 21 requested fields, explicit preservation of four existing detail fields and no number search/persistence/CSV expansion.
-- **Evidence / reference:** authority guards returned `go`; final canonical-format baseline `f4fef68f088c0ade68650db7803c968dd4c548d2` was committed and pushed to `origin/main`; differences after `2d4bb67` are gate evidence and schema-only anti-pattern/routing formatting with unchanged functional contract.
+- **Evidence / reference:** authority guards returned `go`; delivery-evidence baseline `1af7c0a` was committed on local `main`; `git push origin main` failed only because no GitHub credentials are available, so no remote-sync claim is made.
 - **Waiver authority / reference:** `n/a`
 - **Pre-freeze packet-prep rule:** `satisfied; reviews cover the unchanged functional contract and the final refresh only normalized required governance schemas/evidence`
 
@@ -669,8 +670,8 @@ Todos os campos abaixo são propriedades obrigatórias no JSON. `string|null` ac
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-fiscal-note-visibility.md`
 - **No-go handling rule:** `return to review, revalidate material changes with the user and refresh the pushed baseline`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** 23 material sections match canonical final baseline `f4fef68`; the anti-pattern/routing schema normalization introduced no functional drift.
-- **Evidence / reference:** `review_scope_drift_guard.py` returned `Overall outcome: go`; changed material sections: 0.
+- **Findings summary:** the current material sections match local delivery baseline `1af7c0a`; subsequent edits are closeout/baseline evidence only and introduce no functional drift.
+- **Evidence / reference:** `review_scope_drift_guard.py` rerun against local baseline `1af7c0a`; remote push remains separately blocked by missing credentials.
 - **Waiver authority / reference:** `n/a`
 
 ## Questions To Close
@@ -753,8 +754,8 @@ Todos os campos abaixo são propriedades obrigatórias no JSON. `string|null` ac
 - **Disposition:** `move-completed`
 - **Disposition reason:** implementação, documentação, suites, browser, auditorias e guards concluídos no checkout principal; a revisão final encontrou zero bloqueadores de produto.
 - **Delivered state:** `Local-Implemented`, sem deploy; provider smoke e promoção permanecem no TODO de cutover.
-- **Post-commit/push status:** `Foundation será versionada no closeout; produto será commitado localmente sem push/merge/deploy`.
-- **Next path/status action:** mover para `todos/completed/features/` após o guard de closeout retornar `go`.
+- **Post-commit/push status:** `Foundation evidence commit 1af7c0a local; origin push blocked by missing GitHub credentials; produto será commitado localmente sem push/merge/deploy`.
+- **Next path/status action:** concluído em `todos/completed/features/`; promoção/smoke seguem exclusivamente no TODO de cutover.
 
 ## Commands (Run Locally)
 - `bash delphi-ai/tools/query_packages.sh --project-root . --search "fiscal"`

@@ -40,11 +40,11 @@ Ainda em 2026-09-28, o usuário solicitou uma terceira evolução: incluir `Toma
 | --- | --- | --- | --- | --- |
 | `ST-UX` | Usar um workspace fiscal legível, alinhado, com marca e navegação coerentes | `todos/completed/features/TODO-uninotas-fiscal-workspace-ux.md` | `Local-Implemented` em `MonitorNotes@f1a950a9`; React/Vite, ativo local, CSS, acessibilidade e browser; sem novo endpoint | `1 — completed` |
 | `ST-EXPORT` | Baixar todas as notas que pertencem ao contexto e aos filtros aplicados | `todos/completed/features/TODO-uninotas-filtered-csv-export.md` | `Local-Implemented` em `MonitorNotes@8a0dba94`; NestJS + cliente React, CSV seguro, paginação bounded, corrida/cancelamento e carga; sem deploy | `2 — completed` |
-| `ST-VISIBILITY` | Identificar o tomador e consultar todos os dados fiscais aprovados sem máscaras | `todos/active/features/TODO-uninotas-fiscal-note-visibility.md` | NestJS + React, allowlists 17/27, lista/detalhe responsivos, PII efêmera e CSV inalterado; sem deploy | `3 — implementation` |
+| `ST-VISIBILITY` | Identificar o tomador e consultar todos os dados fiscais aprovados sem máscaras | `todos/completed/features/TODO-uninotas-fiscal-note-visibility.md` | `Local-Implemented`; NestJS + React, allowlists 17/27, lista/detalhe responsivos, PII efêmera e CSV inalterado; sem deploy | `3 — completed` |
 
 Os três TODOs podem receber aprovação na mesma conversa, mas mantêm implementação, risco e evidência independentes. O executor permanece serializado no checkout principal. Depois do closeout local de `ST-UX` e antes de iniciar `ST-EXPORT`, o segundo TODO deve rebaselinar produto e Foundation sobre o estado consolidado, reclassificar o diff e repetir coherence/drift/authority; qualquer mudança material exige review e aprovação renovados.
 
-`ST-UX` e `ST-EXPORT` concluíram localmente em 2026-09-28. O deploy, smoke real e calibração de quota continuam fora desse corte e pertencem ao cutover.
+`ST-UX`, `ST-EXPORT` e `ST-VISIBILITY` concluíram localmente em 2026-09-28. O deploy, smoke real e calibração de quota continuam fora desse corte e pertencem ao cutover.
 
 ## Provider Constraint
 
