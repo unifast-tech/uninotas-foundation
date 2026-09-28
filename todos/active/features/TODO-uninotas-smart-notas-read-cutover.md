@@ -40,7 +40,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** concluir a atestação do freeze round 15 e executar nova confirmação arquitetural independente; nenhuma mutação Railway está autorizada.
+- **Next exact step:** publicar e atestar o material round 16 com freeze imutável e budgets completos de transação/lock/pool, então executar nova confirmação arquitetural independente; nenhuma mutação Railway está autorizada.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -90,7 +90,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 - [ ] `CUT-14` Manter `uninotas-foundation:main` como autoridade independente após a promoção canônica; não sincronizar o gitlink documental em `MonitorNotes:main` neste closeout para evitar segundo auto-deploy. Registrar follow-up para o próximo release aprovado.
 - [ ] `CUT-15` Antes do merge, migrar/atestar o consumidor UptimeRobot para `x-monitor-token` na release corrente sem rotacionar token; se o token não estiver configurado, atestar modo público. Consumidor/configuração desconhecidos bloqueiam o corte.
 - [ ] `CUT-16` Endurecer export CSV e inputs legados: neutralizar fórmulas em todo texto externo, limitar `refId` a 1..64 após trim e token de monitoramento a 1..200, e coalescer bursts de tratamentos realtime no frontend.
-- [ ] `CUT-17` Serializar tratamentos concorrentes por `refId` no PostgreSQL, com lock namespaced, refs em ordem lexical binária única, timestamp explícito estritamente monotônico calculado após o lock, desempate defensivo por `id`, revalidação de elegibilidade dentro da transação e SSE somente após commit; validar sobreposição real, inversão de espera e colisão temporal em níveis 5/10/20.
+- [ ] `CUT-17` Serializar tratamentos concorrentes por `refId` no PostgreSQL, com pool Prisma `5/2 s`, lock namespaced, refs em ordem lexical binária única, timestamp explícito monotônico pós-lock, `ReadCommitted`, budgets `2 s/15 s/1,5 s/12 s`, gate de duas transações/1.000 locks, retry somente após rollback comprovado, erros 409/503 estáveis, revalidação sob lock e SSE pós-commit; validar sobreposição, inversão, colisão, lock timeout, lote 500 e headroom de três conexões.
 
 ## Execution Lane Tracking (Required)
 
@@ -104,8 +104,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Scope Item | Local Branch/Commit | Main / Authority | Local Source/Build Validation | Single Remote Target: Stage Customer-Facing | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Backend + frontend read-only | round-15 material root `bcbcaa736cdeb8d76ab98c6b97c285b91eb183d2`; code-origin `31712a0` | `pending promotion to main` | `pending final cutover suite` | `pending one direct cutover` | `planning freeze/attestation governed by review gate` |
-| Foundation cutover contract | round-15 material `0ea5c76b8e5c3b0aade02e846368a174207d96c1` | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round-15 material frozen; this checkpoint records its attestation` |
+| Backend + frontend read-only | round-15 predecessor material root `bcbcaa736cdeb8d76ab98c6b97c285b91eb183d2` / attestation carrier `64e365c480678470f7813effc554a8d172270f45`; round-16 root irá ao review gate; code-origin `31712a0` | `pending promotion to main` | `pending final cutover suite` | `pending one direct cutover` | `planning round 16 material publication pending` |
+| Foundation cutover contract | round-15 predecessor material `0ea5c76b8e5c3b0aade02e846368a174207d96c1` / attestation `38d00ea30525a7af9913805271d8a5d3eade189e`; round-16 material irá ao review gate | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round-16 material publication pending` |
 
 ## Out of Scope
 
@@ -144,7 +144,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 | `D-CUT-20` | A rejeição de token em query do monitor só entra após migração comprovada do UptimeRobot na release atual: se `MONITORAMENTO_TOKEN` estiver configurado, cadastrar `x-monitor-token`, remover credential da URL e provar 200/401 sem revelar/rotacionar o valor; se ausente, atestar modo público. Estado/consumer desconhecido bloqueia merge. A rotação não pertence ao changeset de dez chaves. | Evita derrubar o monitor durante o hard cut e mantém segredo fora da URL sem criar segunda mudança Railway. | `frozen; approval-material` |
 | `D-CUT-21` | Todo `refId` de path/lote é trimado, deve ter 1..64 caracteres e falha 400 se branco/oversize; só ref válido inexistente/inelegível retorna 404. `MONITORAMENTO_TOKEN` configurado e header oferecido devem ter 1..200 caracteres; config fora do bound falha startup e header fora do bound retorna 400. Export CSV prefixa `'` em todo scalar textual externo cujo primeiro caractere seja `=`, `+`, `-`, `@`, TAB ou CR antes do escaping CSV. | Alinha varchar persistido, limita inputs e neutraliza spreadsheet formula injection. | `frozen; approval-material` |
 | `D-CUT-22` | O consumidor React coalesce eventos `evento.tratado` em janela trailing de 250 ms: qualquer burst produz no máximo um refetch de lista e um de resumo por janela, mantendo o refetch idempotente. Um lote síncrono de 500 refs deve produzir exatamente um par de invalidações após aquietar. | Evita tempestade de até 1.000 requests por tratamento em lote sem alterar o contrato SSE. | `frozen; approval-material` |
-| `D-CUT-23` | Tratamentos unitário e em lote seguem política `serialize` por `refId`. Após trim/validação/deduplicação, toda rota usa a mesma ordem lexical binária independente de locale; a transação adquire `pg_advisory_xact_lock(hashtextextended('uninotas:treatment:' || refId, 0))` nessa ordem e revalida erro original elegível sob lock. Para cada ref, atribui explicitamente `criado_em = GREATEST(clock_timestamp(), COALESCE(MAX(criado_em) + interval '1 microsecond', '-infinity'))` sob o mesmo lock e persiste um append por comando aceito; nunca depende do `@default(now())`. A situação efetiva é o último append por `criado_em DESC, id DESC`, sendo `id` somente desempate defensivo. O SSE é publicado apenas depois de `$transaction` resolver, no máximo uma vez por append no processo; ausência/duplicação transitória do sinal não altera a verdade persistida nem substitui refresh. | Elimina inversão causal, empate temporal, lost update e deadlock entre lotes sobrepostos sem novo schema; preserva histórico append-only e torna o resultado concorrente verificável. | `frozen; approval-material` |
+| `D-CUT-23` | Tratamentos unitário e em lote seguem política `serialize` por `refId`. O Prisma datasource da release fixa `connection_limit=5` e `pool_timeout=2` no código, preservando o restante da URL sem logar valor. Após trim/validação/deduplicação, toda rota usa ordem lexical binária independente de locale; uma transação interativa `ReadCommitted` (`maxWait=2 s`, `timeout=15 s`) executa `SET LOCAL lock_timeout='1500ms'` e `statement_timeout='12000ms'`, adquire `pg_advisory_xact_lock(hashtextextended('uninotas:treatment:' || refId, 0))` nessa ordem e revalida erro original elegível sob lock. Para cada ref, atribui explicitamente `criado_em = GREATEST(clock_timestamp(), COALESCE(MAX(criado_em) + interval '1 microsecond', '-infinity'))` sob o mesmo lock e persiste um append; nunca depende do `@default(now())`. Situação efetiva usa `criado_em DESC, id DESC`, com `id` só como desempate defensivo. Um gate process-local fail-fast limita a `2` transações de tratamento simultâneas na única réplica: no máximo `2` das `5` conexões e `1.000` advisory locks para lotes de 500, deixando três conexões para reads/readiness; escalar réplica/concurrency exige rebaseline. Retry inteiro e único após backoff determinístico de `25 ms` só é permitido quando `40P01`, `40001`, `55P03` ou Prisma `P2034` provam abort/rollback; `P2024`, `P2028`, `57014`, conexão perdida ou commit outcome incerto nunca são repetidos automaticamente. Conflito conhecido esgotado retorna 409; capacity/timeout/resultado incerto retorna 503 + `Retry-After: 1`; ambos usam o envelope comum e não revelam existência. Após erro incerto, o frontend refaz detalhe/lista antes de permitir nova ação. SSE só depois de `$transaction` resolver, no máximo uma vez por append no processo. | Elimina inversão causal, empate, lost update, retry ambíguo e saturação não limitada sem novo schema; preserva histórico append-only e torna contenção verificável. | `frozen; approval-material` |
 
 ## Required Operational Decisions Before Approval
 
@@ -163,10 +163,11 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 | Recovery action | state machine `REC-0/1/2A/2B/3`: config restore somente após terminal não ativo; qualquer active força stored-image rollback; `Redeploy` só fallback degradado | current/candidate IDs e status, cancel action, config snapshot/restore, previous-target option após switch | `required per reached state; inability aborts or requires renewed risk/RTO` |
 | External `/eventos` consumers | inventariar integrações fora deste repositório e obter attestation do Owner antes do deploy | lista redatada/declaração do Owner | `required pre-deploy; unknown consumer blocks deploy unless hard-cut risk is explicitly reapproved` |
 | UptimeRobot auth migration | atestar token public/configured; se configured, migrar current monitor para `x-monitor-token` e limpar URL antes do merge | presença/bound redatados + current-release 200/401/URL proof | `required pre-merge; unknown or query-token consumer blocks cutover` |
+| Treatment concurrency envelope | Prisma pool/wait `5/2 s`; `ReadCommitted`; transaction `15 s`; PG lock/statement `1,5 s/12 s`; gate `2`, max `1.000` locks; um retry de `25 ms` só após rollback provado | BCI held-lock, batch500, saturation, SQLSTATE/Prisma mapping e três reads/readiness de headroom | `frozen; change requires rebaseline` |
 
 ## Diff Expectation Contract
 
-- **Contract status:** `required; round-15 material baseline frozen by this checkpoint`
+- **Contract status:** `required; round-16 material baseline frozen by publication; attestation must not alter this field`
 - **Policy:** `strict; unclassified or forbidden paths block delivery`
 - **User validation:** `required on deviation`
 - **Comparison mode:** `working_tree after candidate checkpoint`
@@ -175,7 +176,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Repository | Path | Baseline ref | Comparison mode |
 | --- | --- | --- | --- |
-| `MonitorNotes` | `.` | round-15 material root `bcbcaa736cdeb8d76ab98c6b97c285b91eb183d2` | `committed_diff`; `31712a0` remains code-origin; attestation-only carrier não é implementação |
+| `MonitorNotes` | `.` | round-15 predecessor material root `bcbcaa736cdeb8d76ab98c6b97c285b91eb183d2`; round-16 material root será registrado no freeze metadata | `committed_diff`; `31712a0` remains code-origin; attestation-only carrier não é implementação |
 | `uninotas-foundation` | `foundation_documentation` | `Gate: Review Baseline Freeze -> Baseline commit` | `committed_diff` |
 
 ### Expected Changed Paths
@@ -191,6 +192,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 | `MonitorNotes` | `backend/src/common/**` | `M` | propagar correlation ID único até logs/erros |
 | `MonitorNotes` | `backend/src/fiscal-notes/**` | `M` | bounded probe/capacity/rotation changes |
 | `MonitorNotes` | `backend/src/config/**` | `M` | bounded runtime validation |
+| `MonitorNotes` | `backend/src/prisma/**` | `M` | fixar pool Prisma 5/2 no código sem alterar schema/migration nem expor datasource |
 | `MonitorNotes` | `backend/src/logs/**` | `M` | tornar `/eventos` error-only, serializar tratamentos por ref e testar bloqueio de sucessos/overlap |
 | `MonitorNotes` | `backend/src/monitoramento/**` | `M` | remover sucesso da projeção operacional baseada em logs |
 | `MonitorNotes` | `backend/src/realtime/**` | `M` | remover polling/LISTEN/JWT em query e manter stream autenticado somente para tratamentos elegíveis/heartbeat |
@@ -233,7 +235,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 | --- | --- | --- | --- |
 | `MonitorNotes` | `backend/.env` | `A|M|D|R` | local secrets are not versioned |
 | `MonitorNotes` | `frontend/src/notas/**` | `A|D|R` | arquitetura fiscal já validada; somente correção material exige renewed approval |
-| `MonitorNotes` | `backend/prisma/**` | `A|M|D|R` | no schema/data migration |
+| `MonitorNotes` | `backend/prisma/schema.prisma`, `backend/prisma/sql/**`, `backend/prisma/migrations/**` | `A|M|D|R` | no schema/data migration; somente o runtime client em `backend/src/prisma/**` pode mudar |
 | `MonitorNotes` | `.github/**` | `A|M|D|R` | CI redesign is not authorized |
 | `MonitorNotes` | `Dockerfile` | `A|M|D|R` | change to artifact topology needs renewed approval |
 
@@ -280,7 +282,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 ## Public Error API Contract
 
-Regras comuns: `/eventos/**` e `/realtime/eventos` exigem `Authorization: Bearer` e o guard global que revalida usuário ativo; ausente/inválido/inativo retorna 401. DTO/query inválido ou chave não allowlisted retorna 400. Tratamentos exigem `ADMIN|GESTOR|ANALISTA`; perfil sem permissão retorna 403. Ref original `PENDENTE|SUCESSO` falha como 404 indistinguível de inexistente. Todo erro JSON não-stream preserva o envelope exato `{statusCode:number, erro:string, mensagem:string|string[], caminho:string, timestamp:string ISO}`. `LogResumoDto`, `LogDetalheDto`, `ClienteDto`, `VendaDto`, `ProdutorDto`, `TentativaDto` e `CampoPendenteDto` preservam os campos atuais; somente eligibility e conteúdo do histórico mudam.
+Regras comuns: `/eventos/**` e `/realtime/eventos` exigem `Authorization: Bearer` e o guard global que revalida usuário ativo; ausente/inválido/inativo retorna 401. DTO/query inválido ou chave não allowlisted retorna 400. Tratamentos exigem `ADMIN|GESTOR|ANALISTA`; perfil sem permissão retorna 403. Ref original `PENDENTE|SUCESSO` falha como 404 indistinguível de inexistente. Todo erro JSON não-stream preserva o envelope exato `{statusCode:number, erro:string, mensagem:string|string[], caminho:string, timestamp:string ISO}`. Em tratamentos, 409 usa `erro='Conflito'` e `mensagem='Tratamento concorrente; atualize e tente novamente.'`; 503 usa `erro='Serviço indisponível'`, `mensagem='Não foi possível confirmar o tratamento; atualize antes de tentar novamente.'` e `Retry-After: 1`. `LogResumoDto`, `LogDetalheDto`, `ClienteDto`, `VendaDto`, `ProdutorDto`, `TentativaDto` e `CampoPendenteDto` preservam os campos atuais; somente eligibility e conteúdo do histórico mudam.
 
 | Method / path | Frozen request contract | Frozen success contract | Other status / headers |
 | --- | --- | --- | --- |
@@ -290,8 +292,8 @@ Regras comuns: `/eventos/**` e `/realtime/eventos` exigem `Authorization: Bearer
 | `GET /eventos/exportar` | aceita somente `situacao=TODOS|ERRO|TRATADOS` (default `ERRO`), `busca<=120`, `produto<=200`, `dataInicio/dataFim` ISO; rejeita `pagina,limite,direcao`; teto interno fixo 20.000 | 200 CSV UTF-8/BOM com colunas exatas `refId;idTransacao;eventAt;situacao;mensagem;idSmartNotas;clienteNome;clienteDocumento;clienteEmail;produto;codProduto;valorVenda;meioPagamento`, somente erro original; antes de quote/escape, cada scalar textual externo iniciado por `=,+,-,@,TAB,CR` recebe prefixo `'` | `Content-Type: text/csv; charset=utf-8`; `Content-Disposition` sanitizado; 400/401 |
 | `GET /eventos/:refId` | path decodificado/trimado deve ter 1..64 caracteres; branco/oversize = 400; ref válida deve ser original-`ERRO` | 200 `LogDetalheDto`: campos de `LogResumoDto` mais `orientacao,origem,cliente,venda,produtor,historico,camposPendentes,payload,resposta`; cada tentativa mantém `em,mensagem,ok,autorNome`, mas histórico contém somente linhas originais `ERRO` | 400 input; 401; 404 ref válida inexistente/inelegível |
 | `GET /eventos/:refId/payload` | mesmo bound 1..64/trim; ref elegível original-`ERRO` | 200 exatamente `{enviado,resposta}` | 400 input; 401; 404 válida inexistente/inelegível |
-| `PATCH /eventos/:refId/tratamento` | mesmo bound 1..64/trim; body exatamente `{situacao: RESOLVIDO|IGNORADO|PENDENTE, observacao?: string<=1000}`; ref elegível; overlap na mesma ref é serializado por `D-CUT-23` | 200 `LogDetalheDto`; `PENDENTE` reabre para situação efetiva `ERRO`; cada comando aceito gera exatamente um append, sem lost update | 400 input/body; 401/403; 404 válida inexistente/inelegível |
-| `POST /eventos/tratar-lote` | body `{refIds: string[1..500], situacao, observacao?}`; cada ref é trimada, deve ter 1..64 e ser única após trim; branca/oversize/duplicata rejeita todo lote com 400; mesma enum/regra do unitário; locks de refs em ordem lexical | 200 exatamente `{solicitados,aplicados,ignorados}`; `solicitados` é tamanho validado/único; `ignorados` ecoa somente refs válidas não aplicadas, sem distinguir inexistente de inelegível; batch é atômico e não perde append em overlap unitário/lote | 400/401/403 |
+| `PATCH /eventos/:refId/tratamento` | mesmo bound 1..64/trim; body exatamente `{situacao: RESOLVIDO|IGNORADO|PENDENTE, observacao?: string<=1000}`; ref elegível; overlap na mesma ref é serializado por `D-CUT-23` | 200 `LogDetalheDto`; `PENDENTE` reabre para situação efetiva `ERRO`; cada comando aceito gera exatamente um append, sem lost update | 400 input/body; 401/403; 404 válida inexistente/inelegível; 409 após conflito comprovadamente abortado/retry único; 503 + `Retry-After: 1` em gate/pool/timeout/commit incerto, seguido de refresh obrigatório |
+| `POST /eventos/tratar-lote` | body `{refIds: string[1..500], situacao, observacao?}`; cada ref é trimada, deve ter 1..64 e ser única após trim; branca/oversize/duplicata rejeita todo lote com 400; mesma enum/regra do unitário; locks de refs em ordem lexical binária | 200 exatamente `{solicitados,aplicados,ignorados}`; `solicitados` é tamanho validado/único; `ignorados` ecoa somente refs válidas não aplicadas, sem distinguir inexistente de inelegível; batch é atômico e não perde append em overlap unitário/lote | 400/401/403; 409 após conflito abortado/retry único; 503 + `Retry-After: 1` em gate/pool/timeout/commit incerto, sem retry cliente antes de refresh |
 | `GET /monitoramento/erros` | `MONITORAMENTO_TOKEN`, se configurado, deve ter 1..200 ou startup falha; aceita somente header `x-monitor-token` 1..200, oversize/branco = 400; query `token` inválida; `minutos` inteiro 1..1440 default 60, `atencao` >=1 default 1, `critico` >=1 default 6, `alertarEm=atencao|critico`; demais chaves rejeitadas | 200 exatamente `{status,cor,erros,pendentes,sucessos,total,ultima_verificacao,janela:{inicio,fim,minutos},limites:{atencao,critico},detalhe}`; `erros=total` conta ativos/reabertos, tratados não contam, `pendentes=0`, `sucessos=0` | `Cache-Control: no-store`; 400 input; 401 token ausente/incorreto quando configurado; 503 banco indisponível ou severidade >= `alertarEm`, mesmo shape |
 | `GET /realtime/eventos` | header Bearer obrigatório; nenhum token/query; consumidor usa `fetch` streaming e reconecta após término normal | 200 `text/event-stream`; apenas `evento.tratado` com `refId,situacao,origem='api',em` e `heartbeat` com `origem='sistema',em`; servidor encerra em <=30 s; sem polling/NOTIFY/`evento.novo` | 401 ausente/inválido/inativo a cada conexão; cancelar em logout/unmount; `Cache-Control: no-store`; nenhum JWT em URL/log |
 
@@ -355,7 +357,7 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 - [ ] `DOD-CUT-18` Lista, resumo, produtos, exportação, detalhe, payload, tratamentos, monitoramento e SSE respeitam métodos, allowlists, defaults, bounds 1..64/1..200, campos, envelope, códigos, headers e negações; frontend types/README não expõem contratos removidos.
 - [ ] `DOD-CUT-19` Modo atual de `MONITORAMENTO_TOKEN`/UptimeRobot é atestado; se configurado, consumidor usa header e URL está limpa antes do merge, provado contra a release corrente; nenhuma rotação/11ª chave ocorre.
 - [ ] `DOD-CUT-20` Todo campo textual externo do CSV neutraliza inícios `=,+,-,@,TAB,CR` antes do escaping, com testes adversariais coluna a coluna; `pg`/`@types/pg` são removidos de manifest/lockfile.
-- [ ] `DOD-CUT-21` Tratamentos concorrentes unitário/lote são serializados por ref sem deadlock, inversão causal ou lost update: lock namespaced/ordem total e timestamp pós-lock monotônico não dependem de `now()`; cada comando aceito deixa um append, situação efetiva corresponde ao último append pela ordem estável, lote é atômico, inelegíveis não são gravados e SSE ocorre somente pós-commit; BCI 5/10/20, wait inversion e timestamp collision passam com evidência `pcv-1` canônica.
+- [ ] `DOD-CUT-21` Tratamentos concorrentes unitário/lote são serializados sem deadlock, inversão, lost update, retry ambíguo ou saturação: datasource fixa pool `5`/wait `2 s` sem logar URL; `ReadCommitted`, transaction `15 s`, lock `1,5 s`, statement `12 s`, gate `2`, teto `1.000` locks e headroom de três conexões são cumpridos; somente abort comprovado recebe um retry de 25 ms; commit incerto força 503/refresh. Cada comando aceito deixa um append, lote é atômico e SSE pós-commit; BCI 5/10/20, inversion, collision, held-lock, lote 500 e saturation passam com JSON `pcv-1`.
 
 ## Validation Steps
 
@@ -378,7 +380,7 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 - [ ] `VAL-CUT-17` Gerar com seed versionada fixture local de exatamente 20.000 logs (80% originais `PENDENTE/SUCESSO`, 20% `ERRO`; entre erros, 25% `RESOLVIDO/IGNORADO` e casos reabertos), registrar versão/config PostgreSQL e estatísticas. Workloads HTTP fixos, isolados e nesta ordem: `GET /eventos?situacao=ERRO&pagina=1&limite=25&direcao=desc`, `GET /eventos?situacao=TRATADOS&pagina=1&limite=25&direcao=desc`, `GET /eventos/resumo`, `GET /eventos/produtos`, `GET /eventos/exportar?situacao=TODOS`; o harness SQL usa filtros equivalentes sem inventar query keys. Para **cada** workload: 5 warm-ups descartados, um `EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)` redatado e 30 execuções SQL sequenciais; depois, processo endpoint separado/reiniciado, 5 warm-ups e 50 requests medidos com concorrência 4 para cada workload não-export, e 5 warm-ups + 20 requests com concorrência 1 para export. Por série ordenar wall-clock e calcular nearest-rank `p95 = amostra[ceil(0.95*n)-1]`; não misturar séries. Bloquear se filtro vier após limit/window/group, houver scan correlacionado por linha, lista/resumo/produtos >`3 s` ou export >`8 s`. Falha exige TODO separado de schema/índice e nova aprovação.
 - [ ] `VAL-CUT-18` Antes do changeset/merge, inspecionar apenas presença/bound do `MONITORAMENTO_TOKEN` sem valor; se presente, provar UptimeRobot com `x-monitor-token`, URL sem query credential, current release 200/503 com header e 401 sem ele; se ausente, provar modo público. Desconhecido bloqueia corte; não rotacionar.
 - [ ] `VAL-CUT-19` Para cada coluna textual externa do CSV, testar valores iniciados individualmente por `=`, `+`, `-`, `@`, TAB e CR; output deve conter prefixo `'` dentro do valor CSV escapado, preservar BOM/headers e não alterar números seguros.
-- [ ] `VAL-CUT-20` Executar concorrência real contra PATCH unitário, lotes com refs sobrepostas e unitário versus lote em níveis `5 x 2 batches`, `10 x 3` e `20 x 5`; usar situações conflitantes e elegíveis/inelegíveis. Incluir (a) transação iniciada antes que aguarda o lock e insere depois e (b) linha existente com `criado_em` igual/futuro para forçar o ramo `MAX + 1 microsecond`. Exigir namespace/mesma ordem binária em toda rota, zero deadlock/5xx, timestamps estritamente crescentes por ref, um append por comando aceito/ref aplicada, nenhum append inelegível, lote transacional, história sem perda, situação efetiva igual ao último append em `criado_em DESC, id DESC` e nenhum SSE antes de `$transaction` resolver ou acima de um por append no processo. Gerar JSON `pcv-1` BCI com hash SHA-256 canônico; resposta HTTP isolada não satisfaz o gate.
+- [ ] `VAL-CUT-20` Executar concorrência real contra PATCH unitário, lotes sobrepostos e unitário versus lote em níveis `5 x 2`, `10 x 3` e `20 x 5`, usando situações conflitantes/elegíveis/inelegíveis. Incluir: transação antiga aguardando lock; linha futura para `MAX+1us`; lock >`1,5 s`; lote real de 500; três chamadas para gate 2; duas transações + três reads/readiness simultâneos para provar pool 5/headroom; falhas `40P01/40001/55P03/P2034`, `P2024/P2028/57014`, conexão perdida e commit incerto. Exigir datasource efetivo `connection_limit=5,pool_timeout=2` sem valor da URL em output; `ReadCommitted`, budgets 2/15/1,5/12, ordem/namespace únicos, no máximo um retry inteiro de 25 ms só após rollback, nenhum retry incerto, 409/503/envelope/header exatos, <=2 conexões de mutation/<=1.000 locks, reads/readiness verdes, zero 5xx inesperado, timestamps crescentes, um append por comando aceito, nenhum inelegível, lote atômico, história/estado estáveis e SSE só após `$transaction` resolver. Lote 500 sem contenção conclui <12 s; lock persistente falha bounded sem append. Gerar JSON `pcv-1` BCI com SHA-256; HTTP-only não satisfaz.
 
 ## Completion Evidence Matrix
 
@@ -404,7 +406,7 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 | `DOD-CUT-18` | Definition of Done | public HTTP contract | contract/browser | métodos/campos/status/headers/negações exatos | local backend/frontend | `planned` | frontend types e OpenAPI coerentes |
 | `DOD-CUT-19` | Definition of Done | monitor consumer migration | ops/security | mode attestation + header-only current-release probe | UptimeRobot/current Stage | `planned` | sem token value/rotation |
 | `DOD-CUT-20` | Definition of Done | CSV/dependency hardening | test/security/manifest | adversarial columns + manifest/lock diff | local backend | `planned` | formula prefix + pg removal |
-| `DOD-CUT-21` | Definition of Done | tratamento concorrente | concurrency/domain | BCI 5/10/20 + wait inversion/collision + histórico/situação/SSE + JSON/hash `pcv-1` | local PostgreSQL/backend | `planned` | serialize per-ref monotônico; HTTP-only evidence inválida |
+| `DOD-CUT-21` | Definition of Done | tratamento concorrente | concurrency/domain | BCI 5/10/20 + inversion/collision/held-lock/batch500/saturation/error map + histórico/situação/SSE + JSON/hash `pcv-1` | local PostgreSQL/backend | `planned` | bounded serialize per-ref; HTTP-only evidence inválida |
 | `VAL-CUT-01..20` | Validation Steps | validações | mixed | preencher cada evidência durante execução | mixed | `planned` | agregado não substitui linhas no closeout |
 
 ## External Dependency Readiness
@@ -516,7 +518,7 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 | security/test | CSV export | per-column formula-prefix fixture for `=,+,-,@,TAB,CR` | spreadsheet formula injection or numeric corruption | `implement-in-this-todo` | `VAL-CUT-19` antes do deploy |
 | ops/consumer | UptimeRobot | current-release header migration/public-mode attestation | query credential breakage or false outage | `manual pre-merge gate` | `VAL-CUT-18` antes do changeset/merge |
 | race/load | treatment SSE consumer | fake-time burst of 500 events | unbounded list/summary refetch storm | `implement-in-this-todo` | `VAL-CUT-16` antes do deploy |
-| concurrency/domain | treatment mutations | namespaced advisory transaction locks + total ref order + monotonic post-lock timestamp + BCI 5/10/20/inversion/collision | causal inversion, timestamp tie, lost update, deadlock, partial batch, unstable effective status or pre-commit/duplicate SSE | `implement-in-this-todo` | `VAL-CUT-20` antes de Local-Implemented |
+| concurrency/domain | treatment mutations | namespaced locks + total order + monotonic timestamp + bounded transaction/gate/retry/error map + BCI 5/10/20/inversion/collision/held-lock/batch500 | causal inversion, tie, lost update, deadlock, pool/lock saturation, ambiguous retry, partial batch, unstable status or pre-commit/duplicate SSE | `implement-in-this-todo` | `VAL-CUT-20` antes de Local-Implemented |
 | explain/performance | logs query family | redacted JSON plans on representative high-ineligible dataset | predicate late, correlated per-row scan or p95 above promotion budget | `implement-in-this-todo` | `VAL-CUT-17` antes do deploy |
 | config test | bootstrap variables | configuration specs with flag false/true-invalid | enable sem pares fiscais/HMAC ou valores fora de bound | `already-enforced` | rerun obrigatório em `VAL-CUT-03` |
 | read-only runtime probe | Smart Notas binding | `smart-notas-live.probe.spec.ts` | token/CNPJ mismatch, lista/detail indisponível | `already-enforced` | execução real obrigatória em `VAL-CUT-04` |
@@ -530,8 +532,8 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 - **Decision review lifecycle:** `after review baseline freeze and before APROVADO`
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set: TODO + topology/dependency artifacts + railway/Docker/config/health/fiscal boundaries`
-- **Decision review status:** `round-15 confirmation pending`
-- **Decision review evidence / resolution:** quatorze revisores independentes retornaram `BLOCKED` em rodadas sucessivas. Round 14 encerrou `R13-PCV-01`, mas encontrou SHA root transcrito incorretamente e timestamp não causal sob espera do lock. As refs verificadas e a linearização monotônica pós-lock foram integradas; publicação e nova confirmação independente são obrigatórias.
+- **Decision review status:** `round-16 material publication pending`
+- **Decision review evidence / resolution:** quinze revisores independentes retornaram `BLOCKED` em rodadas sucessivas. Round 15 encerrou `R14-DOC-01` e o núcleo causal de `R14-BCI-01`, mas encontrou drift material na attestation e budgets/retry/pool/locks ainda abertos. Freeze definitivo e envelope transacional completo foram integrados; publicação e nova confirmação independente são obrigatórias.
 
 | Finding ID | Severity | Approval-material | Resolution | Evidence in evolved plan |
 | --- | --- | --- | --- | --- |
@@ -609,6 +611,8 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 | `R13-PCV-01` | high | yes | `Integrated` | quatro rows usam registros/estados/deadlines/evidence rules fechados `pcv-1`; BCI é required/high com `serialize`, invariant e probes 5/10/20 que validam persistência, estado e SSE. |
 | `R14-DOC-01` | high | yes | `Integrated` | `git rev-parse --verify` confirmou root material `da6ef14219e92e67428fd30cef98590512dc0832`, carrier `d60bffe4c57ffbc40477c2798d72ac87191b1a6e`, Foundation material `2368b5c7b0a8d3187caae08bd426a4bde63dfda0` e attestation `55ff86207e16255d4e63e014b591fc426e772590`. |
 | `R14-BCI-01` | high | yes | `Integrated` | lock key namespaced, ordem lexical binária única e `GREATEST(clock_timestamp(), MAX(criado_em)+1us)` sob lock eliminam inversão/empate; `VAL-CUT-20` inclui wait inversion e collision. |
+| `R15-GOV-01` | high | yes | `Integrated` | o `Contract status` definitivo round 16 já está no material publication commit; a attestation não pode alterar esse campo nem qualquer seção material comparada. |
+| `R15-BCI-01` | high | yes | `Integrated` | `D-CUT-23` congela isolation, waits/timeouts, gate2/locks1000, retry somente após rollback provado, mapping 409/503/refresh e testes held-lock/batch500/saturation. |
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before cutover closeout`
 - **Adherence review kind:** `architecture_adherence`
@@ -622,11 +626,11 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 - **Why this decision:** release, segredos, dois contextos e promoção canônica exigem revisão reproduzível.
 - **Trigger stage:** `before first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `0ea5c76b8e5c3b0aade02e846368a174207d96c1`
+- **Baseline commit:** `pending round-16 material publication`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `no_material_findings`
-- **Findings summary:** `R14-DOC-01` e `R14-BCI-01` foram integrados e publicados no material round 15; confirmação independente permanece pendente.
-- **Evidence / reference:** Foundation material `origin/main@0ea5c76b8e5c3b0aade02e846368a174207d96c1`; root material `MonitorNotes/delphi-and-foundation@bcbcaa736cdeb8d76ab98c6b97c285b91eb183d2`; refs verificadas com `git rev-parse --verify`; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73`; Delphi guard `ee9b448`.
+- **Gate status:** `not_run`
+- **Findings summary:** `R15-GOV-01` e `R15-BCI-01` foram integrados no material candidato round 16; publicação, sync e attestation ainda pendem.
+- **Evidence / reference:** predecessor Foundation material/attestation `0ea5c76b8e5c3b0aade02e846368a174207d96c1`/`38d00ea30525a7af9913805271d8a5d3eade189e`; predecessor root material/carrier `bcbcaa736cdeb8d76ab98c6b97c285b91eb183d2`/`64e365c480678470f7813effc554a8d172270f45`; novo SHA será registrado após commit/push.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Review Scope Drift
@@ -638,8 +642,8 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 - **Material sections compared:** `canonical defaults, incluindo Diff Expectation Contract, Module Decision Baseline Snapshot e Decision Baseline (Frozen Before Implementation)`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-cutover.md`
 - **Gate status:** `not_run`
-- **Findings summary:** `R14-DOC-01` e `R14-BCI-01` alteraram material de aprovação; scope drift só pode ser atestado após publicar e revisar o freeze round 15.
-- **Evidence / reference:** baseline congelado em `uninotas-foundation:main@0ea5c76b8e5c3b0aade02e846368a174207d96c1`; execução aguarda convergência da confirmação round 15.
+- **Findings summary:** `R15-GOV-01` e `R15-BCI-01` alteraram material de aprovação; scope drift só pode ser atestado após publicar/revisar o freeze round 16 e comprovar attestation metadata-only.
+- **Evidence / reference:** predecessor em `uninotas-foundation:main@0ea5c76b8e5c3b0aade02e846368a174207d96c1`; nova evidência virá após convergência round 16.
 - **Waiver authority / reference:** `n/a`.
 
 ## Frontend / Consumer Matrix
@@ -674,7 +678,7 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | backend NestJS | fiscal/config/readiness/error-only/correlation/auth mudam | startup fail-closed; DB-negative readiness; exact HTTP contract; SQL predicate before count/group/order/limit/mutations; high-ineligible pagination; correlated history; fetch-SSE global auth/no polling; same correlation ID | Node 22 host Windows; fixtures Jest determinísticas/Prisma SQL assertions; nenhum token live | no diretório `backend`: `npm test -- --runInBand && npm run lint && git diff --exit-code && npm run build`; se lint autofixar, invalidar/refazer freeze e toda validação | `Local-Implemented` | `planned` | output + SHA/tree antes/depois | `npm run lint` contém `--fix`; zero diff é obrigatório |
 | backend SQL plan/performance | error-only muda todas as queries críticas | workloads fixos lista ERRO/TRATADOS, resumo, produtos, export; predicate placement; p95 SQL/HTTP 3 s/8 s | seed 20k: 80% inelegível/20% erro; 25% erros tratados; PG version/config; ordem/isolamento de `VAL-CUT-17` | por workload: 5 warmups + EXPLAIN + 30 SQL; novo processo: 5 warmups + 50 HTTP concurrency 4, ou 20 export concurrency 1; nearest-rank por série | `Local-Implemented` | `planned` | seed + JSON plans redatados + séries/p95 separados | falha abre TODO de schema/index; não amplia este diff |
-| backend BCI treatment overlap | PATCH/lote gravam na mesma ref | PATCH/PATCH, lote/lote e PATCH/lote 5/10/20; wait inversion/collision; append monotônico, atomicidade, estado e SSE pós-commit | PostgreSQL local; refs elegíveis/inelegíveis; situações conflitantes; lock/clock/ordem observáveis | no diretório `backend`: runner Jest dedicado de `VAL-CUT-20`, orquestrado pelo helper `backend_concurrency_probe.sh` quando aplicável | `Local-Implemented` | `planned` | `foundation_documentation/artifacts/tmp/uninotas-cutover-pcv/bci-pcv1.json` + SHA-256 | `BCI-SP-H`/`BCI-A1`; HTTP-only evidence inválida |
+| backend BCI treatment overlap | PATCH/lote gravam na mesma ref | PATCH/lote 5/10/20; inversion/collision/held-lock/batch500/saturation/error map; append, atomicidade, estado e SSE pós-commit | PostgreSQL local; situações conflitantes; falhas SQLSTATE/Prisma injetáveis; lock/clock/pool observáveis | no diretório `backend`: runner Jest dedicado de `VAL-CUT-20`, orquestrado pelo helper `backend_concurrency_probe.sh` quando aplicável | `Local-Implemented` | `planned` | `foundation_documentation/artifacts/tmp/uninotas-cutover-pcv/bci-pcv1.json` + SHA-256 | `BCI-SP-H`/`BCI-A1`; budgets 2/15/1,5/12 + gate2/locks1000 |
 | backend near-limit | envelope externo/memória | 2 MiB, fairness, semaphore 4, rates 15/60, timeout/abort/recovery | loopback stub only; `RLS_OUTPUT_DIR` redatado | no diretório `backend`: `RLS_OUTPUT_DIR=../artifacts/cutover-rls npm test -- --runInBand --runTestsByPath src/fiscal-notes/__tests__/smart-notas-load.spec.ts` | `Local-Implemented` | `planned` | `artifacts/cutover-rls` redatado | sem tráfego provider real |
 | frontend React/Vite unit/race | context/cache/contract mudam | Geral/detalhe/Erros, troca rápida de contexto, logout/401 cache purge e error-only | Node 22 host Windows; fixtures locais dos scripts | no diretório `frontend`: `npm run test:notas && npm run test:notas:race && npm run lint && npm run build` | `Local-Implemented` | `planned` | output dos cinco comandos | bundle same-origin |
 | frontend Playwright intercepted | jornada visível muda | login -> Geral -> detalhe -> Erros -> Geral; ambos contextos; nenhuma origem externa; `/eventos` só erro | `npm run dev` em loopback; Chrome/Chromium local em `CHROME`; todas as APIs interceptadas pelo runner | no diretório `frontend`: `ALVO=http://127.0.0.1:5173 CHROME=<chromium-local> npm run e2e:notas` | `Local-Implemented` | `planned` | relatório console redatado | adicionar negativas do history/error-only neste TODO |
@@ -686,7 +690,7 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 ## Plan Review Gate
 
 - **Review decision:** `required`
-- **Review status:** `round-15 material frozen; attestation and architecture confirmation pending`
+- **Review status:** `round-16 material candidate; publication/sync/attestation and architecture confirmation pending`
 - **Required lenses:** architecture, operations, rollback, security, tests, performance, observability and structural soundness.
 - **Known plan finding:** o health atual retorna HTTP 2xx quando o banco está degradado; `D-CUT-10` agora exige readiness separada não-2xx e mantém Smart Notas fora do loop.
 - **Approval request condition:** nova revisão confirma `D-CUT-06..23`, crítica converge, baseline é atualizado e guards retornam `go/preflight-go`.
@@ -859,9 +863,9 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 
 ### BCI planned evidence
 
-- **Invariant ID:** `CUT-TREATMENT-SERIAL-APPEND-01` — para cada ref elegível, todo comando aceito persiste exatamente um append com timestamp estritamente maior que o append anterior sob o mesmo lock; nenhum append inelegível ocorre; a situação efetiva é o último append pela ordem estável; lote é atômico; SSE nunca antecede commit nem excede um sinal por append no processo.
-- **Concurrency policy:** `serialize` por `pg_advisory_xact_lock` namespaced; todas as rotas normalizam/deduplicam e adquirem refs na mesma ordem lexical binária. Sob cada lock, a aplicação lê `clock_timestamp()` e `MAX(criado_em)`, grava explicitamente o maior entre o relógio e `MAX + 1 microsecond`, e consulta por `criado_em DESC, id DESC`; o default Prisma `now()` não participa da linearização.
-- **Evidence contract:** `BCI-SP-H` / `BCI-A1`; PATCH/PATCH, lote/lote e PATCH/lote nos níveis 5 x 2, 10 x 3 e 20 x 5, mais wait inversion e timestamp collision, validando respostas, linhas persistidas, monotonicidade, ordem efetiva, atomicidade e sinais SSE em `foundation_documentation/artifacts/tmp/uninotas-cutover-pcv/bci-pcv1.json`.
+- **Invariant ID:** `CUT-TREATMENT-SERIAL-APPEND-01` — para cada ref elegível, todo comando aceito persiste exatamente um append com timestamp estritamente maior sob o lock; nenhum inelegível ocorre; estado é o último append; lote é atômico; retry incerto nunca ocorre; SSE não antecede commit nem excede um sinal por append no processo.
+- **Concurrency policy:** `serialize` por lock namespaced e ordem lexical binária. Pool Prisma `5`/wait `2 s`, `ReadCommitted`, transaction `15 s`, lock `1,5 s`, statement `12 s`, gate process-local `2` e teto `1.000` locks delimitam a única réplica e reservam três conexões. Timestamp é `max(clock, previous+1us)`, nunca `now()`. Somente abort comprovado `40P01|40001|55P03|P2034` recebe um retry inteiro após 25 ms; capacity/timeout/connection/commit incerto não recebem retry e exigem refresh.
+- **Evidence contract:** `BCI-SP-H` / `BCI-A1`; PATCH/PATCH, lote/lote e PATCH/lote 5 x 2, 10 x 3, 20 x 5, wait inversion, timestamp collision, held-lock, lote 500, gate/pool/lock saturation e error mapping, validando responses, retry count, conexões/locks, linhas, monotonicidade, estado, atomicidade e SSE em `foundation_documentation/artifacts/tmp/uninotas-cutover-pcv/bci-pcv1.json`.
 
 ### RLS planned evidence
 
