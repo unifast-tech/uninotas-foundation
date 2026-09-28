@@ -627,18 +627,18 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 - **Gate decision:** `required`
 - **Baseline branch:** `uninotas-foundation/main`
-- **Baseline commit:** `4372ea740157afb7850c6a0a82ab5523812c2f5f`
+- **Baseline commit:** `e0c41fe856bd16d735be971303bdf9e63c198b0a`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** findings R11 de fail masking/destino de evidência foram integrados com acumulador final e aggregate `pcv-1` no artifact root governado.
-- **Evidence / reference:** `origin/main` contém `4372ea740157afb7850c6a0a82ab5523812c2f5f`; material export está congelado nesse commit.
+- **Findings summary:** o baseline R12 material permanece intacto; o commit atualizado registra apenas o closeout UX, os novos SHAs de comparação, a autoridade já aprovada e a admissão package-first/capability.
+- **Evidence / reference:** `origin/main` contém `e0c41fe856bd16d735be971303bdf9e63c198b0a`; rota, filtros, CSV, limites, autorização, clocks e lifecycle não mudaram no rebaseline.
 
 ## Gate: Review Scope Drift
 
 - **Gate decision:** `required`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-filtered-csv-export.md`
 - **Gate status:** `no_material_findings`
-- **Evidence / reference:** `review_scope_drift_guard.py` sobre baseline `4372ea740157afb7850c6a0a82ab5523812c2f5f`: `go`, `0/23` seções materiais alteradas; repetir após o review final antes do `APROVADO`.
+- **Evidence / reference:** `review_scope_drift_guard.py` sobre o baseline pós-UX `e0c41fe856bd16d735be971303bdf9e63c198b0a`: `go`, `0/23` seções materiais alteradas; rebaseline administrativo, sem renovação material de escopo.
 
 ## Audit Trigger Matrix
 
