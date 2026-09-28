@@ -418,14 +418,18 @@ O serializer fica em `backend/src/fiscal-notes/`; não criar `common/csv.ts` enq
 ### VAL-EX-04 Exact WSL Command
 
 ```bash
+frc_status=0
+frc_artifact_root="$PWD/foundation_documentation/artifacts/tmp/uninotas-export-pcv/frc"
 for race_scenario in duplicate filter-change navigation unmount logout 401 page-only empty-204; do
-  bash <(tr -d '\r' < delphi-ai/tools/frontend_race_probe.sh) --scenario "$race_scenario" --burst-level 5 --repetitions 2 --timeout-sec 120 --workdir frontend --runner "npm run test:notas:race" --output-dir "artifacts/tmp/uninotas-export-pcv/frc/$race_scenario/low" --fail-fast
-  bash <(tr -d '\r' < delphi-ai/tools/frontend_race_probe.sh) --scenario "$race_scenario" --burst-level 10 --repetitions 3 --timeout-sec 120 --workdir frontend --runner "npm run test:notas:race" --output-dir "artifacts/tmp/uninotas-export-pcv/frc/$race_scenario/medium" --fail-fast
-  bash <(tr -d '\r' < delphi-ai/tools/frontend_race_probe.sh) --scenario "$race_scenario" --burst-level 20 --repetitions 5 --timeout-sec 120 --workdir frontend --runner "npm run test:notas:race" --output-dir "artifacts/tmp/uninotas-export-pcv/frc/$race_scenario/high" --fail-fast
+  bash <(tr -d '\r' < delphi-ai/tools/frontend_race_probe.sh) --scenario "$race_scenario" --burst-level 5 --repetitions 2 --timeout-sec 120 --workdir frontend --runner "npm run test:notas:race" --output-dir "$frc_artifact_root/$race_scenario/low" --fail-fast || frc_status=1
+  bash <(tr -d '\r' < delphi-ai/tools/frontend_race_probe.sh) --scenario "$race_scenario" --burst-level 10 --repetitions 3 --timeout-sec 120 --workdir frontend --runner "npm run test:notas:race" --output-dir "$frc_artifact_root/$race_scenario/medium" --fail-fast || frc_status=1
+  bash <(tr -d '\r' < delphi-ai/tools/frontend_race_probe.sh) --scenario "$race_scenario" --burst-level 20 --repetitions 5 --timeout-sec 120 --workdir frontend --runner "npm run test:notas:race" --output-dir "$frc_artifact_root/$race_scenario/high" --fail-fast || frc_status=1
 done
+DELPHI_RACE_SCENARIO=aggregate DELPHI_RACE_INPUT_DIR="$frc_artifact_root" DELPHI_RACE_OUTPUT_FILE="$PWD/foundation_documentation/artifacts/tmp/uninotas-export-pcv/frc-pcv1.json" npm --prefix frontend run test:notas:race || frc_status=1
+test "$frc_status" -eq 0
 ```
 
-O readiness command executável neste checkout é `bash delphi-ai/tools/verify_context.sh`; o wrapper `delphi-ai/verify_context.sh` também está CRLF e não é alterado por este TODO.
+O modo `aggregate` de `frontend/e2e/notas-race.ts` consolida/valida as 80 attempts, políticas/oráculos e o hash canônico `pcv-1`; ausência/falha/duplicata invalida o JSON e retorna não zero. `foundation_documentation/artifacts/tmp/**` é o espaço derivado/ignorado governado; `MonitorNotes/artifacts/**` permanece intocado. O readiness command executável neste checkout é `bash delphi-ai/tools/verify_context.sh`; o wrapper `delphi-ai/verify_context.sh` também está CRLF e não é alterado por este TODO.
 
 ## Local Verification Matrix
 
@@ -601,6 +605,8 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 | `R9-CR-M1` | `medium` | FRC não individualizava todo lifecycle/204 | oito cenários 5x2/10x3/20x5 + downloader `downloaded|empty` |
 | `R9-AR-M02` | `medium` | retirement do rate path exigia cutover-integrity | lane marcada required no triple review |
 | `R10-AR-H01` | `high` | FRC command tinha placeholder e runner CRLF no WSL | loop exato por cenário/perfil usa runner canônico normalizado em memória; readiness usa helper LF |
+| `R11-AR-H01/CR-H01` | `high` | matriz FRC podia mascarar falha intermediária | acumulador executa toda matriz e retorna não zero se qualquer profile/agregação falhar |
+| `R11-CR-M02` | `medium` | output FRC colidia com `MonitorNotes/artifacts/**` preservado | output absoluto vai ao `foundation_documentation/artifacts/tmp/**` ignorado/governado e aggregate valida `frc-pcv1.json` |
 
 ### Residual Risks
 
@@ -621,18 +627,18 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 - **Gate decision:** `required`
 - **Baseline branch:** `uninotas-foundation/main`
-- **Baseline commit:** `38b3381d9a2267364e2344ee2641b79790f23a4b`
+- **Baseline commit:** `5aba43a1d48abcff76ee80454b4b2c92a1bebd4a`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** findings R9 de deadline cancellation, pacing/state bound, BCI/FRC/RLS, harness e decision/cutover gates foram integrados em baseline material isolado e publicado.
-- **Evidence / reference:** `origin/main` contém `38b3381d9a2267364e2344ee2641b79790f23a4b`; material export está congelado nesse commit.
+- **Findings summary:** finding R10 de executabilidade do FRC/CRLF foi integrado por comandos exatos que normalizam o runner canônico somente em memória.
+- **Evidence / reference:** `origin/main` contém `5aba43a1d48abcff76ee80454b4b2c92a1bebd4a`; material export está congelado nesse commit.
 
 ## Gate: Review Scope Drift
 
 - **Gate decision:** `required`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-filtered-csv-export.md`
 - **Gate status:** `no_material_findings`
-- **Evidence / reference:** `review_scope_drift_guard.py` sobre baseline `38b3381d9a2267364e2344ee2641b79790f23a4b`: `go`, `0/23` seções materiais alteradas; repetir após o review final antes do `APROVADO`.
+- **Evidence / reference:** `review_scope_drift_guard.py` sobre baseline `5aba43a1d48abcff76ee80454b4b2c92a1bebd4a`: `go`, `0/23` seções materiais alteradas; repetir após o review final antes do `APROVADO`.
 
 ## Audit Trigger Matrix
 
@@ -654,8 +660,8 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 - **Critique decision:** `required`
 - **Critique status:** `running`
-- **Findings summary:** critique R10 retornou GO; architecture R10 encontrou somente comando FRC inexequível/placeholder, agora substituído por loop WSL exato e validado em parse, pendente de fresh rerun.
-- **Evidence / reference:** reviewers `/root/filtered_export_architecture_r10` e `/root/filtered_export_critique_r10`.
+- **Findings summary:** R11 confirmou o runner R10, mas encontrou fail masking e output fora do artifact root governado; acumulador + aggregate/final status e destino Foundation foram integrados, pendentes de delta rerun.
+- **Evidence / reference:** reviewers `/root/filtered_export_architecture_r11` e `/root/filtered_export_critique_r11`.
 - **Isolation:** `fresh internal no-context reviewer; cannot implement`
 - **Lenses:** `correctness|performance|security|elegance|structure|operational fit`.
 
@@ -823,10 +829,11 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 | `R8-GOV-H03` | `high` | `by-design/no-action` | `challenged` | commit material não pode conter seu próprio SHA; attestation não material referencia baseline e drift prova 0 seções materiais | `challenged_with_rationale` | Review Baseline Freeze + Scope Drift |
 | `R9-AR-H01,R9-AR-M01..M02,R9-CR-H1..H5,R9-CR-M1` | `high, medium` | `release-blocker` | `same TODO` | harness, deadline, bounded state, pacing, decisions, FRC/RLS e cutover pertencem à feature | `integrated_pending_rerun` | architecture/critique R9 |
 | `R10-AR-H01` | `high` | `release-blocker` | `same TODO` | executabilidade do FRC gate obrigatório | `integrated_pending_rerun` | architecture R10; critique R10 foi GO |
+| `R11-AR-H01,R11-CR-H01,R11-CR-M02` | `high, medium` | `release-blocker` | `same TODO` | fail-closed e destination do FRC gate obrigatório | `integrated_pending_rerun` | architecture/critique R11 |
 | `logs-csv-hardening` | `medium` | `follow-up-hardening` | `split` | serializer legado em `backend/src/logs/**` está fora deste diff | `deferred` | requer TODO próprio antes do closeout se confirmado pelo security gate |
 
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
-- **Reason:** aguardando publicação do baseline R9, fresh reviews finais e aprovação.
+- **Reason:** aguardando publicação do baseline R11, fresh delta reviews finais e aprovação.
 - **Target after implementation:** `Local-Implemented`, sem deploy.
