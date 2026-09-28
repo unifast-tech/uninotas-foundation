@@ -5,7 +5,7 @@
 
 ## Context
 
-A equipe financeira precisa identificar rapidamente quem é o tomador de cada nota e copiar os identificadores operacionais completos diretamente da Geral. O payload real de listagem do Smart Notas contém `nome`, `idCompra` e `chave`; o produto já normaliza compra/chave, mas hoje exclui o nome e mascara os identificadores na apresentação.
+A equipe financeira precisa identificar rapidamente quem é o tomador de cada nota e copiar os identificadores operacionais completos diretamente da Geral. Os payloads reais redigidos de listagem e detalhe do Smart Notas contêm `nome`, `idCompra` e `chave`; o produto já normaliza compra/chave, mas hoje exclui o nome e mascara os identificadores na apresentação.
 
 ## Framing Source & Story Slice
 - **Feature brief:** `direct-to-todo`
@@ -41,12 +41,13 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - **Production-ready threshold for this TODO:** `Railway stage` após o cutover governante
 
 ## Scope
-- [ ] `SCOPE-01` Mapear o campo Smart Notas `nome` para `recipientName` opcional no DTO fiscal normalizado de resumo e detalhe, com limite defensivo e sem expor os demais campos pessoais.
+- [ ] `SCOPE-01` Mapear o campo Smart Notas `nome` para `recipientName: string|null`, sempre presente no DTO fiscal normalizado de resumo e detalhe, com limite de 255 caracteres e sem expor os demais campos pessoais.
 - [ ] `SCOPE-02` Exibir na Geral uma coluna `Tomador` com o nome completo ou `Não disponível`, mantendo tabela acessível e responsiva.
 - [ ] `SCOPE-03` Exibir `purchaseId`, `accessKey` e `referencedAccessKey` integralmente na área fiscal autenticada, com quebra/cópia visual segura, removendo apenas a máscara de apresentação.
 - [ ] `SCOPE-04` Preservar os filtros, paginação, cache, atualização e exportação existentes sem alterar sua semântica.
 - [ ] `SCOPE-05` Cobrir contrato NestJS, normalização React, estados ausentes e jornada browser da Geral/detalhe.
 - [ ] `SCOPE-06` Atualizar módulo fiscal, feature brief e contratos operacionais estáveis sem registrar valores reais de PII ou identificadores fiscais.
+- [ ] `SCOPE-07` Substituir o tipo público baseado em `Omit<FiscalNoteRecord,...>` por uma allowlist positiva explícita, impedindo que futuros campos internos sejam publicados automaticamente.
 
 ## Out of Scope
 - [ ] Alterar perfis, autenticação ou conceder acesso a usuários não autenticados.
@@ -68,6 +69,8 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - [ ] `DOD-04` Filtros, paginação, cache e exportação mantêm a semântica atual sem regressão.
 - [ ] `DOD-05` A tabela permanece utilizável em desktop e mobile, incluindo valores longos de compra/chave e nome ausente.
 - [ ] `DOD-06` Testes e documentação provam a ampliação deliberada de PII/identificadores sem persistir exemplos reais.
+- [ ] `DOD-07` `recipientName` é sempre serializado como string normalizada ou `null`; campo presente vazio, somente espaços ou acima de 255 caracteres falha como `SmartNotasContratoInvalido`.
+- [ ] `DOD-08` Testes provam acesso dos quatro perfis atuais, rejeição sem autenticação, exclusão de PII extra/CSV e limpeza do cache enriquecido no logout/disposal.
 
 ## Validation Steps
 - [ ] `VAL-01` Executar testes unitários/contratuais do adapter, DTO, serviço e controller fiscal com fixtures sintéticas.
@@ -75,6 +78,7 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - [ ] `VAL-03` Executar `cd frontend && npm run test:notas && npm run test:notas:race && npm run build && npm run lint` no runner proprietário do projeto.
 - [ ] `VAL-04` Executar `cd frontend && npm run e2e:notas` contra bundle fresco, cobrindo nome, valores completos, paginação e exportação sem regressão.
 - [ ] `VAL-05` Executar revisão de segurança sobre PII, identificadores, logs, URL, cache, logout e respostas de erro.
+- [ ] `VAL-06` Executar matriz explícita `ADMIN|GESTOR|ANALISTA|LEITOR|não autenticado`, resposta HTTP allowlisted, CSV sem nome e cache limpo após logout.
 
 ## Diff Expectation Contract (Required Before Delivery)
 - **Contract status:** `required`
@@ -152,6 +156,9 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - [x] `D-04` O filtro por número foi cancelado pelo usuário em 2026-09-28 e está fora do escopo; nenhuma varredura de páginas, filtro local parcial ou projeção persistente será criada.
 - [x] `D-05` A exportação existente já contém compra/chave completas e não ganha automaticamente o nome do tomador; ampliar o CSV com PII exige pedido/decisão separado.
 - [x] `D-06` Nome/compra/chaves não entram em URL, logs, telemetria ou armazenamento persistente; o cache continua apenas em memória e é limpo com a sessão.
+- [x] `D-07` O contrato público usa allowlist positiva e não deriva sua superfície de todos os campos de `FiscalNoteRecord` por `Omit`.
+- [x] `D-08` `recipientName` é sempre presente como `string|null`; `nome` ausente/null vira `null`, enquanto presente vazio, somente espaços ou acima de 255 caracteres invalida o contrato do provedor.
+- [x] `D-09` A autorização existente é preservada e provada para os quatro perfis leitores; o acesso sem JWT continua rejeitado.
 
 ## Module Decision Baseline Snapshot (Required Before APROVADO)
 | Module Decision Ref | Current Module Decision | Planned Handling | Evidence |
@@ -168,6 +175,8 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - [x] `D-04` Não implementar filtro por número neste TODO.
 - [x] `D-05` Não ampliar o CSV com nome do tomador neste TODO.
 - [x] `D-06` Preservar filtros, cache, paginação e exportação existentes.
+- [x] `D-07` Usar allowlist pública positiva e `recipientName: string|null` com limite 255.
+- [x] `D-08` Provar os quatro perfis, rejeição sem autenticação, exclusão do CSV e limpeza de cache.
 
 ## Architecture Change Governance
 - **Applicability:** `required`
@@ -203,8 +212,8 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - **Decision review lifecycle:** `after diagnosis is closed and before APROVADO`
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-summary`
-- **Decision review status:** `not_run`
-- **Decision review evidence / resolution:** `pending`
+- **Decision review status:** `findings_integrated`
+- **Decision review evidence / resolution:** fresh no-context reviewer `/root/fiscal_visibility_architecture_opinion`; conclusion `acceptable_with_changes`; five findings integrated/challenged below.
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -233,8 +242,8 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - canonical fiscal module, feature brief and this TODO
 
 ### Ordered Steps
-1. Adicionar testes fail-first para `recipientName`, allowlist e exibição integral.
-2. Estender adapter, tipos e serviço fiscal sem alterar query/filtros.
+1. Adicionar testes fail-first para `recipientName`, allowlist pública positiva, quatro perfis e exibição integral.
+2. Estender adapter, tipos e serviço fiscal sem alterar query/filtros; substituir a projeção pública baseada em `Omit` por interface/`Pick` explícito.
 3. Estender tipos/normalização, Geral e detalhe React.
 4. Ajustar tabela responsiva e preservar a jornada existente de filtros/exportação.
 5. Executar testes focados, suites completas, browser fresco e segurança.
@@ -244,7 +253,7 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - **Intent:** `critical-user-journey` e `compatibility`.
 - **Strategy:** `test-first` para DTO/normalização e regressões visuais; fixtures exclusivamente sintéticas.
 - **Why:** a mudança é observável, aditiva no contrato e sensível à privacidade.
-- **Fail-first target(s):** nome presente/ausente, PII extra descartada, compra/chave completas, quebra visual de valores longos e preservação dos filtros/exportação existentes.
+- **Fail-first target(s):** nome presente/ausente/null/vazio/acima de 255, PII extra descartada, quatro perfis/rejeição sem JWT, compra/chave completas, CSV sem nome, cache limpo, quebra visual de valores longos e preservação dos filtros/exportação existentes.
 - **Deliberate exclusions:** nenhum payload real, segredo, CNPJ, nome real ou identificador real será persistido em teste/artifact.
 
 ### Pre-APROVADO RED Evidence Capture
@@ -333,12 +342,25 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - [x] Uma conta financeira comprometida verá os dados completos autorizados; risco residual aceito para esta superfície autenticada e revisto no gate de segurança.
 
 ## Additional Architectural Opinions
-- **Needed:** `no`
-- **Why ambiguity remains:** `n/a`; o filtro foi cancelado e resta um único caminho dominante de DTO allowlisted.
-- **Opinion count:** `0`
+- **Needed:** `yes`
+- **Why ambiguity remains:** deterministic architecture review required because this TODO intentionally supersedes the prior no-PII public DTO contract.
+- **Opinion count:** `1`
 - **Package mode:** `bounded-summary`
-- **Internal reviewer mandate:** `not_needed`
+- **Internal reviewer mandate:** `required; satisfied by fresh no-context reviewer /root/fiscal_visibility_architecture_opinion`
 - **Required lenses:** `correctness|performance|elegance|structural-soundness|operational-fit`
+
+| Reviewer | Recommendation | Performance view | Elegance view | Structural soundness view | Resolution | Evidence |
+| --- | --- | --- | --- | --- | --- | --- |
+| `/root/fiscal_visibility_architecture_opinion` | `acceptable_with_changes` | low/bounded payload and DOM increase; no calls/query changes | direct adapter -> explicit public DTO -> React is simplest | positive allowlist required instead of public `Omit` | `Integrated` | architecture-opinion final, 2026-09-28 |
+
+### Architecture Opinion Finding Resolution
+| Finding ID | Resolution | Usefulness | Formalizable | Candidate Rule Level | Candidate Rule ID | Rationale / Evidence |
+| --- | --- | --- | --- | --- | --- | --- |
+| `ARCH-OP-01` | `Challenged` | `useful` | `no` | `none` | `n/a` | discovery already records `nome` in both list and detail; Context/A-01 now cite that evidence explicitly, so no fallback/query expansion is needed |
+| `ARCH-OP-02` | `Integrated` | `useful` | `partial` | `project` | `n/a` | `D-07`, `SCOPE-07` and harness require a positive public DTO allowlist instead of `Omit` inheritance |
+| `ARCH-OP-03` | `Integrated` | `useful` | `partial` | `project` | `n/a` | `D-08`/`DOD-07` freeze always-present `string|null`, 255 chars and invalid-present behavior |
+| `ARCH-OP-04` | `Integrated` | `useful` | `partial` | `project` | `n/a` | `D-09`, `DOD-08`, `VAL-06` establish explicit auth/privacy/cache/CSV matrix |
+| `ARCH-OP-05` | `Integrated` | `useful` | `no` | `none` | `n/a` | performance text recognizes small bounded payload/cache/DOM growth, validated through bound and browser tests |
 
 ## Audit Trigger Matrix (Required Before Audit Decisions Are Trusted)
 - **Canonical method:** `wf-docker-audit-escalation-method`
@@ -447,6 +469,18 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - **Attack simulation decision:** `recommended`
 - **Review evidence:** `planned via security-adversarial-review`.
 - **Residual security risk:** disclosure remains possible to any compromised authorized finance account; no field-level role reduction was requested.
+
+### Authorization and Privacy Validation Matrix
+| Actor / Surface | Expected Outcome | Planned Evidence |
+| --- | --- | --- |
+| `ADMIN` | list/detail include allowlisted `recipientName`, purchase and keys | backend application/contract test |
+| `GESTOR` | same authenticated read contract | backend application/contract test |
+| `ANALISTA` | same authenticated read contract | backend application/contract test |
+| `LEITOR` | same authenticated read contract | backend application/contract test |
+| unauthenticated | route rejected before fiscal service/provider call | controller/application test |
+| provider payload with extra recipient PII | extra fields absent from serialized HTTP DTO | adapter + contract negative test |
+| CSV export | raw purchase/key preserved; `recipientName` absent | serializer/export regression test |
+| logout/session disposal | enriched in-memory page removed and late render suppressed | frontend cache/race/browser test |
 
 ## Performance & Concurrency Risk Assessment
 - **Policy schema version:** `pcv-1`
