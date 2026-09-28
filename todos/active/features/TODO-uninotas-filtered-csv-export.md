@@ -32,12 +32,12 @@ Smart Notas evidencia paginação numérica, mas não cursor/snapshot nem ordena
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** congelar/revisar este contrato, obter `preflight-go` e solicitar `APROVADO`.
+- **Next exact step:** solicitar `APROVADO` explícito para execução serial após o TODO UX.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
 - **Work state:** `review`
-- **Why this state now:** achados R7 foram incorporados ao contrato; novo baseline e reviews finais ainda são necessários.
+- **Why this state now:** baseline material publicado, reviews R12 sem findings materiais e guards pré-aprovação prontos; aguarda autoridade humana.
 - **Exit condition:** aprovação explícita e authority guard pós-aprovação em `go`, ou bloqueio formal.
 
 ## Provisional Notes
@@ -618,7 +618,8 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 ## Architecture Review Gates
 
 - **Architecture decision review:** `required`
-- **Decision review status:** `findings_integrated_pending_rerun`
+- **Decision review status:** `no_material_findings`
+- **Decision review evidence / resolution:** `/root/filtered_export_architecture_r12` GO; all R1-R11 material findings integrated or challenged with rationale.
 - **Architecture adherence review:** `required after implementation`
 - **Adherence status:** `not_run`
 - **No-go handling:** `retornar ao plano; não aprovar/concluir com finding material aberto`.
@@ -627,18 +628,18 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 - **Gate decision:** `required`
 - **Baseline branch:** `uninotas-foundation/main`
-- **Baseline commit:** `5aba43a1d48abcff76ee80454b4b2c92a1bebd4a`
+- **Baseline commit:** `4372ea740157afb7850c6a0a82ab5523812c2f5f`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** finding R10 de executabilidade do FRC/CRLF foi integrado por comandos exatos que normalizam o runner canônico somente em memória.
-- **Evidence / reference:** `origin/main` contém `5aba43a1d48abcff76ee80454b4b2c92a1bebd4a`; material export está congelado nesse commit.
+- **Findings summary:** findings R11 de fail masking/destino de evidência foram integrados com acumulador final e aggregate `pcv-1` no artifact root governado.
+- **Evidence / reference:** `origin/main` contém `4372ea740157afb7850c6a0a82ab5523812c2f5f`; material export está congelado nesse commit.
 
 ## Gate: Review Scope Drift
 
 - **Gate decision:** `required`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-filtered-csv-export.md`
 - **Gate status:** `no_material_findings`
-- **Evidence / reference:** `review_scope_drift_guard.py` sobre baseline `5aba43a1d48abcff76ee80454b4b2c92a1bebd4a`: `go`, `0/23` seções materiais alteradas; repetir após o review final antes do `APROVADO`.
+- **Evidence / reference:** `review_scope_drift_guard.py` sobre baseline `4372ea740157afb7850c6a0a82ab5523812c2f5f`: `go`, `0/23` seções materiais alteradas; repetir após o review final antes do `APROVADO`.
 
 ## Audit Trigger Matrix
 
@@ -659,9 +660,9 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 ## Independent No-Context Critique Gate
 
 - **Critique decision:** `required`
-- **Critique status:** `running`
-- **Findings summary:** R11 confirmou o runner R10, mas encontrou fail masking e output fora do artifact root governado; acumulador + aggregate/final status e destino Foundation foram integrados, pendentes de delta rerun.
-- **Evidence / reference:** reviewers `/root/filtered_export_architecture_r11` e `/root/filtered_export_critique_r11`.
+- **Critique status:** `no_material_findings`
+- **Findings summary:** R12 confirmou fail-closed, 24 invocações/80 attempts, aggregate `pcv-1`, artifact root governado e ausência de regressão material.
+- **Evidence / reference:** reviewers `/root/filtered_export_architecture_r12` e `/root/filtered_export_critique_r12`; ambos GO sem finding material.
 - **Isolation:** `fresh internal no-context reviewer; cannot implement`
 - **Lenses:** `correctness|performance|security|elegance|structure|operational fit`.
 
@@ -820,20 +821,20 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 | Finding ID | Severity | Classification | Routing Decision | Same TODO / Split Rationale | Status | Approval / Follow-up Reference |
 | --- | --- | --- | --- | --- | --- | --- |
-| `REV-01..09` | `high, medium` | `release-blocker` | `same TODO` | contrato original de exportação | `integrated_pending_rerun` | reviews R1-R7 |
-| `R2-H1..H5,R2-M1..M2` | `high, medium` | `release-blocker` | `same TODO` | budget, audit, guards e gates pertencem ao endpoint | `integrated_pending_rerun` | reviews R2-R7 |
-| `EX-M01..M03` | `medium` | `release-blocker` | `same TODO` | compatibilidade downloader/auth/audit dentro da feature | `integrated_pending_rerun` | reviews R2-R7 |
-| `R3-EX-H01,R3-EX-M02,R4-EX-H01,R5-H01..H02,R6-H01/M02` | `high, medium` | `release-blocker` | `same TODO` | admissão, clocks, capacidade e owners pertencem ao endpoint | `integrated_pending_rerun` | reviews R3-R7 |
-| `R7-AR-H01,R7-AR-M01..M03,R7-CR-H01..H05,R7-CR-M01..M04` | `high, medium` | `release-blocker` | `same TODO` | contratos de paginação, admissão, BCI, módulo e governança | `integrated_pending_rerun` | architecture/critique R7 |
-| `R8-AR-H01..H02,R8-AR-M01..M03,R8-CR-H01..H02,R8-CR-M01..M04` | `high, medium` | `release-blocker` | `same TODO` | coordinator compartilhado, contrato canônico, BCI/FRC/RLS e transport boundary | `integrated_pending_rerun` | architecture/critique R8 |
+| `REV-01..09` | `high, medium` | `release-blocker` | `same TODO` | contrato original de exportação | `integrated` | reviews R1-R12 |
+| `R2-H1..H5,R2-M1..M2` | `high, medium` | `release-blocker` | `same TODO` | budget, audit, guards e gates pertencem ao endpoint | `integrated` | reviews R2-R12 |
+| `EX-M01..M03` | `medium` | `release-blocker` | `same TODO` | compatibilidade downloader/auth/audit dentro da feature | `integrated` | reviews R2-R12 |
+| `R3-EX-H01,R3-EX-M02,R4-EX-H01,R5-H01..H02,R6-H01/M02` | `high, medium` | `release-blocker` | `same TODO` | admissão, clocks, capacidade e owners pertencem ao endpoint | `integrated` | reviews R3-R12 |
+| `R7-AR-H01,R7-AR-M01..M03,R7-CR-H01..H05,R7-CR-M01..M04` | `high, medium` | `release-blocker` | `same TODO` | contratos de paginação, admissão, BCI, módulo e governança | `integrated` | architecture/critique R7-R12 |
+| `R8-AR-H01..H02,R8-AR-M01..M03,R8-CR-H01..H02,R8-CR-M01..M04` | `high, medium` | `release-blocker` | `same TODO` | coordinator compartilhado, contrato canônico, BCI/FRC/RLS e transport boundary | `integrated` | architecture/critique R8-R12 |
 | `R8-GOV-H03` | `high` | `by-design/no-action` | `challenged` | commit material não pode conter seu próprio SHA; attestation não material referencia baseline e drift prova 0 seções materiais | `challenged_with_rationale` | Review Baseline Freeze + Scope Drift |
-| `R9-AR-H01,R9-AR-M01..M02,R9-CR-H1..H5,R9-CR-M1` | `high, medium` | `release-blocker` | `same TODO` | harness, deadline, bounded state, pacing, decisions, FRC/RLS e cutover pertencem à feature | `integrated_pending_rerun` | architecture/critique R9 |
-| `R10-AR-H01` | `high` | `release-blocker` | `same TODO` | executabilidade do FRC gate obrigatório | `integrated_pending_rerun` | architecture R10; critique R10 foi GO |
-| `R11-AR-H01,R11-CR-H01,R11-CR-M02` | `high, medium` | `release-blocker` | `same TODO` | fail-closed e destination do FRC gate obrigatório | `integrated_pending_rerun` | architecture/critique R11 |
+| `R9-AR-H01,R9-AR-M01..M02,R9-CR-H1..H5,R9-CR-M1` | `high, medium` | `release-blocker` | `same TODO` | harness, deadline, bounded state, pacing, decisions, FRC/RLS e cutover pertencem à feature | `integrated` | architecture/critique R9-R12 |
+| `R10-AR-H01` | `high` | `release-blocker` | `same TODO` | executabilidade do FRC gate obrigatório | `integrated` | architecture R10-R12 |
+| `R11-AR-H01,R11-CR-H01,R11-CR-M02` | `high, medium` | `release-blocker` | `same TODO` | fail-closed e destination do FRC gate obrigatório | `integrated` | architecture/critique R11-R12 |
 | `logs-csv-hardening` | `medium` | `follow-up-hardening` | `split` | serializer legado em `backend/src/logs/**` está fora deste diff | `deferred` | requer TODO próprio antes do closeout se confirmado pelo security gate |
 
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
-- **Reason:** aguardando publicação do baseline R11, fresh delta reviews finais e aprovação.
+- **Reason:** reviews R12 limpos; aguardando somente `APROVADO` explícito.
 - **Target after implementation:** `Local-Implemented`, sem deploy.
