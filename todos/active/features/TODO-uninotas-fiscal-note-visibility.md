@@ -528,13 +528,13 @@ Todos os campos abaixo são propriedades obrigatórias no JSON. `string|null` ac
 - **Why this decision:** planning-side reviews must evaluate a committed and pushed scope-bearing contract.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `main`
-- **Baseline commit:** `c11a1849ab143be6fda217b6955be1314a0d8190`
+- **Baseline commit:** `3b94edcdeeec4744915b2f9dbfa034bfa7574c43`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `not_run`
-- **Findings summary:** expanded scope-bearing contract froze distinct summary/detail allowlists, all 21 requested detail fields, signed route identity, no number search and no persistence/export expansion; post-review refinements require a refreshed baseline.
-- **Evidence / reference:** authority guards returned `go`; expanded scope baseline `c11a1849ab143be6fda217b6955be1314a0d8190` was committed and pushed to `origin/main`.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** refreshed scope-bearing contract includes exact 17/27-field DTOs, signed/decodificável route semantics, split list/detail records, bounded export evidence, all 21 requested fields and no number search/persistence/CSV expansion.
+- **Evidence / reference:** authority guards returned `go`; refreshed scope baseline `3b94edcdeeec4744915b2f9dbfa034bfa7574c43` was committed and pushed to `origin/main`.
 - **Waiver authority / reference:** `n/a`
-- **Pre-freeze packet-prep rule:** `review findings are integrated as packet preparation; new authoritative reviews wait for the refreshed pushed baseline`
+- **Pre-freeze packet-prep rule:** `satisfied; convergence reviews run only after refreshed baseline 3b94edc was pushed`
 
 ## Gate: Review Scope Drift
 - **Gate decision:** `required`
