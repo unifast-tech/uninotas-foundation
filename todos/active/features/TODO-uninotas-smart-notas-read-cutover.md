@@ -40,7 +40,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** publicar o baseline material round 10 com os achados `R9-*` integrados e executar nova confirmação arquitetural independente; nenhuma mutação Railway está autorizada.
+- **Next exact step:** executar confirmação arquitetural round 10 sobre `uninotas-foundation@b39d703` / `MonitorNotes@72cfbe7`; nenhuma mutação Railway está autorizada.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -101,8 +101,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Scope Item | Local Branch/Commit | Main / Authority | Local Source/Build Validation | Single Remote Target: Stage Customer-Facing | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Backend + frontend read-only | material root predecessor `delphi-and-foundation@916b881`; code-origin `31712a0` | `pending promotion to main` | `pending final cutover suite` | `pending one direct cutover` | `round-10 planning sync pending` |
-| Foundation cutover contract | predecessor `main@2851770`; round-10 SHA pending | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round-10 material publication pending` |
+| Backend + frontend read-only | material root baseline `delphi-and-foundation@72cfbe7`; code-origin `31712a0` | `pending promotion to main` | `pending final cutover suite` | `pending one direct cutover` | `published round-10 baseline; attestation carrier may follow` |
+| Foundation cutover contract | `main@b39d703` material freeze | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `published round-10 material baseline` |
 
 ## Out of Scope
 
@@ -156,7 +156,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 ## Diff Expectation Contract
 
-- **Contract status:** `required; round-10 material baseline pending publication`
+- **Contract status:** `required; round-10 material baseline frozen by this checkpoint`
 - **Policy:** `strict; unclassified or forbidden paths block delivery`
 - **User validation:** `required on deviation`
 - **Comparison mode:** `working_tree after candidate checkpoint`
@@ -562,11 +562,11 @@ Transições não podem pular evidência: `REC-1 -> REC-2` exige merge/tree equi
 - **Why this decision:** release, segredos, dois contextos e promoção canônica exigem revisão reproduzível.
 - **Trigger stage:** `before first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `pending round-10 material publication`
+- **Baseline commit:** `b39d703d98d28a2cd3e13006739a5eb6076dae97`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `not_run`
-- **Findings summary:** `R9-ARCH-01..04`, `R9-DOC-01`, `R9-PERF-01` e `R9-OPS-01` integrados; publicação round 10 e nova confirmação pendentes.
-- **Evidence / reference:** predecessor `origin/main@2851770aaa4fa9e17dd349e24a1cec166fa43f8b`; novo SHA será registrado após commit/push; material root predecessor `MonitorNotes@916b881`; code-origin `31712a0`; Delphi guard `ee9b448`.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** `R9-ARCH-01..04`, `R9-DOC-01`, `R9-PERF-01` e `R9-OPS-01` integrados e publicados; round 10 governa nova confirmação.
+- **Evidence / reference:** `origin/main@b39d703d98d28a2cd3e13006739a5eb6076dae97`; material root baseline `MonitorNotes@72cfbe77815ee68b266a54356cb8494fa1b14f5b`; code-origin `31712a0`; Delphi guard `ee9b448`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Review Scope Drift
