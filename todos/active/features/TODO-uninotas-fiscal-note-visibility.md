@@ -83,7 +83,7 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - [ ] `DOD-11` Canários `allowed-visible-but-forbidden-in-sinks` são visíveis somente na UI fiscal e permanecem ausentes de URL, storage, console, referrer e requests alheios; PII não aprovada permanece `forbidden-everywhere`.
 - [ ] `DOD-12` Cache/logout usa canários distintos por sessão e resposta tardia para provar que objetos enriquecidos antigos não reaparecem antes nem depois da resposta da nova sessão.
 - [ ] `DOD-13` O card apresenta todos os 21 campos enumerados pelo usuário e preserva os campos de detalhe existentes, com `Não disponível` para valores legitimamente nulos e rótulos fiscais claros.
-- [ ] `DOD-14` `providerInternalId` é visível/copiável apenas no detalhe autenticado e nunca é aceito como parâmetro bruto; a rota/cache key continuam usando o `noteId` assinado existente, cujo payload é decodificável e já contém esse ID, sem promessa de confidencialidade do token.
+- [ ] `DOD-14` `providerInternalId` é visível/copiável apenas no detalhe autenticado e nunca é aceito como parâmetro bruto; a rota continua usando o `noteId` assinado existente, cujo payload é decodificável e já contém esse ID, sem promessa de confidencialidade do token. Não existe cache de detalhe no contrato atual.
 - [ ] `DOD-15` Documento aceita somente 11 ou 14 dígitos; e-mail é `string|null` de até 320 caracteres; cidade até 255, estado até 64 e país até 128; valores presentes vazios/overbound ou documento inválido falham como contrato Smart Notas inválido.
 - [ ] `DOD-16` Nenhum valor real fornecido pelo usuário é persistido; fixtures usam canários sintéticos inequívocos e não reutilizam pessoa, documento, e-mail, chave, compra ou ID do exemplo real.
 - [ ] `DOD-17` O caminho de lista/exportação carrega somente `recipientName` como nova PII; os cinco campos pessoais exclusivos do detalhe nunca integram `FiscalNotePage` nem o acumulador de exportação.
@@ -99,7 +99,7 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - [ ] `VAL-06` Executar matriz explícita `ADMIN|GESTOR|ANALISTA|LEITOR|não autenticado`, resposta HTTP allowlisted, CSV sem nome e cache limpo após logout.
 - [ ] `VAL-07` Executar browser desktop e 390 px em Geral e detalhe, verificando `scrollWidth`, conteúdo exato não truncado, labels/semântica, teclado e ausência dos canários nos sinks proibidos.
 - [ ] `VAL-08` Executar teste unitário/race de cache com valores enriquecidos old-session, resposta tardia e valores distintos new-session.
-- [ ] `VAL-09` Executar contract/browser matrix que conta e verifica os 21 campos solicitados no detalhe, ausência desses novos campos sensíveis na lista/CSV e preservação dos campos de detalhe anteriores.
+- [ ] `VAL-09` Executar contract/browser matrix que conta e verifica os 21 campos solicitados no detalhe, ausência dos novos campos sensíveis na lista/CSV e preservação visível explícita de `issueDate`, `referencedAccessKey`, `operationNature` e `quantity`.
 - [ ] `VAL-10` Executar scan/revisão do diff e artifacts para garantir que nenhum valor real fornecido na solicitação foi copiado ou persistido.
 - [ ] `VAL-11` Executar exportação sintética no limite de 20.000 records com `recipientName` de 255 caracteres, provando que nenhum campo pessoal detail-only é retido e que prazo/schema permanecem válidos.
 
@@ -499,9 +499,9 @@ Todos os campos abaixo são propriedades obrigatórias no JSON. `string|null` ac
 - **Canonical multi-lane audit protocol:** `audit-protocol-triple-review` (required before Completed; additive, not a substitute for planning critique)
 - **Audit session / round evidence:** `delivery-side; pending implementation`
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
-- **Critique status:** `not_run`
-- **Findings summary:** previous six findings remain integrated, but a fresh critique is required for expanded detail PII/ID scope.
-- **Evidence / reference:** historical reviewer `/root/fiscal_visibility_plan_critique`; expanded-scope rerun pending.
+- **Critique status:** `no_material_findings`
+- **Findings summary:** fresh critic found no approval-breaking issue; two non-blocking clarifications were integrated: no nonexistent detail-cache claim and explicit UI preservation of all four prior detail-only fields.
+- **Evidence / reference:** fresh no-context reviewer `/root/fiscal_detail_plan_critique_r2` reviewed baseline `3b94edc` and returned `acceptable`; historical findings from `/root/fiscal_visibility_plan_critique` remain integrated.
 - **Waiver authority / reference:** `n/a`
 
 | Finding ID | Resolution | Usefulness | Formalizable | Candidate Rule Level | Candidate Rule ID | Rationale / Evidence |
@@ -512,6 +512,8 @@ Todos os campos abaixo são propriedades obrigatórias no JSON. `string|null` ac
 | `CRIT-04` | `Integrated` | `useful` | `partial` | `project` | `n/a` | touched surfaces and VAL-06 name `fiscal-notes.application.spec.ts` as the real JWT/profile HTTP boundary |
 | `CRIT-05` | `Integrated` | `useful` | `partial` | `project` | `n/a` | `D-10` and DOD-09 make the frontend required field strict for list/detail |
 | `CRIT-06` | `Integrated` | `useful` | `no` | `none` | `n/a` | consumer inventory includes export/RLS/live/application/notas-unit fixtures; SCOPE-09/D-10 remove obsolete mask helpers |
+| `CRIT2-01` | `Integrated` | `useful` | `no` | `none` | `n/a` | DOD-14 now states no detail cache exists instead of implying a detail cache key |
+| `CRIT2-02` | `Integrated` | `useful` | `partial` | `project` | `n/a` | VAL-09 names all four existing detail-only fields whose visible preservation must be proved |
 
 ## Gate: Assumption Code Coherence
 - **Gate decision:** `required`
