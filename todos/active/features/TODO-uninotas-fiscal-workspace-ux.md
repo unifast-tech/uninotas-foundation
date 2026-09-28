@@ -208,7 +208,8 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 ## Architecture Review Gates
 
 - **Architecture decision review:** `required`
-- **Decision review status:** `findings_integrated_pending_rerun`
+- **Decision review status:** `no_material_findings`
+- **Decision review evidence / resolution:** R3 fresh critique: `GO`, sem findings materiais; story bound, retry, disclosure e ativo confirmados.
 - **Architecture adherence review:** `required after implementation`
 - **Adherence status:** `not_run`
 - **No-go handling:** `retornar ao plano; não aprovar/concluir com finding material aberto`.
@@ -249,7 +250,9 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 ## Independent No-Context Critique Gate
 
 - **Critique decision:** `required`
-- **Critique status:** `not_run`
+- **Critique status:** `no_material_findings`
+- **Findings summary:** R3 fresh no-context critique retornou `UX — GO`, sem findings materiais.
+- **Evidence / reference:** reviewer `/root/fiscal_split_critique_r3`, baseline `03c225d0fe9278b3b594a883b28a929ecbe4d70d`.
 - **Isolation:** `fresh internal no-context reviewer; cannot implement`
 - **Lenses:** `correctness|accessibility|elegance|structure|regression`.
 

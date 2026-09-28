@@ -132,12 +132,28 @@ Query opcional:
 | --- | --- | --- |
 | `400` | `ConsultaDeNotasInvalida` | filtro inválido, desconhecido ou `pagina` presente |
 | `422` | `ExportacaoFiscalLimiteExcedido` | rows/pages/bytes excedem envelope; mensagem orienta reduzir filtros |
-| `429` | `ExportacaoFiscalOcupada` | contexto/global/actor admission ou context budget sem capacidade; `Retry-After` é `5` para concorrência e os segundos restantes para o rolling minute do ator |
+| `429` | `ExportacaoFiscalOcupada` | configuração incapaz, contexto/global/actor admission ou rolling cooldown; `Retry-After` segue a precedência abaixo |
+| `429` | `LimiteDeConsultaExcedido` | `ratePerUserMinute` já esgotado; `Retry-After` é o restante da janela fixa existente |
 | `502` | `ExportacaoFiscalPaginacaoInconsistente` | metadata, tamanho, contagem ou ID duplicado diverge |
 | `504` | `ExportacaoFiscalPrazoExcedido` | deadline total de 180s |
 | existing mapped status | existing provider code | credencial, contrato, indisponibilidade, quota externa ou timeout de uma página |
 
 Abort por desconexão do cliente encerra o trabalho e não tenta responder. Não há retry.
+
+### Atomic Admission and `Retry-After`
+
+Antes da primeira chamada provider, uma seção crítica síncrona por instância avalia, sem mutação, configuração mínima, actor ativo/cooldown, contexto ativo, limite global e user fixed-window budget. Se qualquer condição rejeitar, nenhum contador, cooldown ou lease é alterado.
+
+Somente quando todas passam, a mesma seção crítica: consome exatamente uma unidade do user budget; grava o início do rolling cooldown de 60s; e adquire leases de actor/context/global. O cooldown conta do start aceito e permanece consumido mesmo se a chamada posterior falhar, pois o trabalho foi admitido. Leases ativos são liberados em success/error/abort. Cada provider page consome depois o scheduler/budget de contexto; indisponibilidade temporária de token espera até o deadline e termina em 504 se não houver tempo, nunca vira uma segunda cobrança de usuário.
+
+Mapeamento determinístico quando uma tentativa é rejeitada:
+
+1. configuração incapaz de exportar (`maxConcurrency < 2` ou export share zero): `ExportacaoFiscalOcupada`, `Retry-After: 60`;
+2. se qualquer bloqueio export-specific coexistir (actor ativo, actor cooldown, contexto ativo ou global cheio): `ExportacaoFiscalOcupada`, com `Retry-After = max(5 para cada lease ocupado, segundos restantes do cooldown, segundos restantes da user fixed window se também esgotada)`;
+3. se o único bloqueio for user fixed-window: `LimiteDeConsultaExcedido`, com segundos até a próxima janela fixa;
+4. token temporário do context budget após admissão espera; deadline produz `ExportacaoFiscalPrazoExcedido` 504.
+
+O relógio injetável governa tanto a janela fixa quanto o cooldown. Testes cobrem colisões, fronteira exata de minuto, relógio avançado, rejeição sem mutation de todos os contadores/leases e liberação em todos os exits.
 
 ## Pagination Consistency Contract
 
@@ -356,6 +372,7 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 | `EX-M01` | `medium` | downloader também serve CSV PostgreSQL | assinatura retrocompatível e teste do legado |
 | `R3-EX-H01` | `high` | actor rate podia ser cobrado uma vez ou por página | uma unidade no start + um ativo e um start/min/ator; pages usam context budget |
 | `R3-EX-M02` | `medium` | teste owner do filtro global faltava no diff | `all-exceptions.filter.spec.ts` incluído |
+| `R4-EX-H01` | `high` | rejeição/collision/Retry-After ainda permitia implementações divergentes | admissão atômica sem charge em rejeição + precedência cause/header congelada |
 
 ### Residual Risks
 
@@ -376,11 +393,11 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 - **Gate decision:** `required`
 - **Baseline branch:** `uninotas-foundation/main`
-- **Baseline commit:** `03c225d0fe9278b3b594a883b28a929ecbe4d70d`
+- **Baseline commit:** `ce8ef11885d5d97f63e4d4ece4a4a9452cadce36`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** findings R2 foram integrados em baseline material isolado e publicado.
-- **Evidence / reference:** `origin/main` contém `03c225d0fe9278b3b594a883b28a929ecbe4d70d`; commit material final altera somente os dois TODOs após `ed3b774`.
+- **Findings summary:** findings R3 de actor budget/test ownership foram integrados em baseline material isolado e publicado.
+- **Evidence / reference:** `origin/main` contém `ce8ef11885d5d97f63e4d4ece4a4a9452cadce36`; commit material altera somente este TODO.
 
 ## Gate: Review Scope Drift
 
@@ -409,6 +426,8 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 - **Critique decision:** `required`
 - **Critique status:** `not_run`
+- **Findings summary:** R3 encontrou actor-budget ambíguo e spec ausente; ambos integrados em `ce8ef118`; R4 pendente.
+- **Evidence / reference:** reviewer `/root/fiscal_split_critique_r3`.
 - **Isolation:** `fresh internal no-context reviewer; cannot implement`
 - **Lenses:** `correctness|performance|security|elegance|structure|operational fit`.
 
@@ -508,7 +527,7 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 - **Profile RLS-P1 default:** fake config `maxConcurrency=8`, context rate `120/min`, user rate `30/min`; dois exports de atores distintos (um/contexto) + list/detail controlados; 200 pages/20k rows/24MiB; segundo export do mesmo ator e extra por contexto falham 429.
 - **Profile RLS-P2 constrained/saturated:** fake config `maxConcurrency=2`, context rate `4/min`, user rate `2/min`; somente um export global, um slot interativo reservado; actor/context budgets, cooldown e abort/recovery sob fake clock.
-- **Thresholds:** cada start consome exatamente uma user-budget unit; nenhum ator possui >1 export ativo ou >1 start aceito/rolling minute; page calls não alteram user counter; export calls nunca ultrapassam `floor(contextRate*0.75)`/min/context; total calls nunca ultrapassam context rate; export concurrency <= `min(2,maxConcurrency-1)`; admitted list/detail error rate `0%`; p95 list/detail <= `2x` baseline do mesmo stub; extras `100%` no erro esperado; ator B pode iniciar quando contexto distinto/global permitem; output <=24MiB; peak heap delta <=96MiB no P1; cleanup/recovery <=1s após abort com fake port; zero late calls após deadline.
+- **Thresholds:** cada start aceito consome exatamente uma user-budget unit e inicia um cooldown; toda rejeição pré-admissão preserva user/context counters, cooldown e leases; nenhum ator possui >1 export ativo ou >1 start aceito/rolling minute; page calls não alteram user counter; colisões retornam o code/Retry-After da precedência congelada, inclusive fronteira fixa/rolling; export calls nunca ultrapassam `floor(contextRate*0.75)`/min/context; total calls nunca ultrapassam context rate; export concurrency <= `min(2,maxConcurrency-1)`; admitted list/detail error rate `0%`; p95 list/detail <= `2x` baseline do mesmo stub; extras `100%` no erro esperado; ator B pode iniciar quando contexto distinto/global permitem; output <=24MiB; peak heap delta <=96MiB no P1; cleanup/recovery <=1s após abort com fake port; zero late calls após deadline.
 - Capturar p50/p95/p99, throughput, statuses, calls por classe/contexto, active/peak, RSS/heap, bytes, abort/recovery.
 - Artifact planejado: `foundation_documentation/artifacts/tmp/uninotas-export-pcv/rls-pcv1.json`.
 
