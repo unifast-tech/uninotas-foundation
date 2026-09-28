@@ -313,11 +313,11 @@ Este corte estabelece uma experiência única e coerente para o workspace fiscal
 - **Why this decision:** mudança medium/cross-stack/public contract exige review reproduzível.
 - **Trigger stage:** `before first planning-side review or guard`
 - **Baseline branch:** `uninotas-foundation/main`
-- **Baseline commit:** `pending`
-- **Baseline push reference:** `pending`
-- **Gate status:** `not_run`
-- **Findings summary:** `pending`
-- **Evidence / reference:** `pending commit/push`
+- **Baseline commit:** `9c67c9d6521dd4570d186965774195b52a55d9fc`
+- **Baseline push reference:** `origin/main@9c67c9d6521dd4570d186965774195b52a55d9fc`
+- **Gate status:** `no_material_findings`
+- **Findings summary:** `o commit material contém somente este TODO e foi publicado no main canônico da Foundation`.
+- **Evidence / reference:** `git diff --cached --name-status` registrou apenas `A todos/active/features/TODO-uninotas-fiscal-workspace-ux-and-export.md`; Git for Windows publicou `db96701..9c67c9d`.
 - **Waiver authority / reference:** `n/a`
 - **Pre-freeze packet-prep rule:** `all review rows remain prepared-pre-freeze until this gate passes`.
 
@@ -480,7 +480,7 @@ Este corte estabelece uma experiência única e coerente para o workspace fiscal
 
 - **Canonical method:** `wf-docker-audit-escalation-method`
 - **Guard command:** `python3 delphi-ai/tools/audit_escalation_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-fiscal-workspace-ux-and-export.md`
-- **Latest TEACH evidence / artifact:** `pending baseline freeze`
+- **Latest TEACH evidence / artifact:** `pending audit guard after origin/main@9c67c9d`.
 
 | Trigger | Value | Notes |
 | --- | --- | --- |
