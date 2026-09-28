@@ -103,8 +103,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Scope Item | Local Branch/Commit | Main / Authority | Local Source/Build Validation | Single Remote Target: Stage Customer-Facing | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Backend + frontend read-only | round-12 predecessor root `85442f5`/carrier `d5420be`; round-13 root em `Gate: Review Baseline Freeze`; code-origin `31712a0` | `pending promotion to main` | `pending final cutover suite` | `pending one direct cutover` | `planning freeze/attestation governed by review gate` |
-| Foundation cutover contract | round-12 predecessor `05e2765`/attestation `82c3401`; round-13 material em `Gate: Review Baseline Freeze` | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round-13 material frozen; attestation may follow` |
+| Backend + frontend read-only | round-13 material root `9c136fa7dc6e80c2ceccaf1405510460b3b28685`; code-origin `31712a0` | `pending promotion to main` | `pending final cutover suite` | `pending one direct cutover` | `planning freeze/attestation governed by review gate` |
+| Foundation cutover contract | round-13 material `4ab7e1d6c03ca2e13f0cf7702228d240a793d06e` | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round-13 material frozen; this checkpoint records its attestation` |
 
 ## Out of Scope
 
@@ -173,7 +173,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Repository | Path | Baseline ref | Comparison mode |
 | --- | --- | --- | --- |
-| `MonitorNotes` | `.` | round-12 material root `85442f5ee4e6343b5ccb3b4c58b9f3d229361730`; attestation carrier `d5420be4736739bd51d21e73020a497197ceac23` | `committed_diff`; `31712a0` remains code-origin; round-13 refs irão ao review gate; attestation-only carrier não é implementação |
+| `MonitorNotes` | `.` | round-13 material root `9c136fa7dc6e80c2ceccaf1405510460b3b28685` | `committed_diff`; `31712a0` remains code-origin; attestation-only carrier não é implementação |
 | `uninotas-foundation` | `foundation_documentation` | `Gate: Review Baseline Freeze -> Baseline commit` | `committed_diff` |
 
 ### Expected Changed Paths
@@ -612,11 +612,11 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 - **Why this decision:** release, segredos, dois contextos e promoção canônica exigem revisão reproduzível.
 - **Trigger stage:** `before first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `pending round-13 material publication`
+- **Baseline commit:** `4ab7e1d6c03ca2e13f0cf7702228d240a793d06e`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `not_run`
-- **Findings summary:** `R12-OPS-01..02`, `R12-SEC-01`, `R12-ARCH-01`, `R12-PERF-01..02`, `R12-STRUCT-01` e `R12-DOC-01` integrados; publicação round 13 pendente.
-- **Evidence / reference:** predecessor `origin/main@05e27650bc717c4ad0e08bbd5d2a0517b68ebeee`; round-12 attestation `82c3401`; root material/carrier `85442f5`/`d5420be`; novo SHA será registrado após commit/push.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** `R12-OPS-01..02`, `R12-SEC-01`, `R12-ARCH-01`, `R12-PERF-01..02`, `R12-STRUCT-01` e `R12-DOC-01` foram integrados e publicados no material round 13; confirmação independente permanece pendente.
+- **Evidence / reference:** Foundation material `origin/main@4ab7e1d6c03ca2e13f0cf7702228d240a793d06e`; root material `MonitorNotes/delphi-and-foundation@9c136fa7dc6e80c2ceccaf1405510460b3b28685`; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73`; Delphi guard `ee9b448`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Review Scope Drift
@@ -629,7 +629,7 @@ Transições não podem pular evidência: `REC-1 -> REC-2A` ocorre no instante d
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-cutover.md`
 - **Gate status:** `not_run`
 - **Findings summary:** achados round 12 alteraram material de aprovação; scope drift só pode ser atestado após publicar e revisar o freeze round 13.
-- **Evidence / reference:** predecessor `uninotas-foundation:main@05e27650bc717c4ad0e08bbd5d2a0517b68ebeee`; nova evidência virá após convergência round 13.
+- **Evidence / reference:** baseline congelado em `uninotas-foundation:main@4ab7e1d6c03ca2e13f0cf7702228d240a793d06e`; execução aguarda convergência da confirmação round 13.
 - **Waiver authority / reference:** `n/a`.
 
 ## Frontend / Consumer Matrix
