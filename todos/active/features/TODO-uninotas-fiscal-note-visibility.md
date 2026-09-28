@@ -191,15 +191,48 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 | introduzir pesquisa por número disfarçada | React/adapter | diff review e contract tests dos filtros permitidos |
 | persistir nome/chaves/compra | URL/browser/db/logs | testes de URL/cache/logout e security review |
 
+### Architecture Protection Harness
+| Harness Type | Surface | Command / Rule / Artifact | Regression It Must Catch | Adoption Timing | Evidence Plan / Follow-up |
+| --- | --- | --- | --- | --- | --- |
+| `test` | Smart Notas adapter/DTO | `backend/src/fiscal-notes/smart-notas.adapter.spec.ts`; backend full suite | PII não aprovada atravessando a allowlist | `implement-in-this-todo` | `DOD-03`, `VAL-01`, `VAL-02` |
+| `test` | React normalization/UI | frontend fiscal tests + `npm run e2e:notas` | nome ausente quebrando UI ou identificadores ainda mascarados | `implement-in-this-todo` | `DOD-01`, `DOD-02`, `DOD-05`, `VAL-03`, `VAL-04` |
+| `audit` | contrato de privacidade | `security-adversarial-review` | PII/IDs em URL, storage, logs ou erro | `implement-in-this-todo` | `DOD-06`, `VAL-05` |
+
+## Architecture Review Gates (Deterministically Derived From Architecture Change Governance)
+- **Architecture decision review:** `required`
+- **Decision review lifecycle:** `after diagnosis is closed and before APROVADO`
+- **Decision review kind:** `architecture_opinion`
+- **Decision review package:** `bounded-summary`
+- **Decision review status:** `not_run`
+- **Decision review evidence / resolution:** `pending`
+- **Architecture adherence review:** `required`
+- **Adherence review lifecycle:** `after implementation and before Completed`
+- **Adherence review kind:** `architecture_adherence`
+- **Adherence review package:** `bounded-file-set`
+- **Adherence review status:** `not_run`
+- **Adherence review evidence / resolution:** `pending`
+- **No-go handling:** `when either required review is absent, blocked, or exposes an unresolved approval-breaking divergence, return to the affected diagnosis/decision or delivery-evidence loop; do not claim APROVADO or Completed.`
+
 ## Assumptions Preview
-| ID | Assumption | Evidence | Contract Impact |
-| --- | --- | --- | --- |
-| `A-01` | `nome` é o nome/razão social do tomador | live-shape redigida em ambos os contextos no discovery; payload Prosperar revalidado em 2026-09-28 | nova coluna/DTO |
-| `A-02` | leitores atuais são membros da equipe financeira | confirmação explícita do usuário em 2026-09-28 | autorização existente é preservada |
-| `A-03` | compra/chave já chegam completos e só são mascarados no React | adapter, DTO e `normalizacaoFiscal.ts` | mudança predominantemente de apresentação |
-| `A-04` | Smart Notas não oferece filtro por número | OpenAPI e probe redigido com quatro aliases ignorados | justifica a exclusão aprovada em `D-04` |
+| Assumption ID | Assumption | Evidence | If False | Confidence | Handling |
+| --- | --- | --- | --- | --- | --- |
+| `A-01` | `nome` é o nome/razão social do tomador | `todos/active/process/TODO-uninotas-smart-notas-api-and-fiscal-context-discovery.md`; observed field matrix | label/semantics must be corrected before implementation | `High` | `Promote to Decision` via `D-01` |
+| `A-02` | leitores atuais são membros da equipe financeira | user confirmation dated 2026-09-28; `frontend/src/paginas/Equipe.tsx` roles | authorization contract must be redesigned | `High` | `Promote to Decision` via `D-02` |
+| `A-03` | compra/chave already arrive complete and are masked only in React | `backend/src/fiscal-notes/smart-notas.adapter.ts`; `frontend/src/notas/normalizacaoFiscal.ts`; `frontend/src/paginas/ListaNotas.tsx` | backend/provider contract work would be required | `High` | `Keep as Assumption` |
+| `A-04` | Smart Notas não oferece filtro por número | official OpenAPI plus redacted probe; discovery search matrix | exclusion remains harmless, but a future TODO may reconsider | `High` | `Keep as Assumption` |
 
 ## Execution Plan
+### Touched Surfaces
+- `backend/src/fiscal-notes/**`
+- `frontend/src/api/notas.ts`
+- `frontend/src/notas/normalizacaoFiscal.ts`
+- `frontend/src/paginas/ListaNotas.tsx`
+- `frontend/src/paginas/DetalheNota.tsx`
+- `frontend/src/estilos/**`
+- `frontend/e2e/notas.mjs`
+- canonical fiscal module, feature brief and this TODO
+
+### Ordered Steps
 1. Adicionar testes fail-first para `recipientName`, allowlist e exibição integral.
 2. Estender adapter, tipos e serviço fiscal sem alterar query/filtros.
 3. Estender tipos/normalização, Geral e detalhe React.
@@ -209,9 +242,20 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 
 ## Test Strategy
 - **Intent:** `critical-user-journey` e `compatibility`.
-- **Approach:** `test-first` para DTO/normalização e regressões visuais; fixtures exclusivamente sintéticas.
-- **Fail-first targets:** nome presente/ausente, PII extra descartada, compra/chave completas, quebra visual de valores longos e preservação dos filtros/exportação existentes.
+- **Strategy:** `test-first` para DTO/normalização e regressões visuais; fixtures exclusivamente sintéticas.
+- **Why:** a mudança é observável, aditiva no contrato e sensível à privacidade.
+- **Fail-first target(s):** nome presente/ausente, PII extra descartada, compra/chave completas, quebra visual de valores longos e preservação dos filtros/exportação existentes.
 - **Deliberate exclusions:** nenhum payload real, segredo, CNPJ, nome real ou identificador real será persistido em teste/artifact.
+
+### Pre-APROVADO RED Evidence Capture
+- **Decision:** `not_needed`
+- **Why now:** não é correção de bug/regressão e o comportamento solicitado está suficientemente definido.
+- **Target symptom:** `n/a`
+- **Allowed surfaces:** `n/a`
+- **Forbidden surfaces reaffirmed:** `production code|runtime/config/deploy|canonical project docs outside TODO authoring`
+- **Planned command / target:** `n/a`
+- **Status:** `not_run`
+- **Findings summary:** `n/a`
 
 ## Frontend / Consumer Matrix
 | Producer | Consumer | Contract Change | Compatibility / Evidence |
@@ -236,30 +280,140 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 | frontend | `npm run build && npm run lint` | bundle/tipos/estilo | dependências instaladas | `planned` |
 | frontend | `npm run e2e:notas` | jornada visível e responsiva | bundle fresco + Chrome local | `planned` |
 
-## Audit Trigger Matrix
-| Signal | Result | Rationale |
-| --- | --- | --- |
-| shared/public API contract | `yes` | DTO fiscal recebe campo aditivo |
-| security/privacy | `yes` | nome e identificadores completos |
-| performance-sensitive search | `no` | pesquisa por número foi cancelada e query não muda |
-| retriggerable async UI | `no-new-risk` | async/cache/filtros permanecem inalterados |
-| persistence/schema | `no` | nenhuma persistência ou migração |
-| architecture decision review | `required` | supersede intencional do contrato de privacidade |
-| independent critique | `required` | complexidade medium + API/privacy |
-| triple review | `pending-guard` | será derivado pelo audit escalation guard |
-
 ## Plan Review Gate
-- **Status:** `prepared-pending-freeze`
-- **Architecture:** Smart Notas permanece autoridade; o DTO público amplia somente a allowlist de nome.
-- **Code quality:** um campo canônico `recipientName`; sem lógica duplicada de masking/filtering.
-- **Tests:** contrato e browser cobrem valores longos/ausentes e preservam filtros/exportação.
-- **Performance:** nenhuma chamada upstream, varredura, query ou cardinalidade nova.
-- **Security:** ampliação é allowlisted e autorizada para leitores financeiros; demais PII continua proibida.
+
+### Review Sections
+- [x] Architecture — Smart Notas permanece autoridade; o DTO público amplia somente a allowlist de nome.
+- [x] Code Quality — um campo canônico `recipientName`; nenhuma lógica de filtro, busca ou persistência nova.
+- [x] Tests — contrato e browser cobrem valores longos/ausentes e preservam filtros/exportação.
+- [x] Performance — nenhuma chamada upstream, varredura, query ou cardinalidade nova.
+- [x] Security — ampliação allowlisted e autorizada para leitores financeiros; demais PII continua proibida.
+- [x] Elegance — extensão aditiva do record existente e remoção da máscara no consumidor, sem novo serviço/abstração.
+- [x] Structural Soundness — adapter continua sendo o limite de payload e o frontend recebe somente DTO normalizado.
+
+### Issue Cards
+- **Issue ID:** `SEC-01`
+  - **Severity:** `medium`
+  - **Evidence:** contrato atual exclui PII em `modules/fiscal-notes-and-documents.md`; usuário autorizou nome completo a todos os leitores financeiros.
+  - **Why it matters now:** ampliar PII sem allowlist estreita poderia expor documento, contato ou endereço por acidente.
+  - **Option A (Recommended):** adicionar somente `recipientName` ao record normalizado e manter todos os demais campos fora do DTO.
+    - **Effort:** `low`
+    - **Risk:** `medium`
+    - **Blast radius:** `cross-module`
+    - **Maintenance burden:** `low`
+    - **Performance impact:** `neutral`
+    - **Elegance impact:** `improves`
+    - **Structural soundness impact:** `improves`
+  - **Option B (Alternative):** expor um objeto completo do tomador e ocultar campos no React.
+    - **Effort:** `low`
+    - **Risk:** `high`
+    - **Blast radius:** `cross-module`
+    - **Maintenance burden:** `high`
+    - **Performance impact:** `neutral`
+    - **Elegance impact:** `regresses`
+    - **Structural soundness impact:** `regresses`
+  - **Option C (Do Nothing):** manter nome excluído e identificadores mascarados.
+    - **Effort:** `low`
+    - **Risk:** `low`
+    - **Blast radius:** `local`
+    - **Maintenance burden:** `low`
+    - **Performance impact:** `neutral`
+    - **Elegance impact:** `neutral`
+    - **Structural soundness impact:** `neutral`
+  - **Recommendation:** `Option A`, pois atende a equipe financeira com minimização explícita e preserva o adapter como trust boundary.
+
+### Failure Modes & Edge Cases
+- [x] `nome` ausente/null: renderizar `Não disponível` sem falhar a página.
+- [x] compra/chave ausentes: manter `Não disponível` em vez de string vazia.
+- [x] valores longos: permitir quebra/cópia sem alargar indefinidamente a tabela.
+- [x] payload com PII adicional: descartar no adapter/normalizador e provar por teste negativo.
+- [x] CSV existente: não adicionar nome e preservar contrato/ordem atual.
+
+### Residual Unknowns / Risks
+- [x] Uma conta financeira comprometida verá os dados completos autorizados; risco residual aceito para esta superfície autenticada e revisto no gate de segurança.
+
+## Additional Architectural Opinions
+- **Needed:** `no`
+- **Why ambiguity remains:** `n/a`; o filtro foi cancelado e resta um único caminho dominante de DTO allowlisted.
+- **Opinion count:** `0`
+- **Package mode:** `bounded-summary`
+- **Internal reviewer mandate:** `not_needed`
+- **Required lenses:** `correctness|performance|elegance|structural-soundness|operational-fit`
+
+## Audit Trigger Matrix (Required Before Audit Decisions Are Trusted)
+- **Canonical method:** `wf-docker-audit-escalation-method`
+- **Guard command:** `python3 delphi-ai/tools/audit_escalation_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-fiscal-note-visibility.md`
+- **Latest TEACH evidence / artifact:** `Overall outcome: go`; fingerprint `44e80676b588`; architecture decision review and critique required before approval; delivery audits derived as recorded below.
+
+| Trigger | Value | Notes |
+| --- | --- | --- |
+| `complexity` | `medium` | cross-stack API/UI/privacy change |
+| `blast_radius` | `cross-stack` | NestJS producer and React consumers |
+| `behavioral_change_or_bugfix` | `yes` | new visible field and unmasked identifiers |
+| `changes_public_contract` | `yes` | additive `recipientName` field |
+| `touches_auth_or_tenant` | `no` | profiles and guards remain unchanged |
+| `touches_runtime_or_infra` | `no` | no deploy/runtime/config change |
+| `touches_tests` | `yes` | contract/unit/browser fixtures and assertions change |
+| `critical_user_journey` | `yes` | finance note identification in Geral/detail |
+| `release_or_promotion_critical` | `yes` | requested for the pending delivery package |
+| `high_severity_plan_review_issue` | `no` | SEC-01 is medium and resolved in the plan |
+| `explicit_three_lane_request` | `no` | user did not request dedicated three-lane protocol |
+
+## Independent No-Context Critique Gate
+- **Critique decision:** `required`
+- **Why this decision:** medium cross-stack public-contract and privacy change.
+- **Impact signals in scope:** `cross-stack blast radius|public contract/api|intentional module supersede`
+- **Package mode:** `bounded-summary`
+- **Package minimum contents:** `frozen baseline|scope boundary|assumptions|execution plan|SEC-01|security residual`
+- **Critique isolation mode:** `fresh internal no-context reviewer`
+- **Internal reviewer mandate:** `required; fresh no-context reviewer distinct from the architecture-opinion reviewer and implementing agent`
+- **Canonical multi-lane audit protocol:** `audit-protocol-triple-review` (required before Completed; additive, not a substitute for planning critique)
+- **Audit session / round evidence:** `delivery-side; pending implementation`
+- **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
+- **Critique status:** `not_run`
+- **Findings summary:** `pending`
+- **Evidence / reference:** `pending`
+- **Waiver authority / reference:** `n/a`
+
+## Gate: Assumption Code Coherence
+- **Gate decision:** `required`
+- **Why this decision:** A-01 through A-03 directly determine the public DTO and presentation change.
+- **Trigger stage:** `after critique convergence and before APROVADO`
+- **Guard scope:** `A-01,A-02,A-03,A-04`
+- **Guard command:** `python3 delphi-ai/tools/assumption_code_coherence_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-fiscal-note-visibility.md`
+- **Gate status:** `not_run`
+- **Findings summary:** `pending`
+- **Evidence / reference:** `pending`
+- **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Baseline Freeze
-- **Status:** `pending-freeze`
-- **Branch / commit / push:** `pending`
-- **Reason:** o contrato foi reconvergido após o cancelamento do filtro e aguarda commit/push antes das revisões.
+- **Gate decision:** `required`
+- **Why this decision:** planning-side reviews must evaluate a committed and pushed scope-bearing contract.
+- **Trigger stage:** `before the first planning-side review or guard run`
+- **Baseline branch:** `main`
+- **Baseline commit:** `9d389bdcbbf2858cf068335936f82eb808064172`
+- **Baseline push reference:** `origin/main`
+- **Gate status:** `no_material_findings`
+- **Findings summary:** scope-bearing contract frozen after removal of number search.
+- **Evidence / reference:** authority guards returned `go`; remote advanced `c4056a9..9d389bd`.
+- **Waiver authority / reference:** `n/a`
+- **Pre-freeze packet-prep rule:** `satisfied; no review result predates the freeze`
+
+## Gate: Review Scope Drift
+- **Gate decision:** `required`
+- **Why this decision:** scope-bearing sections must remain aligned with the frozen no-number-search contract.
+- **Trigger stage:** `after the planning-side review/guard cycle converges and before APROVADO`
+- **Baseline source:** `Review Baseline Freeze -> Baseline commit`
+- **Material sections compared:** `Context|Contract Boundary|Scope|Out of Scope|Definition of Done|Validation Steps|Execution Lane Tracking|Canonical Module Anchors|Decisions|Decision Baseline|Architecture Change Governance|Questions To Close|Assumptions Preview|Execution Plan|Flow Evidence Planning Matrix|Local CI-Equivalent Suite Matrix|Runtime / Rollout Notes|Security Risk Assessment|Performance & Concurrency Risk Assessment`
+- **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-fiscal-note-visibility.md`
+- **No-go handling rule:** `return to review, revalidate material changes with the user and refresh the pushed baseline`
+- **Gate status:** `not_run`
+- **Findings summary:** `pending`
+- **Evidence / reference:** `pending`
+- **Waiver authority / reference:** `n/a`
+
+## Questions To Close
+- [x] Nenhuma pergunta material permanece; o filtro por número foi explicitamente cancelado.
 
 ## Rules Acknowledgement / Ingestion
 | Rule / Workflow / Skill | Why It Applies | Pre-Approval Status |
