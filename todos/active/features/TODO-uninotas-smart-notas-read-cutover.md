@@ -40,7 +40,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** publicar/fixar o round-4 com os findings integrados, executar confirmação arquitetural e crítica independente, depois guards e `preflight-go`; nenhuma mutação Railway está autorizada.
+- **Next exact step:** executar confirmação arquitetural e crítica independente sobre o round-4 publicado, depois guards e `preflight-go`; nenhuma mutação Railway está autorizada.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -100,7 +100,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 | Scope Item | Local Branch/Commit | Main / Authority | Exact-Image Local Validation | Single Remote Target: Stage Customer-Facing | Current Status |
 | --- | --- | --- | --- | --- | --- |
 | Backend + frontend read-only | `delphi-and-foundation@31712a042cab3c796d5daca7350c6c58453e1c73` | `pending promotion to main` | `pending final cutover suite` | `pending one direct cutover` | `published review candidate` |
-| Foundation cutover contract | `main@f49a479b3b18ee3ccacc1a04f08a3be21a7d689a` | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `published round-3 review baseline` |
+| Foundation cutover contract | `main@565d1d0601fd6e50a8013d72090a1deaadd8a84d` | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `published round-4 review baseline` |
 
 ## Out of Scope
 
@@ -146,7 +146,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 ## Diff Expectation Contract
 
-- **Contract status:** `required; round-4 refresh pending after confirmation findings`
+- **Contract status:** `required; round-4 baseline checkpoint frozen`
 - **Policy:** `strict; unclassified or forbidden paths block delivery`
 - **User validation:** `required on deviation`
 - **Comparison mode:** `working_tree after candidate checkpoint`
@@ -156,7 +156,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 | Repository | Path | Baseline ref | Comparison mode |
 | --- | --- | --- | --- |
 | `MonitorNotes` | `.` | `31712a042cab3c796d5daca7350c6c58453e1c73` | `committed_diff` |
-| `uninotas-foundation` | `foundation_documentation` | `f49a479b3b18ee3ccacc1a04f08a3be21a7d689a` | `committed_diff` |
+| `uninotas-foundation` | `foundation_documentation` | `565d1d0601fd6e50a8013d72090a1deaadd8a84d` | `committed_diff` |
 
 ### Expected Changed Paths
 
@@ -436,11 +436,11 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 - **Why this decision:** release, segredos, dois contextos e promoção canônica exigem revisão reproduzível.
 - **Trigger stage:** `before first planning-side review or guard run`
 - **Baseline branch:** `MonitorNotes:delphi-and-foundation` + `uninotas-foundation:main`
-- **Baseline commit:** código inicial preservado em `MonitorNotes@31712a042cab3c796d5daca7350c6c58453e1c73`; Foundation round 3 `f49a479b3b18ee3ccacc1a04f08a3be21a7d689a` foi revisada e está superseded pelo round 4 ainda não publicado.
-- **Baseline push reference:** `MonitorNotes/delphi-and-foundation` publicado; refresh Foundation main-only pendente.
-- **Gate status:** `blocked`
-- **Findings summary:** `CONFIRM-ARCH-01..06` mudaram materialmente ordem, error-only coverage, diff whitelist e pre-deploy gate; novo freeze é obrigatório.
-- **Evidence / reference:** reviewer `/root/cutover_architecture_confirmation`; novo SHA será registrado após push.
+- **Baseline commit:** `MonitorNotes@31712a042cab3c796d5daca7350c6c58453e1c73` + `uninotas-foundation@565d1d0601fd6e50a8013d72090a1deaadd8a84d`.
+- **Baseline push reference:** `MonitorNotes/delphi-and-foundation` + `uninotas-foundation:main`; SHAs publicados, com Foundation local/remoto verificados.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** `CONFIRM-ARCH-01..06` foram integrados e publicados; round 4 governa confirmação/crítica.
+- **Evidence / reference:** push Foundation `2238c5b..565d1d0`; `rev-parse`/`ls-remote` iguais em `565d1d0601fd6e50a8013d72090a1deaadd8a84d`.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Review Scope Drift
@@ -452,8 +452,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 - **Material sections compared:** `Context|Contract Boundary|Scope|Out of Scope|Definition of Done|Validation Steps|Execution Lane Tracking|Decision Baseline|Architecture Change Governance|Assumptions Preview|Execution Plan|Security Risk Assessment|Performance & Concurrency Risk Assessment`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-cutover.md`
 - **Gate status:** `blocked`
-- **Findings summary:** terceira revisão exigiu novo drift material; executar somente depois do round-4 refresh, architecture confirmation e crítica convergirem.
-- **Evidence / reference:** reviewers das três rodadas; `CONFIRM-ARCH-01..06` integrados, refresh pendente.
+- **Findings summary:** round 4 foi publicado; o guard permanece bloqueado até architecture confirmation e crítica convergirem, quando comparará o pacote revisado com `565d1d0`.
+- **Evidence / reference:** reviewers das três rodadas; `CONFIRM-ARCH-01..06` integrados no baseline publicado.
 - **Waiver authority / reference:** `n/a`.
 
 ## Test Strategy
@@ -479,7 +479,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 ## Plan Review Gate
 
 - **Review decision:** `required`
-- **Review status:** `third-round findings integrated; round-4 freeze and independent confirmation pending`
+- **Review status:** `round-4 frozen; architecture confirmation and independent critique pending`
 - **Required lenses:** architecture, operations, rollback, security, tests, performance, observability and structural soundness.
 - **Known plan finding:** o health atual retorna HTTP 2xx quando o banco está degradado; `D-CUT-10` agora exige readiness separada não-2xx e mantém Smart Notas fora do loop.
 - **Approval request condition:** nova revisão confirma `D-CUT-06..12`, crítica converge, baseline é atualizado e guards retornam `go/preflight-go`.
