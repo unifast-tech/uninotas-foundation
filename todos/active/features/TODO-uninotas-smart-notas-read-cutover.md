@@ -40,13 +40,13 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** despachar arquitetura round30 sobre material/attestation publicados e, se limpa, crítica/coerência/drift com refs exatas. Nenhuma implementação ou mutação Railway está autorizada.
+- **Next exact step:** publicar/atestar round31 com `REC-2B/3A` alinhados a D-CUT-37 e repetir arquitetura/crítica/coerência/drift. Nenhuma implementação ou mutação Railway está autorizada.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
 - **Work state:** `review`
-- **Why this state now:** a arquitetura round29 encontrou a janela de segundo deployment entre changeset e toggle; round30 prepara o freeze exclusivo da source antes do changeset.
-- **Exit condition:** preflight read-only de capacidade conclusivo, decisões `D-CUT-06..37` congeladas, gates vinculados às refs round30 e `todo_authority_guard.py --pre-approval` em `preflight-go`.
+- **Why this state now:** a arquitetura round30 confirmou o freeze, mas encontrou `REC-2B/3A` menos estritos que D-CUT-37 para deployments extras; round31 alinha a state machine executável.
+- **Exit condition:** preflight read-only de capacidade conclusivo, decisões `D-CUT-06..37` congeladas, gates vinculados às refs round31 e `todo_authority_guard.py --pre-approval` em `preflight-go`.
 
 ## Provisional Notes
 
@@ -57,8 +57,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 ## Blocker Notes
 
 - **Blocker:** nenhuma mutação Railway pode ocorrer antes da revisão formal, `preflight-go` e nova aprovação operacional específica.
-- **Why blocked now:** round29 está publicado/atestado com drift 0/23, mas a arquitetura R29 bloqueou a janela de segundo deployment; round30 ainda precisa de publicação, attestation e reviews correntes.
-- **What unblocks it:** round30 publicado/atestado, arquitetura/crítica/coerência/drift sem achados e vinculadas às refs correntes, capacidade pré-implementação conclusiva, guards `preflight-go` e `APROVADO` explícito.
+- **Why blocked now:** round30 está publicado/atestado com drift 0/23, mas a arquitetura R30 bloqueou atalhos em `REC-2B/3A`; round31 ainda precisa de publicação, attestation e reviews correntes.
+- **What unblocks it:** round31 publicado/atestado, arquitetura/crítica/coerência/drift sem achados e vinculadas às refs correntes, capacidade pré-implementação conclusiva, guards `preflight-go` e `APROVADO` explícito.
 - **Owner / source:** project Owner confirmado privadamente / painel Railway; o identificador pessoal não é persistido na Foundation.
 - **Last confirmed truth:** `Unifast Products / Stage / MonitorNotes / US East / main / Pro`, domínio `https://monitornotes-stage.up.railway.app` e project Owner operador foram confirmados; retenção de 30 dias e janela 20:00–22:00 foram aceitas; health respondeu HTTP 200 com aplicação/banco `ok`.
 
@@ -118,8 +118,8 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Scope Item | Local Branch/Commit | Main / Authority | Local Source/Build Validation | Single Remote Target: Stage Customer-Facing | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| Backend + frontend read-only | round30 material root `3b763bbd256a0bc60872cf0d9183ce5ee740fd74`; code-origin `31712a0`; attestation carrier pending | `pending promotion to main` | `pending final cutover suite` | `pre-implementation capacity hard stop; otherwise direct fiscal cutover` | `round30 material published; attestation metadata pending commit` |
-| Foundation cutover contract | round30 material `f1f2945ad0dc32dac600b0598fd9f72dcb7b17c5`; attestation pending | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round30 material published; attestation metadata pending commit` |
+| Backend + frontend read-only | round30 attestation carrier predecessor `0d4d1bb5805e732e89e80e2ec0cf51d0c1660d16`; code-origin `31712a0`; round31 material/attestation pending | `pending promotion to main` | `pending final cutover suite` | `pre-implementation capacity hard stop; otherwise direct fiscal cutover` | `round31 candidate; publication pending` |
+| Foundation cutover contract | round30 attestation predecessor `cf5d67ebcabf1b42268affe9df7ee869229c5ecf`; round31 material/attestation pending | `main-only authority` | `n/a` | `pending runtime promotion after observed cutover` | `round31 candidate; publication pending` |
 
 ## Out of Scope
 
@@ -217,7 +217,7 @@ Inequalities: global `L+C+1+Og+Mg<=G`; database finito `L+C+Xd+Od+Md<=D`; role f
 
 ## Diff Expectation Contract
 
-- **Contract status:** `required; round30 material baseline will be frozen by publication; its attestation must not alter this field`
+- **Contract status:** `required; round31 material baseline will be frozen by publication; its attestation must not alter this field`
 - **Policy:** `strict; unclassified or forbidden paths block delivery`
 - **User validation:** `required on deviation`
 - **Comparison mode:** `working_tree after candidate checkpoint`
@@ -226,7 +226,7 @@ Inequalities: global `L+C+1+Og+Mg<=G`; database finito `L+C+Xd+Od+Md<=D`; role f
 
 | Repository | Path | Baseline ref | Comparison mode |
 | --- | --- | --- | --- |
-| `MonitorNotes` | `.` | round29 attestation carrier predecessor `066f4e8fb2b95d1235f0bc2d5b6730219ed1612e`; round30 material root será registrado no freeze metadata | `committed_diff`; `31712a0` remains code-origin; attestation-only carrier não é implementação |
+| `MonitorNotes` | `.` | round30 attestation carrier predecessor `0d4d1bb5805e732e89e80e2ec0cf51d0c1660d16`; round31 material root será registrado no freeze metadata | `committed_diff`; `31712a0` remains code-origin; attestation-only carrier não é implementação |
 | `uninotas-foundation` | `foundation_documentation` | `Gate: Review Baseline Freeze -> Baseline commit` | `committed_diff` |
 
 ### Expected Changed Paths
@@ -339,7 +339,7 @@ Inequalities: global `L+C+1+Og+Mg<=G`; database finito `L+C+Xd+Od+Md<=D`; role f
 10. Promover somente o PR permitido para `main`, verificar tree equivalente e entrar em `REC-2A`. Capturar o único trigger/approval/revision/build permitido; imediatamente após registrá-lo, desligar Auto-deploy sem cancelar esse trigger, mantendo o freeze de source. Falha do toggle ou qualquer segundo trigger/revision inicia abort e classifica todos como candidatos. Quando o único candidato fica ativo, comprovar `overlap=0`, `drain=20`, antigo ID rollbackable e boot/timer. Barreiras fiscal e de tratamento permanecem fechadas; quiesce/SIGTERM invalida callbacks por epoch.
 11. Ao primeiro `Active` capturado pelo observador contínuo, iniciar deadline monotônico local de 178 s, garantindo máximo real de 180 s; não estender por restart pré-abertura. Gap>2 s, reconnect/restart do observador ou estado ambíguo abortam sem reiniciar timer. Durante `Active-fiscal-fechada`, contar separadamente apenas o 503/header exato; demais falhas seguem thresholds normais e smoke/readiness/mismatch/vazamento continuam abort imediato. Verificar rollback target, login/Erros e handshake fiscal; ADMIN prova ambos bindings e, imediatamente antes do CAS final, revalida identidade/ADMIN sem cache. Expiração sem abertura inicia abort.
 12. Após abertura, iniciar SLO geral e observação de 30 minutos. Geral/detalhe só renderizam sob lease atual; respostas fiscais cruzando o deadline revalidam antes de serializar e streams encerram no deadline. Um primeiro restart pós-abertura recebe a mesma fase local178/real180 e reinicia a observação; segundo restart inesperado aborta. Depois de anterior terminal, affinity, orçamento e runner, ADMIN treatment abre single-flight com revalidação sem cache antes do CAS. Em sucesso, reativar Auto-deploy apenas depois dos 30 minutos verdes, source/runtime coerentes e zero queued/in-flight.
-13. Em abort, seguir `REC-1`, `REC-2A/2B`, `REC-3A`, `REC-3B` e depois `REC-4` quando houve merge. Em 3A, quiesce fiscal externo com auth fresca precede treatment/zeros/fence/+2 s e só então Rollback. Se qualquer control/auth API estiver indisponível/incoerente, 3B usa `Remove` no candidato exato, espera `Removed`, prova candidata/transaction/fence zero estável2 s via runner e só então Rollback. Novo boot reinicia; ação/runner inconclusivos viram breach fail-closed. Após restaurar runtime, manter Auto-deploy off e estabilizar a source em <=24 h por revert revisado para a tree verde ou novo TODO/aprovação; só então, com zero queue, reativar. Evidência remota só se ramo ocorrer.
+13. Em abort, seguir `REC-1`, `REC-2A/2B`, `REC-3A`, `REC-3B` e depois `REC-4` quando houve merge. Inventariar reviewed/extras. REC-2B exige todo candidato never-Active terminal/impedido e runner zeros2s antes de restore. Em 3A, somente o reviewed pode usar quiesce+drain; todo extra que esteve Active exige `Remove -> Removed`, seguido de conjunto completo zero2s antes do Rollback. Se qualquer control/auth API estiver indisponível/incoerente, 3B remove todos. Novo boot/revision reinicia; ação/runner inconclusivos viram breach fail-closed. Após restaurar runtime, manter Auto-deploy off e estabilizar a source em <=24 h por revert revisado para a tree verde ou novo TODO/aprovação; só então, com zero queue, reativar. Evidência remota só se ramo ocorrer.
 14. Após janela verde e inventário externo limpo, promover capabilities/policies/módulos/root docs Foundation atomicamente. Consumidor externo descoberto bloqueia promoção/deploy até coordenação ou novo aceite.
 15. Não sincronizar novo Foundation commit em `MonitorNotes:main` neste closeout; registrar pin divergente e follow-up do próximo release de produto.
 
@@ -381,12 +381,12 @@ Regras comuns: `/eventos/**` e `/realtime/eventos` exigem `Authorization: Bearer
 | `REC-0 no-remote-mutation` | qualquer estado de código/checkpoint, publicado ou não, enquanto nenhuma configuração Railway foi commitada | nenhuma recuperação Railway; reverter somente diff/commit do TODO conforme autoridade Git e manter Stage intocado | refs/status/diff classificados; `5 min` |
 | `REC-1 staged-config` | changeset de dez chaves foi commitado sem redeploy, mas `main` ainda não foi promovida | restaurar o snapshot redatado anterior via novo staged commit sem redeploy; confirmar deployment corrente inalterada | nomes/escopo antes/depois + mesmo deployment ID; `10 min` |
 | `REC-2A post-merge-not-safe` | começa imediatamente após promover o único PR permitido, inclusive sem deployment visível, trigger atrasado/rejeitado, awaiting approval, queued/building/deploying ou revision extra | manter freeze exclusivo; após trigger/revision permitido, desligar Auto-deploy; bloquear restore; impedir/rejeitar todos os triggers ou abortar deployments in-flight serialmente; observar até prova de nenhum candidato Active. Qualquer revision extra é candidata e abort imediato; se qualquer uma esteve Active, ir a `REC-3A` se controls/auth confiáveis, senão `REC-3B` | main SHA/tree + conjunto de revisions/states/ações/toggle; decisão 5 min; sem prova, breach/reassessment |
-| `REC-2B candidate-conclusively-prevented` | trigger conclusivamente rejeitado/impedido sem deployment possível, ou deployment terminal cancelado/falho e nunca active | somente então restaurar snapshot anterior por staged commit sem redeploy e comprovar mesma deployment verde ativa; não usar `Rollback`; manter Auto-deploy off e seguir `REC-4` | prova do trigger impedido ou status terminal + current deployment ID antes/depois + config redatada restaurada; runtime dentro do RTO total `10 min` |
-| `REC-3A candidate-active/control-available` | um ou mais deployments candidatos estiveram Active, deployment verde virou previous e APIs ADMIN respondem confiavelmente | confirmar ID antigo/runner e inventário completo de revisions. Quiesce fiscal externo em cada boot alcançável com auth fresca, depois treatments; provar todos candidatos terminal/removidos ou quiesced+drained, fiscal quiescida, `ativos=0`, quatro zeros e fence ausente. Boot/PID/revision change reinicia checklist/+2 s. Só então Rollback. Pós-ação, runner mantém todo candidato/transaction/fence zero; não candidata só após legado exato `Active`; manter freeze/Auto-deploy off e seguir `REC-4` | preflight runner + conjunto IDs/revisions/boots/gates/fence; conditional `VAL-CUT-22`; runtime objetivo 10 min condicionado |
+| `REC-2B candidate-conclusively-prevented` | o trigger revisado e todo extra foram conclusivamente rejeitados/impedidos sem deployment possível, ou todos os deployments ficaram terminais cancelados/falhos e nenhum esteve Active | inventariar separadamente reviewed/extras; runner externo prova o conjunto completo de sessões/transactions/fences candidatos zero estável2 s. Somente então restaurar snapshot anterior por staged commit sem redeploy e comprovar mesma deployment verde ativa; não usar `Rollback`; manter Auto-deploy off e seguir `REC-4` | prova de cada trigger impedido/status terminal never-Active + runner zeros2s + current deployment ID antes/depois + config redatada restaurada; runtime dentro do RTO total `10 min` |
+| `REC-3A candidate-active/control-available` | o candidato revisado esteve Active, deployment verde virou previous e APIs ADMIN respondem confiavelmente; pode haver extras inventariados | confirmar ID antigo/runner e separar revision revisada de extras. O revisado pode seguir quiesce fiscal com auth fresca, treatment drain e prova quiesced+drained. Todo extra que esteve Active obrigatoriamente recebe `Remove -> Removed`; extra never-Active deve estar conclusivamente cancelado/terminal. Runner prova todo conjunto candidato/transactions/fences zero estável2 s. Boot/PID/revision change reinicia checklist. Só então Rollback. Pós-ação, não candidata só após legado exato `Active`; manter freeze/Auto-deploy off e seguir `REC-4` | preflight runner + classificação reviewed/extras + IDs/revisions/boots/gates/Removed/fence/zeros2s; conditional `VAL-CUT-22`; runtime objetivo 10 min condicionado |
 | `REC-3B candidate-active/control-unavailable` | algum candidato está/esteve Active, mas API fiscal/treatment/auth está indisponível, incoerente ou não confiável | não inferir quiesce. Usar `Remove` em cada deployment candidato exato e aguardar todos `Removed`. Runner externo exige todas as sessões/transactions candidatas e fences zero por janela estável de 2 s; qualquer revision/boot/sessão nova reinicia e é removida antes de prosseguir. Só depois executar `Rollback` no ID verde antigo e manter polling até legado `Active`/todo candidato zero; manter freeze/Auto-deploy off e seguir `REC-4`. Se inventário/Remove/permissão/estado/runner não forem conclusivos, parar em breach fail-closed e reassessment humano | disponibilidade da ação/permissão atestada sem executá-la pré-merge; simulação local multi-candidate/unreachable + restart; evidência real somente se estado ocorrer; downtime aceito; runtime objetivo 10 min condicionado |
 | `REC-4 source-stabilization` | runtime legado verde foi restaurado após merge, mas `main` ainda contém candidato rejeitado e Auto-deploy está off | registrar divergência, Owner e prazo <=24 h; mergear revert revisado que restaura a tree verde ou abrir novo TODO/aprovação para candidato corrigido. Confirmar main segura, runtime coerente e zero queued/in-flight antes de reativar Auto-deploy; source disconnect não é fallback implícito | refs/tree, toggle/queue e decisão do Owner; runtime RTO já encerrado, source estabilizada <=24 h |
 
-Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -> REC-2B` exige trigger impedido/terminal não ativo; qualquer `Active` força `REC-3A` se ambos controles/auth respondem, senão `REC-3B`; todo `REC-2B/3A/3B` após merge converge em `REC-4`. Mutation smoke espera target rollbackable, runner válido e abertura ADMIN com fence. Um operador serializa ações. Em `REC-3A`, fiscal quiesce autorizado precede treatment; em `REC-3B`, `Remove` precede prova externa estável e Rollback. Nenhum ramo permite Rollback sem prior terminal/removed, candidata/transaction/fence zero e probe pós-switch. O session fence continua prova enquanto vivo; novo boot/PID reinicia. Falta de prova em 5 min ou runtime recovery >10 min é breach fail-closed; source stabilization tem prazo separado de 24 h e Auto-deploy permanece off até concluí-la.
+Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -> REC-2B` exige todo candidato never-Active impedido/terminal e conjunto externo zero2s; qualquer `Active` força `REC-3A` se controles/auth do reviewed respondem, senão `REC-3B`; extra Active sempre exige `Remove -> Removed`. Todo `REC-2B/3A/3B` após merge converge em `REC-4`. Mutation smoke espera target rollbackable, runner válido e abertura ADMIN com fence. Um operador serializa ações. Nenhum ramo permite restore/Rollback sem classificação reviewed/extras, terminal/removed aplicável, conjunto de sessões/transactions/fences zero2s e probe pós-switch. O session fence continua prova enquanto vivo; nova revision/boot/PID reinicia. Falta de prova em 5 min ou runtime recovery >10 min é breach fail-closed; source stabilization tem prazo separado de 24 h e Auto-deploy permanece off até concluí-la.
 
 ## Health, Readiness and Rollback Contract
 
@@ -403,7 +403,7 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 - Teardown: `railway.json` fixa overlap zero/drain 20; leituras fiscais nascem fechadas por boot. O primeiro tráfego autenticado agenda espera mínima de 30 s para treatments, mas a barrier só abre por POST ADMIN após anterior terminal/removido, runner/control session-affine, fence global adquirido uma única vez no writer pool1 e zeros aplicáveis. Health/readiness usa control isolado.
 - Ativação fiscal: observador já ativo antes do merge consulta status+boot/gate em <=1 s com deadline <=1 s. `Active-fiscal-fechada` usa allowance local178 s sob gap máximo2 s, limitando a fase real a 180 s; restart pré-abertura não estende. Gap/reconnect/restart do observador ou ambiguidade abortam sem reset. Somente o 503/header fiscal exato é esperado/contado à parte; SLO geral começa após abrir. Primeiro restart pós-abertura recebe a mesma fase bounded e reinicia observação30; segundo restart inesperado aborta. A janela 20:00–22:00 não se estende.
 - Config as Code está deprecado, mas a Railway documenta suporte aos serviços legados até `2026-12-01`; este cutover exige prova remota dos valores e abre follow-up de migração IaC antes dessa data, sem ampliar a janela atual.
-- Rollback primário: runner externo deve estar provado/online no preflight pré-APROVADO e repetido pre-merge; disponibilidade/permissão da ação `Remove` e do toggle Auto-deploy são atestadas antes do changeset/merge. Com control/auth disponível, quiesce fiscal+treatment com revalidação fresca, zeros/fence e +2 s precedem `Rollback`. Sem control/auth confiável, `Remove` encerra a candidata; somente status `Removed` + runner candidata/transaction/fence zero estável 2 s autorizam `Rollback`. Depois, não candidata só com legado exato `Active`; candidata permanece zero. Objetivo runtime `10 min` é condicionado; Auto-deploy fica off e `REC-4` estabiliza source em <=24 h antes da reativação.
+- Rollback primário: runner externo deve estar provado/online no preflight pré-APROVADO e repetido pre-merge; disponibilidade/permissão da ação `Remove` e do toggle Auto-deploy são atestadas antes do changeset/merge. Com control/auth disponível, somente o reviewed pode usar quiesce fiscal+treatment; extra Active é removido. Sem control/auth confiável, `Remove` encerra todos. `REC-2B` também exige runner externo zero2s antes de restore. Somente todos os status terminal/Removed aplicáveis + conjunto completo de sessões/transactions/fences zero estável2 s autorizam restore/Rollback. Depois, não candidato só com legado exato `Active`; candidatos permanecem zero. Objetivo runtime `10 min` é condicionado; Auto-deploy fica off e `REC-4` estabiliza source em <=24 h antes da reativação.
 - Fallback degradado: `Redeploy` reconstrói a deployment a partir do source/config original e não preserva identidade de bits; só pode ser usado após bloqueio/renovação explícita do risco e do RTO.
 - Kill switch: `SMART_NOTAS_READ_ENABLED=false`; corta o provedor, mas não restaura integralmente a nova tela `Geral`.
 - Fontes verificadas: [Railway Staged Changes](https://docs.railway.com/deployments/staged-changes), [Deployment Actions](https://docs.railway.com/deployments/deployment-actions), [Deployment Teardown](https://docs.railway.com/deployments/deployment-teardown), [Services](https://docs.railway.com/services), [Service CLI](https://docs.railway.com/cli/service), [Auto-deploy toggle](https://railway.com/changelog/2026-05-01-undoable-deletes), [Config as Code reference](https://docs.railway.com/config-as-code/reference), [image retention by plan](https://docs.railway.com/pricing/plans), [Prisma PostgreSQL connector](https://docs.prisma.io/docs/orm/v6/overview/databases/postgresql) e [PostgreSQL application_name](https://www.postgresql.org/docs/18/runtime-config-logging.html).
@@ -434,7 +434,7 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 - [ ] `DOD-CUT-04` Timeout, rate, concorrência e bytes/memória são calibrados para a topologia real sob carga near-limit.
 - [ ] `DOD-CUT-05` Logs têm sink, retenção, acesso e redaction comprovados.
 - [ ] `DOD-CUT-06` A tree candidata passa localmente em build, readiness, probes, API/browser smoke e `/erros`; essa evidência não é tratada como OCI Railway idêntico.
-- [ ] `DOD-CUT-07` `REC-0/1/2A/2B/3A/3B/4` cobre record/trigger/in-flight/active/source. Antes do merge, runner e ações/permissões `Remove`/Auto-deploy são atestados sem execução destrutiva. 3A exige fiscal quiesce autorizado, treatment drain, zeros/fence/+2 s; 3B exige `Remove`, `Removed` e candidata/transaction/fence zero estável2 s antes do Rollback. Pós-ação, candidata permanece zero, legado volta Active e REC-4 mantém Auto-deploy off até source segura. RTO runtime10 é condicionado; source <=24 h; inconclusivo é breach fail-closed.
+- [ ] `DOD-CUT-07` `REC-0/1/2A/2B/3A/3B/4` cobre record/trigger/in-flight/active/source e separa reviewed/extras. Antes do merge, runner e ações/permissões `Remove`/Auto-deploy são atestados. REC-2B exige never-Active terminal/impedido+runner zeros2s antes de restore. 3A permite quiesce/drain só ao reviewed e exige Remove→Removed de todo extra Active; 3B remove todos. Conjunto completo zero2s precede Rollback; legado volta Active e REC-4 mantém Auto-deploy off. RTO runtime10 é condicionado; source <=24 h; inconclusivo é breach.
 - [ ] `DOD-CUT-08` Após abertura fiscal dentro da fase allowance local178 s/máxima real180 s, `Stage` customer-facing passa em lista/detalhe para ambos sem fallback/mistura por no mínimo 30 minutos na janela.
 - [ ] `DOD-CUT-09` Teste local determinístico com chaves efêmeras prova que rotação HMAC invalida ID antigo e relistagem produz IDs válidos; nenhuma rotação HMAC ocorre no `Stage` deste TODO.
 - [ ] `DOD-CUT-10` Um predicado SQL canônico de classificação original `ERRO` é aplicado antes de count/group/order/limit/paginação e mutations em lista, resumo, produtos, exportação, detalhe, payload, histórico correlacionado, tratamento unitário/lote e monitoramento; defesa TypeScript não substitui query-side filtering; tratamento `PENDENTE` sobre erro original permanece elegível; o contrato público congelado em `D-CUT-17..19`, `backend/README.md`, decorators OpenAPI e a descrição Swagger global em `backend/src/main.ts` estão coerentes.
@@ -487,7 +487,7 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 - [ ] `VAL-CUT-19` Para cada coluna textual externa do CSV, testar valores iniciados individualmente por `=`, `+`, `-`, `@`, TAB, CR e LF; output contém prefixo `'` dentro do valor escapado, preserva BOM/headers e não altera números seguros.
 - [ ] `VAL-CUT-20` Executar PATCH/lotes `5x2/10x3/20x5`, lote500 e dois commit-incertain com Prisma6.19.3/clients4-1-1. Validar control pool/connect/socket1, statement200, uma statement, sem transaction/wait; sampler e readiness seguem `VAL-CUT-11`. Teste transitório registra role/database de legado/candidato/runner, Xd/Xr, G/D/R, O* disjuntos, margens e cada inequality. `L`/classe/cap desconhecido, P2024 ou fence gap reprova e não autoriza preparatória neste TODO. Gerar JSON BCI.
 - [ ] `VAL-CUT-21` Em processos independentes, provar UUID/names, session affinity e negativo multiplex. Confirmar manifests/lock/runtime em `6.19.3`; writer URL redatada contém semanticamente `max_idle_connection_lifetime=0`. Boot A abre uma vez, heartbeat <=30 s e teste real idle >300 s mantêm mesmo PID/fence; policies PostgreSQL/proxy de idle são registradas redatadas. Open/open simultâneo aceita um owner e chama `pg_try_advisory_lock` uma vez; open/open↔quiesce e open/open↔SIGTERM terminam sem lock residual/unlock excedente. Derrubar a sessão encerra lock/transaction antes de B adquirir; A não reacquire e falha antes de domínio. Intercalar timer/open↔quiesce/SIGTERM/DB success/failure para stale409. Classificador/five counts, lease exact-once, cleanup owner-only, headers/no-store e reads verdes são obrigatórios.
-- [ ] `VAL-CUT-22` Somente se abort real alcançar `REC-3A/3B`, coletar evidência condicional: 3A fiscal+treatment quiesce; ou 3B Remove→Removed; depois runner candidata/transaction/fence zero estável2 s, Rollback no antigo exato, não candidata só com legado Active, restart/race e RTO. Se não ocorrer, `n/a — state not reached`; nunca autoriza drill remoto.
+- [ ] `VAL-CUT-22` Somente se abort real alcançar `REC-3A/3B`, coletar evidência condicional por conjunto: 3A quiesce fiscal+treatment do reviewed e Remove→Removed de todo extra Active; ou 3B Remove→Removed de todos; depois runner prova sessões/transactions/fences de todo candidato zero estável2 s, Rollback no antigo exato, não candidato só com legado Active, restart/revision race e RTO. Se não ocorrer, `n/a — state not reached`; nunca autoriza drill remoto.
 - [ ] `VAL-CUT-23` Preencher caches nos dois contextos e provar enter/focus/resume suprimindo antes de `GET /notas/estado`, inclusive cache fresco. Capturar `requestStart` monotônico, testar clock de parede ±, RTT quase1 s, resposta de boot antigo atrasada cruzando restart, deadline já exaurido e timer/background atrasado; todo render após `requestStart+5 s` deve ocultar mesmo sem callback. Provar heartbeat3/timeout1, header invalidando metadata, geração/stale Promise sem repopular e abstração `api/cliente.ts` preservando header sem text matching. Provar zero adapter fechado, POST negatives e novo 200 pós-lease sem dados sensíveis.
 - [ ] `VAL-CUT-24` Provar quiesce fiscal simultâneo com opener/heartbeat/SIGTERM: após auth fresca epoch muda sync, stale opener409, estado público fechado, frontend invalida, zero provider; retry autorizado idempotente e reopen409. Simular REC-3A e REC-3B auth/API-unreachable: Remove→Removed, restart race, runner zeros estáveis2 s e Rollback somente depois; nenhuma ação remota em teste.
 - [ ] `VAL-CUT-25` Com relógio monotônico fake, preencher identidade ativa, desativar imediatamente e solicitar estado a cada3 s: último 200 pode ocorrer antes de30 s, mas render fica oculto até35 s do fill; primeira revalidação retorna401 e invalida. Token expiry também invalida; perfil entre setores preserva viewer; ADMIN demotion perde operação após cache bound.
@@ -696,6 +696,7 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 | load/stress | external path and 2 MiB envelope | RLS report on approved topology | saturation, quota amplification, memory/recovery failure | `implement-in-this-todo` | `VAL-CUT-05` |
 | browser smoke | same-origin React/Nest release | source-owned fiscal browser journey | incompatible UI/API, context/cache leak, `/erros` regression | `implement-in-this-todo` | `VAL-CUT-06` |
 | operational recovery | Railway deployment | pre-merge facts + runner read-only + disponibilidade/permissão `Remove`; REC-3A quiesce ou REC-3B Remove→Removed→zero2s; exact old-ID Rollback somente se abort alcançar o estado | API candidata indisponível, runner/Remove/Rollback ausente, imagem expirada, vars erradas ou drill destrutivo | `manual-only-with-rationale` | local simulation `VAL-CUT-08/24`; real conditional `VAL-CUT-22` |
+| deployment/recovery | exclusive-freeze multi-candidate invariant | classify reviewed/extras; REC-2B external zeros; extra Active Remove→Removed; full-set zero2s | executable REC table weaker than D-CUT-37 or hidden extra candidate | `implement-in-this-todo` | `VAL-CUT-35` before staged changeset; conditional `VAL-CUT-22` |
 | security/race | external fiscal+treatment quiesce | revoke/demote + opener/mutation/quiesce/SIGTERM interleavings | estado irreversível por identidade cacheada ou await entre prova/CAS | `implement-in-this-todo` | `VAL-CUT-31` antes do deploy |
 | ops/runtime | transition observer | pre-merge continuous poll/deadline1/gap2/local178 harness | degradação >180 s, timer reset ou blind interval | `implement-in-this-todo` | `VAL-CUT-32` antes do deploy |
 | deployment/recovery | Auto-deploy and source stabilization | trigger→off, success→on, abort→REC-4/revert/zero queue | candidato rejeitado volta em push/redeploy posterior | `manual-only-with-rationale` | local `VAL-CUT-33`; remoto somente no cutover autorizado |
@@ -708,7 +709,7 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set: TODO + topology/dependency artifacts + railway/Docker/config/health/fiscal boundaries`
 - **Decision review status:** `not_run`
-- **Decision review evidence / resolution:** arquitetura round29 confirmou `0/23`, mas bloqueou em `R29-ARCH-OPS-01`; correção foi integrada no candidato D-CUT-35/37 e exige reviewer fresco round30 após publication+attestation. Evidência histórica: `/tmp/uninotas-cutover-round29-architecture.stj9YD/dispatch.json`.
+- **Decision review evidence / resolution:** arquitetura round30 confirmou `0/23`, mas bloqueou em `R30-ARCH-OPS-01`; correção foi integrada no candidato `REC-2B/3A`, DOD/VAL/harness round31 e exige reviewer fresco após publication+attestation. Evidência histórica: `/tmp/uninotas-cutover-round30-architecture.eBwdez/dispatch.json`.
 
 | Finding ID | Severity | Approval-material | Resolution | Evidence in evolved plan |
 | --- | --- | --- | --- | --- |
@@ -824,6 +825,7 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 | `R26-STRUCT-01` | medium | yes | `Integrated` | D-CUT-28 torna L desconhecido hard stop; cap4 recebe TODO/promoção próprios e obriga rebaseline/CI/reviews ao retomar. |
 | `R26-PERF-01` | medium | yes | `Integrated` | D-CUT-29 torna handler snapshot-only e sampler250/single-flight/deadline1000/age500; flood1000/c100 não cria DB queue e stale falha fechado. |
 | `R29-ARCH-OPS-01` | high | yes | `Integrated in round30 candidate` | D-CUT-37 move freeze exclusivo/zero queue para antes do changeset, autoriza somente a tree revisada e classifica revision extra no conjunto completo de candidatos antes de restore/Rollback. |
+| `R30-ARCH-OPS-01` | high | yes | `Integrated in round31 candidate` | REC-2B agora exige zeros externos do conjunto antes de restore; REC-3A permite quiesce somente ao reviewed e força Remove→Removed para todo extra Active; harness `VAL-CUT-35` protege a invariável. |
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before cutover closeout`
 - **Adherence review kind:** `architecture_adherence`
@@ -837,11 +839,11 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 - **Why this decision:** release, segredos, dois contextos e promoção canônica exigem revisão reproduzível.
 - **Trigger stage:** `before first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `f1f2945ad0dc32dac600b0598fd9f72dcb7b17c5`
+- **Baseline commit:** `pending round31 material publication`; predecessor `cf5d67ebcabf1b42268affe9df7ee869229c5ecf`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `no_material_findings`
-- **Findings summary:** achado arquitetural R29 foi integrado e publicado no material round30; esta attestation altera somente metadata e a arquitetura round30 deve confirmar antes da crítica.
-- **Evidence / reference:** `reviewRound=30`; Foundation material `origin/main@f1f2945ad0dc32dac600b0598fd9f72dcb7b17c5`; root material `MonitorNotes/delphi-and-foundation@3b763bbd256a0bc60872cf0d9183ce5ee740fd74`; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73`; refs verificadas.
+- **Gate status:** `not_run`
+- **Findings summary:** achado arquitetural R30 foi integrado no candidato material round31; publicação e attestation precisam fixar refs exatas sem alterar seções materiais.
+- **Evidence / reference:** predecessor Foundation `origin/main@cf5d67ebcabf1b42268affe9df7ee869229c5ecf`; predecessor root `MonitorNotes/delphi-and-foundation@0d4d1bb5805e732e89e80e2ec0cf51d0c1660d16`; code-origin `31712a042cab3c796d5daca7350c6c58453e1c73`; round31 refs pendentes.
 - **Waiver authority / reference:** `n/a`.
 
 ## Gate: Review Scope Drift
@@ -852,9 +854,9 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 - **Baseline source:** `Review Baseline Freeze -> Baseline commit`
 - **Material sections compared:** `canonical defaults, incluindo Diff Expectation Contract, Module Decision Baseline Snapshot e Decision Baseline (Frozen Before Implementation)`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-cutover.md`
-- **Gate status:** `no_material_findings`
-- **Findings summary:** a attestation round30 preserva todas as 23 seções materiais do baseline; arquitetura e crítica correntes ainda devem confirmar.
-- **Evidence / reference:** `reviewRound=30`; `review_scope_drift_guard.py` contra `uninotas-foundation:main@f1f2945ad0dc32dac600b0598fd9f72dcb7b17c5`; resultado `go`, `0/23`; root material `3b763bbd256a0bc60872cf0d9183ce5ee740fd74`.
+- **Gate status:** `not_run`
+- **Findings summary:** material round31 ainda não foi publicado/atestado; a contagem `0/23` round30 é histórica e não satisfaz o round corrente.
+- **Evidence / reference:** pendente após publication+attestation round31; exigir `reviewRound=31` e refs exatas correntes.
 - **Waiver authority / reference:** `n/a`.
 
 ## Frontend / Consumer Matrix
@@ -906,10 +908,10 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 ## Plan Review Gate
 
 - **Review decision:** `required`
-- **Review status:** `round30 candidate integrates R29 architecture finding; publication, attestation and current architecture/critique pending`
+- **Review status:** `round31 candidate integrates R30 architecture finding; publication, attestation and current architecture/critique pending`
 - **Required lenses:** architecture, operations, rollback, security, tests, performance, observability and structural soundness.
 - **Known plan finding:** o health atual retorna HTTP 2xx quando o banco está degradado; `D-CUT-10` agora exige readiness separada não-2xx e mantém Smart Notas fora do loop.
-- **Approval request condition:** nova revisão confirma `D-CUT-06..37`, crítica/coerência/drift correntes convergem com refs round30 exatas, preflight D-CUT-32/34/35/37 é conclusivo, baseline é atualizado e guards retornam `go/preflight-go`.
+- **Approval request condition:** nova revisão confirma `D-CUT-06..37` e REC executável, crítica/coerência/drift convergem com refs round31 exatas, preflight D-CUT-32/34/35/37 é conclusivo, baseline é atualizado e guards retornam `go/preflight-go`.
 
 ### Review Sections
 
@@ -1159,7 +1161,7 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 - **Independent test-quality audit:** `required before Stage cutover`.
 - **Independent final review:** `required after implementation and before Stage cutover`.
 - **Dedicated triple review:** `required because release-critical + secrets + external provider`.
-- **Current status:** `round29 architecture blocked with one high finding integrated into round30 candidate; publication/attestation/current reviews and operational preflight pending`.
+- **Current status:** `round30 architecture blocked with one high finding integrated into round31 candidate; publication/attestation/current reviews and operational preflight pending`.
 
 ## Audit Trigger Matrix (Required Before Audit Decisions Are Trusted)
 
@@ -1194,7 +1196,7 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 - **Audit session / round evidence (when protocol used):** `pending post-implementation evidence`
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
 - **Critique status:** `not_run`
-- **Findings summary:** crítica round28 retornou quatro achados integrados em D-CUT-33..36; a arquitetura round29 adicionou `R29-ARCH-OPS-01`, integrado em D-CUT-35/37. Crítica round30 ainda não foi executada e nenhuma autoridade de implementação foi concedida.
+- **Findings summary:** crítica round28 retornou quatro achados integrados; arquiteturas round29/30 adicionaram os riscos de freeze e divergência REC, integrados em D-CUT-35/37 e REC-2B/3A. Crítica round31 ainda não foi executada e nenhuma autoridade de implementação foi concedida.
 
 | Finding ID | Resolution (`Integrated|Challenged|Deferred`) | Usefulness (`useful|noise|mixed|unknown`) | Formalizable (`yes|partial|no|unknown`) | Candidate Rule Level (`paced|project|none|unknown`) | Candidate Rule ID | Rationale / Evidence |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -1220,7 +1222,7 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 | `R28-OPS-02` | `Integrated` | `useful` | `yes` | `project` | `CUT-ROLLBACK-SOURCE-STABILIZATION` | D-CUT-35 desliga Auto-deploy após trigger, mantém off em abort e cria REC-4 com source segura em <=24 h. |
 | `R28-GOV-01` | `Integrated` | `useful` | `yes` | `paced` | `CUT-CURRENT-ROUND-EVIDENCE-BINDING` | D-CUT-36 exige round/refs exatos e reset de crítica/coerência/drift quando o material evolui. |
 
-- **Evidence / reference:** crítica round28 `/tmp/uninotas-cutover-round28-critique.lV9jCo/dispatch.json`; arquitetura round29 `/tmp/uninotas-cutover-round29-architecture.stj9YD/dispatch.json`; crítica round30 pendente; registros anteriores preservados; audit fingerprint `453bba9462e3`.
+- **Evidence / reference:** crítica round28 `/tmp/uninotas-cutover-round28-critique.lV9jCo/dispatch.json`; arquiteturas round29 `/tmp/uninotas-cutover-round29-architecture.stj9YD/dispatch.json` e round30 `/tmp/uninotas-cutover-round30-architecture.eBwdez/dispatch.json`; crítica round31 pendente; audit fingerprint `453bba9462e3`.
 - **Waiver authority / reference (required if waived):** `n/a`
 
 ## Verification Debt Assessment
@@ -1253,7 +1255,7 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 - **Gate decision:** `required`
 - **Guard command:** `python3 delphi-ai/tools/assumption_code_coherence_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-smart-notas-read-cutover.md`
 - **Gate status:** `not_run`
-- **Evidence / reference:** rounds anteriores são históricos; rerodar somente após crítica round30 convergir e vincular `reviewRound=30` às refs exatas material/attestation/architecture correntes.
+- **Evidence / reference:** rounds anteriores são históricos; rerodar somente após crítica round31 convergir e vincular `reviewRound=31` às refs exatas material/attestation/architecture correntes.
 
 ## Approval
 
