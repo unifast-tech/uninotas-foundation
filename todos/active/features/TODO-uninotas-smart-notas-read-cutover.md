@@ -40,12 +40,12 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** publicar o material round 23 com os achados R22 integrados, atestar sem drift e repetir arquitetura + crítica independente; nenhuma implementação ou mutação Railway está autorizada.
+- **Next exact step:** concluir a attestation metadata-only do material round 23 e repetir arquitetura + crítica independente; nenhuma implementação ou mutação Railway está autorizada.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
 - **Work state:** `review`
-- **Why this state now:** a topologia customer-facing e o baseline Git estão confirmados; os achados da revisão round 22 estão sendo integrados antes de nova revisão formal.
+- **Why this state now:** a topologia customer-facing e o baseline Git estão confirmados; os achados round 22 foram integrados no material round 23 que este checkpoint publica.
 - **Exit condition:** fatos remotos confirmados, decisões `D-CUT-06..25` congeladas, revisão pré-aprovação limpa e `todo_authority_guard.py --pre-approval` em `preflight-go`.
 
 ## Provisional Notes
@@ -176,7 +176,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 ## Diff Expectation Contract
 
-- **Contract status:** `required; round-23 material baseline pending publication; its attestation must not alter this field`
+- **Contract status:** `required; round-23 material baseline frozen by publication; its attestation must not alter this field`
 - **Policy:** `strict; unclassified or forbidden paths block delivery`
 - **User validation:** `required on deviation`
 - **Comparison mode:** `working_tree after candidate checkpoint`
@@ -775,7 +775,7 @@ Transições não pulam evidência: `REC-1 -> REC-2A` ocorre no merge; `REC-2A -
 ## Plan Review Gate
 
 - **Review decision:** `required`
-- **Review status:** `round-23 findings integrated; publication/attestation and independent confirmations pending`
+- **Review status:** `round-23 material frozen by this publication; metadata-only attestation and independent confirmations pending`
 - **Required lenses:** architecture, operations, rollback, security, tests, performance, observability and structural soundness.
 - **Known plan finding:** o health atual retorna HTTP 2xx quando o banco está degradado; `D-CUT-10` agora exige readiness separada não-2xx e mantém Smart Notas fora do loop.
 - **Approval request condition:** nova revisão confirma `D-CUT-06..25`, crítica converge, baseline é atualizado e guards retornam `go/preflight-go`.
