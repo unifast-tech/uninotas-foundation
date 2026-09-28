@@ -162,7 +162,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 
 | Repository | Path | Baseline ref | Comparison mode |
 | --- | --- | --- | --- |
-| `MonitorNotes` | `.` | `c9c2e42` post-baseline attestation metadata carrier | `committed_diff`; `31712a0` is code-origin and `922957f` is the material implementation freeze before the known metadata-only gitlink sync |
+| `MonitorNotes` | `.` | round-8 material root sync; exact SHA recorded in `Gate: Review Baseline Freeze` evidence after the one-way Foundation-to-root sync | `committed_diff`; `31712a0` remains code-origin; any later attestation-only gitlink carrier is classified below and is not product implementation |
 | `uninotas-foundation` | `foundation_documentation` | `Gate: Review Baseline Freeze -> Baseline commit` | `committed_diff` |
 
 ### Expected Changed Paths
@@ -186,7 +186,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 | `MonitorNotes` | `frontend/src/hooks/useResumo.ts` | `M` | remover semântica de sucesso do resumo legado |
 | `MonitorNotes` | `frontend/e2e/**` | `A|M` | fail-first/unit/race/browser evidence for context cache and strict error-only journeys |
 | `MonitorNotes` | `artifacts/**` | `A|M` | redacted evidence |
-| `MonitorNotes` | `uninotas-foundation` | `M` | sync conhecido de attestation `922957f -> c9c2e42` já incorporado à base operacional; `D-CUT-14` proíbe novo sync isolado em `main` após o cutover |
+| `MonitorNotes` | `uninotas-foundation` | `M` | sync do material freeze e, no máximo, seu carrier de attestation metadata antes da implementação; `D-CUT-14` proíbe novo sync isolado em `main` após o cutover |
 | `uninotas-foundation` | `project_constitution.md` | `M` | promover invariantes/runtime authority após cutover |
 | `uninotas-foundation` | `project_mandate.md` | `M` | alinhar mandato atual com Smart Notas/error-only |
 | `uninotas-foundation` | `domain_entities.md` | `M` | promover entidades/owners atuais |
@@ -221,7 +221,7 @@ O artefato de produção é único: o `Dockerfile` da raiz compila o frontend Re
 | Diff item | Classification | Evidence / agent defense | Decision | User validation / renewed approval |
 | --- | --- | --- | --- | --- |
 | `legacy error-only boundary` | `planned approval-material` | revalidação `REVAL-ARCH-03` provou que inventário sem enforcement não basta | integrar `/eventos`/monitoramento/realtime/frontend nos paths aprovados | exige novo `APROVADO` sobre o plano reconvergido |
-| `c9c2e42` versus material freeze `922957f` | `accepted preexisting metadata-only delta` | único delta é gitlink `cdf6fb1 -> 67f9e42`, contendo somente a attestation do próprio round 7 | usar `c9c2e42` como base operacional do futuro product diff; não contar esse delta como implementação | classificado no round 8; não autoriza sync pós-cutover |
+| post-baseline attestation gitlink carrier | `accepted preexisting metadata-only delta` | por construção, o único delta permitido após o material root sync é o gitlink do freeze Foundation para sua attestation; material root SHA e carrier observados são registrados no freeze/review package | iniciar o product diff no material root sync exato e classificar separadamente o carrier; nenhum arquivo de produto pode entrar nesse commit | regra resolve a referência circular Foundation→root; não autoriza sync pós-cutover |
 
 ## Bounded But Elastic Guardrails
 
