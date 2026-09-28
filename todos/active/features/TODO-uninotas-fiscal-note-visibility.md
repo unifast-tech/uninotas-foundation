@@ -299,8 +299,8 @@ Todos os campos abaixo são propriedades obrigatórias no JSON. `string|null` ac
 - **Decision review lifecycle:** `after diagnosis is closed and before APROVADO`
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-summary`
-- **Decision review status:** `findings_integrated; fresh convergence rerun pending`
-- **Decision review evidence / resolution:** fresh reviewer `/root/fiscal_detail_architecture_r2` returned `not_ready` with three approval-breaking findings. The plan now documents signed-but-decodable route semantics, exact DTO tables and split internal records/export bound; a new frozen-baseline reviewer must confirm convergence.
+- **Decision review status:** `no_material_findings`
+- **Decision review evidence / resolution:** `/root/fiscal_detail_architecture_r2` findings were integrated; fresh distinct reviewer `/root/fiscal_detail_architecture_convergence` reviewed baseline `3b94edc` and returned `acceptable`, with no approval-breaking or material findings. Canonical module wording remains a delivery-side synchronization item already in scope.
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -446,15 +446,16 @@ Todos os campos abaixo são propriedades obrigatórias no JSON. `string|null` ac
 ## Additional Architectural Opinions
 - **Needed:** `yes`
 - **Why ambiguity remains:** deterministic architecture review required because this TODO intentionally supersedes the prior no-PII public DTO contract.
-- **Opinion count:** `2 completed + 1 fresh convergence rerun required`
+- **Opinion count:** `3 completed`
 - **Package mode:** `bounded-summary`
-- **Internal reviewer mandate:** `required; expanded-scope findings were integrated and a distinct fresh no-context reviewer must confirm the refreshed baseline`
+- **Internal reviewer mandate:** `satisfied by distinct fresh no-context convergence reviewer against baseline 3b94edc`
 - **Required lenses:** `correctness|performance|elegance|structural-soundness|operational-fit`
 
 | Reviewer | Recommendation | Performance view | Elegance view | Structural soundness view | Resolution | Evidence |
 | --- | --- | --- | --- | --- | --- | --- |
 | `/root/fiscal_visibility_architecture_opinion` | `acceptable_with_changes` | low/bounded payload and DOM increase; no calls/query changes | direct adapter -> explicit public DTO -> React is simplest | positive allowlist required instead of public `Omit` | `Integrated` | architecture-opinion final, 2026-09-28 |
-| `/root/fiscal_detail_architecture_r2` | `not_ready` | detail-only PII must not widen 20.000-row export records | split list/detail records is cleaner than retaining all PII internally | token is signed but decodificável; exact DTO allowlists were missing | `Integrated; rerun pending` | fresh no-context architecture opinion against `c11a184`, 2026-09-28 |
+| `/root/fiscal_detail_architecture_r2` | `not_ready` | detail-only PII must not widen 20.000-row export records | split list/detail records is cleaner than retaining all PII internally | token is signed but decodificável; exact DTO allowlists were missing | `Integrated; converged` | fresh no-context architecture opinion against `c11a184`, 2026-09-28 |
+| `/root/fiscal_detail_architecture_convergence` | `acceptable` | bounded name growth has mandatory 20.000-row evidence | exact projections and split records are cohesive | signed route + 17/27 DTO contract resolves prior blockers | `No material findings` | fresh no-context convergence review against `3b94edc`, 2026-09-28 |
 
 ### Architecture Opinion Finding Resolution
 | Finding ID | Resolution | Usefulness | Formalizable | Candidate Rule Level | Candidate Rule ID | Rationale / Evidence |
