@@ -32,7 +32,7 @@ Smart Notas evidencia paginação numérica, mas não cursor/snapshot nem ordena
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** solicitar `APROVADO` explícito para execução serial após o TODO UX.
+- **Next exact step:** aguardar o checkpoint verde e closeout de `ST-UX`; então rebaselinear produto/Foundation e repetir coherence, diff, drift e authority antes da execução.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
@@ -676,7 +676,9 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 ## Approval
 
-- **Approved by:** `pending explicit APROVADO`
+- **Status:** `approved-sequenced`
+- **Approved by:** `project owner / user`
+- **Approval reference:** resposta explícita `APROVADO` em 2026-09-28 para o pacote serial UX seguido de exportação; a execução de export permanece condicionada ao rebaseline pós-UX já congelado neste TODO.
 - **Approval scope:** `SCOPE-EX-01..07` e contratos frozen deste TODO.
 - **Not authorized:** `deploy/merge/snapshot claim/async export/runtime config/logs/worktrees`.
 - **Renewed approval required:** volume, formato, colunas, raw identifiers, rota, auth, context, runtime ou diff boundary muda materialmente.
@@ -689,7 +691,7 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 - **Selected model:** `gpt-5.6-terra`
 - **Selected effort:** `medium`
 - **Proof mode:** `declared`
-- **Subagent / delegation authorization:** `pending APROVADO; workflow-required serialized executor`
+- **Subagent / delegation authorization:** `authorized by explicit APROVADO on 2026-09-28 for one workflow-required serialized executor, only after the mandatory post-UX rebaseline guards return go`
 - **Execution topology:** `primary-checkout-single-writer`
 - **Worktree authorization:** `not-authorized`
 - **Guard outcome:** `go`

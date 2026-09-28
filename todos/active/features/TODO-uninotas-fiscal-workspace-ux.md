@@ -28,13 +28,13 @@ A validação visual da primeira versão do UniNotas mostrou selects ilegíveis 
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** congelar/revisar o plano, obter `preflight-go` e solicitar `APROVADO`.
+- **Next exact step:** executar `SCOPE-UX-01..07` no principal checkout com um único executor serializado e concluir o checkpoint afetado antes de iniciar `ST-EXPORT`.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
-- **Work state:** `review`
-- **Why this state now:** achados independentes foram incorporados e o baseline revisável ainda será congelado.
-- **Exit condition:** aprovação explícita e authority guard pós-aprovação em `go`, ou bloqueio formal.
+- **Work state:** `implementation`
+- **Why this state now:** o usuário aprovou explicitamente o escopo congelado após `preflight-go`; a execução React/Vite pode começar sob single-writer.
+- **Exit condition:** implementação e checkpoint afetado verdes, seguidos dos gates de entrega e movimento para `completed/features/`, ou bloqueio formal.
 
 ## Provisional Notes
 
@@ -266,7 +266,9 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 ## Approval
 
-- **Approved by:** `pending explicit APROVADO`
+- **Status:** `approved`
+- **Approved by:** `project owner / user`
+- **Approval reference:** resposta explícita `APROVADO` em 2026-09-28, após `preflight-go` e publicação do baseline revisado em `origin/main`.
 - **Approval scope:** `SCOPE-UX-01..07`
 - **Not authorized:** `export/backend/deploy/merge/worktrees`
 - **Renewed approval required:** rota, auth, fonte ou diff boundary material muda.
@@ -279,11 +281,20 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 - **Selected model:** `gpt-5.6-terra`
 - **Selected effort:** `medium`
 - **Proof mode:** `declared`
-- **Subagent / delegation authorization:** `pending APROVADO; workflow-required serialized executor`
+- **Subagent / delegation authorization:** `authorized by explicit APROVADO on 2026-09-28 for one workflow-required serialized routine executor`
 - **Execution topology:** `primary-checkout-single-writer`
 - **Worktree authorization:** `not-authorized`
 - **Guard outcome:** `go`
 - **Guard evidence:** `agent_role_routing_guard.py` para codex/implementation/routine-executor/gpt-5.6-terra/medium/declared; não concede autoridade antes do APROVADO.
+
+## Package-First Assessment
+
+- **Query executed:** `bash delphi-ai/tools/query_packages.sh --project-root . --search "react"`
+- **Relevant packages found:** `none`
+- **READMEs read:** `frontend/README.md` já pertence ao escopo de implementação e será conferido pelo executor.
+- **Decision:** implementação local no host React/Vite existente; nenhum pacote, helper compartilhado ou dependência será criado.
+- **Tier:** `Local host application`
+- **Rationale:** disclosure, composição de header, filtros e paginação são específicos desta interface e já possuem owners locais; o catálogo proprietário não oferece capacidade equivalente.
 
 ## Rules Acknowledgement / Ingestion
 
