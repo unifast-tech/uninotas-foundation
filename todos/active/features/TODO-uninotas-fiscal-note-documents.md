@@ -3,7 +3,7 @@
 ## Artifact Identity
 
 - **Artifact type:** `tactical_execution_contract`
-- **Status:** `Pending Approval`
+- **Status:** `Approved / In Progress`
 - **Created:** `2026-09-28`
 - **Owner:** `Delphi / Operational Coder`, sob autoridade humana do usuário
 
@@ -40,12 +40,12 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** congelar/publicar o baseline documental, concluir gates de planejamento e obter `APROVADO` antes de modificar código.
+- **Next exact step:** validar a autoridade pós-aprovação e executar a implementação test-first no checkout principal.
 
 ## Active Work State (Required While TODO Remains In `active/`)
 
 - **Work state:** `implementation`
-- **Why this state now:** o contrato está em preparação e nenhuma implementação foi autorizada.
+- **Why this state now:** o usuário aprovou explicitamente o contrato congelado e a implementação está autorizada dentro do escopo aprovado.
 - **Exit condition:** após aprovação, implementação/evidências locais concluídas e movimento para `completed/features/`; deploy permanece separado.
 
 ## Provisional Notes
@@ -289,11 +289,11 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 - **Why this decision:** TODO medium/cross-stack com contrato público e URL fiscal externa.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `295234e6ccf825392c4c80064a17803bdf6d533d`
+- **Baseline commit:** `ca35e2edd8889cdb31507462c3bd278b3ad86318`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** `round 4 convergiu sem findings; paths concretos das duas premissas live foram adicionados para satisfazer coherence e recongelados após o drift guard; nenhuma implementação foi incluída`.
-- **Evidence / reference:** `uninotas-foundation@295234e6ccf825392c4c80064a17803bdf6d533d`, publicado em `origin/main` via Windows Git Credential Manager após o Git WSL não encontrar credencial.
+- **Findings summary:** `rounds 4–5 convergiram sem findings; decisões, coherence, drift e preflight ficaram registrados e o baseline final foi publicado; nenhuma implementação foi incluída`.
+- **Evidence / reference:** `uninotas-foundation@ca35e2edd8889cdb31507462c3bd278b3ad86318`, publicado em `origin/main` via Windows Git Credential Manager após o Git WSL não encontrar credencial.
 - **Waiver authority / reference:** `n/a`.
 - **Pre-freeze packet-prep rule:** `planning rows remain prepared-pre-freeze until the pushed baseline exists`.
 
@@ -615,8 +615,11 @@ Artifacts in `running|passed` must carry every `pcv-1` evidence field, including
 
 ## Approval
 
-- **Status:** `pending`.
+- **Status:** `approved`.
 - **Requested phrase:** `APROVADO`.
-- **Authorized scope:** `pending`.
+- **Approval evidence:** usuário respondeu `APROVADO` em `2026-09-28`, após apresentação e congelamento do contrato documental.
+- **Authorized scope:** `SCOPE-DOC-01..08`, `D-01..08`, a matriz HTTP pública, os testes e as auditorias definidos neste TODO.
+- **Explicit exclusions preserved:** proxy/stream binário, persistência/cache de URL, novas variáveis/dependências, banco/migração, runtime/deploy/merge e worktrees/checkouts auxiliares.
+- **Renewed approval required when:** houver mudança material no contrato público, allowlist, perfis, persistência, arquitetura de entrega de documentos ou qualquer expansão das exclusões acima.
 - **Exclusions:** `proxy/persistence/runtime/deploy/worktrees`.
 - **Renewal trigger:** qualquer mudança material em contrato público, segurança da URL, perfis, proxy/persistência, runtime ou validação.
