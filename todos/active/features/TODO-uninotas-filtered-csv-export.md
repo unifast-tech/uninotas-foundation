@@ -340,9 +340,11 @@ Não há pipeline versionada no repositório; estas evidências são `Local Veri
 
 - **Gate decision:** `required`
 - **Baseline branch:** `uninotas-foundation/main`
-- **Baseline commit:** `pending material split commit`
-- **Baseline push reference:** `pending`
-- **Gate status:** `not_run`
+- **Baseline commit:** `1ced35fc4ece74ee472ec6696d6f0f1e8e5e60e0`
+- **Baseline push reference:** `origin/main@1ced35fc4ece74ee472ec6696d6f0f1e8e5e60e0`
+- **Gate status:** `no_material_findings`
+- **Findings summary:** o split material e o contrato de exportação bounded foram publicados no main canônico.
+- **Evidence / reference:** commit `1ced35fc4ece74ee472ec6696d6f0f1e8e5e60e0`, push confirmado em 2026-09-28.
 
 ## Gate: Review Scope Drift
 
