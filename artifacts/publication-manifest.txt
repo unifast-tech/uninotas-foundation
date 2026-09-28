@@ -60,4 +60,4 @@ todos/completed/features/TODO-uninotas-smart-notas-read-backend.md
 todos/active/features/TODO-uninotas-smart-notas-read-cutover.md
 todos/completed/features/TODO-uninotas-smart-notas-read-frontend.md
 todos/active/features/TODO-uninotas-filtered-csv-export.md
-todos/active/features/TODO-uninotas-fiscal-workspace-ux.md
+todos/completed/features/TODO-uninotas-fiscal-workspace-ux.md

@@ -1,0 +1,444 @@
+# TODO — Evoluir a experiência do workspace fiscal do UniNotas
+
+## Artifact Identity
+
+- **Artifact type:** `tactical_execution_contract`
+- **Status:** `Completed`
+- **Created:** `2026-09-28`
+- **Owner:** `Delphi / Operational Coder`, sob autoridade humana do usuário
+
+## Context
+
+A validação visual da primeira versão do UniNotas mostrou selects ilegíveis no tema escuro, controles desalinhados, atualização manual redundante, marca provisória, ações de sessão dispersas e paginação sem respiro. Este TODO entrega somente a correção React/Vite do workspace e sua navegação. A exportação do filtro completo é governada separadamente por `TODO-uninotas-filtered-csv-export.md`.
+
+## Framing Source & Story Slice
+
+- **Feature brief:** `foundation_documentation/artifacts/feature-briefs/uninotas-fiscal-workspace-improvements.md`
+- **Story:** `ST-UX`
+- **Why this is bounded:** ativo, header, filtros, disclosure de configurações e paginação pertencem à mesma composição visual autenticada e não criam contrato backend.
+
+## Contract Boundary
+
+- `Geral` continua sendo a tela Smart Notas de um único contexto fiscal.
+- `Processamento das notas` abre a rota PostgreSQL existente `/erros`, disponível a todos os perfis autenticados, sem mudar dados, filtros ou permissões de tratamento.
+- O controle de configurações é um disclosure acessível com links/botões normais; não implementa semântica ARIA de menu de aplicação.
+- Este TODO não adiciona exportação nem muda API, auth, banco ou deploy.
+
+## Delivery Status Canon (Required)
+
+- **Current delivery stage:** `Local-Implemented`
+- **Qualifiers:** `Provisional`
+- **Next exact step:** rebaselinear `ST-EXPORT` sobre `MonitorNotes@f1a950a9fb48db68fd7370aed1a7605958a5d50b` e o commit Foundation deste closeout.
+
+## Active Work State (Required While TODO Remains In `active/`)
+
+- **Work state:** `completed`
+- **Why this state now:** implementação, commit local, browser, revisões independentes e guards finais estão verdes; o TODO foi movido para `completed/features/`.
+- **Exit condition:** alcançada em 2026-09-28 com o movimento para `completed/features/`, sem promover runtime.
+
+## Provisional Notes
+
+- **Missing for production-ready:** implementação, testes, evidência browser, auditorias e cutover/deploy separado.
+- **Revisit criteria:** mudança de rotas, autorização, fonte PostgreSQL, modelo de sessão ou inclusão da exportação neste pacote.
+- **Dependencies unblocked:** a implementação local usa somente React/Vite e a imagem oficial disponível; Chromium será revalidado antes do browser run.
+
+## Blocker Notes
+
+- **Blocked:** `no`.
+- **Current blocker:** `none`.
+- **Unblock condition:** `n/a`.
+
+## Scope
+
+- [x] `SCOPE-UX-01` Corrigir select/campo/opções e indicadores de foco para contraste WCAG nos temas claro e escuro.
+- [x] `SCOPE-UX-02` Alinhar controles da barra pela base; manter carga automática ao mudar contexto/status/datas e ao retornar com cache stale; remover `Atualizar` da barra; manter `Aplicar filtros` somente para Documento e ID da compra; preservar retry contextual `Tentar novamente` quando a listagem falhar.
+- [x] `SCOPE-UX-03` Versionar e usar como ativo local a imagem oficial anexada, preservando fallback textual acessível.
+- [x] `SCOPE-UX-04` Reorganizar o header com marca, `Smart Notas` e `Processamento das notas`; ambos os destinos permanecem disponíveis a todos os usuários autenticados.
+- [x] `SCOPE-UX-05` Substituir o bloco textual de sessão por botão de configurações que mostre conta/perfil e contenha tema, senha, sair e Equipe somente para ADMIN.
+- [x] `SCOPE-UX-06` Centralizar paginação e garantir respiro inferior em desktop e viewport móvel.
+- [x] `SCOPE-UX-07` Atualizar testes frontend/browser e documentação visível diretamente afetada.
+
+## Out of Scope
+
+- Exportação CSV/XLSX ou qualquer mudança backend.
+- Alterar a tela `/erros`, suas queries, banco, eventos, tratamento ou atualização em tempo real.
+- Alterar autenticação, perfis ou permissão de gestão da equipe.
+- Prisma, Docker, Railway, variáveis, deploy, merge ou promoção.
+- Nova biblioteca de UI, ícones, tema ou estado.
+- Worktrees, checkouts auxiliares e escritores paralelos de produto.
+
+## Execution Lane Tracking (Required)
+
+- **Local implementation branch:** `MonitorNotes:release/uninotas-smart-notas`
+- **Foundation authority:** `uninotas-foundation:main`
+- **Promotion lane:** `n/a — termina Local-Implemented; deploy fica no cutover`
+- **Execution topology:** `principal checkout; single product-code writer`
+
+## Diff Expectation Contract
+
+- **Contract status:** `required`
+- **Policy:** `strict`
+- **Comparison mode:** `working_tree`
+- **User validation:** `required on deviation`
+
+### Repository Baselines
+
+| Repository | Path | Baseline ref | Comparison mode |
+| --- | --- | --- | --- |
+| `MonitorNotes` | `.` | `release/uninotas-smart-notas@a4b5a0eb6ae96291ffe5c6e16f297b64dcd62f29` | `working_tree` |
+| `uninotas-foundation` | `foundation_documentation` | `main@feaf2e090927aa15087ee9ea4185886f749586e6` | `working_tree` |
+
+### Expected Changed Paths
+
+| Repository | Path glob | Change | Reason |
+| --- | --- | --- | --- |
+| `MonitorNotes` | `frontend/public/marca-unifast.jpeg` | `A` | imagem oficial fornecida |
+| `MonitorNotes` | `frontend/src/componentes/Cabecalho.tsx` | `M` | marca, navegação e disclosure |
+| `MonitorNotes` | `frontend/src/paginas/ListaNotas.tsx` | `M` | filtros, retry contextual e paginação |
+| `MonitorNotes` | `frontend/src/hooks/useTema.ts` | `M` | somente se necessário para seleção explícita de tema |
+| `MonitorNotes` | `frontend/src/estilos/*.css` | `M` | contraste, alinhamento, disclosure e respiro |
+| `MonitorNotes` | `frontend/e2e/notas.mjs` | `M` | jornada browser e acessibilidade |
+| `MonitorNotes` | `frontend/e2e/notas-unit.ts` | `M` | comportamento unitário |
+| `MonitorNotes` | `frontend/README.md` | `M` | navegação/validação, se desatualizado |
+| `MonitorNotes` | `uninotas-foundation` | `M` | gitlink acompanha publicação Foundation governada |
+| `MonitorNotes` | `artifacts/**` | `??` | estado preexistente do usuário; aceitar no diff, nunca stagear/alterar |
+| `uninotas-foundation` | `todos/active/features/TODO-uninotas-fiscal-workspace-ux.md` | `M, D` | evidência e closeout |
+| `uninotas-foundation` | `todos/completed/features/TODO-uninotas-fiscal-workspace-ux.md` | `A` | destino de closeout |
+| `uninotas-foundation` | `todos/active/features/TODO-uninotas-filtered-csv-export.md` | `M` | coordenação/rebaseline serial entre histórias |
+| `uninotas-foundation` | `artifacts/feature-briefs/uninotas-fiscal-workspace-improvements.md` | `M` | coordenação do objetivo de release |
+| `uninotas-foundation` | `modules/fiscal-notes-and-documents.md` | `M` | navegação/UX estável no closeout |
+| `uninotas-foundation` | `artifacts/publication-manifest.txt` | `M` | publicação dos paths finais |
+
+### Not Expected Changed Paths
+
+| Repository | Path glob | Change types | Reason |
+| --- | --- | --- | --- |
+| `MonitorNotes` | `backend/**` | `any` | pacote frontend-only |
+| `MonitorNotes` | `frontend/src/api/**` | `any` | nenhum contrato HTTP novo |
+| `MonitorNotes` | `Dockerfile` | `any` | runtime fora do escopo |
+| `MonitorNotes` | `docker-compose.yml` | `any` | runtime fora do escopo |
+| `MonitorNotes` | `.github/**` | `any` | pipeline fora do escopo |
+| `MonitorNotes` | `backend/.env*` | `any` | config fora do escopo |
+| `MonitorNotes` | `frontend/.env*` | `any` | config fora do escopo |
+| `uninotas-foundation` | `project_constitution.md` | `any` | sem mudança estratégica |
+| `uninotas-foundation` | `system_roadmap.md` | `any` | sem mudança estratégica |
+| `uninotas-foundation` | `policies/**` | `any` | sem mudança de política |
+| `uninotas-foundation` | `deterministic/**` | `any` | sem mudança de validator |
+
+## Definition of Done
+
+- [x] `DOD-UX-01` Selects, opções, bordas e foco são legíveis em claro/escuro: texto normal >= 4.5:1; fronteira e foco >= 3:1.
+- [x] `DOD-UX-02` Filtros e CTA alinham; contexto/status/datas continuam disparando carga automática; Documento/ID dependem de Aplicar; `Atualizar` inexiste na barra e erro oferece `Tentar novamente` sem mudar o filtro.
+- [x] `DOD-UX-03` A imagem anexada aparece como marca oficial local com fallback acessível.
+- [x] `DOD-UX-04` `Smart Notas` abre a última Geral e `Processamento das notas` abre `/erros` para todos os perfis autenticados.
+- [x] `DOD-UX-05` Configurações mostra nome, e-mail e perfil; expõe tema, senha e sair; Equipe somente para ADMIN.
+- [x] `DOD-UX-06` Disclosure possui `aria-expanded`/`aria-controls`, fecha por Escape e clique externo, devolve foco ao gatilho, mantém tab order e não estoura com conta longa/mobile.
+- [x] `DOD-UX-07` Paginação está centralizada, responsiva e com espaço inferior perceptível.
+- [x] `DOD-UX-08` Testes, browser, auditorias e guards passam sem tocar backend/runtime.
+
+## Decisions
+
+- [x] `UX-D-01` Usar disclosure simples contendo conteúdo, links e botões normais; não usar `role=menu`.
+- [x] `UX-D-02` O ícone de configurações terá nome acessível; estado aberto/fechado é local ao header.
+- [x] `UX-D-03` Escape fecha e devolve foco; clique externo fecha; cada link/ação fecha explicitamente e mudança de location fecha o disclosure, pois o header permanece montado entre rotas.
+- [x] `UX-D-04` `Processamento das notas` substitui o rótulo genérico `Erros` na navegação principal, preservando `/erros`.
+- [x] `UX-D-05` A marca é copiada byte a byte do JPEG quadrado fornecido para `frontend/public/marca-unifast.jpeg`; SHA-256 `72cfcd5c1e7c221560af23ae4a56d010793178e8a3e3334c3c2ada8828a7e034`, geometria `256x256`; nenhuma geração/alteração visual e CSS usa contain, não crop.
+- [x] `UX-D-06` Nenhuma ação genérica de refresh permanece na barra; falha da listagem mantém `Tentar novamente`, acionando o refresh já existente e evitando perda de recovery.
+
+## Assumptions Preview
+
+| ID | Assumption | Concrete Evidence | If False | Confidence | Handling |
+| --- | --- | --- | --- | --- | --- |
+| `UX-A-01` | `/erros` é o destino PostgreSQL existente para todos os autenticados | `frontend/src/App.tsx:21`; `frontend/src/App.tsx:36` | exige mudança de rota/permissão | `High` | `Keep as Assumption` |
+| `UX-A-02` | tema atual já possui owner único reutilizável | `frontend/src/hooks/useTema.ts`; `frontend/src/componentes/Cabecalho.tsx:36` | exige refatorar contrato de tema | `High` | `Keep as Assumption` |
+| `UX-A-03` | refresh existente pode ser reutilizado somente como retry de erro | `frontend/src/paginas/ListaNotas.tsx:9`; `frontend/src/contextos/NotasFiscaisContexto.tsx`; `frontend/src/notas/cacheFiscal.ts:71` | remoção causaria perda de recovery | `High` | `Keep as Assumption` |
+| `UX-A-04` | imagem anexada é a marca autorizada | ativo provisório em `frontend/public/marca-unifast.svg`; decisão humana + SHA congelado | ativo incorreto | `High` | `Promoted to UX-D-05` |
+
+## Execution Plan
+
+1. Criar/ajustar testes fail-first para filtros, disclosure, permissões, links e layout.
+2. Copiar a imagem oficial como ativo local versionado.
+3. Refatorar header/disclosure com foco, fechamento explícito por ações/location e ações existentes, sem efeitos de render.
+4. Corrigir filtros, contraste, retry contextual e paginação em CSS/ListaNotas.
+5. Rodar unit/lint/build e preview browser fresco desktop/mobile.
+6. Executar revisão de acessibilidade, aderência, qualidade de teste, final e guards; consolidar módulo somente depois de comportamento estável.
+
+## Validation Steps
+
+- [x] `VAL-UX-01` `cd frontend && npm run test:notas`
+- [x] `VAL-UX-02` `cd frontend && npm run lint && npm run build`
+- [x] `VAL-UX-03` build fresco; iniciar `npm run preview -- --host 127.0.0.1`; provar bundle servido corresponde ao checkout; executar `ALVO=<preview> CHROME=<local> npm run e2e:notas`; encerrar preview.
+- [x] `VAL-UX-04` Browser em desktop e mobile cobre claro/escuro, foco/teclado/Escape/clique externo, ADMIN e não-ADMIN, conta longa, filtros e paginação.
+- [x] `VAL-UX-05` Capability audits React/Vite, `git diff --check`, validator/guards Foundation.
+
+## Local Verification Matrix
+
+| Surface | Command / Evidence | Status |
+| --- | --- | --- |
+| React unit contract | `cd frontend && npm run test:notas` | `passed — parser/calendar/filter/privacy + cache deterministic suites` |
+| Static/build | `cd frontend && npm run lint && npm run build` | `passed — ESLint Hooks/TS; Vite 60 modules` |
+| Browser | preview fresco + `npm run e2e:notas`, APIs interceptadas, desktop/mobile | `passed — Windows Chrome; final run after all fixes` |
+| Accessibility | contrast measurements + keyboard/focus assertions | `passed — light/dark text/options/border/hover/focus; mobile disclosure; pagination` |
+| Foundation | validator, diff/authority/completion guards | `passed — deterministic validator, Foundation validator, authority, diff and completion guards go` |
+
+Não há pipeline versionada no repositório; estas evidências são `Local Verification`, não alegação de CI-Equivalent.
+
+## Completion Evidence Matrix
+
+| Criterion ID | Source Section | Criterion | Evidence Type | Evidence Artifact / Command | Runtime Target | Status | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `SCOPE-UX-01` | `Scope` | `SCOPE-UX-01` Corrigir select/campo/opções e indicadores de foco para contraste WCAG nos temas claro e escuro. | `browser+css` | `e2e/notas.mjs`; computed WCAG normal/hover/focus | `Chrome local` | `passed` | texto/opção >=4.5; borda/hover/foco >=3 |
+| `SCOPE-UX-02` | `Scope` | `SCOPE-UX-02` Alinhar controles da barra pela base; manter carga automática ao mudar contexto/status/datas e ao retornar com cache stale; remover `Atualizar` da barra; manter `Aplicar filtros` somente para Documento e ID da compra; preservar retry contextual `Tentar novamente` quando a listagem falhar. | `browser+code` | `ListaNotas.tsx`; `npm run e2e:notas` | `Chrome local` | `passed` | Atualizar removido; Tentar novamente preservado |
+| `SCOPE-UX-03` | `Scope` | `SCOPE-UX-03` Versionar e usar como ativo local a imagem oficial anexada, preservando fallback textual acessível. | `asset+browser` | SHA-256 `72cfcd5c...e034`; `file` 256x256; header | `local` | `passed` | 6,019 bytes; object-fit contain |
+| `SCOPE-UX-04` | `Scope` | `SCOPE-UX-04` Reorganizar o header com marca, `Smart Notas` e `Processamento das notas`; ambos os destinos permanecem disponíveis a todos os usuários autenticados. | `browser` | jornada `/` ↔ `/erros` em `e2e:notas` | `Chrome local` | `passed` | última Geral preservada |
+| `SCOPE-UX-05` | `Scope` | `SCOPE-UX-05` Substituir o bloco textual de sessão por botão de configurações que mostre conta/perfil e contenha tema, senha, sair e Equipe somente para ADMIN. | `browser` | ANALISTA ausente; ADMIN presente; conta/perfil | `Chrome local` | `passed` | sem semântica `menu` |
+| `SCOPE-UX-06` | `Scope` | `SCOPE-UX-06` Centralizar paginação e garantir respiro inferior em desktop e viewport móvel. | `browser+css` | computed `justify-content`, geometria e padding desktop/mobile | `Chrome local` | `passed` | >=48px inferior |
+| `SCOPE-UX-07` | `Scope` | `SCOPE-UX-07` Atualizar testes frontend/browser e documentação visível diretamente afetada. | `browser+doc` | browser test `frontend/e2e/notas.mjs`; `frontend/README.md` | `Chrome local` | `passed` | comportamento visível documentado |
+| `DOD-UX-01` | `Definition of Done` | `DOD-UX-01` Selects, opções, bordas e foco são legíveis em claro/escuro: texto normal >= 4.5:1; fronteira e foco >= 3:1. | `browser` | helper de contraste para Contexto/Status, ambos temas | `Chrome local` | `passed` | popup nativo cross-OS não é alegado |
+| `DOD-UX-02` | `Definition of Done` | `DOD-UX-02` Filtros e CTA alinham; contexto/status/datas continuam disparando carga automática; Documento/ID dependem de Aplicar; `Atualizar` inexiste na barra e erro oferece `Tentar novamente` sem mudar o filtro. | `navigation/browser+local mutation` | `frontend/e2e/notas.mjs`; UI filter-state mutation e retry na branch non-main, requests GET interceptadas | `Chrome local` | `passed` | nova chave sem falso stale; zero write externo |
+| `DOD-UX-03` | `Definition of Done` | `DOD-UX-03` A imagem anexada aparece como marca oficial local com fallback acessível. | `asset+code` | hash/dimensão + `Marca` | `local` | `passed` | cópia byte a byte |
+| `DOD-UX-04` | `Definition of Done` | `DOD-UX-04` `Smart Notas` abre a última Geral e `Processamento das notas` abre `/erros` para todos os perfis autenticados. | `browser` | links principais e rotas existentes | `Chrome local` | `passed` | sem mudança de autorização backend |
+| `DOD-UX-05` | `Definition of Done` | `DOD-UX-05` Configurações mostra nome, e-mail e perfil; expõe tema, senha e sair; Equipe somente para ADMIN. | `browser` | fixture ANALISTA→ADMIN | `Chrome local` | `passed` | Equipe condicional |
+| `DOD-UX-06` | `Definition of Done` | `DOD-UX-06` Disclosure possui `aria-expanded`/`aria-controls`, fecha por Escape e clique externo, devolve foco ao gatilho, mantém tab order e não estoura com conta longa/mobile. | `browser+review` | aria, Escape/outside, teclado/foco, caixa 390x844 | `Chrome local` | `passed` | conta longa sem overflow |
+| `DOD-UX-07` | `Definition of Done` | `DOD-UX-07` Paginação está centralizada, responsiva e com espaço inferior perceptível. | `browser` | helper desktop 1280x800 e mobile 390x844 | `Chrome local` | `passed` | centralização protegida por CSS e geometria |
+| `DOD-UX-08` | `Definition of Done` | `DOD-UX-08` Testes, browser, auditorias e guards passam sem tocar backend/runtime. | `command+review` | tests/lint/build/browser + reviews; diff boundary | `local` | `passed` | nenhum backend/runtime tocado |
+| `VAL-UX-01` | `Validation Steps` | `VAL-UX-01` `cd frontend && npm run test:notas` | `command` | `cd frontend && npm run test:notas` | `local` | `passed` | exit 0 |
+| `VAL-UX-02` | `Validation Steps` | `VAL-UX-02` `cd frontend && npm run lint && npm run build` | `command` | `npm run lint && npm run build` | `local` | `passed` | ESLint/TS/Vite exit 0 |
+| `VAL-UX-03` | `Validation Steps` | `VAL-UX-03` build fresco; iniciar `npm run preview -- --host 127.0.0.1`; provar bundle servido corresponde ao checkout; executar `ALVO=<preview> CHROME=<local> npm run e2e:notas`; encerrar preview. | `runtime+browser+Playwright` | source-owned web_app_tests `frontend/e2e/notas.mjs`; project-owned run_web_navigation_smoke `npm run e2e:notas`; rebuilt bundle/build artifact `index-Xczr8WUA.css`/`index-DVeKd3ec.js`; preview 4173 | `Chrome local / http://127.0.0.1:4173` | `passed` | servidor encerrado após cada run |
+| `VAL-UX-04` | `Validation Steps` | `VAL-UX-04` Browser em desktop e mobile cobre claro/escuro, foco/teclado/Escape/clique externo, ADMIN e não-ADMIN, conta longa, filtros e paginação. | `navigation/browser+Playwright` | browser web_app_tests `frontend/e2e/notas.mjs`; run_web_navigation_smoke `npm run e2e:notas`; rebuilt bundle/build artifact hashes no Runtime Freshness Attestation | `Chrome local / http://127.0.0.1:4173` | `passed` | ADMIN/ANALISTA, conta longa, filtros, paginação |
+| `VAL-UX-05` | `Validation Steps` | `VAL-UX-05` Capability audits React/Vite, `git diff --check`, validator/guards Foundation. | `navigation/browser+guard` | capability audits ready; browser `frontend/e2e/notas.mjs` passed; diff/validator/authority/completion guards finais | `local + Chrome local` | `passed` | evidência final antes do movimento |
+
+## Local CI-Equivalent Suite Matrix
+
+| Repository / CI Surface | Why In Scope | Local CI-Equivalent Command | Required Before | Status | Evidence Artifact / Command | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| frontend behavior | React/filtros/cache consumers afetados | `cd frontend && npm run test:notas` | `Local-Implemented` | `passed` | deterministic parser/cache output | local verification; não há pipeline para alegar paridade |
+| frontend static/build | TS, Hooks, CSS asset bundle | `cd frontend && npm run lint && npm run build` | `Local-Implemented` | `passed` | Vite 6.4.3, 60 modules | build local reproduzível |
+| frontend browser | fluxo fiscal/legado e acessibilidade | preview fresco + Windows Chrome + `npm run e2e:notas` | `Local-Implemented` | `passed` | `OK mocked fiscal/cache/privacy/session and legacy PATCH flows` | APIs interceptadas; nenhum serviço externo |
+| Foundation | TODO/módulo/publicação | validator + authority/diff/completion/closeout guards | `Completed` | `passed` | validator e guards finais em 2026-09-28 | não é CI-Equivalent |
+
+## Runtime Freshness Attestation
+
+- **Authoritative product state:** `release/uninotas-smart-notas@f1a950a9fb48db68fd7370aed1a7605958a5d50b` (o commit local foi criado após a mesma árvore validada).
+- **Build fingerprint:** Vite assets `dist/assets/index-Xczr8WUA.css` (SHA-256 `65f30100...ffc3`) e `dist/assets/index-DVeKd3ec.js` (SHA-256 `242ad170...9296`), 60 modules.
+- **Served target:** `http://127.0.0.1:4173`, iniciado por `npm run preview -- --host 127.0.0.1 --port 4173` imediatamente após build.
+- **Browser/runtime:** Windows Chrome `C:\Program Files\Google\Chrome\Application\chrome.exe`; todas as APIs interceptadas pelo fixture autoral.
+- **Freshness proof:** build final precedeu o preview; o runner passou sobre esse target; o PID listener foi encerrado após a execução; nenhuma mudança de produto ocorreu antes do commit local.
+
+## Plan Review Gate
+
+### Failure Modes & Edge Cases
+
+- [x] opção nativa continua branca sobre branco em um dos temas;
+- [x] disclosure prende foco, não fecha ou perde retorno de foco;
+- [x] não-ADMIN vê Equipe ou ADMIN deixa de vê-la;
+- [x] conta longa estoura o header;
+- [x] remover Atualizar interrompe a atualização automática;
+- [x] paginação encosta no viewport ou deixa de ser utilizável em mobile.
+
+### Incorporated Independent Findings
+
+| Finding | Severity | Resolution |
+| --- | --- | --- |
+| pacote combinava UX global e exportação pública | `high` | split em `ST-UX` e `ST-EXPORT` |
+| acessibilidade do menu era vaga | `medium` | disclosure, foco, Escape, clique externo, contraste e overflow congelados |
+| comandos eram chamados indevidamente de CI-Equivalent | `high` | matriz renomeada Local Verification e preview lifecycle explicitado |
+| remover Atualizar eliminaria o único retry imediato | `high` | remover apenas da barra e preservar `Tentar novamente` contextual usando refresh existente |
+| header não desmonta entre rotas | `medium` | links/actions/location fecham disclosure explicitamente |
+| ativo oficial estava ambíguo | `medium` | SHA-256, geometria quadrada e destino congelados |
+
+## Architecture Review Gates
+
+- **Architecture decision review:** `required`
+- **Decision review status:** `no_material_findings`
+- **Decision review evidence / resolution:** R3 fresh critique: `GO`, sem findings materiais; story bound, retry, disclosure e ativo confirmados.
+- **Architecture adherence review:** `required after implementation`
+- **Adherence status:** `no_material_findings`
+- **Adherence evidence / resolution:** fresh reviewer `/root/ux_architecture_adherence`; mobile off-screen e retorno de foco foram integrados; delta final `GO`, somente limitação cross-OS do popup nativo registrada.
+- **No-go handling:** `retornar ao plano; não aprovar/concluir com finding material aberto`.
+
+## Gate: Review Baseline Freeze
+
+- **Gate decision:** `required`
+- **Baseline branch:** `uninotas-foundation/main`
+- **Baseline commit:** `03c225d0fe9278b3b594a883b28a929ecbe4d70d`
+- **Baseline push reference:** `origin/main`
+- **Gate status:** `no_material_findings`
+- **Findings summary:** findings R2 foram integrados em baseline material isolado e publicado.
+- **Evidence / reference:** `origin/main` contém `03c225d0fe9278b3b594a883b28a929ecbe4d70d`; commit material final altera somente os dois TODOs após `ed3b774`.
+
+## Gate: Review Scope Drift
+
+- **Gate decision:** `required`
+- **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-fiscal-workspace-ux.md`
+- **Gate status:** `no_material_findings`
+- **Evidence / reference:** `review_scope_drift_guard.py` sobre baseline `03c225d0fe9278b3b594a883b28a929ecbe4d70d`: `go`, `0/23` seções materiais alteradas; repetir após R3 antes do APROVADO.
+
+## Audit Trigger Matrix
+
+| Trigger | Value | Notes |
+| --- | --- | --- |
+| `complexity` | `medium` | header global + accessibility + browser |
+| `blast_radius` | `cross-module` | rotas autenticadas compartilham header |
+| `behavioral_change_or_bugfix` | `yes` | UX visível |
+| `changes_public_contract` | `no` | sem API |
+| `touches_auth_or_tenant` | `no` | apenas visibilidade existente por perfil |
+| `touches_runtime_or_infra` | `no` | n/a |
+| `touches_tests` | `yes` | unit/browser |
+| `critical_user_journey` | `yes` | navegação fiscal |
+| `release_or_promotion_critical` | `yes` | entrega solicitada |
+| `high_severity_plan_review_issue` | `no` | findings integrados |
+| `explicit_three_lane_request` | `no` | n/a |
+
+## Independent No-Context Critique Gate
+
+- **Critique decision:** `required`
+- **Critique status:** `no_material_findings`
+- **Findings summary:** R3 fresh no-context critique retornou `UX — GO`, sem findings materiais.
+- **Evidence / reference:** reviewer `/root/fiscal_split_critique_r3`, baseline `03c225d0fe9278b3b594a883b28a929ecbe4d70d`.
+- **Isolation:** `fresh internal no-context reviewer; cannot implement`
+- **Lenses:** `correctness|accessibility|elegance|structure|regression`.
+
+## Gate: Assumption Code Coherence
+
+- **Gate decision:** `required`
+- **Guard scope:** `UX-A-01,UX-A-02,UX-A-03,UX-A-04`
+- **Guard command:** `python3 delphi-ai/tools/assumption_code_coherence_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-fiscal-workspace-ux.md`
+- **Gate status:** `no_material_findings`
+- **Evidence / reference:** paths `frontend/src/App.tsx`, `frontend/src/hooks/useTema.ts`, `frontend/src/componentes/Cabecalho.tsx`, `frontend/src/paginas/ListaNotas.tsx`, `frontend/src/contextos/NotasFiscaisContexto.tsx` e `frontend/src/notas/cacheFiscal.ts` resolvidos; `UX-A-04` promovida a decisão.
+
+## Approval
+
+- **Status:** `approved`
+- **Approved by:** `project owner / user`
+- **Approval reference:** resposta explícita `APROVADO` em 2026-09-28, após `preflight-go` e publicação do baseline revisado em `origin/main`.
+- **Approval scope:** `SCOPE-UX-01..07`
+- **Not authorized:** `export/backend/deploy/merge/worktrees`
+- **Renewed approval required:** rota, auth, fonte ou diff boundary material muda.
+
+## Agent Routing Preflight
+
+- **Client surface:** `codex`
+- **Current governed action:** `implementation`
+- **Selected role:** `routine-executor`
+- **Selected model:** `gpt-5.6-terra`
+- **Selected effort:** `medium`
+- **Proof mode:** `declared`
+- **Subagent / delegation authorization:** `authorized by explicit APROVADO on 2026-09-28 for one workflow-required serialized routine executor`
+- **Execution topology:** `primary-checkout-single-writer`
+- **Worktree authorization:** `not-authorized`
+- **Guard outcome:** `go`
+- **Guard evidence:** `agent_role_routing_guard.py` para codex/implementation/routine-executor/gpt-5.6-terra/medium/declared; não concede autoridade antes do APROVADO.
+
+## Package-First Assessment
+
+- **Query executed:** `bash delphi-ai/tools/query_packages.sh --project-root . --search "react"`
+- **Relevant packages found:** `none`
+- **READMEs read:** `frontend/README.md` já pertence ao escopo de implementação e será conferido pelo executor.
+- **Decision:** implementação local no host React/Vite existente; nenhum pacote, helper compartilhado ou dependência será criado.
+- **Tier:** `Local host application`
+- **Rationale:** disclosure, composição de header, filtros e paginação são específicos desta interface e já possuem owners locais; o catálogo proprietário não oferece capacidade equivalente.
+
+## Rules Acknowledgement / Ingestion
+
+| Source | Why It Applies | Must Preserve | Must Avoid | Execution Impact |
+| --- | --- | --- | --- | --- |
+| `delphi-ai/rules/core/todo-driven-execution-model-decision.md` | tactical TODO | approval, diff, evidence | preapproval code | lifecycle governado |
+| `delphi-ai/skills/rule-react-react-architecture-always-on/SKILL.md` | header/list React | pure render, owner único, a11y | side effects no render | component/browser review |
+| `delphi-ai/skills/wf-react-change-ui-boundary-method/SKILL.md` | UI boundary | estados/ações explícitos | coupling oculto | test-first UI |
+| `delphi-ai/skills/rule-vite-vite-build-runtime-always-on/SKILL.md` | ativo/build | asset local e bundle fresco | env/asset guess | build/preview proof |
+| `delphi-ai/skills/test-creation-standard/SKILL.md` | testes mudam | fail-first/assertions eficazes | bypass | unit/browser |
+| `delphi-ai/skills/ci-equivalent-governance/SKILL.md` | verificação | linguagem honesta | alegação CI sem pipeline | Local Verification |
+
+## Performance & Concurrency Risk Assessment
+
+- **Policy schema version:** `pcv-1`
+- **Global sensitivity level:** `low`
+- **Why this level:** somente estado local síncrono e layout; refresh reutiliza fluxo já existente.
+- **Current delivery stage at review time:** `Local-Implemented, Provisional, review`
+
+| Policy Schema Version | Lane ID | Lane | Trigger Result | Trigger Severity | Trigger Reason Code | Trigger Rationale | Gate Deadline | Minimum Evidence Rule | State | Residual Risk | Uncertainty Reason Code | Recorded At UTC | Executor ID |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `pcv-1` | `EPS` | `endpoint-performance-scrutiny` | `not_needed` | `low` | `EPS-NO-DATA-PATH-CHANGE` | nenhum endpoint/query/repository muda | `before_local_implemented` | `EPS-INV` | `not_applicable` | none | `none` | `2026-09-28T18:00:00Z` | `codex-primary` |
+| `pcv-1` | `FRC` | `frontend-race-condition-validation` | `not_needed` | `low` | `FRC-NO-NEW-ASYNC-SURFACE` | disclosure é síncrono; retry usa request guard existente | `before_local_implemented` | `FRC-INV` | `not_applicable` | fechamento por location | `none` | `2026-09-28T18:00:00Z` | `codex-primary` |
+| `pcv-1` | `BCI` | `backend-concurrency-idempotency-validation` | `not_needed` | `low` | `BCI-NO-BACKEND-WRITE` | sem backend/mutation | `before_local_implemented` | `BCI-INV` | `not_applicable` | none | `none` | `2026-09-28T18:00:00Z` | `codex-primary` |
+| `pcv-1` | `RLS` | `runtime-load-stress-validation` | `not_needed` | `low` | `RLS-NO-BULK-PATH` | sem bulk/runtime | `before_local_implemented` | `RLS-INV` | `not_applicable` | none | `none` | `2026-09-28T18:00:00Z` | `codex-primary` |
+
+## Required Delivery Gates
+
+- `test-quality-audit`: `required; no_material_findings`
+- `architecture-adherence`: `required; no_material_findings`
+- `independent-final-review`: `required; no_material_findings`
+- `audit-protocol-triple-review`: `required before Completed per escalation outcome; clean`
+- `verification-debt-audit`: `required; no blocking verification debt`
+- `security-adversarial-review`: `not_needed; no new data/auth boundary`
+- `cutover-integrity-audit`: `not_needed`
+
+## Independent Test Quality Audit Gate
+
+- **Audit decision:** `required`
+- **Audit status:** `no_material_findings`
+- **Evidence / reference:** fresh reviewer `/root/ux_test_quality_audit`; mobile off-screen, contraste incompleto e proteção fraca da centralização foram integrados; rerun final retornou `GO. Sem findings remanescentes`.
+- **Test-first status:** testes browser foram alterados antes do primeiro código, mas o RED inicial não foi executável pela descoberta tardia do Chrome Windows; REDs reais posteriores de stale incorreto, estado residual, borda de foco e hover foram observados e corrigidos sem reduzir thresholds. Demais mudanças são honestamente `test-after`.
+- **Boundary claim:** o e2e prova o consumidor React com APIs interceptadas, não backend/auth/SSE reais nem popup nativo cross-OS.
+
+## Dedicated Triple Review Audit Gate
+
+- **Audit decision:** `required`
+- **Canonical protocol:** `audit-protocol-triple-review` (baseline dual: performance + test quality; cutover integrity não aplicável).
+- **Audit status:** `clean`
+- **Performance evidence:** fresh reviewer `/root/ux_performance_audit`; encontrou e confirmou o painel mobile fora da viewport; após correção, probes 390x844, 320x568 e 844x390 ficaram integralmente visíveis; rerun `GO`.
+- **Test-quality evidence:** `/root/ux_test_quality_audit`; findings `UX-TQ-01..03` integrados e rerun final `GO`, sem finding remanescente.
+- **Cutover lane:** `not_needed`; nenhuma fonte, capability ownership, compatibilidade ou runtime foi ativado/retirado.
+
+## Independent No-Context Final Review Gate
+
+- **Final review decision:** `required`
+- **Final review status:** `no_material_findings`
+- **Evidence / reference:** fresh reviewer `/root/ux_final_review`; `UX-FINAL-01` detectou hover light em 2.586:1, corrigido com `--regua-forte` e prova hover para Contexto/Status em ambos temas; rerun delta retornou `GO`, zero P1/P2.
+- **Residual evidence boundary:** popup nativo de `select` depende de navegador/SO; a suíte prova tokens CSS e Chrome declarado, sem alegar certificação multiplataforma ou percurso Tab completo.
+
+## Pipeline/Copilot P1/P2 Preflight
+
+| Reviewer Surface / Package | Review Focus | Status | Evidence Artifact / Command | Findings | Resolution / Notes |
+| --- | --- | --- | --- | --- | --- |
+| UX React/Vite + browser package | correctness, a11y, mobile, regressions, tests, performance, elegance | `passed` | architecture/test-quality/performance/final reviewers + final Chrome run | `UX-ARCH-01..02`, `UX-TQ-01..03`, `UX-FINAL-01` | todos integrados; nenhum P1/P2 aberto |
+
+## Rule-Spirit Anti-Pattern Hunt
+
+| Rule / Principle Surface | Bypass or Anti-Pattern Search Lens | Status | Evidence Artifact / Command | Findings | Resolution / Notes |
+| --- | --- | --- | --- | --- | --- |
+| React/Vite/source authority | render/effect bypass, hard-coded target, hidden runtime, test weakening | `passed` | normalized CRLF execution of `rule_spirit_anti_pattern_scan.sh`; `artifacts/tmp/uninotas-fiscal-workspace-ux-rule-spirit.json` | five heuristic review/warning matches | localhost is overridable browser fixture; fixture email is synthetic; `dia.test` is RegExp; all `by-design/no-action`, zero blocker |
+
+## Promotion Finding Routing Ledger
+
+| Finding ID | Finding Source | Severity | Classification | Required Action | Status | Rationale / Follow-up Reference |
+| --- | --- | --- | --- | --- | --- | --- |
+| `UX-ARCH-01 / UX-TQ-01 / UX-PERF-01` | architecture + test-quality + performance | `high` | `release-blocker` | corrigir painel mobile abaixo da viewport e provar ação real | `resolved` | absolute anchor + bounding box/actions em 390x844; três reviewers GO |
+| `UX-ARCH-02` | architecture adherence | `medium` | `release-blocker` | devolver foco após tema desmontar controle | `resolved` | `fechar(true)` + keyboard/focus browser assertion |
+| `UX-TQ-02` | test-quality | `medium` | `release-blocker` | provar border normal/foco e outline real | `resolved` | Contexto/Status, claro/escuro, style/width/ratios |
+| `UX-TQ-03` | test-quality | `low` | `release-blocker` | impedir falso positivo de centralização | `resolved` | computed `justifyContent=center` + geometria |
+| `UX-FINAL-01` | independent final review | `medium` | `release-blocker` | corrigir hover light 2.586:1 e cobrir estado | `resolved` | `--regua-forte`; hover >=3 em ambos temas |
+| `UX-RES-01` | architecture/final residual | `low` | `by-design/no-action` | limitar claim de popup nativo | `accepted` | matriz oficial cross-browser/SO inexiste; evidence declara somente CSS + Chrome |
+| `RULE-SPIRIT-01` | heuristic scanner | `review/warning` | `by-design/no-action` | classificar localhost, fixture email e `dia.test` | `resolved` | alvo loopback é overridable e interceptado; email é `.test`; `dia.test` é RegExp |
+
+## Verification Debt Assessment
+
+- **Audit outcome:** `no blocking verification debt`
+- **Inline code TODO debt:** `none found in affected frontend surfaces`
+- **Evidence / audit artifact:** normalized CRLF execution of `verification_debt_audit.sh` sobre o TODO e sete paths frontend; zero checklist pendente e zero inline debt. Sinais de `Provisional`, `n/a` e closeout são contratos explícitos de entrega local, não waivers ocultos.
+- **Accepted residual debt:** somente `UX-RES-01`, limitação explícita de evidência cross-OS; produção/deploy permanecem no cutover.
+
+## Module Consolidation Gate
+
+- [x] comportamento UX estável será registrado em `modules/fiscal-notes-and-documents.md` sem promover runtime ownership.
+- [x] nenhuma decisão de exportação, backend, auth ou deploy foi alterada.
+- [x] `ST-EXPORT` permanece separado e precisa de rebaseline após este closeout.
+
+## TODO Closeout Disposition
+
+- **Disposition:** `move-completed`
+- **Reason:** escopo UX implementado no commit local `f1a950a`, validações/reviews/guards verdes e nenhum finding material aberto; deploy permanece separado.
+- **Target after implementation:** `Local-Implemented`, sem deploy.
+- **Post-commit/push status:** `local commit only; no push/merge/deploy performed`.
+- **Next path/status action:** caminho final, brief e publication manifest atualizados; rebaselinear `ST-EXPORT`.
