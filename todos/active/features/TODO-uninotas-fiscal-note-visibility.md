@@ -52,7 +52,8 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - [ ] `SCOPE-09` Remover helpers/re-exports de máscara que ficarem sem consumidores e manter canários de privacidade separados por sink.
 - [ ] `SCOPE-10` Ampliar somente o DTO público de detalhe com `providerInternalId`, `recipientDocument`, `recipientEmail`, `recipientCity`, `recipientState` e `recipientCountry`, mantendo o resumo de lista limitado a `recipientName` como nova PII.
 - [ ] `SCOPE-11` Mostrar no card de detalhe todos os campos do `GET /notas` enumerados pelo usuário: ID interno, modelo, finalidade, status, ambiente, número, chave, compra, produto, valor unitário, valor total, emissão agendada, pagamento, competência, nome, documento, e-mail, cidade, estado, país e plataforma; preservar também os campos de detalhe já existentes.
-- [ ] `SCOPE-12` Manter `noteId` opaco como única identidade de rota. `providerInternalId` é somente referência visível autenticada e nunca parâmetro aceito do consumidor.
+- [ ] `SCOPE-12` Manter `noteId` como única identidade de rota assinada e vinculada ao contexto. O token é resistente a adulteração, porém decodificável e não confidencial; `providerInternalId` nunca será aceito como parâmetro bruto informado pelo consumidor.
+- [ ] `SCOPE-13` Separar o record interno de lista/exportação do record de detalhe, para que documento, e-mail e localização não sejam acumulados durante exportações de até 20.000 notas.
 
 ## Out of Scope
 - [ ] Alterar perfis, autenticação ou conceder acesso a usuários não autenticados.
@@ -82,9 +83,12 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - [ ] `DOD-11` Canários `allowed-visible-but-forbidden-in-sinks` são visíveis somente na UI fiscal e permanecem ausentes de URL, storage, console, referrer e requests alheios; PII não aprovada permanece `forbidden-everywhere`.
 - [ ] `DOD-12` Cache/logout usa canários distintos por sessão e resposta tardia para provar que objetos enriquecidos antigos não reaparecem antes nem depois da resposta da nova sessão.
 - [ ] `DOD-13` O card apresenta todos os 21 campos enumerados pelo usuário e preserva os campos de detalhe existentes, com `Não disponível` para valores legitimamente nulos e rótulos fiscais claros.
-- [ ] `DOD-14` `providerInternalId` é visível/copiável apenas no detalhe autenticado; a rota, cache key, list response e CSV continuam usando/expondo somente contratos já aprovados e nunca aceitam esse ID do navegador.
+- [ ] `DOD-14` `providerInternalId` é visível/copiável apenas no detalhe autenticado e nunca é aceito como parâmetro bruto; a rota/cache key continuam usando o `noteId` assinado existente, cujo payload é decodificável e já contém esse ID, sem promessa de confidencialidade do token.
 - [ ] `DOD-15` Documento aceita somente 11 ou 14 dígitos; e-mail é `string|null` de até 320 caracteres; cidade até 255, estado até 64 e país até 128; valores presentes vazios/overbound ou documento inválido falham como contrato Smart Notas inválido.
 - [ ] `DOD-16` Nenhum valor real fornecido pelo usuário é persistido; fixtures usam canários sintéticos inequívocos e não reutilizam pessoa, documento, e-mail, chave, compra ou ID do exemplo real.
+- [ ] `DOD-17` O caminho de lista/exportação carrega somente `recipientName` como nova PII; os cinco campos pessoais exclusivos do detalhe nunca integram `FiscalNotePage` nem o acumulador de exportação.
+- [ ] `DOD-18` Um cenário sintético de 20.000 registros com nomes de 255 caracteres prova o limite adicional de 5.100.000 code points no acumulador, conclusão dentro do deadline existente e CSV sem os novos campos.
+- [ ] `DOD-19` O normalizador frontend exige exatamente os 17 campos de resumo e 27 de detalhe com os tipos/nullability congelados; ausência, tipo incorreto ou string inválida gera resposta incompatível em vez de fallback silencioso.
 
 ## Validation Steps
 - [ ] `VAL-01` Executar testes unitários/contratuais do adapter, DTO, serviço e controller fiscal com fixtures sintéticas.
@@ -97,6 +101,7 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - [ ] `VAL-08` Executar teste unitário/race de cache com valores enriquecidos old-session, resposta tardia e valores distintos new-session.
 - [ ] `VAL-09` Executar contract/browser matrix que conta e verifica os 21 campos solicitados no detalhe, ausência desses novos campos sensíveis na lista/CSV e preservação dos campos de detalhe anteriores.
 - [ ] `VAL-10` Executar scan/revisão do diff e artifacts para garantir que nenhum valor real fornecido na solicitação foi copiado ou persistido.
+- [ ] `VAL-11` Executar exportação sintética no limite de 20.000 records com `recipientName` de 255 caracteres, provando que nenhum campo pessoal detail-only é retido e que prazo/schema permanecem válidos.
 
 ## Diff Expectation Contract (Required Before Delivery)
 - **Contract status:** `required`
@@ -182,10 +187,11 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - [x] `D-12` Valores autorizados visíveis e PII proibida usam conjuntos de canários separados para que remover a máscara nunca enfraqueça provas de URL/storage/log/request/referrer.
 - [x] `D-13` Limpeza de cache/sessão é provada com valores enriquecidos distintos e resposta antiga tardia, não apenas com página vazia ou segunda resposta idêntica.
 - [x] `D-14` O detalhe público acrescenta somente `providerInternalId`, `recipientDocument`, `recipientEmail`, `recipientCity`, `recipientState` e `recipientCountry`; telefone/endereço completo/inscrições/retorno bruto permanecem privados.
-- [x] `D-15` `providerInternalId` pode ser mostrado como referência financeira, mas `noteId` opaco continua sendo a única identidade de rota e nenhuma chamada aceita ID interno informado pelo cliente.
-- [x] `D-16` Os campos adicionais de detalhe não entram na lista, CSV, URL, logs, telemetria ou armazenamento persistente; ficam somente na resposta/cache efêmero autenticado do detalhe.
+- [x] `D-15` `providerInternalId` pode ser mostrado como referência financeira, mas `noteId` assinado continua sendo a única identidade de rota e nenhuma chamada aceita ID interno bruto informado pelo cliente. O token é decodificável, contém o ID e não oferece confidencialidade; sua proteção é integridade/context binding.
+- [x] `D-16` Documento, e-mail e localização não entram na lista, CSV, URL, logs, telemetria ou armazenamento persistente; ficam somente na resposta/memória efêmera autenticada do detalhe. O ID interno pode aparecer indiretamente no `noteId` já existente e em logs de rota que registrem esse token.
 - [x] `D-17` Documento usa validação 11/14 dígitos; e-mail/localização usam limites explícitos e valores presentes inválidos falham fechados no adapter/normalizador.
 - [x] `D-18` Os valores reais da solicitação são dados sensíveis transitórios e são proibidos em qualquer arquivo ou artifact persistido.
+- [x] `D-19` Records internos distintos separam lista/exportação de detalhe; somente `recipientName` amplia o acumulador de até 20.000 itens, com limite calculado e cenário máximo obrigatório.
 
 ## Module Decision Baseline Snapshot (Required Before APROVADO)
 | Module Decision Ref | Current Module Decision | Planned Handling | Evidence |
@@ -206,14 +212,56 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - [x] `D-08` Provar os quatro perfis, rejeição sem autenticação, exclusão do CSV e limpeza de cache.
 - [x] `D-09` Usar normalização frontend estrita, lista semântica rotulada e testes desktop/mobile/sinks/sessão com canários distintos.
 - [x] `D-10` Remover helpers/re-exports de masking sem consumidores; não manter código morto da política anterior.
-- [x] `D-11` Manter `noteId` opaco como rota e `providerInternalId` apenas como referência visível/copiável no detalhe.
+- [x] `D-11` Manter `noteId` assinado como única entrada de rota; o token é decodificável e `providerInternalId` permanece apenas referência visível/copiável no detalhe, nunca parâmetro bruto aceito.
 - [x] `D-12` Proibir novos campos sensíveis na lista/CSV/sinks e proibir persistência dos valores reais da solicitação.
+- [x] `D-13` Não tratar `noteId` como mecanismo de confidencialidade; a garantia existente é integridade e vínculo de contexto.
+- [x] `D-14` Separar records internos de lista/exportação e detalhe, mantendo PII detail-only fora do acumulador de exportação.
+
+## Exact Public DTO Contract
+
+Todos os campos abaixo são propriedades obrigatórias no JSON. `string|null` aceita `null`, mas nunca ausência, tipo diferente, string vazia ou valor acima do limite. A lista tem exatamente 17 campos por item; o detalhe tem exatamente esses 17 mais 10 campos, totalizando 27. Os 21 campos enumerados pelo usuário estão incluídos no detalhe; os seis restantes são `noteId`, `fiscalContext` e os quatro campos de detalhe já existentes.
+
+| Public field | Public type | Provider/source rule | Summary | Detail |
+| --- | --- | --- | --- | --- |
+| `noteId` | `string` | token assinado derivado de contexto + `idInterno`; decodificável | yes | yes |
+| `fiscalContext` | `'unifast'|'prosperar'` | contexto fiscal confiável | yes | yes |
+| `providerStatus` | `string` | `status`, required, max 64 | yes | yes |
+| `fiscalNumber` | `string|null` | `numeroNota`, max 128 | yes | yes |
+| `accessKey` | `string|null` | `chave`, max 128 | yes | yes |
+| `purchaseId` | `string|null` | `idCompra`, max 128 | yes | yes |
+| `environment` | `string|null` | `ambiente`, max 64 | yes | yes |
+| `model` | `string|null` | `modelo`, max 64 | yes | yes |
+| `purpose` | `string|null` | `finalidade`, max 64 | yes | yes |
+| `platform` | `string|null` | `plataforma`, max 64 | yes | yes |
+| `product` | `string|null` | `produto`, max 500 | yes | yes |
+| `scheduledIssueDate` | `string|null` | `dataEmitir`, ISO local date após normalização | yes | yes |
+| `paymentDate` | `string|null` | `dataPagamento`, ISO local date após normalização | yes | yes |
+| `competence` | `string|null` | `competencia`, formato atual, max 64 | yes | yes |
+| `unitValue` | `string|null` | `valorUnitario`, decimal normalizado | yes | yes |
+| `totalValue` | `string|null` | `valorTotal`, decimal normalizado | yes | yes |
+| `recipientName` | `string|null` | `nome`, max 255 | yes | yes |
+| `providerInternalId` | `string` | `idInterno`, required, regex/limite 127 atuais | no | yes |
+| `issueDate` | `string|null` | `dataEmissao`, ISO local date após normalização | no | yes |
+| `referencedAccessKey` | `string|null` | `chaveNotaRef`, max 128 | no | yes |
+| `operationNature` | `string|null` | `naturezaOperacao`, max 255 | no | yes |
+| `quantity` | `string|null` | `qnt`, decimal normalizado | no | yes |
+| `recipientDocument` | `string|null` | `documento`, somente 11 ou 14 dígitos | no | yes |
+| `recipientEmail` | `string|null` | `email`, max 320; sem inventar validação sintática além do contrato observado | no | yes |
+| `recipientCity` | `string|null` | `cidade`, max 255 | no | yes |
+| `recipientState` | `string|null` | `estado`, max 64 | no | yes |
+| `recipientCountry` | `string|null` | `pais`, max 128 | no | yes |
+
+### Exact Internal Record Split
+
+- `FiscalNoteListRecord`: dados comuns, `providerIdInterno` necessário para gerar `noteId` e `recipientName`; é o único record permitido em `FiscalNotePage` e no acumulador da exportação.
+- `FiscalNoteDetailRecord`: estende o record de lista com os quatro campos detail-only atuais e `recipientDocument`, `recipientEmail`, `recipientCity`, `recipientState`, `recipientCountry`; é retornado somente por `SmartNotasPort.detail()`.
+- `providerInternalId` público é projetado do `providerIdInterno` somente no detalhe. Nenhum dos cinco campos pessoais detail-only pode existir estruturalmente no record de lista/exportação.
 
 ## Architecture Change Governance
 - **Applicability:** `required`
 - **Why this applies:** o TODO amplia intencionalmente o contrato de privacidade que antes excluía toda PII do tomador e o ID interno do provedor.
 - **Deviation / debt being retired:** máscara visual deixou de atender à necessidade da equipe financeira; nenhuma dívida de origem de dados será resolvida por fallback.
-- **Target steady-state after closeout:** resumo allowlisted expõe nome e identificadores fiscais já existentes; detalhe allowlisted expõe todos os campos enumerados pelo usuário, com PII/localização minimizada à lista explícita; rota continua opaca e pesquisa limitada aos filtros do provedor.
+- **Target steady-state after closeout:** resumo allowlisted expõe nome e identificadores fiscais já existentes; detalhe allowlisted expõe todos os campos enumerados pelo usuário, com PII/localização minimizada à lista explícita; rota usa token assinado decodificável sem aceitar ID bruto e a pesquisa continua limitada aos filtros do provedor.
 - **Temporary exceptions allowed:** `none`.
 - **Cutover / removal condition:** `n/a`.
 
@@ -223,14 +271,15 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 | DTO allowlist | NestJS fiscal adapter | provider -> API | impede vazamento de payload/PII não aprovado |
 | ephemeral sensitive filters | módulo fiscal `Invariants` | React cache/query | evita URL/storage/log exposure |
 | provider-supported filter boundary | `D-04` | list/export | impede filtro parcial ou varredura dispendiosa |
-| opaque route identity | `D-15` | detail route | permite referência visível sem transformar ID do provedor em autoridade de entrada |
+| signed route identity | `D-15` | detail route | preserva integridade/context binding sem alegar confidencialidade nem aceitar ID bruto como autoridade de entrada |
+| split internal records | `D-19` | list/export vs detail | impede PII detail-only no acumulador de exportação |
 
 ### Anti-Patterns To Prohibit
 | Anti-Pattern | Prohibited Surface | Protection Harness |
 | --- | --- | --- |
 | espalhar payload bruto do Smart Notas | adapter/DTO/frontend | contract tests e normalização allowlisted |
 | introduzir pesquisa por número disfarçada | React/adapter | diff review e contract tests dos filtros permitidos |
-| persistir nome/chaves/compra | URL/browser/db/logs | testes de URL/cache/logout e security review |
+| persistir PII/compra/chaves | URL/browser/db/logs | testes de URL/cache/logout e security review; `noteId` assinado decodificável é exceção existente apenas para ID interno |
 | remover canário global para fazer E2E passar | browser tests | separar visibilidade permitida de sinks proibidos e manter ambas as asserções |
 | aceitar campo público ausente como `null` | frontend normalizer | contract tests strict list/detail |
 | espalhar PII de detalhe para resumo/CSV | service/serializer | exact-key list/detail tests plus golden CSV |
@@ -241,7 +290,8 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 | --- | --- | --- | --- | --- | --- |
 | `test` | Smart Notas adapter/DTO | `backend/src/fiscal-notes/smart-notas.adapter.spec.ts`; backend full suite | PII não aprovada atravessando a allowlist ou campos de detalhe vazando para lista/CSV | `implement-in-this-todo` | `DOD-03`, `DOD-13`..`DOD-15`, `VAL-01`, `VAL-02`, `VAL-09` |
 | `test` | React normalization/UI | frontend fiscal tests + `npm run e2e:notas` | nome ausente quebrando UI ou identificadores ainda mascarados | `implement-in-this-todo` | `DOD-01`, `DOD-02`, `DOD-05`, `VAL-03`, `VAL-04` |
-| `audit` | contrato de privacidade | `security-adversarial-review` | PII/IDs em URL, storage, logs ou erro | `implement-in-this-todo` | `DOD-06`, `VAL-05` |
+| `audit` | contrato de privacidade | `security-adversarial-review` | PII/IDs em URL, storage, logs ou erro fora da exceção documentada do `noteId` | `implement-in-this-todo` | `DOD-06`, `DOD-14`, `VAL-05` |
+| `test` | export memory shape | backend export spec at 20.000 synthetic rows | PII detail-only acumulada ou limite de nome não testado | `implement-in-this-todo` | `DOD-17`, `DOD-18`, `VAL-11` |
 | `test` | browser privacy/cache/accessibility | `frontend/e2e/notas.mjs`; `frontend/e2e/notas-unit.ts` | canário autorizado escapando para sinks, cache antigo reaparecendo ou labels/overflow inválidos | `implement-in-this-todo` | `DOD-09`..`DOD-12`, `VAL-07`, `VAL-08` |
 
 ## Architecture Review Gates (Deterministically Derived From Architecture Change Governance)
@@ -249,8 +299,8 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - **Decision review lifecycle:** `after diagnosis is closed and before APROVADO`
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-summary`
-- **Decision review status:** `not_run`
-- **Decision review evidence / resolution:** previous reviewer `/root/fiscal_visibility_architecture_opinion` remains historical; new review required because PII/ID scope expanded after that opinion.
+- **Decision review status:** `findings_integrated; fresh convergence rerun pending`
+- **Decision review evidence / resolution:** fresh reviewer `/root/fiscal_detail_architecture_r2` returned `not_ready` with three approval-breaking findings. The plan now documents signed-but-decodable route semantics, exact DTO tables and split internal records/export bound; a new frozen-baseline reviewer must confirm convergence.
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -286,7 +336,7 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 
 ### Ordered Steps
 1. Adicionar testes fail-first para resumo/detalhe allowlisted, todos os campos enumerados, normalização frontend estrita, quatro perfis HTTP reais, sinks/canários, cache de sessão e exibição integral.
-2. Estender o record interno do adapter com os seis campos novos, criar projeções públicas positivas distintas para resumo e detalhe e manter rota/query/filtros inalterados.
+2. Separar `FiscalNoteListRecord` de `FiscalNoteDetailRecord`, mapear os seis campos novos somente no detalhe exceto `recipientName` comum, criar projeções públicas positivas distintas e manter rota/query/filtros inalterados.
 3. Estender tipos/normalização, Geral e card de detalhe React com todos os campos enumerados, mantendo valores legitimamente nulos explícitos.
 4. Converter a grade visual em lista semântica de links/células rotuladas, aplicar `min-width: 0`/`overflow-wrap: anywhere` aos valores reais e preservar a jornada existente de filtros/exportação.
 5. Executar testes focados, suites completas, browser fresco e segurança.
@@ -296,7 +346,7 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - **Intent:** `critical-user-journey` e `compatibility`.
 - **Strategy:** `test-first` para DTO/normalização e regressões visuais; fixtures exclusivamente sintéticas.
 - **Why:** a mudança é observável, aditiva no contrato e sensível à privacidade.
-- **Fail-first target(s):** provider nome/documento/e-mail/localização ausentes/null/vazios/overbound; documento não 11/14; HTTP fields ausentes/tipo inválido; exact-key summary/detail projections; PII extra descartada; quatro perfis/rejeição sem JWT; card com os 21 campos; CSV exato sem novos campos; route remains opaque; cache old/new-session; desktop/mobile labels/teclado/overflow; preservação dos filtros/exportação existentes.
+- **Fail-first target(s):** provider nome/documento/e-mail/localização ausentes/null/vazios/overbound; documento não 11/14; HTTP fields ausentes/tipo inválido; exact-key summary/detail projections; PII extra descartada; quatro perfis/rejeição sem JWT; card com os 21 campos; CSV exato sem novos campos; rota recusa ID bruto e aceita somente token assinado; cache old/new-session; exportação máxima; desktop/mobile labels/teclado/overflow; preservação dos filtros/exportação existentes.
 - **Deliberate exclusions:** nenhum payload real, segredo, CNPJ, nome real ou identificador real será persistido em teste/artifact.
 
 ### Pre-APROVADO RED Evidence Capture
@@ -338,7 +388,7 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 ## Plan Review Gate
 
 ### Review Sections
-- [x] Architecture — Smart Notas permanece autoridade; resumo e detalhe possuem allowlists positivas distintas e a rota continua opaca.
+- [x] Architecture — Smart Notas permanece autoridade; resumo/detalhe possuem allowlists positivas distintas, records internos separados e a rota usa token assinado decodificável.
 - [x] Code Quality — nomes canônicos para seis campos adicionais de detalhe; nenhuma lógica de filtro, busca ou persistência nova.
 - [x] Tests — contrato e browser cobrem os 21 campos, valores longos/ausentes, perfis/sinks e preservam lista/CSV/filtros/exportação.
 - [x] Performance — nenhuma chamada upstream, varredura, query ou cardinalidade nova.
@@ -396,14 +446,15 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 ## Additional Architectural Opinions
 - **Needed:** `yes`
 - **Why ambiguity remains:** deterministic architecture review required because this TODO intentionally supersedes the prior no-PII public DTO contract.
-- **Opinion count:** `1 completed + 1 fresh rerun required`
+- **Opinion count:** `2 completed + 1 fresh convergence rerun required`
 - **Package mode:** `bounded-summary`
-- **Internal reviewer mandate:** `required; previous reviewer cannot satisfy the expanded scope, so a fresh no-context architecture reviewer is pending`
+- **Internal reviewer mandate:** `required; expanded-scope findings were integrated and a distinct fresh no-context reviewer must confirm the refreshed baseline`
 - **Required lenses:** `correctness|performance|elegance|structural-soundness|operational-fit`
 
 | Reviewer | Recommendation | Performance view | Elegance view | Structural soundness view | Resolution | Evidence |
 | --- | --- | --- | --- | --- | --- | --- |
 | `/root/fiscal_visibility_architecture_opinion` | `acceptable_with_changes` | low/bounded payload and DOM increase; no calls/query changes | direct adapter -> explicit public DTO -> React is simplest | positive allowlist required instead of public `Omit` | `Integrated` | architecture-opinion final, 2026-09-28 |
+| `/root/fiscal_detail_architecture_r2` | `not_ready` | detail-only PII must not widen 20.000-row export records | split list/detail records is cleaner than retaining all PII internally | token is signed but decodificável; exact DTO allowlists were missing | `Integrated; rerun pending` | fresh no-context architecture opinion against `c11a184`, 2026-09-28 |
 
 ### Architecture Opinion Finding Resolution
 | Finding ID | Resolution | Usefulness | Formalizable | Candidate Rule Level | Candidate Rule ID | Rationale / Evidence |
@@ -413,6 +464,9 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 | `ARCH-OP-03` | `Integrated` | `useful` | `partial` | `project` | `n/a` | `D-08`/`DOD-07` freeze always-present `string|null`, 255 chars and invalid-present behavior |
 | `ARCH-OP-04` | `Integrated` | `useful` | `partial` | `project` | `n/a` | `D-09`, `DOD-08`, `VAL-06` establish explicit auth/privacy/cache/CSV matrix |
 | `ARCH-OP-05` | `Integrated` | `useful` | `no` | `none` | `n/a` | performance text recognizes small bounded payload/cache/DOM growth, validated through bound and browser tests |
+| `ARCH2-01` | `Integrated` | `useful` | `partial` | `project` | `n/a` | `SCOPE-12`, `D-15`, `DOD-14` and security matrix state that `noteId` is signed but decodificável and may expose the embedded ID indirectly; only raw-ID input is prohibited |
+| `ARCH2-02` | `Integrated` | `useful` | `yes` | `project` | `n/a` | `Exact Public DTO Contract` freezes all 17 summary and 27 detail fields, types, origins, presence and null semantics |
+| `ARCH2-03` | `Integrated` | `useful` | `yes` | `project` | `n/a` | `SCOPE-13`, `D-19`, record split, `DOD-17`/`DOD-18` and `VAL-11` keep detail PII out of export and prove the bounded 5.100.000-code-point list-name increase |
 
 ## Audit Trigger Matrix (Required Before Audit Decisions Are Trusted)
 - **Canonical method:** `wf-docker-audit-escalation-method`
@@ -476,11 +530,11 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - **Baseline branch:** `main`
 - **Baseline commit:** `c11a1849ab143be6fda217b6955be1314a0d8190`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `no_material_findings`
-- **Findings summary:** expanded scope-bearing contract is frozen with distinct summary/detail allowlists, all 21 requested detail fields, opaque route identity, no number search and no persistence/export expansion.
+- **Gate status:** `not_run`
+- **Findings summary:** expanded scope-bearing contract froze distinct summary/detail allowlists, all 21 requested detail fields, signed route identity, no number search and no persistence/export expansion; post-review refinements require a refreshed baseline.
 - **Evidence / reference:** authority guards returned `go`; expanded scope baseline `c11a1849ab143be6fda217b6955be1314a0d8190` was committed and pushed to `origin/main`.
 - **Waiver authority / reference:** `n/a`
-- **Pre-freeze packet-prep rule:** `satisfied; no review result predates the freeze`
+- **Pre-freeze packet-prep rule:** `review findings are integrated as packet preparation; new authoritative reviews wait for the refreshed pushed baseline`
 
 ## Gate: Review Scope Drift
 - **Gate decision:** `required`
@@ -526,7 +580,7 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 ## Security Risk Assessment
 - **Risk level:** `high`
 - **Why this risk level:** intentional exposure of document, email, city/state/country, provider ID and full fiscal/order identifiers through an authenticated detail contract.
-- **Attack surface in scope:** JWT/profile authorization, distinct summary/detail DTO allowlists, opaque-route boundary, provider payload, browser memory/cache, URL/log/error/telemetry, CSV exclusion and long-value rendering.
+- **Attack surface in scope:** JWT/profile authorization, distinct summary/detail DTO allowlists, signed-but-decodable route token, provider payload, browser memory/cache, URL/log/error/telemetry, CSV exclusion and long-value rendering.
 - **Attack simulation decision:** `required`
 - **Review evidence:** `planned via security-adversarial-review`.
 - **Residual security risk:** disclosure remains possible to any compromised authorized finance account; no field-level role reduction was requested.
@@ -542,14 +596,14 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 | provider payload with extra recipient PII | extra fields absent from serialized HTTP DTO | adapter + contract negative test |
 | list response | document/email/location/provider ID absent; only name added | exact-key HTTP/service test |
 | CSV export | raw purchase/key preserved; all new PII/provider ID absent | serializer/export regression test |
-| detail route | opaque `noteId` required; raw provider ID never accepted as route/query input | application/codec negative test |
+| detail route | signed/decodificável `noteId` required; raw provider ID never accepted as route/query input | application/codec negative test |
 | logout/session disposal | enriched in-memory page removed and late render suppressed | frontend cache/race/browser test |
 | real values from request | absent from repository/artifacts and command output | diff/privacy scan + manual review |
 
 ## Performance & Concurrency Risk Assessment
 - **Policy schema version:** `pcv-1`
 - **Global sensitivity level:** `low`
-- **Why this level:** os mesmos registros e chamadas são mantidos; seis strings bounded ampliam apenas o record interno e a resposta/cache/DOM do detalhe (e records transitórios da exportação), sem mudar I/O, query, quota, paginação ou concorrência.
+- **Why this level:** chamadas/I/O/query/quota/paginação/concorrência não mudam; records distintos evitam cinco campos detail-only no export, mas `recipientName` adiciona no pior caso 5.100.000 code points aos 20.000 records acumulados e exige cenário sintético máximo.
 - **Current delivery stage at review time:** `Pending`
 
 | Lane ID | Lane | Trigger Result | Trigger Severity | Trigger Reason Code | Gate Deadline | Minimum Evidence Rule | State | Residual Risk | Uncertainty Reason Code |
@@ -557,7 +611,7 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 | `EPS` | `endpoint-performance-scrutiny` | `not_needed` | `low` | `n/a-query-unchanged` | `before_local_implemented` | `n/a` | `not_applicable` | `none` | `none` |
 | `FRC` | `frontend-race-condition-validation` | `not_needed` | `low` | `n/a-async-unchanged` | `before_local_implemented` | `n/a` | `not_applicable` | `none` | `none` |
 | `BCI` | `backend-concurrency-idempotency-validation` | `not_needed` | `low` | `n/a-read-only` | `before_local_implemented` | `n/a` | `not_applicable` | `none` | `none` |
-| `RLS` | `runtime-load-stress-validation` | `not_needed` | `low` | `n/a-load-shape-unchanged` | `before_local_implemented` | `n/a` | `not_applicable` | `none` | `none` |
+| `RLS` | `runtime-load-stress-validation` | `recommended` | `low` | `bounded-export-memory-shape` | `before_local_implemented` | `20.000 synthetic records with 255-char names; no detail-only PII; completes within existing deadline/schema` | `planned` | `bounded list-name memory growth` | `none` |
 
 ## TODO Closeout Disposition
 - **Disposition:** `keep-active`
