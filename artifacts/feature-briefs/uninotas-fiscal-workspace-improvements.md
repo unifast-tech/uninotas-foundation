@@ -2,7 +2,7 @@
 
 ## Artifact Role
 
-- **Why this brief exists now:** a revisão visual do UniNotas identificou ajustes de navegação, marca, contraste e layout, enquanto a exportação do filtro inteiro introduz um contrato público e uma carga paginada própria. O objetivo de release é único, mas os riscos e evidências precisam de dois TODOs independentes.
+- **Why this brief exists now:** a revisão visual do UniNotas identificou ajustes de navegação, marca, contraste e layout, enquanto a exportação do filtro inteiro e a visibilidade fiscal ampliada introduzem contratos públicos e riscos próprios. O objetivo de release é único, mas os riscos e evidências precisam de três TODOs independentes.
 - **What this brief is not:** autoridade de implementação, aprovação, módulo canônico ou contrato de deploy.
 
 ## Source Request
@@ -19,6 +19,8 @@ O usuário solicitou:
 
 Em 2026-09-28, o usuário esclareceu que a exportação deve abranger **todos os registros do contexto e dos filtros aplicados**, independentemente da página visível.
 
+Ainda em 2026-09-28, o usuário solicitou uma terceira evolução: incluir `Tomador` na Geral, exibir compra e chaves completas para a equipe financeira e apresentar no card todos os campos enumerados do `GET /notas`. O filtro por número foi considerado e explicitamente cancelado por não existir suporte equivalente no provedor.
+
 ## Confirmed Product Direction
 
 - `Geral` continua sendo a lista fiscal de um único contexto: Unifast ou Prosperar.
@@ -28,6 +30,9 @@ Em 2026-09-28, o usuário esclareceu que a exportação deve abranger **todos os
 - `Processamento das notas` abre a projeção PostgreSQL já existente; este objetivo não altera seus dados ou filtros.
 - Todos os perfis leitores podem exportar o filtro fiscal do contexto ativo.
 - A exportação pertence ao backend; o navegador faz uma única solicitação autenticada e nunca percorre páginas do provedor.
+- Todos os perfis autenticados atuais podem visualizar os dados fiscais allowlisted; lista e detalhe continuam protegidos pelas rotas existentes.
+- A Geral acrescenta somente o nome do tomador como nova PII. Documento, e-mail e localização ficam exclusivamente no detalhe; o CSV permanece sem PII do tomador.
+- `noteId` assinado continua sendo a única identidade aceita na rota de detalhe. O ID interno pode ser exibido como referência, mas nunca enviado cru como autoridade de consulta.
 
 ## Story Decomposition
 
@@ -35,8 +40,9 @@ Em 2026-09-28, o usuário esclareceu que a exportação deve abranger **todos os
 | --- | --- | --- | --- | --- |
 | `ST-UX` | Usar um workspace fiscal legível, alinhado, com marca e navegação coerentes | `todos/completed/features/TODO-uninotas-fiscal-workspace-ux.md` | `Local-Implemented` em `MonitorNotes@f1a950a9`; React/Vite, ativo local, CSS, acessibilidade e browser; sem novo endpoint | `1 — completed` |
 | `ST-EXPORT` | Baixar todas as notas que pertencem ao contexto e aos filtros aplicados | `todos/completed/features/TODO-uninotas-filtered-csv-export.md` | `Local-Implemented` em `MonitorNotes@8a0dba94`; NestJS + cliente React, CSV seguro, paginação bounded, corrida/cancelamento e carga; sem deploy | `2 — completed` |
+| `ST-VISIBILITY` | Identificar o tomador e consultar todos os dados fiscais aprovados sem máscaras | `todos/active/features/TODO-uninotas-fiscal-note-visibility.md` | NestJS + React, allowlists 17/27, lista/detalhe responsivos, PII efêmera e CSV inalterado; sem deploy | `3 — implementation` |
 
-Os dois TODOs podem receber aprovação na mesma conversa, mas mantêm implementação, risco e evidência independentes. O executor permanece serializado no checkout principal. Depois do closeout local de `ST-UX` e antes de iniciar `ST-EXPORT`, o segundo TODO deve rebaselinar produto e Foundation sobre o estado consolidado, reclassificar o diff e repetir coherence/drift/authority; qualquer mudança material exige review e aprovação renovados.
+Os três TODOs podem receber aprovação na mesma conversa, mas mantêm implementação, risco e evidência independentes. O executor permanece serializado no checkout principal. Depois do closeout local de `ST-UX` e antes de iniciar `ST-EXPORT`, o segundo TODO deve rebaselinar produto e Foundation sobre o estado consolidado, reclassificar o diff e repetir coherence/drift/authority; qualquer mudança material exige review e aprovação renovados.
 
 `ST-UX` e `ST-EXPORT` concluíram localmente em 2026-09-28. O deploy, smoke real e calibração de quota continuam fora desse corte e pertencem ao cutover.
 
@@ -53,4 +59,4 @@ Smart Notas oferece paginação numérica, sem cursor ou token de snapshot evide
 
 ## Completion Boundary
 
-O objetivo fica pronto localmente quando ambos os TODOs alcançarem `Local-Implemented` com seus próprios testes, auditorias e documentação. Promoção/deploy continua pertencendo ao TODO de cutover.
+O objetivo fica pronto localmente quando os três TODOs alcançarem `Local-Implemented` com seus próprios testes, auditorias e documentação. Promoção/deploy continua pertencendo ao TODO de cutover.

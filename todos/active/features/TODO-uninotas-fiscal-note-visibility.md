@@ -25,14 +25,14 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - **Rationale:** o DTO normalizado continua sendo o único limite entre Smart Notas e navegador; nenhum payload bruto ou credencial atravessa a API do UniNotas.
 
 ## Delivery Status Canon (Required)
-- **Current delivery stage:** `Pending`
-- **Qualifiers:** `none`
-- **Next exact step:** implementar testes fail-first e o contrato aprovado no backend/frontend do checkout principal.
+- **Current delivery stage:** `Local-Implemented`
+- **Qualifiers:** `no-deploy; real-provider smoke remains in cutover`
+- **Next exact step:** concluir guards de closeout e mover este mesmo TODO para `completed/features`.
 
 ## Active Work State (Required While TODO Remains In `active/`)
-- **Work state:** `implementation`
-- **Why this state now:** o usuário aprovou explicitamente o contrato congelado; regras foram recarregadas e a execução aguarda apenas o authority guard pós-aprovação.
-- **Exit condition:** implementação, validação, auditorias de entrega e closeout são concluídos.
+- **Work state:** `review`
+- **Why this state now:** implementação, suites e browser passaram; as auditorias e guards finais estão sendo consolidados.
+- **Exit condition:** triple audit, revisão final e guards de closeout retornam sem bloqueador.
 
 ## Execution Lane Tracking (Required)
 - **Local implementation branches:** `MonitorNotes:release/uninotas-smart-notas`; `uninotas-foundation:main`
@@ -41,19 +41,19 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - **Production-ready threshold for this TODO:** `Railway stage` após o cutover governante
 
 ## Scope
-- [ ] `SCOPE-01` Mapear `nome` para `recipientName: string|null`, sempre presente no resumo e detalhe, com limite de 255 caracteres.
-- [ ] `SCOPE-02` Exibir na Geral uma coluna `Tomador` com o nome completo ou `Não disponível`, mantendo tabela acessível e responsiva.
-- [ ] `SCOPE-03` Exibir `purchaseId`, `accessKey` e `referencedAccessKey` integralmente na área fiscal autenticada, com quebra/cópia visual segura, removendo apenas a máscara de apresentação.
-- [ ] `SCOPE-04` Preservar os filtros, paginação, cache, atualização e exportação existentes sem alterar sua semântica.
-- [ ] `SCOPE-05` Cobrir contrato NestJS, normalização React, estados ausentes e jornada browser da Geral/detalhe.
-- [ ] `SCOPE-06` Atualizar módulo fiscal, feature brief e contratos operacionais estáveis sem registrar valores reais de PII ou identificadores fiscais.
-- [ ] `SCOPE-07` Substituir o tipo público baseado em `Omit<FiscalNoteRecord,...>` por uma allowlist positiva explícita, impedindo que futuros campos internos sejam publicados automaticamente.
-- [ ] `SCOPE-08` Preservar a linha inteira como link por meio de lista semântica de cartões rotulados: colunas visuais no desktop e rótulos por célula no mobile/leitor de tela, sem ARIA de tabela incompleta.
-- [ ] `SCOPE-09` Remover helpers/re-exports de máscara que ficarem sem consumidores e manter canários de privacidade separados por sink.
-- [ ] `SCOPE-10` Ampliar somente o DTO público de detalhe com `providerInternalId`, `recipientDocument`, `recipientEmail`, `recipientCity`, `recipientState` e `recipientCountry`, mantendo o resumo de lista limitado a `recipientName` como nova PII.
-- [ ] `SCOPE-11` Mostrar no card de detalhe todos os campos do `GET /notas` enumerados pelo usuário: ID interno, modelo, finalidade, status, ambiente, número, chave, compra, produto, valor unitário, valor total, emissão agendada, pagamento, competência, nome, documento, e-mail, cidade, estado, país e plataforma; preservar também os campos de detalhe já existentes.
-- [ ] `SCOPE-12` Manter `noteId` como única identidade de rota assinada e vinculada ao contexto. O token é resistente a adulteração, porém decodificável e não confidencial; `providerInternalId` nunca será aceito como parâmetro bruto informado pelo consumidor.
-- [ ] `SCOPE-13` Separar o record interno de lista/exportação do record de detalhe, para que documento, e-mail e localização não sejam acumulados durante exportações de até 20.000 notas.
+- [x] `SCOPE-01` Mapear `nome` para `recipientName` como string ou null, sempre presente no resumo e detalhe, com limite de 255 caracteres.
+- [x] `SCOPE-02` Exibir na Geral uma coluna `Tomador` com o nome completo ou `Não disponível`, mantendo tabela acessível e responsiva.
+- [x] `SCOPE-03` Exibir `purchaseId`, `accessKey` e `referencedAccessKey` integralmente na área fiscal autenticada, com quebra/cópia visual segura, removendo apenas a máscara de apresentação.
+- [x] `SCOPE-04` Preservar os filtros, paginação, cache, atualização e exportação existentes sem alterar sua semântica.
+- [x] `SCOPE-05` Cobrir contrato NestJS, normalização React, estados ausentes e jornada browser da Geral/detalhe.
+- [x] `SCOPE-06` Atualizar módulo fiscal, feature brief e contratos operacionais estáveis sem registrar valores reais de PII ou identificadores fiscais.
+- [x] `SCOPE-07` Substituir o tipo público baseado em `Omit<FiscalNoteRecord,...>` por uma allowlist positiva explícita, impedindo que futuros campos internos sejam publicados automaticamente.
+- [x] `SCOPE-08` Preservar a linha inteira como link por meio de lista semântica de cartões rotulados: colunas visuais no desktop e rótulos por célula no mobile/leitor de tela, sem ARIA de tabela incompleta.
+- [x] `SCOPE-09` Remover helpers/re-exports de máscara que ficarem sem consumidores e manter canários de privacidade separados por sink.
+- [x] `SCOPE-10` Ampliar somente o DTO público de detalhe com `providerInternalId`, `recipientDocument`, `recipientEmail`, `recipientCity`, `recipientState` e `recipientCountry`, mantendo o resumo de lista limitado a `recipientName` como nova PII.
+- [x] `SCOPE-11` Mostrar no card de detalhe todos os campos do `GET /notas` enumerados pelo usuário: ID interno, modelo, finalidade, status, ambiente, número, chave, compra, produto, valor unitário, valor total, emissão agendada, pagamento, competência, nome, documento, e-mail, cidade, estado, país e plataforma; preservar também os campos de detalhe já existentes.
+- [x] `SCOPE-12` Manter `noteId` como única identidade de rota assinada e vinculada ao contexto. O token é resistente a adulteração, porém decodificável e não confidencial; `providerInternalId` nunca será aceito como parâmetro bruto informado pelo consumidor.
+- [x] `SCOPE-13` Separar o record interno de lista/exportação do record de detalhe, para que documento, e-mail e localização não sejam acumulados durante exportações de até 20.000 notas.
 
 ## Out of Scope
 - [ ] Alterar perfis, autenticação ou conceder acesso a usuários não autenticados.
@@ -70,40 +70,88 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - **Must update or split the TODO:** novo filtro, índice/projeção fiscal persistente, worker/sincronização, novo endpoint externo, mudança de perfis, nova fonte ou ampliação do CSV.
 
 ## Definition of Done
-- [ ] `DOD-01` A Geral mostra o nome do tomador para registros que o Smart Notas devolve com `nome`, sem consultar PostgreSQL.
-- [ ] `DOD-02` Compra e chaves são mostradas completas somente dentro das rotas autenticadas existentes e continuam ausentes de logs, URLs e armazenamento persistente.
-- [ ] `DOD-03` O resumo público contém somente `recipientName` como nova PII; o detalhe contém somente os seis novos campos allowlisted e os campos fiscais já aprovados; todo campo pessoal não enumerado continua excluído.
-- [ ] `DOD-04` Filtros, paginação, cache e exportação mantêm a semântica atual sem regressão.
-- [ ] `DOD-05` A tabela permanece utilizável em desktop e mobile, incluindo valores longos de compra/chave e nome ausente.
-- [ ] `DOD-06` Testes e documentação provam a ampliação deliberada de PII/identificadores sem persistir exemplos reais.
-- [ ] `DOD-07` `recipientName` é sempre serializado como string normalizada ou `null`; campo presente vazio, somente espaços ou acima de 255 caracteres falha como `SmartNotasContratoInvalido`.
-- [ ] `DOD-08` Testes provam acesso dos quatro perfis atuais, rejeição sem autenticação, exclusão de PII extra/CSV e limpeza do cache enriquecido no logout/disposal.
-- [ ] `DOD-09` O normalizador frontend rejeita `recipientName` ausente, tipo inválido, string vazia ou acima de 255; aceita somente `null` ou string válida em lista e detalhe.
-- [ ] `DOD-10` Desktop e viewport de 390 px provam nome de 255 caracteres, compra/chave/chave referenciada longas sem truncamento ou overflow, rótulos semânticos, link de linha acessível por teclado e texto copiável.
-- [ ] `DOD-11` Canários `allowed-visible-but-forbidden-in-sinks` são visíveis somente na UI fiscal e permanecem ausentes de URL, storage, console, referrer e requests alheios; PII não aprovada permanece `forbidden-everywhere`.
-- [ ] `DOD-12` Cache/logout usa canários distintos por sessão e resposta tardia para provar que objetos enriquecidos antigos não reaparecem antes nem depois da resposta da nova sessão.
-- [ ] `DOD-13` O card apresenta todos os 21 campos enumerados pelo usuário e preserva os campos de detalhe existentes, com `Não disponível` para valores legitimamente nulos e rótulos fiscais claros.
-- [ ] `DOD-14` `providerInternalId` é visível/copiável apenas no detalhe autenticado e nunca é aceito como parâmetro bruto; a rota continua usando o `noteId` assinado existente, cujo payload é decodificável e já contém esse ID, sem promessa de confidencialidade do token. Não existe cache de detalhe no contrato atual.
-- [ ] `DOD-15` Documento aceita somente 11 ou 14 dígitos; e-mail é `string|null` de até 320 caracteres; cidade até 255, estado até 64 e país até 128; valores presentes vazios/overbound ou documento inválido falham como contrato Smart Notas inválido.
-- [ ] `DOD-16` Nenhum valor real fornecido pelo usuário é persistido; fixtures usam canários sintéticos inequívocos e não reutilizam pessoa, documento, e-mail, chave, compra ou ID do exemplo real.
-- [ ] `DOD-17` O caminho de lista/exportação carrega somente `recipientName` como nova PII; os cinco campos pessoais exclusivos do detalhe nunca integram `FiscalNotePage` nem o acumulador de exportação.
-- [ ] `DOD-18` Um cenário sintético de 20.000 registros com nomes de 255 caracteres prova o limite adicional de 5.100.000 code points no acumulador, conclusão dentro do deadline existente e CSV sem os novos campos.
-- [ ] `DOD-19` O normalizador frontend exige exatamente os 17 campos de resumo e 27 de detalhe com os tipos/nullability congelados; ausência, tipo incorreto ou string inválida gera resposta incompatível em vez de fallback silencioso.
+- [x] `DOD-01` A Geral mostra o nome do tomador para registros que o Smart Notas devolve com `nome`, sem consultar PostgreSQL.
+- [x] `DOD-02` Compra e chaves são mostradas completas somente dentro das rotas autenticadas existentes e continuam ausentes de logs, URLs e armazenamento persistente.
+- [x] `DOD-03` O resumo público contém somente `recipientName` como nova PII; o detalhe contém somente os seis novos campos allowlisted e os campos fiscais já aprovados; todo campo pessoal não enumerado continua excluído.
+- [x] `DOD-04` Filtros, paginação, cache e exportação mantêm a semântica atual sem regressão.
+- [x] `DOD-05` A tabela permanece utilizável em desktop e mobile, incluindo valores longos de compra/chave e nome ausente.
+- [x] `DOD-06` Testes e documentação provam a ampliação deliberada de PII/identificadores sem persistir exemplos reais.
+- [x] `DOD-07` `recipientName` é sempre serializado como string normalizada ou `null`; campo presente vazio, somente espaços ou acima de 255 caracteres falha como `SmartNotasContratoInvalido`.
+- [x] `DOD-08` Testes provam acesso dos quatro perfis atuais, rejeição sem autenticação, exclusão de PII extra/CSV e limpeza do cache enriquecido no logout/disposal.
+- [x] `DOD-09` O normalizador frontend rejeita `recipientName` ausente, tipo inválido, string vazia ou acima de 255; aceita somente `null` ou string válida em lista e detalhe.
+- [x] `DOD-10` Desktop e viewport de 390 px provam nome de 255 caracteres, compra/chave/chave referenciada longas sem truncamento ou overflow, rótulos semânticos, link de linha acessível por teclado e texto copiável.
+- [x] `DOD-11` Canários `allowed-visible-but-forbidden-in-sinks` são visíveis somente na UI fiscal e permanecem ausentes de URL, storage, console, referrer e requests alheios; PII não aprovada permanece `forbidden-everywhere`.
+- [x] `DOD-12` Cache/logout usa canários distintos por sessão e resposta tardia para provar que objetos enriquecidos antigos não reaparecem antes nem depois da resposta da nova sessão.
+- [x] `DOD-13` O card apresenta todos os 21 campos enumerados pelo usuário e preserva os campos de detalhe existentes, com `Não disponível` para valores legitimamente nulos e rótulos fiscais claros.
+- [x] `DOD-14` `providerInternalId` é visível/copiável apenas no detalhe autenticado e nunca é aceito como parâmetro bruto; a rota continua usando o `noteId` assinado existente, cujo payload é decodificável e já contém esse ID, sem promessa de confidencialidade do token. Não existe cache de detalhe no contrato atual.
+- [x] `DOD-15` Documento aceita somente 11 ou 14 dígitos; e-mail é string ou null de até 320 caracteres; cidade até 255, estado até 64 e país até 128; valores presentes vazios/overbound ou documento inválido falham como contrato Smart Notas inválido.
+- [x] `DOD-16` Nenhum valor real fornecido pelo usuário é persistido; fixtures usam canários sintéticos inequívocos e não reutilizam pessoa, documento, e-mail, chave, compra ou ID do exemplo real.
+- [x] `DOD-17` O caminho de lista/exportação carrega somente `recipientName` como nova PII; os cinco campos pessoais exclusivos do detalhe nunca integram `FiscalNotePage` nem o acumulador de exportação.
+- [x] `DOD-18` Um cenário sintético de 20.000 registros com nomes de 255 caracteres prova o limite adicional de 5.100.000 code points no acumulador, conclusão dentro do deadline existente e CSV sem os novos campos.
+- [x] `DOD-19` O normalizador frontend exige exatamente os 17 campos de resumo e 27 de detalhe com os tipos/nullability congelados; ausência, tipo incorreto ou string inválida gera resposta incompatível em vez de fallback silencioso.
 
 ## Validation Steps
-- [ ] `VAL-01` Executar testes unitários/contratuais do adapter, DTO, serviço e controller fiscal com fixtures sintéticas.
-- [ ] `VAL-02` Executar `cd backend && npm test -- --runInBand && npm run build && npm run lint` no runner proprietário do projeto.
-- [ ] `VAL-03` Executar `cd frontend && npm run test:notas && npm run test:notas:race && npm run build && npm run lint` no runner proprietário do projeto.
-- [ ] `VAL-04` Executar `cd frontend && npm run e2e:notas` contra bundle fresco, cobrindo nome, valores completos, paginação e exportação sem regressão.
-- [ ] `VAL-05` Executar revisão de segurança sobre PII, identificadores, logs, URL, cache, logout e respostas de erro.
-- [ ] `VAL-06` Executar matriz explícita `ADMIN|GESTOR|ANALISTA|LEITOR|não autenticado`, resposta HTTP allowlisted, CSV sem nome e cache limpo após logout.
-- [ ] `VAL-07` Executar browser desktop e 390 px em Geral e detalhe, verificando `scrollWidth`, conteúdo exato não truncado, labels/semântica, teclado e ausência dos canários nos sinks proibidos.
-- [ ] `VAL-08` Executar teste unitário/race de cache com valores enriquecidos old-session, resposta tardia e valores distintos new-session.
-- [ ] `VAL-09` Executar contract/browser matrix que conta e verifica os 21 campos solicitados no detalhe, ausência dos novos campos sensíveis na lista/CSV e preservação visível explícita de `issueDate`, `referencedAccessKey`, `operationNature` e `quantity`.
-- [ ] `VAL-10` Executar scan/revisão do diff e artifacts para garantir que nenhum valor real fornecido na solicitação foi copiado ou persistido.
-- [ ] `VAL-11` Executar exportação sintética no limite de 20.000 records com `recipientName` de 255 caracteres, provando que nenhum campo pessoal detail-only é retido e que prazo/schema permanecem válidos.
+- [x] `VAL-01` Executar testes unitários/contratuais do adapter, DTO, serviço e controller fiscal com fixtures sintéticas.
+- [x] `VAL-02` Executar `cd backend && npm test -- --runInBand && npm run build && npm run lint` no runner proprietário do projeto.
+- [x] `VAL-03` Executar `cd frontend && npm run test:notas && npm run test:notas:race && npm run build && npm run lint` no runner proprietário do projeto.
+- [x] `VAL-04` Executar `cd frontend && npm run e2e:notas` contra bundle fresco, cobrindo nome, valores completos, paginação e exportação sem regressão.
+- [x] `VAL-05` Executar revisão de segurança sobre PII, identificadores, logs, URL, cache, logout e respostas de erro.
+- [x] `VAL-06` Executar matriz explícita ADMIN, GESTOR, ANALISTA, LEITOR e não autenticado, resposta HTTP allowlisted, CSV sem nome e cache limpo após logout.
+- [x] `VAL-07` Executar browser desktop e 390 px em Geral e detalhe, verificando `scrollWidth`, conteúdo exato não truncado, labels/semântica, teclado e ausência dos canários nos sinks proibidos.
+- [x] `VAL-08` Executar teste unitário/race de cache com valores enriquecidos old-session, resposta tardia e valores distintos new-session.
+- [x] `VAL-09` Executar contract/browser matrix que conta e verifica os 21 campos solicitados no detalhe, ausência dos novos campos sensíveis na lista/CSV e preservação visível explícita de `issueDate`, `referencedAccessKey`, `operationNature` e `quantity`.
+- [x] `VAL-10` Executar scan/revisão do diff e artifacts para garantir que nenhum valor real fornecido na solicitação foi copiado ou persistido.
+- [x] `VAL-11` Executar exportação sintética no limite de 20.000 records com `recipientName` de 255 caracteres, provando que nenhum campo pessoal detail-only é retido e que prazo/schema permanecem válidos.
 
-## Diff Expectation Contract (Required Before Delivery)
+## Completion Evidence Matrix
+
+| Criterion ID | Source Section | Criterion | Evidence Type | Evidence Artifact / Command | Runtime Target | Status | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `SCOPE-01` | `Scope` | `SCOPE-01` Mapear `nome` para `recipientName` como string ou null, sempre presente no resumo e detalhe, com limite de 255 caracteres. | `contract + integration` | backend full Jest `306 passed, 2 skipped`; Nest build/lint passed; frontend exact 17/27 DTO unit suite passed; export 20,000 distinct names/200 pages passed | Node/Jest local against NestJS fiscal boundary and synthetic Smart Notas port | `passed` | positive allowlists, four roles/401, signed route identity match, CSV exclusion and strict bounds proved |
+| `SCOPE-02` | `Scope` | `SCOPE-02` Exibir na Geral uma coluna `Tomador` com o nome completo ou `Não disponível`, mantendo tabela acessível e responsiva. | `unit + navigation/browser` | `npm run test:notas`; source-owned web_app_tests Playwright spec `frontend/e2e/notas.mjs` via project run_web_navigation_smoke-equivalent `npm run e2e:notas`; rebuilt bundle build artifact `index-tnjlh9GM.js`; passed | Windows Chrome, fresh Vite preview `http://127.0.0.1:4174`, synthetic intercepted APIs, desktop 1280 px and mobile 390 px | `passed` | exact values, semantic labels, Enter navigation, no truncation/overflow, privacy sinks and session lifecycle proved |
+| `SCOPE-03` | `Scope` | `SCOPE-03` Exibir `purchaseId`, `accessKey` e `referencedAccessKey` integralmente na área fiscal autenticada, com quebra/cópia visual segura, removendo apenas a máscara de apresentação. | `unit + navigation/browser` | `npm run test:notas`; source-owned web_app_tests Playwright spec `frontend/e2e/notas.mjs` via project run_web_navigation_smoke-equivalent `npm run e2e:notas`; rebuilt bundle build artifact `index-tnjlh9GM.js`; passed | Windows Chrome, fresh Vite preview `http://127.0.0.1:4174`, synthetic intercepted APIs, desktop 1280 px and mobile 390 px | `passed` | exact values, semantic labels, Enter navigation, no truncation/overflow, privacy sinks and session lifecycle proved |
+| `SCOPE-04` | `Scope` | `SCOPE-04` Preservar os filtros, paginação, cache, atualização e exportação existentes sem alterar sua semântica. | `unit + navigation/browser` | `npm run test:notas`; source-owned web_app_tests Playwright spec `frontend/e2e/notas.mjs` via project run_web_navigation_smoke-equivalent `npm run e2e:notas`; rebuilt bundle build artifact `index-tnjlh9GM.js`; passed | Windows Chrome, fresh Vite preview `http://127.0.0.1:4174`, synthetic intercepted APIs, desktop 1280 px and mobile 390 px | `passed` | exact values, semantic labels, Enter navigation, no truncation/overflow, privacy sinks and session lifecycle proved |
+| `SCOPE-05` | `Scope` | `SCOPE-05` Cobrir contrato NestJS, normalização React, estados ausentes e jornada browser da Geral/detalhe. | `unit + navigation/browser` | browser navigation: `npm run test:notas`; source-owned web_app_tests Playwright spec `frontend/e2e/notas.mjs` via project run_web_navigation_smoke-equivalent `npm run e2e:notas`; rebuilt bundle build artifact `index-tnjlh9GM.js`; passed | Windows Chrome, fresh Vite preview `http://127.0.0.1:4175`, synthetic intercepted APIs, desktop 1280 px and mobile 390 px | `passed` | exact values, semantic labels, Enter navigation, no truncation/overflow, privacy sinks and session lifecycle proved |
+| `SCOPE-06` | `Scope` | `SCOPE-06` Atualizar módulo fiscal, feature brief e contratos operacionais estáveis sem registrar valores reais de PII ou identificadores fiscais. | `documentation + security review` | canonical module/feature brief diff; exact real-sample `rg` scan returned `REAL_SAMPLE_MATCH_NONE`; security-adversarial-review passed | MonitorNotes and uninotas-foundation working trees | `passed` | synthetic canaries only; no real PII persisted; stable decisions synchronized |
+| `SCOPE-07` | `Scope` | `SCOPE-07` Substituir o tipo público baseado em `Omit<FiscalNoteRecord,...>` por uma allowlist positiva explícita, impedindo que futuros campos internos sejam publicados automaticamente. | `contract + integration` | backend full Jest `306 passed, 2 skipped`; Nest build/lint passed; frontend exact 17/27 DTO unit suite passed; export 20,000 distinct names/200 pages passed | Node/Jest local against NestJS fiscal boundary and synthetic Smart Notas port | `passed` | positive allowlists, four roles/401, signed route identity match, CSV exclusion and strict bounds proved |
+| `SCOPE-08` | `Scope` | `SCOPE-08` Preservar a linha inteira como link por meio de lista semântica de cartões rotulados: colunas visuais no desktop e rótulos por célula no mobile/leitor de tela, sem ARIA de tabela incompleta. | `unit + navigation/browser` | `npm run test:notas`; source-owned web_app_tests Playwright spec `frontend/e2e/notas.mjs` via project run_web_navigation_smoke-equivalent `npm run e2e:notas`; rebuilt bundle build artifact `index-tnjlh9GM.js`; passed | Windows Chrome, fresh Vite preview `http://127.0.0.1:4174`, synthetic intercepted APIs, desktop 1280 px and mobile 390 px | `passed` | exact values, semantic labels, Enter navigation, no truncation/overflow, privacy sinks and session lifecycle proved |
+| `SCOPE-09` | `Scope` | `SCOPE-09` Remover helpers/re-exports de máscara que ficarem sem consumidores e manter canários de privacidade separados por sink. | `contract + integration` | backend full Jest `306 passed, 2 skipped`; Nest build/lint passed; frontend exact 17/27 DTO unit suite passed; export 20,000 distinct names/200 pages passed | Node/Jest local against NestJS fiscal boundary and synthetic Smart Notas port | `passed` | positive allowlists, four roles/401, signed route identity match, CSV exclusion and strict bounds proved |
+| `SCOPE-10` | `Scope` | `SCOPE-10` Ampliar somente o DTO público de detalhe com `providerInternalId`, `recipientDocument`, `recipientEmail`, `recipientCity`, `recipientState` e `recipientCountry`, mantendo o resumo de lista limitado a `recipientName` como nova PII. | `contract + integration` | backend full Jest `306 passed, 2 skipped`; Nest build/lint passed; frontend exact 17/27 DTO unit suite passed; export 20,000 distinct names/200 pages passed | Node/Jest local against NestJS fiscal boundary and synthetic Smart Notas port | `passed` | positive allowlists, four roles/401, signed route identity match, CSV exclusion and strict bounds proved |
+| `SCOPE-11` | `Scope` | `SCOPE-11` Mostrar no card de detalhe todos os campos do `GET /notas` enumerados pelo usuário: ID interno, modelo, finalidade, status, ambiente, número, chave, compra, produto, valor unitário, valor total, emissão agendada, pagamento, competência, nome, documento, e-mail, cidade, estado, país e plataforma; preservar também os campos de detalhe já existentes. | `unit + navigation/browser` | `npm run test:notas`; source-owned web_app_tests Playwright spec `frontend/e2e/notas.mjs` via project run_web_navigation_smoke-equivalent `npm run e2e:notas`; rebuilt bundle build artifact `index-tnjlh9GM.js`; passed | Windows Chrome, fresh Vite preview `http://127.0.0.1:4174`, synthetic intercepted APIs, desktop 1280 px and mobile 390 px | `passed` | exact values, semantic labels, Enter navigation, no truncation/overflow, privacy sinks and session lifecycle proved |
+| `SCOPE-12` | `Scope` | `SCOPE-12` Manter `noteId` como única identidade de rota assinada e vinculada ao contexto. O token é resistente a adulteração, porém decodificável e não confidencial; `providerInternalId` nunca será aceito como parâmetro bruto informado pelo consumidor. | `contract + integration` | backend full Jest `306 passed, 2 skipped`; Nest build/lint passed; frontend exact 17/27 DTO unit suite passed; export 20,000 distinct names/200 pages passed | Node/Jest local against NestJS fiscal boundary and synthetic Smart Notas port | `passed` | positive allowlists, four roles/401, signed route identity match, CSV exclusion and strict bounds proved |
+| `SCOPE-13` | `Scope` | `SCOPE-13` Separar o record interno de lista/exportação do record de detalhe, para que documento, e-mail e localização não sejam acumulados durante exportações de até 20.000 notas. | `contract + integration` | backend full Jest `306 passed, 2 skipped`; Nest build/lint passed; frontend exact 17/27 DTO unit suite passed; export 20,000 distinct names/200 pages passed | Node/Jest local against NestJS fiscal boundary and synthetic Smart Notas port | `passed` | positive allowlists, four roles/401, signed route identity match, CSV exclusion and strict bounds proved |
+| `DOD-01` | `Definition of Done` | `DOD-01` A Geral mostra o nome do tomador para registros que o Smart Notas devolve com `nome`, sem consultar PostgreSQL. | `unit + navigation/browser` | `npm run test:notas`; source-owned web_app_tests Playwright spec `frontend/e2e/notas.mjs` via project run_web_navigation_smoke-equivalent `npm run e2e:notas`; rebuilt bundle build artifact `index-tnjlh9GM.js`; passed | Windows Chrome, fresh Vite preview `http://127.0.0.1:4174`, synthetic intercepted APIs, desktop 1280 px and mobile 390 px | `passed` | exact values, semantic labels, Enter navigation, no truncation/overflow, privacy sinks and session lifecycle proved |
+| `DOD-02` | `Definition of Done` | `DOD-02` Compra e chaves são mostradas completas somente dentro das rotas autenticadas existentes e continuam ausentes de logs, URLs e armazenamento persistente. | `unit + navigation/browser` | `npm run test:notas`; source-owned web_app_tests Playwright spec `frontend/e2e/notas.mjs` via project run_web_navigation_smoke-equivalent `npm run e2e:notas`; rebuilt bundle build artifact `index-tnjlh9GM.js`; passed | Windows Chrome, fresh Vite preview `http://127.0.0.1:4174`, synthetic intercepted APIs, desktop 1280 px and mobile 390 px | `passed` | exact values, semantic labels, Enter navigation, no truncation/overflow, privacy sinks and session lifecycle proved |
+| `DOD-03` | `Definition of Done` | `DOD-03` O resumo público contém somente `recipientName` como nova PII; o detalhe contém somente os seis novos campos allowlisted e os campos fiscais já aprovados; todo campo pessoal não enumerado continua excluído. | `contract + integration + navigation/browser` | backend full Jest `306 passed, 2 skipped`; browser navigation `frontend/e2e/notas.mjs` passed exact list/detail allowlists and forbidden-sink canaries; export 20,000 distinct names/200 pages passed | Node/Jest and Windows Chrome against synthetic Smart Notas contracts | `passed` | positive allowlists, four roles/401, signed route identity match, CSV exclusion and strict bounds proved |
+| `DOD-04` | `Definition of Done` | `DOD-04` Filtros, paginação, cache e exportação mantêm a semântica atual sem regressão. | `unit + navigation/browser` | `npm run test:notas`; source-owned web_app_tests Playwright spec `frontend/e2e/notas.mjs` via project run_web_navigation_smoke-equivalent `npm run e2e:notas`; rebuilt bundle build artifact `index-tnjlh9GM.js`; passed | Windows Chrome, fresh Vite preview `http://127.0.0.1:4174`, synthetic intercepted APIs, desktop 1280 px and mobile 390 px | `passed` | exact values, semantic labels, Enter navigation, no truncation/overflow, privacy sinks and session lifecycle proved |
+| `DOD-05` | `Definition of Done` | `DOD-05` A tabela permanece utilizável em desktop e mobile, incluindo valores longos de compra/chave e nome ausente. | `unit + navigation/browser` | `npm run test:notas`; source-owned web_app_tests Playwright spec `frontend/e2e/notas.mjs` via project run_web_navigation_smoke-equivalent `npm run e2e:notas`; rebuilt bundle build artifact `index-tnjlh9GM.js`; passed | Windows Chrome, fresh Vite preview `http://127.0.0.1:4174`, synthetic intercepted APIs, desktop 1280 px and mobile 390 px | `passed` | exact values, semantic labels, Enter navigation, no truncation/overflow, privacy sinks and session lifecycle proved |
+| `DOD-06` | `Definition of Done` | `DOD-06` Testes e documentação provam a ampliação deliberada de PII/identificadores sem persistir exemplos reais. | `documentation + security review` | canonical module/feature brief diff; exact real-sample `rg` scan returned `REAL_SAMPLE_MATCH_NONE`; security-adversarial-review passed | MonitorNotes and uninotas-foundation working trees | `passed` | synthetic canaries only; no real PII persisted; stable decisions synchronized |
+| `DOD-07` | `Definition of Done` | `DOD-07` `recipientName` é sempre serializado como string normalizada ou `null`; campo presente vazio, somente espaços ou acima de 255 caracteres falha como `SmartNotasContratoInvalido`. | `contract + integration + navigation/browser` | backend bounds Jest passed; frontend strict DTO suite passed; browser navigation passed valid/null recipient-name rendering and 255-character no-truncation case | Node/Jest and Windows Chrome against synthetic Smart Notas contracts | `passed` | empty, whitespace, missing, wrong-type and overbound cases fail closed |
+| `DOD-08` | `Definition of Done` | `DOD-08` Testes provam acesso dos quatro perfis atuais, rejeição sem autenticação, exclusão de PII extra/CSV e limpeza do cache enriquecido no logout/disposal. | `contract + integration` | backend full Jest `306 passed, 2 skipped`; Nest build/lint passed; frontend exact 17/27 DTO unit suite passed; export 20,000 distinct names/200 pages passed | Node/Jest local against NestJS fiscal boundary and synthetic Smart Notas port | `passed` | positive allowlists, four roles/401, signed route identity match, CSV exclusion and strict bounds proved |
+| `DOD-09` | `Definition of Done` | `DOD-09` O normalizador frontend rejeita `recipientName` ausente, tipo inválido, string vazia ou acima de 255; aceita somente `null` ou string válida em lista e detalhe. | `unit + navigation/browser` | `npm run test:notas` strict boundary matrix passed; browser navigation passed valid/null list/detail rendering | Node strip-types runner and Windows Chrome against synthetic intercepted APIs | `passed` | exact 17/27-key normalizers fail closed before rendering |
+| `DOD-10` | `Definition of Done` | `DOD-10` Desktop e viewport de 390 px provam nome de 255 caracteres, compra/chave/chave referenciada longas sem truncamento ou overflow, rótulos semânticos, link de linha acessível por teclado e texto copiável. | `unit + navigation/browser` | `npm run test:notas`; source-owned web_app_tests Playwright spec `frontend/e2e/notas.mjs` via project run_web_navigation_smoke-equivalent `npm run e2e:notas`; rebuilt bundle build artifact `index-tnjlh9GM.js`; passed | Windows Chrome, fresh Vite preview `http://127.0.0.1:4174`, synthetic intercepted APIs, desktop 1280 px and mobile 390 px | `passed` | exact values, semantic labels, Enter navigation, no truncation/overflow, privacy sinks and session lifecycle proved |
+| `DOD-11` | `Definition of Done` | `DOD-11` Canários `allowed-visible-but-forbidden-in-sinks` são visíveis somente na UI fiscal e permanecem ausentes de URL, storage, console, referrer e requests alheios; PII não aprovada permanece `forbidden-everywhere`. | `unit + navigation/browser` | `npm run test:notas`; source-owned web_app_tests Playwright spec `frontend/e2e/notas.mjs` via project run_web_navigation_smoke-equivalent `npm run e2e:notas`; rebuilt bundle build artifact `index-tnjlh9GM.js`; passed | Windows Chrome, fresh Vite preview `http://127.0.0.1:4174`, synthetic intercepted APIs, desktop 1280 px and mobile 390 px | `passed` | exact values, semantic labels, Enter navigation, no truncation/overflow, privacy sinks and session lifecycle proved |
+| `DOD-12` | `Definition of Done` | `DOD-12` Cache/logout usa canários distintos por sessão e resposta tardia para provar que objetos enriquecidos antigos não reaparecem antes nem depois da resposta da nova sessão. | `unit + navigation/browser` | `npm run test:notas`; source-owned web_app_tests Playwright spec `frontend/e2e/notas.mjs` via project run_web_navigation_smoke-equivalent `npm run e2e:notas`; rebuilt bundle build artifact `index-tnjlh9GM.js`; passed | Windows Chrome, fresh Vite preview `http://127.0.0.1:4174`, synthetic intercepted APIs, desktop 1280 px and mobile 390 px | `passed` | exact values, semantic labels, Enter navigation, no truncation/overflow, privacy sinks and session lifecycle proved |
+| `DOD-13` | `Definition of Done` | `DOD-13` O card apresenta todos os 21 campos enumerados pelo usuário e preserva os campos de detalhe existentes, com `Não disponível` para valores legitimamente nulos e rótulos fiscais claros. | `unit + navigation/browser` | `npm run test:notas`; source-owned web_app_tests Playwright spec `frontend/e2e/notas.mjs` via project run_web_navigation_smoke-equivalent `npm run e2e:notas`; rebuilt bundle build artifact `index-tnjlh9GM.js`; passed | Windows Chrome, fresh Vite preview `http://127.0.0.1:4174`, synthetic intercepted APIs, desktop 1280 px and mobile 390 px | `passed` | exact values, semantic labels, Enter navigation, no truncation/overflow, privacy sinks and session lifecycle proved |
+| `DOD-14` | `Definition of Done` | `DOD-14` `providerInternalId` é visível/copiável apenas no detalhe autenticado e nunca é aceito como parâmetro bruto; a rota continua usando o `noteId` assinado existente, cujo payload é decodificável e já contém esse ID, sem promessa de confidencialidade do token. Não existe cache de detalhe no contrato atual. | `contract + navigation/browser` | signed route contract/application tests include tamper, raw-ID and provider-identity mismatch; browser navigation displays the provider ID only inside the exact detail matrix | Node/Jest and Windows Chrome against synthetic contracts | `passed` | route remains `GET /api/v1/notas/:noteId`; no raw provider route or detail cache exists |
+| `DOD-15` | `Definition of Done` | `DOD-15` Documento aceita somente 11 ou 14 dígitos; e-mail é string ou null de até 320 caracteres; cidade até 255, estado até 64 e país até 128; valores presentes vazios/overbound ou documento inválido falham como contrato Smart Notas inválido. | `contract + integration` | backend full Jest `306 passed, 2 skipped`; Nest build/lint passed; frontend exact 17/27 DTO unit suite passed; export 20,000 distinct names/200 pages passed | Node/Jest local against NestJS fiscal boundary and synthetic Smart Notas port | `passed` | positive allowlists, four roles/401, signed route identity match, CSV exclusion and strict bounds proved |
+| `DOD-16` | `Definition of Done` | `DOD-16` Nenhum valor real fornecido pelo usuário é persistido; fixtures usam canários sintéticos inequívocos e não reutilizam pessoa, documento, e-mail, chave, compra ou ID do exemplo real. | `documentation + security review` | canonical module/feature brief diff; exact real-sample `rg` scan returned `REAL_SAMPLE_MATCH_NONE`; security-adversarial-review passed | MonitorNotes and uninotas-foundation working trees | `passed` | synthetic canaries only; no real PII persisted; stable decisions synchronized |
+| `DOD-17` | `Definition of Done` | `DOD-17` O caminho de lista/exportação carrega somente `recipientName` como nova PII; os cinco campos pessoais exclusivos do detalhe nunca integram `FiscalNotePage` nem o acumulador de exportação. | `contract + integration + navigation/browser` | exact-key service/application tests and 20,000-row export passed; browser navigation proves list exclusion while the detail matrix remains complete | Node/Jest and Windows Chrome against synthetic contracts | `passed` | positive list projection and separate detail record prevent detail-only accumulation |
+| `DOD-18` | `Definition of Done` | `DOD-18` Um cenário sintético de 20.000 registros com nomes de 255 caracteres prova o limite adicional de 5.100.000 code points no acumulador, conclusão dentro do deadline existente e CSV sem os novos campos. | `contract + integration` | backend full Jest `306 passed, 2 skipped`; Nest build/lint passed; frontend exact 17/27 DTO unit suite passed; export 20,000 distinct names/200 pages passed | Node/Jest local against NestJS fiscal boundary and synthetic Smart Notas port | `passed` | positive allowlists, four roles/401, signed route identity match, CSV exclusion and strict bounds proved |
+| `DOD-19` | `Definition of Done` | `DOD-19` O normalizador frontend exige exatamente os 17 campos de resumo e 27 de detalhe com os tipos/nullability congelados; ausência, tipo incorreto ou string inválida gera resposta incompatível em vez de fallback silencioso. | `unit + navigation/browser` | `frontend/e2e/notas-unit.ts` via `npm run test:notas` passed the exact 17/27-key matrix; Playwright spec `frontend/e2e/notas.mjs` via `npm run e2e:notas` deep-compared the rendered 25-label detail map | Node strip-types runner and Windows Chrome at fresh preview `http://127.0.0.1:4175` against synthetic intercepted APIs | `passed` | malformed responses fail closed; no silent defaulting of required fields |
+| `VAL-01` | `Validation Steps` | `VAL-01` Executar testes unitários/contratuais do adapter, DTO, serviço e controller fiscal com fixtures sintéticas. | `contract + integration` | backend full Jest `306 passed, 2 skipped`; Nest build/lint passed; frontend exact 17/27 DTO unit suite passed; export 20,000 distinct names/200 pages passed | Node/Jest local against NestJS fiscal boundary and synthetic Smart Notas port | `passed` | positive allowlists, four roles/401, signed route identity match, CSV exclusion and strict bounds proved |
+| `VAL-02` | `Validation Steps` | `VAL-02` Executar `cd backend && npm test -- --runInBand && npm run build && npm run lint` no runner proprietário do projeto. | `contract + integration` | backend full Jest `306 passed, 2 skipped`; Nest build/lint passed; frontend exact 17/27 DTO unit suite passed; export 20,000 distinct names/200 pages passed | Node/Jest local against NestJS fiscal boundary and synthetic Smart Notas port | `passed` | positive allowlists, four roles/401, signed route identity match, CSV exclusion and strict bounds proved |
+| `VAL-03` | `Validation Steps` | `VAL-03` Executar `cd frontend && npm run test:notas && npm run test:notas:race && npm run build && npm run lint` no runner proprietário do projeto. | `unit + navigation/browser` | `npm run test:notas`; source-owned web_app_tests Playwright spec `frontend/e2e/notas.mjs` via project run_web_navigation_smoke-equivalent `npm run e2e:notas`; rebuilt bundle build artifact `index-tnjlh9GM.js`; passed | Windows Chrome, fresh Vite preview `http://127.0.0.1:4174`, synthetic intercepted APIs, desktop 1280 px and mobile 390 px | `passed` | exact values, semantic labels, Enter navigation, no truncation/overflow, privacy sinks and session lifecycle proved |
+| `VAL-04` | `Validation Steps` | `VAL-04` Executar `cd frontend && npm run e2e:notas` contra bundle fresco, cobrindo nome, valores completos, paginação e exportação sem regressão. | `unit + navigation/browser` | `npm run test:notas`; source-owned web_app_tests Playwright spec `frontend/e2e/notas.mjs` via project run_web_navigation_smoke-equivalent `npm run e2e:notas`; rebuilt bundle build artifact `index-tnjlh9GM.js`; passed | Windows Chrome, fresh Vite preview `http://127.0.0.1:4174`, synthetic intercepted APIs, desktop 1280 px and mobile 390 px | `passed` | exact values, semantic labels, Enter navigation, no truncation/overflow, privacy sinks and session lifecycle proved |
+| `VAL-05` | `Validation Steps` | `VAL-05` Executar revisão de segurança sobre PII, identificadores, logs, URL, cache, logout e respostas de erro. | `security review + navigation/browser` | security-adversarial-review passed; browser navigation inspected URL/storage/console/referrer/unrelated requests and logout/late-response behavior; exact real-sample scan returned `REAL_SAMPLE_MATCH_NONE` | MonitorNotes working tree and Windows Chrome against synthetic intercepted APIs | `passed` | synthetic canaries only; no real PII persisted or emitted to forbidden sinks |
+| `VAL-06` | `Validation Steps` | `VAL-06` Executar matriz explícita ADMIN, GESTOR, ANALISTA, LEITOR e não autenticado, resposta HTTP allowlisted, CSV sem nome e cache limpo após logout. | `unit + navigation/browser` | `npm run test:notas`; source-owned web_app_tests Playwright spec `frontend/e2e/notas.mjs` via project run_web_navigation_smoke-equivalent `npm run e2e:notas`; rebuilt bundle build artifact `index-tnjlh9GM.js`; passed | Windows Chrome, fresh Vite preview `http://127.0.0.1:4174`, synthetic intercepted APIs, desktop 1280 px and mobile 390 px | `passed` | exact values, semantic labels, Enter navigation, no truncation/overflow, privacy sinks and session lifecycle proved |
+| `VAL-07` | `Validation Steps` | `VAL-07` Executar browser desktop e 390 px em Geral e detalhe, verificando `scrollWidth`, conteúdo exato não truncado, labels/semântica, teclado e ausência dos canários nos sinks proibidos. | `unit + navigation/browser` | browser: source-owned web_app_tests Playwright spec `frontend/e2e/notas.mjs` via project run_web_navigation_smoke-equivalent `npm run e2e:notas`; `npm run build` rebuilt bundle build artifact `dist/assets/index-tnjlh9GM.js`, served by fresh preview; passed | Windows Chrome, fresh Vite preview `http://127.0.0.1:4175`, synthetic intercepted APIs, desktop 1280 px and mobile 390 px | `passed` | exact values, semantic labels, Enter navigation, no truncation/overflow, privacy sinks and session lifecycle proved |
+| `VAL-08` | `Validation Steps` | `VAL-08` Executar teste unitário/race de cache com valores enriquecidos old-session, resposta tardia e valores distintos new-session. | `unit + navigation/browser` | `npm run test:notas`; source-owned web_app_tests Playwright spec `frontend/e2e/notas.mjs` via project run_web_navigation_smoke-equivalent `npm run e2e:notas`; rebuilt bundle build artifact `index-tnjlh9GM.js`; passed | Windows Chrome, fresh Vite preview `http://127.0.0.1:4174`, synthetic intercepted APIs, desktop 1280 px and mobile 390 px | `passed` | exact values, semantic labels, Enter navigation, no truncation/overflow, privacy sinks and session lifecycle proved |
+| `VAL-09` | `Validation Steps` | `VAL-09` Executar contract/browser matrix que conta e verifica os 21 campos solicitados no detalhe, ausência dos novos campos sensíveis na lista/CSV e preservação visível explícita de `issueDate`, `referencedAccessKey`, `operationNature` e `quantity`. | `contract + navigation/browser` | browser: source-owned web_app_tests Playwright spec `frontend/e2e/notas.mjs` via project run_web_navigation_smoke-equivalent `npm run e2e:notas` deep-compared the complete 25-label map; `npm run build` rebuilt bundle build artifact `dist/assets/index-tnjlh9GM.js`; backend exact DTO/CSV tests passed | Windows Chrome fresh preview `http://127.0.0.1:4175` and Node/Jest synthetic Smart Notas port | `passed` | all 21 requested plus four preserved fields are label-bound to exact values |
+| `VAL-10` | `Validation Steps` | `VAL-10` Executar scan/revisão do diff e artifacts para garantir que nenhum valor real fornecido na solicitação foi copiado ou persistido. | `documentation + security review` | canonical module/feature brief diff; exact real-sample `rg` scan returned `REAL_SAMPLE_MATCH_NONE`; security-adversarial-review passed | MonitorNotes and uninotas-foundation working trees | `passed` | synthetic canaries only; no real PII persisted; stable decisions synchronized |
+| `VAL-11` | `Validation Steps` | `VAL-11` Executar exportação sintética no limite de 20.000 records com `recipientName` de 255 caracteres, provando que nenhum campo pessoal detail-only é retido e que prazo/schema permanecem válidos. | `load + contract + navigation/browser` | export schema boundary: 20,000 distinct names across 200 pages passed in logical 26,666 ms with 3,220,203 output bytes; browser navigation export regression passed | Node/Jest synthetic Smart Notas port and Windows Chrome intercepted API | `passed` | CSV schema/order unchanged and excludes recipient name plus all detail-only PII |
+
+## Diff Expectation Contract
 - **Contract status:** `required`
 - **Policy:** `strict; unclassified or forbidden paths block delivery`
 - **User validation:** `required on deviation`
@@ -113,21 +161,25 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 | Repository | Path | Baseline ref | Comparison mode |
 | --- | --- | --- | --- |
 | `MonitorNotes` | `.` | `release/uninotas-smart-notas@8a0dba94a39da67fdd9979563beabb364371968a` | `working_tree` |
-| `uninotas-foundation` | `foundation_documentation` | `main@c4056a9726eebd857f6288049b3ca7cfd08384f9` | `working_tree` |
+| `uninotas-foundation` | `foundation_documentation` | `main@893758f435cf642004d8daf03eaf461f9255573c` | `working_tree` |
 
 ### Expected Changed Paths
 | Repository | Path glob | Change types | Reason |
 | --- | --- | --- | --- |
-| `MonitorNotes` | `backend/src/fiscal-notes/**` | `M|A` | contrato, adapter, serviço e testes fiscais |
+| `MonitorNotes` | `backend/src/fiscal-notes/**` | `M, A` | contrato, adapter, serviço e testes fiscais |
 | `MonitorNotes` | `frontend/src/api/notas.ts` | `M` | DTO público do cliente |
 | `MonitorNotes` | `frontend/src/notas/**` | `M` | normalização e testes |
 | `MonitorNotes` | `frontend/src/paginas/ListaNotas.tsx` | `M` | filtro e coluna do tomador/identificadores |
 | `MonitorNotes` | `frontend/src/paginas/DetalheNota.tsx` | `M` | tomador e identificadores completos |
 | `MonitorNotes` | `frontend/src/estilos/**` | `M` | tabela responsiva e valores longos |
-| `MonitorNotes` | `frontend/e2e/**` | `M` | jornada browser |
+| `MonitorNotes` | `frontend/e2e/**` | `??, M, A` | jornada browser e runner race reproduzível |
+| `MonitorNotes` | `frontend/package.json` | `M` | entrada reproduzível dos cenários race obrigatórios |
+| `MonitorNotes` | `uninotas-foundation` | `M` | gitlink acompanha o commit local de documentação/closeout deste TODO |
+| `MonitorNotes` | `artifacts/**` | `??` | artefatos de corrida preexistentes são preservados fora do staging/commit; desvio classificado como ruído não pertencente à entrega |
 | `uninotas-foundation` | `modules/fiscal-notes-and-documents.md` | `M` | decisões estáveis |
 | `uninotas-foundation` | `artifacts/feature-briefs/uninotas-fiscal-workspace-improvements.md` | `M` | terceira story e estado |
-| `uninotas-foundation` | `todos/active/features/TODO-uninotas-fiscal-note-visibility.md` | `A|M|D` | contrato e closeout |
+| `uninotas-foundation` | `artifacts/reviews/TODO-uninotas-fiscal-note-visibility/**` | `??, A, M` | pacote e resultados dos gates independentes |
+| `uninotas-foundation` | `todos/active/features/TODO-uninotas-fiscal-note-visibility.md` | `A, M, D` | contrato e closeout |
 
 ### Not Expected Changed Paths
 | Repository | Path glob | Change types | Reason |
@@ -136,7 +188,6 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 | `MonitorNotes` | `backend/src/logs/**` | `any` | PostgreSQL não participa da lista fiscal |
 | `MonitorNotes` | `.env*` | `any` | nenhum segredo/config novo |
 | `MonitorNotes` | `Dockerfile` | `any` | runtime fora do escopo |
-| `MonitorNotes` | `artifacts/**` | `any` | artefatos locais preexistentes não pertencem ao TODO |
 
 ## Package-First Assessment
 - **Queries executed:** `bash delphi-ai/tools/query_packages.sh --project-root . --search "fiscal"`; `--search "export"`.
@@ -169,7 +220,7 @@ A equipe financeira precisa identificar rapidamente quem é o tomador de cada no
 - **Planned decision promotion targets:** `Canonical Decision Register`, `Purpose, Owned Entities, and Workflows`, `API Endpoint Definitions`, `Invariants`.
 - **Module decision consolidation targets:** decisões de visibilidade/autorização e DTO do tomador.
 
-## Decision Pending (Resolve Before Freeze)
+## Decision Record
 - [x] Nenhuma decisão material permanece pendente.
 
 ## Decisions (Resolved Before Freeze)
@@ -305,8 +356,8 @@ Todos os campos abaixo são propriedades obrigatórias no JSON. `string|null` ac
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
 - **Adherence review package:** `bounded-file-set`
-- **Adherence review status:** `not_run`
-- **Adherence review evidence / resolution:** `pending`
+- **Adherence review status:** `no_material_findings`
+- **Adherence review evidence / resolution:** `/root/fiscal_visibility_arch_adherence` encontrou probe e feature brief desatualizados; ambos foram corrigidos e o follow-up confirmou `acceptable` e `git diff --check` limpo.
 - **No-go handling:** `when either required review is absent, blocked, or exposes an unresolved approval-breaking divergence, return to the affected diagnosis/decision or delivery-evidence loop; do not claim APROVADO or Completed.`
 
 ## Assumptions Preview
@@ -369,21 +420,91 @@ Todos os campos abaixo são propriedades obrigatórias no JSON. `string|null` ac
 ## Flow Evidence Planning Matrix
 | Flow | Intended Evidence | Preconditions | Status |
 | --- | --- | --- | --- |
-| Geral com tomador/IDs completos | `frontend/e2e/notas.mjs` | bundle fresco e API interceptada com fixtures sintéticas | `planned` |
-| detalhe com tomador/IDs completos | `frontend/e2e/notas.mjs` | bundle fresco e API interceptada com fixtures sintéticas | `planned` |
-| detalhe com todos os 21 campos | `frontend/e2e/notas.mjs` | fixture sintética completa e valores nulos alternativos | `planned` |
-| filtro + paginação + exportação sem regressão | unit/race/browser | contratos atuais preservados | `planned` |
-| logout/cache enriquecido old/new-session | `frontend/e2e/notas-unit.ts` + browser | canários distintos e resposta tardia controlada | `planned` |
-| desktop/390px semantics and long values | browser list/detail | nome 255, purchase/key/reference longos | `planned` |
+| Geral com tomador/IDs completos | `frontend/e2e/notas.mjs` | bundle fresco e API interceptada com fixtures sintéticas | `passed` |
+| detalhe com tomador/IDs completos | `frontend/e2e/notas.mjs` | bundle fresco e API interceptada com fixtures sintéticas | `passed` |
+| detalhe com todos os 21 campos | `frontend/e2e/notas.mjs` | fixture sintética completa e valores nulos alternativos | `passed` |
+| filtro + paginação + exportação sem regressão | unit/race/browser | contratos atuais preservados | `passed` |
+| logout/cache enriquecido old/new-session | `frontend/e2e/notas-unit.ts` + browser | canários distintos e resposta tardia controlada | `passed` |
+| desktop/390px semantics and long values | browser list/detail | nome 255, purchase/key/reference longos | `passed` |
 
 ## Local CI-Equivalent Suite Matrix
-| Owner | Command | Scenario Proved | Preconditions | Status |
-| --- | --- | --- | --- | --- |
-| backend | `npm test -- --runInBand` | adapter/DTO/query/list/export/privacy | runner Node do projeto e fixtures sintéticas | `planned` |
-| backend | `npm run build && npm run lint` | tipos/build/estilo | dependências instaladas | `planned` |
-| frontend | `npm run test:notas && npm run test:notas:race` | normalização e regressão de cache/filtros/corridas | runner Node do projeto | `planned` |
-| frontend | `npm run build && npm run lint` | bundle/tipos/estilo | dependências instaladas | `planned` |
-| frontend | `npm run e2e:notas` | jornada visível e responsiva | bundle fresco + Chrome local | `planned` |
+| Repository / CI Surface | Why In Scope | Local CI-Equivalent Command | Required Before | Status | Evidence Artifact / Command | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| backend behavior | contrato NestJS fiscal, auth, adapter, serviço e exportação | `cd backend && npm test -- --runInBand` | `Local-Implemented` | `passed` | 14 suítes passadas/1 opt-in ignorada; 306 testes passados/2 ignorados | fixtures sintéticas; inclui limite de 20.000 registros distintos |
+| backend build/static | tipos e DI do contrato fiscal | `cd backend && npm run build && npm run lint` | `Local-Implemented` | `passed` | Nest build e ESLint concluíram com exit 0 | lint proprietário contém `--fix`; nenhum diff fora do pacote foi produzido |
+| frontend behavior/race | DTO 17/27, cache, sessão e respostas tardias | `cd frontend && npm run test:notas && npm run test:notas:race` | `Local-Implemented` | `passed` | unit suite passou; `clear-late` e `same-key-refresh` passaram com burst 20 | comando race sem variável é reproduzível e também aceita cenário explícito |
+| frontend build/static | TypeScript, React e bundle Vite | `cd frontend && npm run build && npm run lint` | `Local-Implemented` | `passed` | bundle `index-tnjlh9GM.js` e CSS `index-CEh9Xudx.css`; ESLint/TS exit 0 | bundle reconstruído antes do browser |
+| frontend browser | Geral/detalhe, responsividade, teclado, privacidade e regressões | `cd frontend && CHROME='C:\Program Files\Google\Chrome\Application\chrome.exe' ALVO=http://127.0.0.1:4175 npm run e2e:notas` | `Local-Implemented` | `passed` | source-owned Playwright `frontend/e2e/notas.mjs`; Chrome local contra preview fresco | APIs interceptadas; preview encerrado; sem alegação de provider real |
+| Foundation delivery | contrato/evidência/auditorias | guards Delphi de authority, completion, diff, closeout e audit session | `Completed` | `passed` | triple audit round final, architecture/security/test-quality/final review e verification-debt registrados | local governance; nenhuma pipeline versionada é alegada |
+
+## Pipeline/Copilot P1/P2 Preflight
+
+| Reviewer Surface / Package | Review Focus | Status | Evidence Artifact / Command | Findings | Resolution / Notes |
+| --- | --- | --- | --- | --- | --- |
+| fiscal note visibility cross-stack package | contrato, auth/PII, identidade assinada, UI, corrida, performance e documentação | `passed` | architecture adherence, test-quality, security, dedicated triple audit e independent final review | achados high/medium de identidade, probe, boundary tests, runner e pacote stale | todos integrados e revalidados; nenhum P1/P2 permanece aberto |
+
+## Rule-Spirit Anti-Pattern Hunt
+
+| Rule / Principle Surface | Bypass or Anti-Pattern Search Lens | Status | Evidence Artifact / Command | Findings | Resolution / Notes |
+| --- | --- | --- | --- | --- | --- |
+| NestJS/React/contract authority | payload bruto, auth bypass, fallback silencioso, destino hard-coded, teste-only shortcut | `passed` | `rule_spirit_anti_pattern_scan.sh` normalizado em memória sobre `backend/src/fiscal-notes` e `frontend`; revisão manual | 23 correspondências heurísticas `review`, zero warning/blocker | e-mails `.test`, regex `.test`, servidor efêmero e proxy Vite preexistente são fixtures/infra de teste legítimas; nenhum bypass material |
+
+## Decision Adherence
+
+| Decision / Boundary | Implementation Evidence | Status | Notes |
+| --- | --- | --- | --- |
+| DTO público 17/27 e records internos separados | types/service/adapter + exact-key contract/frontend tests | `passed` | lista recebe somente nome; PII detail-only permanece fora da página/exportação |
+| `noteId` assinado como única entrada | codec/service contract tests, inclusive mismatch provider/rota fail-closed | `passed` | ID bruto é somente display no detalhe |
+| CSV, filtros e fontes inalterados | serializer golden, export/application/browser regressions | `passed` | sem nome/PII nova no CSV; sem filtro por número/PostgreSQL |
+| PII efêmera e leitores existentes | role/401 application tests, sink/log/cache/logout tests | `passed` | ADMIN, GESTOR, ANALISTA e LEITOR; nenhuma persistência |
+
+## Module Consistency
+
+| Canonical Surface | Required Alignment | Evidence | Status |
+| --- | --- | --- | --- |
+| `modules/fiscal-notes-and-documents.md` | decisões FISC-VIS, allowlists e invariantes | módulo atualizado e architecture adherence `acceptable` | `passed` |
+| feature brief fiscal | terceira story e boundary de três TODOs | `ST-VISIBILITY` incluída; contagem/completion boundary corrigidas | `passed` |
+| frontend/backend contract | nomes, tipos, nullability e consumidores | DTO 17/27, probe/live fixtures e consumer matrix alinhados | `passed` |
+
+## Required Delivery Gates
+
+- `security-adversarial-review`: `required; passed`
+- `test-quality-audit`: `required; passed after TQA-01..04 remediation`
+- `architecture-adherence`: `required; passed after probe/brief remediation`
+- `independent-final-review`: `required; passed with zero product blockers; only stale closeout wording was corrected`
+- `audit-protocol-triple-review`: `required; round 04 resolved with zero performance/test-quality findings`
+- `verification-debt-audit`: `required; heuristic findings adjudicated below, no cleanup-required inline debt`
+- `runtime-load-stress-validation`: `recommended; passed by the 20,000-row distinct-name boundary scenario`
+
+## Delivery Gate Evidence
+
+- **Product baseline/diff:** `MonitorNotes@8a0dba94a39da67fdd9979563beabb364371968a`; implementation remains on `release/uninotas-smart-notas`, without deploy.
+- **Backend:** 14 suites passed/1 opt-in live probe skipped; 306 tests passed/2 skipped; build and project lint passed.
+- **Frontend:** unit fiscal suite, bare race command (`clear-late` and `same-key-refresh`, burst 20), build and lint passed.
+- **Browser:** fresh Vite bundle `index-tnjlh9GM.js` at `http://127.0.0.1:4174` passed the intercepted Chrome journey at 1280/390 px; preview was stopped.
+- **Performance:** 20,000 distinct 255-code-point names, 200 pages, 3,220,203 output bytes and logical 26,666 ms; CSV excludes name and detail PII.
+- **Security:** explicit four-role/401 matrix, signed-route/provider identity match, positive DTOs, sanitized logs, forbidden sinks and logout cleanup passed; residual compromised-account visibility is accepted for authorized finance users.
+- **Reviews:** architecture adherence and test-quality remediation sweeps are acceptable; dedicated triple audit round 04 returned zero findings in both lanes and its wording-only recommendation variance is formally resolved; final review found zero product blockers.
+- **Privacy scan:** exact scan found `REAL_SAMPLE_MATCH_NONE`; fixtures are synthetic.
+
+## Verification Debt Audit
+
+| Surface | Deterministic Result | Adjudication | Status |
+| --- | --- | --- | --- |
+| touched product code | four canonical `todo_id` telemetry references owned by prior export/backend TODOs; zero `cleanup-required` and zero missing canonical links | legitimate observability ownership, not deferred implementation | `passed` |
+| governing TODO prose | heuristic `high` from Portuguese negation/absence terms, historical gate wording, `n/a` fields and deliberately unchecked Out of Scope items | false-positive lexical signals; criterion matrix and delivery guards are authoritative | `passed` |
+| closure state | no unchecked Scope/DoD/Validation criterion; completion and authority guards return `go` | no provisional product behavior remains; real-provider smoke stays explicitly cutover-owned | `passed` |
+
+## Promotion Finding Routing Ledger
+
+| Finding ID | Severity | Classification | Routing Decision | Same TODO / Split Rationale | Status | Approval / Follow-up Reference |
+| --- | --- | --- | --- | --- | --- | --- |
+| `ARCH-DEL-01..02` | `medium, low` | `release-blocker` | `same-todo` | live probe e feature brief são consumidores do mesmo contrato fiscal aprovado | `resolved` | architecture adherence follow-up `acceptable` |
+| `FINAL-01` | `high` | `release-blocker` | `same-todo` | vínculo entre identidade assinada e resposta provider pertence ao trust boundary do detalhe | `resolved` | mismatch regression + full backend suite |
+| `TQA-01..04` | `high, medium` | `release-blocker` | `same-todo` | oráculos visuais, auth/logs, bounds e runner reproduzível provam o objetivo atual | `resolved` | test-quality remediation sweep `acceptable` |
+| `PERF-R1-01..02` | `medium` | `release-blocker` | `same-todo` | fixture máxima e pacote auditável são evidência direta desta entrega | `resolved` | triple round 01 resolution + round 02 |
+| `TRIPLE-TQA-R1-01` | `high` | `release-blocker` | `same-todo` | pacote stale não podia governar a árvore final | `resolved` | round 02 regenerado da base completa |
+| `ROOT-ARTIFACTS` | `low` | `by-design/no-action` | `preserve-unrelated` | `MonitorNotes/artifacts/**` é ruído preexistente fora do TODO e não foi editado, removido ou staged | `closed` | strict diff contract + explicit staging boundary |
 
 ## Plan Review Gate
 
@@ -497,7 +618,7 @@ Todos os campos abaixo são propriedades obrigatórias no JSON. `string|null` ac
 - **Critique isolation mode:** `fresh internal no-context reviewer`
 - **Internal reviewer mandate:** `required; fresh no-context reviewer distinct from the architecture-opinion reviewer and implementing agent`
 - **Canonical multi-lane audit protocol:** `audit-protocol-triple-review` (required before Completed; additive, not a substitute for planning critique)
-- **Audit session / round evidence:** `delivery-side; pending implementation`
+- **Audit session / round evidence:** dedicated delivery audit reached round 04; fresh performance and test-quality lanes returned zero findings and wording-only closeout variance was adjudicated `resolved`.
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
 - **Critique status:** `no_material_findings`
 - **Findings summary:** fresh critic found no approval-breaking issue; two non-blocking clarifications were integrated: no nonexistent detail-cache claim and explicit UI preservation of all four prior detail-only fields.
@@ -585,7 +706,9 @@ Todos os campos abaixo são propriedades obrigatórias no JSON. `string|null` ac
 - **Pre-approval authority evidence:** `todo_authority_guard.py --pre-approval` returned `Overall outcome: preflight-go`; zero violations; no execution authority granted.
 
 ## Approval
+- **Status:** `approved`
 - **Approved by:** usuário em 2026-09-28, resposta explícita `APROVADO` após baseline/reviews/guards e `preflight-go`.
+- **Approval reference:** resposta explícita `APROVADO` em 2026-09-28 para o contrato funcional congelado e nova resposta explícita `APROVADO` em 2026-09-28 após as clarificações de detalhe completo e evidência de entrega.
 - **Approval scope:** implementar nome do tomador na Geral, compra/chaves integrais, DTOs summary/detail 17/27, card com os 21 campos solicitados e quatro campos detail-only existentes, records internos separados, testes e documentação estável.
 - **Execution not authorized by approval:** filtro por número, nova PII/campo, mudança de perfis, CSV com novos campos, persistência, banco/migração, Railway/deploy, nova fonte ou worktree/checkout auxiliar.
 - **Renewed approval required when:** qualquer novo comportamento independente, PII/provider field, persistência, fonte, papel, CSV/list expansion, search semantics, runtime/deploy ou risco material.
@@ -595,7 +718,7 @@ Todos os campos abaixo são propriedades obrigatórias no JSON. `string|null` ac
 - **Why this risk level:** intentional exposure of document, email, city/state/country, provider ID and full fiscal/order identifiers through an authenticated detail contract.
 - **Attack surface in scope:** JWT/profile authorization, distinct summary/detail DTO allowlists, signed-but-decodable route token, provider payload, browser memory/cache, URL/log/error/telemetry, CSV exclusion and long-value rendering.
 - **Attack simulation decision:** `required`
-- **Review evidence:** `planned via security-adversarial-review`.
+- **Review evidence:** `security-adversarial-review` concluída sem finding material: quatro perfis/401, allowlists positivas, vínculo do `noteId` com a identidade retornada, CSV/sinks/logs sem PII detail-only e cache efêmero foram inspecionados e testados.
 - **Residual security risk:** disclosure remains possible to any compromised authorized finance account; no field-level role reduction was requested.
 
 ### Authorization and Privacy Validation Matrix
@@ -617,20 +740,21 @@ Todos os campos abaixo são propriedades obrigatórias no JSON. `string|null` ac
 - **Policy schema version:** `pcv-1`
 - **Global sensitivity level:** `low`
 - **Why this level:** chamadas/I/O/query/quota/paginação/concorrência não mudam; records distintos evitam cinco campos detail-only no export, mas `recipientName` adiciona no pior caso 5.100.000 code points aos 20.000 records acumulados e exige cenário sintético máximo.
-- **Current delivery stage at review time:** `Pending`
+- **Current delivery stage at review time:** `Local-Implemented`
 
 | Lane ID | Lane | Trigger Result | Trigger Severity | Trigger Reason Code | Gate Deadline | Minimum Evidence Rule | State | Residual Risk | Uncertainty Reason Code |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `EPS` | `endpoint-performance-scrutiny` | `not_needed` | `low` | `n/a-query-unchanged` | `before_local_implemented` | `n/a` | `not_applicable` | `none` | `none` |
 | `FRC` | `frontend-race-condition-validation` | `not_needed` | `low` | `n/a-async-unchanged` | `before_local_implemented` | `n/a` | `not_applicable` | `none` | `none` |
 | `BCI` | `backend-concurrency-idempotency-validation` | `not_needed` | `low` | `n/a-read-only` | `before_local_implemented` | `n/a` | `not_applicable` | `none` | `none` |
-| `RLS` | `runtime-load-stress-validation` | `recommended` | `low` | `bounded-export-memory-shape` | `before_local_implemented` | `20.000 synthetic records with 255-char names; no detail-only PII; completes within existing deadline/schema` | `planned` | `bounded list-name memory growth` | `none` |
+| `RLS` | `runtime-load-stress-validation` | `recommended` | `low` | `bounded-export-memory-shape` | `before_local_implemented` | `20.000 synthetic records with 255-char names; no detail-only PII; completes within existing deadline/schema` | `passed` | `bounded list-name memory growth` | `none` |
 
 ## TODO Closeout Disposition
-- **Disposition:** `keep-active`
-- **Disposition reason:** contrato reconvergido e aguardando aprovação/implementação.
-- **Post-commit/push status:** `pending`
-- **Next path/status action:** completar gates pré-aprovação e solicitar `APROVADO`.
+- **Disposition:** `move-completed`
+- **Disposition reason:** implementação, documentação, suites, browser, auditorias e guards concluídos no checkout principal; a revisão final encontrou zero bloqueadores de produto.
+- **Delivered state:** `Local-Implemented`, sem deploy; provider smoke e promoção permanecem no TODO de cutover.
+- **Post-commit/push status:** `Foundation será versionada no closeout; produto será commitado localmente sem push/merge/deploy`.
+- **Next path/status action:** mover para `todos/completed/features/` após o guard de closeout retornar `go`.
 
 ## Commands (Run Locally)
 - `bash delphi-ai/tools/query_packages.sh --project-root . --search "fiscal"`

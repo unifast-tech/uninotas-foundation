@@ -1,0 +1,59 @@
+{
+  "schema_version": "subagent-review-merge-v2",
+  "artifact_kind": "subagent_review_merge",
+  "authoritative": false,
+  "edit_policy": "derived_merge_packet",
+  "dispatch_path": "/mnt/c/unifast/monitordenotas/uninotas-foundation/artifacts/reviews/TODO-uninotas-fiscal-note-visibility/triple-audit/round-01/dispatch/performance.dispatch.json",
+  "review_kind": "critique",
+  "review_count": 1,
+  "reviewer_labels": [
+    "performance-r1"
+  ],
+  "highest_finding_severity": "medium",
+  "axis_summary": {
+    "performance": "acceptable",
+    "elegance": "strong_positive",
+    "structural_soundness": "strong_positive",
+    "operational_fit": "mixed"
+  },
+  "recommended_paths": [
+    "No severe runtime-performance blocker is present. Make the 20,000-row recipient-name workload representative and refresh the bounded package from the complete current diff."
+  ],
+  "exact_next_step": "Record reviewer resolutions in the governing TODO using the machine-checkable resolution table or equivalent gate ledger, then extract the derived resolution packet and decide whether another bounded review pass is still required.",
+  "findings": [
+    {
+      "finding_id": "F-EB8781F7",
+      "severity": "medium",
+      "title": "The frozen audit package omits current validation-entrypoint changes",
+      "rationale": "The round package omitted frontend/package.json, the new race wrapper and live probe while its evidence described the prior race invocation.",
+      "suggested_action": "Classify and include the complete runner/probe diff and regenerate the bounded package.",
+      "reviewer_labels": [
+        "performance-r1"
+      ],
+      "source_finding_ids": [
+        "PERF-R1-02"
+      ],
+      "category": "operational_fit",
+      "formalizable_hint": "yes",
+      "candidate_rule_level": "project",
+      "candidate_rule_id": "n/a"
+    },
+    {
+      "finding_id": "F-C4A0360C",
+      "severity": "medium",
+      "title": "The 20,000-row name test does not exercise the claimed worst-case memory shape",
+      "rationale": "The test reused one 255-character string for all 20,000 records, so it did not represent distinct retained values.",
+      "suggested_action": "Generate a deterministic distinct 255-code-point name for every synthetic row and retain the CSV-exclusion assertion.",
+      "reviewer_labels": [
+        "performance-r1"
+      ],
+      "source_finding_ids": [
+        "PERF-R1-01"
+      ],
+      "category": "tests",
+      "formalizable_hint": "partial",
+      "candidate_rule_level": "project",
+      "candidate_rule_id": "n/a"
+    }
+  ]
+}

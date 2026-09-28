@@ -1,0 +1,42 @@
+{
+  "schema_version": "subagent-review-merge-v2",
+  "artifact_kind": "subagent_review_merge",
+  "authoritative": false,
+  "edit_policy": "derived_merge_packet",
+  "dispatch_path": "/mnt/c/unifast/monitordenotas/uninotas-foundation/artifacts/reviews/TODO-uninotas-fiscal-note-visibility/triple-audit/round-01/dispatch/test-quality.dispatch.json",
+  "review_kind": "test_quality_audit",
+  "review_count": 1,
+  "reviewer_labels": [
+    "triple_test_quality_r15"
+  ],
+  "highest_finding_severity": "high",
+  "axis_summary": {
+    "performance": "strong_positive",
+    "elegance": "acceptable",
+    "structural_soundness": "mixed",
+    "operational_fit": "regresses"
+  },
+  "recommended_paths": [
+    "Regenerate the effective round package and dispatch from the latest base package after freezing the complete working-tree test and runner surface, then run a fresh no-context test-quality audit."
+  ],
+  "exact_next_step": "Record reviewer resolutions in the governing TODO using the machine-checkable resolution table or equivalent gate ledger, then extract the derived resolution packet and decide whether another bounded review pass is still required.",
+  "findings": [
+    {
+      "finding_id": "F-168182E3",
+      "severity": "high",
+      "title": "The dispatch-bound round package is stale and omits changed test-runner surfaces",
+      "rationale": "The round package omitted the live probe, package manifest and race wrapper and reported 304 tests while the current suite has 306 passing tests.",
+      "suggested_action": "Regenerate the effective package and dispatch from the refreshed bounded package, then rerun with a fresh reviewer.",
+      "reviewer_labels": [
+        "triple_test_quality_r15"
+      ],
+      "source_finding_ids": [
+        "TQA-01"
+      ],
+      "category": "operational_fit",
+      "formalizable_hint": "yes",
+      "candidate_rule_level": "paced",
+      "candidate_rule_id": "bounded-review-package-freshness"
+    }
+  ]
+}
