@@ -463,6 +463,15 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Why:** production-like stage symptoms passed all existing immutable-total unit tests; regression must be proven before changing the state machine.
 - **Fail-first targets:** provider total changes after page 1/resume; stale running/failed checkpoint after process restart; rolling while history incomplete; covered empty list; covered export with unrelated incomplete window; incomplete export exact `409`; no provider call on covered reads; exact provider-error preservation.
 
+### Package-First Assessment
+
+- **Query executed:** `bash delphi-ai/tools/query_packages.sh --project-root . --search "fiscal cache synchronization read model"`
+- **Relevant packages found:** none.
+- **READMEs read:** `n/a`.
+- **Decision:** extend the existing host-owned fiscal-notes module; do not create a package or add a dependency.
+- **Tier:** local host implementation.
+- **Rationale:** the correction changes UniNotas-specific persistence, synchronization, API and UI contracts and has no reusable proprietary package match.
+
 ### Pre-APROVADO RED Evidence Capture
 
 - **Decision:** `not_needed`
@@ -482,6 +491,15 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 | covered/partial/empty interval semantics | backend projection consumed by list | `web-only` | Playwright readonly + API integration | `no` | `yes` | deterministic DB fixture and stage period with known data | n/a |
 | CSV export covered vs incomplete | visible download/error | `web-only` | Playwright readonly/download + API integration | `no` | `yes` | assert download only for covered interval and zero-byte/error for incomplete | n/a |
 | detail/PDF/XML/document filter regression | provider-backed unchanged contract | `web-only` | existing integration/browser regression | `no` | `no` for automated; stage smoke only if safe | existing mocked provider tests | n/a |
+
+## Frontend / Consumer Matrix
+
+| Producer Surface | Consumer | Required State | Failure / Partial State | Evidence | Disposition |
+| --- | --- | --- | --- | --- | --- |
+| `GET /api/v1/notas` coverage/source metadata | `NotasFiscaisContexto` + `ListaNotas` | covered interval renders local rows without historical-loading warning | partial/failed sync renders an actionable synchronization notice without hiding stored rows | frontend parser/unit + browser list flow | consumer implemented and must be updated/evidenced in this TODO |
+| `GET /api/v1/notas/exportar` interval coverage contract | `ListaNotas` export controller | covered interval downloads exactly one CSV | incomplete interval handles `409 ExportacaoFiscalCoberturaIncompleta` and downloads zero bytes | backend contract + browser download flow | consumer implemented and must be updated/evidenced in this TODO |
+| provider-backed detail/PDF/XML/document-filter paths | `DetalheNota`, `AcoesDocumento`, document-filter list | existing provider behavior remains unchanged | provider errors retain existing user-visible behavior | existing unit/browser regression suites | preserve without new consumer behavior |
+| background historical/rolling synchronization | no direct UI command surface | UI consumes only explicit read-model metadata | no polling loop or provider traversal is owned by React | backend scheduler tests + frontend negative assertion | consumer intentionally observes metadata only |
 
 ## Local CI-Equivalent Suite Matrix
 
@@ -596,7 +614,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 
 - **Canonical method:** `wf-docker-audit-escalation-method`
 - **Guard command:** `python3 delphi-ai/tools/audit_escalation_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-fiscal-note-read-model.md`
-- **Latest TEACH evidence / artifact:** `pending review baseline freeze`
+- **Latest TEACH evidence / artifact:** `audit_escalation_guard.py` returned `Overall outcome: go` on `2026-09-29`; fingerprint `ad81743d5b49`; derived critique/test-quality/final/triple-review/performance-concurrency floors remain `required`, security `recommended`, verification-debt `required`.
 
 | Trigger | Value | Notes |
 | --- | --- | --- |
