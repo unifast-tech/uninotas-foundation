@@ -113,6 +113,9 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 | `MonitorNotes` | `frontend/src/componentes/**` | `M, A` | accessible confirmation/action component if extracted |
 | `MonitorNotes` | `frontend/src/estilos/layout.css` | `M` | action placement and responsive layout |
 | `MonitorNotes` | `frontend/e2e/**` | `M, A` | deterministic UI/browser evidence |
+| `MonitorNotes` | `delphi-ai` | `M` | pre-existing approved workspace link; excluded from product staging |
+| `MonitorNotes` | `foundation_documentation` | `M` | pre-existing Foundation workspace link; excluded from product staging |
+| `MonitorNotes` | `uninotas-foundation` | `T` | pre-existing tracked-gitlink versus workspace-symlink topology; excluded from product staging |
 | `uninotas-foundation` | `artifacts/feature-briefs/uninotas-fiscal-note-cancellation.md` | `A, M` | framing source |
 | `uninotas-foundation` | `todos/active/features/TODO-uninotas-fiscal-note-cancellation.md` | `A, M` | governing execution contract and evidence |
 | `uninotas-foundation` | `modules/fiscal-notes-and-documents.md` | `M` | stable endpoint/mutation contract consolidation |
@@ -132,7 +135,7 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 
 | Diff item | Classification | Evidence / defense | Decision | User validation |
 | --- | --- | --- | --- | --- |
-| none at freeze | n/a | strict expected paths above | classify before changing contract | required for material expansion |
+| workspace links `delphi-ai`, `foundation_documentation`, `uninotas-foundation` | noise / governed support topology | links predate this feature and are versioned in their owning repositories | retain locally; exclude from MonitorNotes staging | already authorized during workspace setup |
 
 ## Complexity
 
@@ -173,6 +176,22 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 - **Applicability:** `not_needed`
 - **Rationale:** adds one bounded mutation through the existing fiscal adapter/service/controller architecture; it does not establish a new shared architecture.
 
+## Architecture Review Gates
+
+- **Architecture decision review:** `not_needed`
+- **Decision review lifecycle:** `n/a`
+- **Decision review kind:** `n/a`
+- **Decision review package:** `n/a`
+- **Decision review status:** `n/a`
+- **Decision review evidence / resolution:** existing fiscal port/adapter/service/controller boundary remains unchanged.
+- **Architecture adherence review:** `not_needed`
+- **Adherence review lifecycle:** `n/a`
+- **Adherence review kind:** `n/a`
+- **Adherence review package:** `n/a`
+- **Adherence review status:** `n/a`
+- **Adherence review evidence / resolution:** implementation uses the existing architecture; delivery adherence is covered by final review.
+- **No-go handling:** when a new architectural boundary becomes necessary, return to planning and renewed approval.
+
 ## External Dependency Readiness
 
 | Dependency | Required contract | Evidence | Readiness | Failure handling |
@@ -182,11 +201,13 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 
 ## Assumptions Preview
 
-- The provider operation is synchronous at HTTP level, but `cancelada=false` may carry a manual municipal procedure.
-- `404` cannot distinguish missing, non-authorized or already canceled; public messaging must avoid asserting which one occurred.
-- A network timeout after request transmission has unknown outcome; UI must direct the user to refresh rather than retry automatically.
-- Current deployment uses one API replica; frontend and backend guards prevent duplicate local submission but do not claim distributed exactly-once semantics.
-- The existing cache row may be absent; provider success remains success and detail reload is authoritative.
+| Assumption ID | Assumption | Evidence | If False | Confidence | Handling |
+| --- | --- | --- | --- | --- | --- |
+| `A-CAN-01` | `cancelada=false` may carry a manual municipal procedure. | `artifacts/feature-briefs/uninotas-fiscal-note-cancellation.md` records the official operation description that some NFS-e municipalities require manual cancellation. | UI guidance copy and false-result path would simplify. | High | Keep as Assumption |
+| `A-CAN-02` | Provider `404` cannot distinguish missing, non-authorized or already canceled. | `artifacts/feature-briefs/uninotas-fiscal-note-cancellation.md` records the official response description combining all three cases. | Public error mapping could become more specific. | High | Keep as Assumption |
+| `A-CAN-03` | Timeout after dispatch has unknown mutation outcome. | `backend/src/fiscal-notes/smart-notas.adapter.ts` owns the abortable external fetch and `backend/src/fiscal-notes/smart-notas.port.ts` exposes no provider idempotency key or result token. | Automatic retry could be considered only under a new provider guarantee. | High | Keep as Assumption |
+| `A-CAN-04` | Current runtime uses one API replica. | `modules/fiscal-notes-and-documents.md` limits coordination claims to the process and `C:/Unifast/MonitorNotas/MonitorNotes/railway.json` declares no replica topology. | Distributed lease/idempotency design becomes approval-material. | Medium | Keep as Assumption |
+| `A-CAN-05` | A matching cache row may be absent. | `backend/src/fiscal-notes/fiscal-note-cache.service.ts` treats the read model as derived and `todos/active/features/TODO-uninotas-fiscal-note-read-model.md` preserves provider-backed detail during partial bootstrap/resume. | Cache update can be mandatory but provider success semantics stay unchanged. | High | Keep as Assumption |
 
 ## Execution Plan
 
@@ -249,10 +270,39 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 
 ## Plan Review Gate
 
-- **Review state:** prepared-pre-freeze
+- **Review state:** completed against frozen baseline
 - **Primary risks:** irreversible side effect, unknown timeout outcome, duplicate submission, role bypass, cache divergence and untrusted provider message.
 - **Preferred design:** direct mutation through signed context-bound ID, one attempt, strict response, explicit confirmation, best-effort projection update and provider detail refetch.
 - **Rejected design:** optimistic `Cancelada` before provider response; automatic retry; raw provider ID from browser; allowing `LEITOR`; hiding `cancelada=false` guidance.
+
+### Review Sections
+
+- [x] Architecture — existing port/adapter/service/controller ownership is preserved.
+- [x] Code Quality — one mutation method and one public DTO; no alternate direct fetch path.
+- [x] Tests — fail-first adapter, authorization, cache, BCI, FRC and browser lanes are planned.
+- [x] Performance — one direct upstream call; no list scan or historical traversal.
+- [x] Security — editor-only endpoint, signed context identity, no client credentials/raw ID.
+- [x] Elegance — documents remain in the overflow menu; cancellation is a first-class destructive action.
+- [x] Structural Soundness — provider success is never reclassified by a downstream cache failure.
+
+### Issue Cards
+
+- **Issue ID:** `PR-CAN-01`
+  - **Severity:** medium
+  - **Evidence:** provider publishes no idempotency key and existing adapter can time out after dispatch.
+  - **Why it matters now:** retrying can repeat an irreversible operation while reporting failure can also be false.
+  - **Option A (Recommended):** one attempt, no automatic retry, neutral uncertain-result feedback and authoritative detail reload.
+  - **Option B:** retry automatically once after timeout; rejected because outcome is unknown.
+  - **Option C:** report failure without reload; rejected because it can lie about provider state.
+  - **Recommendation:** Option A; prove with BCI/FRC and integration tests.
+- **Issue ID:** `PR-CAN-02`
+  - **Severity:** medium
+  - **Evidence:** provider mutation and PostgreSQL cache update cannot share a transaction.
+  - **Why it matters now:** cache failure after provider success cannot roll back the cancellation.
+  - **Option A (Recommended):** return provider success, attempt context-scoped cache update, reload provider detail and let rolling sync repair residual drift.
+  - **Option B:** return server error when cache update fails; rejected because it encourages unsafe retry.
+  - **Option C:** ignore local projection entirely; rejected because list may remain visibly stale for 15 minutes.
+  - **Recommendation:** Option A; log only aggregate reconciliation outcome.
 
 ### Failure Modes & Edge Cases
 
@@ -288,30 +338,131 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 
 ## Audit Trigger Matrix
 
-| Trigger | Result | Rationale | Required Lane |
-| --- | --- | --- | --- |
-| external irreversible mutation | yes | cancellation cannot be rolled back locally | security + BCI |
-| frontend async user flow | yes | duplicate/late result and navigation races | FRC |
-| shared/public API contract | yes | new authenticated mutation endpoint | test-quality + final review |
-| architecture correction | no | existing boundaries are reused | n/a |
-| cutover/legacy retirement | no | additive endpoint only | n/a |
+- **Latest audit derivation:** `audit_escalation_guard.py` returned `go` on 2026-09-29 with fingerprint `584a99faf1f8`.
+- **Derived delivery floor:** critique `required`; test-quality audit `required`; final review `required`; dedicated triple review `required`; security review `required`; verification-debt audit `required`; performance/concurrency validation `recommended` with BCI/FRC mandatory from the risk matrix.
+
+| Trigger | Value | Notes |
+| --- | --- | --- |
+| `complexity` | `medium` | Cross-stack external mutation with explicit failure semantics. |
+| `blast_radius` | `cross-stack` | NestJS producer, React consumer and local read model. |
+| `behavioral_change_or_bugfix` | `yes` | Adds a user-visible fiscal mutation. |
+| `changes_public_contract` | `yes` | Adds an authenticated POST endpoint and response DTO. |
+| `touches_auth_or_tenant` | `yes` | Changes role authorization and context-bound provider credentials. |
+| `touches_runtime_or_infra` | `no` | No queue, worker, migration or deploy change. |
+| `touches_tests` | `yes` | New contract, integration, race and browser tests. |
+| `critical_user_journey` | `yes` | Fiscal cancellation is business-critical and irreversible. |
+| `release_or_promotion_critical` | `yes` | Incorrect behavior blocks safe release of the feature. |
+| `high_severity_plan_review_issue` | `no` | Both issue cards are medium and have selected mitigations. |
+| `explicit_three_lane_request` | `no` | User did not request the dedicated three-lane protocol. |
+
+## Independent No-Context Critique Gate
+
+- **Critique decision:** `required`
+- **Why this decision:** medium, cross-stack, authenticated, irreversible fiscal mutation with a new public endpoint.
+- **Impact signals in scope:** `cross-module blast radius|public API|auth|critical user journey`
+- **Package mode:** `bounded-file-set`
+- **Package minimum contents:** frozen TODO, feature brief, fiscal module contract and directly touched backend/frontend anchors.
+- **Critique isolation mode:** `fresh internal no-context reviewer`
+- **Internal reviewer mandate:** required; reviewer must differ from the implementing agent and return findings before implementation advice.
+- **Canonical multi-lane audit protocol:** `n/a` for planning critique; dedicated triple review remains a delivery gate.
+- **Audit session / round evidence:** `n/a`
+- **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
+- **Critique status:** `not_run`
+- **Findings summary:** pending fresh no-context review against the pushed baseline.
+- **Resolution ledger:** findings, if any, will be classified below as `Integrated|Challenged|Deferred`.
+
+| Finding ID | Resolution | Usefulness | Formalizable | Candidate Rule Level | Candidate Rule ID | Rationale / Evidence |
+| --- | --- | --- | --- | --- | --- | --- |
+
+- **Evidence / reference:** pending reviewer output.
+- **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Baseline Freeze
 
-- **Status:** pending-freeze
-- **Authoritative repository:** `C:/Unifast/uninotas-foundation`
-- **Planned branch:** `feature/uninotas-fiscal-note-cancellation`
-- **Baseline:** pending commit/push of this brief and TODO.
+- **Gate decision:** `required`
+- **Why this decision:** medium cross-stack mutation requires a stable review packet before planning guards.
+- **Trigger stage:** `before the first planning-side review or guard run`
+- **Baseline branch:** `feature/uninotas-fiscal-note-cancellation`
+- **Baseline commit:** `c07622d05c55fd5cde717656ba37cc20d6a23725`
+- **Baseline push reference:** `origin/feature/uninotas-fiscal-note-cancellation`
+- **Gate status:** `no_material_findings`
+- **Findings summary:** feature brief and tactical TODO were committed and pushed before authoritative guard interpretation.
+- **Evidence / reference:** `git_write_authority_guard.py` returned `Overall outcome: go`; remote branch creation succeeded.
+- **Waiver authority / reference:** `n/a`
+- **Scope-neutral evidence update:** this freeze record and guard outcomes may be committed after the baseline without changing the frozen feature scope.
 
 ## Gate: Assumption Code Coherence
 
-- **Status:** pending-freeze
-- **Evidence:** run after baseline publication and planning review.
+- **Gate decision:** `required`
+- **Why this decision:** provider semantics, cache absence and single-replica coordination are live assumptions that influence failure handling.
+- **Trigger stage:** `after critique convergence and before APROVADO`
+- **Guard scope:** `A-CAN-01,A-CAN-02,A-CAN-03,A-CAN-04,A-CAN-05`
+- **Guard command:** `python delphi-ai/tools/assumption_code_coherence_guard.py --todo <todo-path>`
+- **Gate status:** `not_run`
+- **Findings summary:** pending guard execution after audit-floor derivation.
+- **Evidence / reference:** pending
+- **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
 
-- **Status:** pending-freeze
-- **Evidence:** run after review convergence.
+- **Gate decision:** `required`
+- **Why this decision:** approval must use the same mutation, permission, retry and cache semantics reviewed at freeze.
+- **Trigger stage:** `after the planning-side review/guard cycle converges and before APROVADO`
+- **Baseline source:** `Review Baseline Freeze -> Baseline commit`
+- **Material sections compared:** `Context|Contract Boundary|Scope|Out of Scope|Definition of Done|Validation Steps|Canonical Module Anchors|Decisions|Decision Baseline|Architecture Change Governance|Assumptions Preview|Execution Plan|Flow Evidence Planning Matrix|Local CI-Equivalent Suite Matrix|Runtime / Rollout Notes|Security Risk Assessment|Performance & Concurrency Risk Assessment`
+- **Guard command:** `python delphi-ai/tools/review_scope_drift_guard.py --todo <todo-path>`
+- **No-go handling rule:** return to review, revalidate material scope with the user and refresh the baseline when necessary.
+- **Gate status:** `not_run`
+- **Findings summary:** pending review convergence.
+- **Evidence / reference:** pending
+- **Waiver authority / reference:** `n/a`
+
+## Delivery Review Gates
+
+### Verification Debt Assessment
+
+- **Audit decision:** `required before Completed`
+- **Audit status:** `not_run`
+- **Why this decision:** medium behavior change with live external-state uncertainty must account for any unexecuted validation.
+- **Evidence / reference:** planned `verification-debt-audit` after implementation and primary validation.
+- **Accepted residual debt:** none approved.
+
+### Independent Test Quality Audit Gate
+
+- **Audit decision:** `required`
+- **Why this decision:** behavior-defining API/UI change and critical fiscal journey require independent validation of test efficacy.
+- **Package mode:** `bounded-file-set`
+- **Canonical method:** `wf-docker-independent-test-quality-audit-method`
+- **Audit isolation mode:** `fresh internal no-context reviewer`
+- **Audit status:** `not_run`
+- **Audit focus:** product/test alignment, fail-first evidence, bypasses, assertion efficacy and failure-mode coverage.
+- **Evidence / reference:** required after implementation and primary validation.
+
+### Dedicated Triple Review Audit Gate
+
+- **Audit decision:** `required`
+- **Why this decision:** audit escalation requires the delivery-side Performance + Test Quality lanes; cutover-integrity remains not applicable unless implementation introduces a compatibility bridge.
+- **Canonical protocol:** `audit-protocol-triple-review`
+- **Audit status:** `not_run`
+- **Evidence / reference:** required after implementation and before final review.
+
+### Security Adversarial Review Gate
+
+- **Review decision:** `required`
+- **Why this decision:** tenant-context credentials and an irreversible role-protected fiscal mutation are in scope.
+- **Review status:** `not_run`
+- **Review focus:** authorization bypass, signed-ID/context isolation, external message trust, duplicate submission and sensitive logging.
+- **Evidence / reference:** required after implementation and primary validation.
+
+### Independent No-Context Final Review Gate
+
+- **Final review decision:** `required`
+- **Why this decision:** medium cross-stack public API/auth change with irreversible external side effect.
+- **Package mode:** `bounded-file-set`
+- **Review isolation mode:** `fresh internal no-context reviewer`
+- **Final review status:** `not_run`
+- **Review focus:** approval adherence, regressions, evidence strength, security/performance residuals, elegance and structural soundness.
+- **Evidence / reference:** required after all delivery audits and before `Completed`.
 
 ## Approval
 
@@ -347,12 +498,11 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 
 ## Blockers (Current)
 
-- `PENDING_REVIEW_BASELINE`: feature brief and TODO must be committed and pushed before authoritative planning guards.
 - `PENDING_APPROVAL`: implementation requires explicit `APROVADO` after preflight-go.
 
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
 - **Disposition reason:** planning contract awaiting freeze/review/approval.
-- **Post-commit/push status:** `pending`
-- **Next path/status action:** publish review baseline and complete approval gates.
+- **Post-commit/push status:** `complete`
+- **Next path/status action:** complete planning guards and request explicit approval.
