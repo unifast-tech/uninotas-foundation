@@ -22,7 +22,7 @@
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** executar assumption-code coherence, scope-drift e authority preflight sobre a baseline convergida; então apresentar as mudanças materiais e solicitar novo `APROVADO`.
+- **Next exact step:** apresentar as mudanças materiais convergidas ao usuário e solicitar novo `APROVADO`; somente depois iniciar RED/implementação na branch `release/uninotas`.
 
 ## Active Work State
 
@@ -269,19 +269,24 @@ The backend remains authoritative: a stale client that submits export during par
 ## Agent Routing Preflight
 
 - **Client surface:** `codex`
-- **Current governed action:** `todo-approval`
-- **Selected role:** `primary-chat`
-- **Selected model:** `gpt-5.6-terra`
-- **Selected effort:** `max`
+- **Current governed action:** `implementation`
+- **Selected role:** `routine-executor`
+- **Selected model:** `gpt-5.6-luna`
+- **Selected effort:** `medium`
 - **Proof mode:** `declared`
 - **Exception reason:** `n/a`
+- **Subagent / delegation authorization:** `not-requested`
 - **Execution topology:** `primary-checkout-single-writer`
-- **Worktree authorization:** not requested; no worktree or auxiliary checkout may be created.
+- **Worktree / auxiliary-checkout authorization:** `not-authorized`
+- **Worktree authorization:** `not-authorized`
+- **Worktree authorization evidence:** `n/a`
+- **Writer scheduling policy:** `single-writer-serialized`
 - **Profile:** `Operational / Coder`
 - **Scope:** `nestjs, react, vite, postgresql, prisma`
 - **Package-first result:** Delphi package query for `fiscal cache synchronization read model` completed with zero matches; the existing host-owned fiscal module remains the selected boundary and no dependency is added. Node capability audits for NestJS and Prisma returned `ready`.
-- **Guard outcome:** `pending`
-- **Guard evidence:** rerun required after the corrective baseline is committed/pushed and before approval review.
+- **Guard outcome:** `go`
+- **Waiver / exception reference:** `n/a`
+- **Guard evidence:** routing guard returned `Overall outcome: go`; `todo_authority_guard.py ... --pre-approval` returned `Overall outcome: preflight-go` with zero violations.
 
 ## Historical Execution Plan — Delivered Baseline
 
@@ -350,7 +355,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 
 ## Architecture Change Governance
 
-- **Applicability:** `required`.
+- **Applicability:** `required`
 - **Why this applies:** a baseline entregue criou dependência request→bootstrap, um checkpoint global incompatível com totais móveis e um gate global de exportação; o TODO também precisa superseder decisões canônicas de exportação ainda orientadas ao provedor.
 - **Deviation / debt being retired:** bootstrap histórico móvel terminando no dia atual, rolling condicionado ao bootstrap, listagem aguardando sync, exportação bloqueada por estado global e erro de cobertura disfarçado como indisponibilidade externa.
 - **Target steady-state after closeout:** PostgreSQL é a projeção derivada usada imediatamente por listagem e por exportações de intervalos cobertos; Smart Notas alimenta janelas históricas fechadas e rolling recente em background e continua autoridade de detalhe/documentos.
@@ -764,11 +769,11 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Why this decision:** big architecture correction needs a committed/pushed immutable TODO packet before independent review.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `d10c04fb2a9d4aa8339fb08f9b537eb4cf7f4f36`
-- **Baseline push reference:** `origin/main@d10c04fb2a9d4aa8339fb08f9b537eb4cf7f4f36`
+- **Baseline commit:** `a1c42017e34f5a47e86e064ea8be900f35a873c9`
+- **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** the snapshot-visible retained-horizon resolution was frozen and pushed as one TODO-only commit; no product/module/runtime file was changed. R4 reviewed `c5220a77c5a54c7d3142016799d32de6952b0926`; R5 reviewed the `d10c04f` focused baseline.
-- **Evidence / reference:** `https://github.com/unifast-tech/uninotas-foundation/commit/d10c04fb2a9d4aa8339fb08f9b537eb4cf7f4f36`; R4 package `artifacts/tmp/fiscal-read-model-critique-r4-package.md`.
+- **Findings summary:** the snapshot-visible retained-horizon resolution and R5 no-anchor test refinement were frozen and pushed as TODO-only commits; no product/module/runtime file was changed. R4 reviewed `c5220a7`; R5 reviewed `d10c04f` and its sole finding is integrated in `a1c4201`.
+- **Evidence / reference:** `https://github.com/unifast-tech/uninotas-foundation/commit/a1c42017e34f5a47e86e064ea8be900f35a873c9`; R5 package `artifacts/tmp/fiscal-read-model-critique-r5-package.md`.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
@@ -779,9 +784,9 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Baseline source:** `Review Baseline Freeze -> Baseline commit`
 - **Material sections compared:** `Context|Contract Boundary|Scope|Out of Scope|Definition of Done|Validation Steps|Execution Lane Tracking|Canonical Module Anchors|Decisions|Decision Baseline|Architecture Change Governance|Questions To Close|Assumptions Preview|Execution Plan|Flow Evidence Planning Matrix|Local CI-Equivalent Suite Matrix|Runtime / Rollout Notes|Security Risk Assessment|Performance & Concurrency Risk Assessment`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-fiscal-note-read-model.md`
-- **Gate status:** `not_run`
-- **Findings summary:** pending frozen baseline and review convergence.
-- **Evidence / reference:** `pending`
+- **Gate status:** `no_material_findings`
+- **Findings summary:** zero material-section drift relative to `a1c42017e34f5a47e86e064ea8be900f35a873c9`; the post-review working diff contains baseline/gate metadata only.
+- **Evidence / reference:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-fiscal-note-read-model.md` returned `Overall outcome: go`, `Changed material sections: 0`.
 - **Waiver authority / reference:** `n/a`
 
 ## Independent No-Context Critique Gate
