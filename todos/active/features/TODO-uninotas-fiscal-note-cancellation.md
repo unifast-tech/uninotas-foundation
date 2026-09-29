@@ -383,11 +383,11 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 - **Why this decision:** medium cross-stack mutation requires a stable review packet before planning guards.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `feature/uninotas-fiscal-note-cancellation`
-- **Baseline commit:** `c07622d05c55fd5cde717656ba37cc20d6a23725`
+- **Baseline commit:** `b20cd3124bbc684ab19c4872666fb7144407700c`
 - **Baseline push reference:** `origin/feature/uninotas-fiscal-note-cancellation`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** feature brief and tactical TODO were committed and pushed before authoritative guard interpretation.
-- **Evidence / reference:** `git_write_authority_guard.py` returned `Overall outcome: go`; remote branch creation succeeded.
+- **Findings summary:** refined feature brief/TODO decisions, assumptions, execution plan and review-gate floor were committed and pushed before the independent critique.
+- **Evidence / reference:** `b20cd3124bbc684ab19c4872666fb7144407700c` pushed to `origin/feature/uninotas-fiscal-note-cancellation`.
 - **Waiver authority / reference:** `n/a`
 - **Scope-neutral evidence update:** this freeze record and guard outcomes may be committed after the baseline without changing the frozen feature scope.
 
