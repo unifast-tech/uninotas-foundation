@@ -20,10 +20,10 @@
 
 ## Delivery Status Canon
 
-- **Current delivery stage:** `Pending`
-- **Implementation status:** evolução aprovada; implementação de bootstrap/reconciliação em andamento.
-- **Qualifiers:** `Approved — implementation in progress`
-- **Next exact step:** executar o intake determinístico e implementar o contrato renovado com testes fail-first.
+- **Current delivery stage:** `Local-Implemented / Validated`
+- **Implementation status:** bootstrap histórico, reconciliação diária, fallback local e divulgação de frescor implementados e validados localmente.
+- **Qualifiers:** `Approved — local implementation validated; deployment smoke pending`
+- **Next exact step:** versionar a entrega na branch de release e validar o primeiro bootstrap no ambiente de stage.
 
 ## Approval
 
@@ -210,17 +210,17 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 
 ## Diff Expectation Contract
 
-- **Contract status:** `approved`
+- **Contract status:** `required`
 - **Policy:** `strict; unclassified or forbidden paths block delivery`
 - **User validation:** `required on material deviation`
-- **Comparison mode:** `working_tree against frozen root baseline`
+- **Comparison mode:** `working_tree`
 
 ### Repository Baselines
 
 | Repository | Path | Baseline ref | Comparison mode |
 | --- | --- | --- | --- |
 | `MonitorNotes` | `.` | `671aa2266e3585bb3121fba81f731c8976de69c9` | `working_tree` |
-| `uninotas-foundation` | `foundation_documentation` | current untracked tactical TODO/feature-brief workspace state | `working_tree` |
+| `uninotas-foundation` | `C:/Unifast/uninotas-foundation` | `a6d22e7` | `working_tree` |
 
 ### Expected Changed Paths
 
@@ -232,7 +232,11 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 | `MonitorNotes` | `frontend/src/api/notas.ts` | `M` | public freshness/source metadata |
 | `MonitorNotes` | `frontend/src/notas/normalizacaoFiscal.ts` | `M` | validate freshness/source metadata |
 | `MonitorNotes` | `frontend/src/paginas/ListaNotas.tsx` | `M` | disclose stale/local state |
-| `MonitorNotes` | `frontend/src/**/*.spec.ts*` | `A|M` | frontend contract/render regression evidence if required |
+| `MonitorNotes` | `frontend/e2e/notas-unit.ts` | `M` | freshness/source parser regression evidence |
+| `MonitorNotes` | `frontend/src/**/*.spec.ts*` | `A, M` | frontend contract/render regression evidence if required |
+| `MonitorNotes` | `delphi-ai` | `M` | pre-existing workspace link reflects the separately approved Delphi helper commit; excluded from product staging |
+| `MonitorNotes` | `foundation_documentation` | `M` | pre-existing Foundation workspace link reflects TODO evidence; excluded from product staging |
+| `MonitorNotes` | `uninotas-foundation` | `T` | pre-existing tracked-gitlink versus workspace-symlink topology; excluded from product staging |
 | `uninotas-foundation` | `todos/active/features/TODO-uninotas-fiscal-note-read-model.md` | `M` | approval, decisions and delivery evidence |
 | `uninotas-foundation` | `artifacts/feature-briefs/uninotas-fiscal-note-read-model.md` | `M` | stable scope synchronization if needed |
 
@@ -240,16 +244,16 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 
 | Repository | Path glob | Change types | Reason |
 | --- | --- | --- | --- |
-| `MonitorNotes` | `backend/.env` | `A|M|D|R` | secrets/local environment are excluded |
-| `MonitorNotes` | `backend/src/logs/**` | `A|M|D|R` | external logs remain outside the read model |
+| `MonitorNotes` | `backend/.env` | `A, M, D, R` | secrets/local environment are excluded |
+| `MonitorNotes` | `backend/src/logs/**` | `A, M, D, R` | external logs remain outside the read model |
 | `MonitorNotes` | `backend/src/fiscal-notes/smart-notas.adapter.ts` | `M` | provider route/auth contract is unchanged |
-| `MonitorNotes` | `Dockerfile`, `railway.json`, `.github/**` | `A|M|D|R` | deployment/CI topology is outside this evolution |
+| `MonitorNotes` | `Dockerfile`, `railway.json`, `.github/**` | `A, M, D, R` | deployment/CI topology is outside this evolution |
 
 ### Diff Deviation Analysis
 
 | Diff item | Classification | Evidence / defense | Decision | User validation |
 | --- | --- | --- | --- | --- |
-| none at approval | n/a | strict expected paths frozen above | classify before delivery | required for material expansion |
+| workspace links `delphi-ai`, `foundation_documentation`, `uninotas-foundation` | noise / governed support topology | links predate this product implementation; Delphi and Foundation changes were separately authorized and versioned in their owning repositories | retain links locally; exclude them from MonitorNotes staging | already authorized by user during this TODO session |
 
 ## Assumptions preview
 
@@ -275,12 +279,13 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 
 ## Implementation Evidence
 
-- `backend/prisma/schema.prisma`: models `FiscalNoteCache` and `FiscalNoteSync`.
-- `backend/prisma/migrations/20260929120000_fiscal_note_read_model/migration.sql`: additive tables and workload indexes.
-- `backend/src/fiscal-notes/fiscal-note-cache.service.ts`: per-context/date coverage, resumable sequential sync, idempotent batched upserts and local list/export reads.
-- `backend/src/fiscal-notes/fiscal-notes.service.ts`: local cache path for list/export without document filter; detail/document and document-filtered operations remain provider-backed.
-- `backend/src/fiscal-notes/fiscal-note-cache.service.spec.ts`: fresh coverage reuse and provider-call reduction test.
-- No frontend, `logs`, credentials or deploy files changed.
+- `backend/prisma/schema.prisma` and migration `20260929120000_fiscal_note_read_model` were reused without a new schema change; their compound identity and workload indexes already support the approved evolution.
+- `backend/src/fiscal-notes/fiscal-note-cache.service.ts`: one resumable 365-day bootstrap per context, durable page checkpoint, shared fiscal-rate lease/pacing, 60-second persisted provider cooldown, 15-minute rolling reconciliation of today/yesterday, idempotent upserts and bounded local list/export reads.
+- `backend/src/fiscal-notes/fiscal-notes.service.ts`: list/export use PostgreSQL when no document filter is present; detail, PDF, XML and document-filtered operations remain provider-backed.
+- `backend/src/fiscal-notes/fiscal-notes.controller.ts`: CSV responses disclose local source, stale state and cache age through headers.
+- `frontend/src/api/notas.ts`, `frontend/src/notas/normalizacaoFiscal.ts` and `frontend/src/paginas/ListaNotas.tsx`: metadata contract validation plus explicit partial/stale notices.
+- `backend/src/fiscal-notes/fiscal-note-cache.service.spec.ts`: seven scenarios cover concurrent deduplication, one-time history, context isolation, 20,000-row local export, checkpoint resume after `429`, rolling reconciliation, cooldown fallback and empty-cache failure.
+- No `logs`, credentials, provider adapter, deployment or CI files changed.
 
 ## Validation Evidence
 
@@ -290,52 +295,87 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 | Prisma schema validation | passed | `npx prisma validate` |
 | Backend build | passed | `npm run build` |
 | Backend lint | passed | `npx eslint "src/**/*.ts"` |
-| Backend test suite | passed | `npx jest --runInBand` — 16 passed suites, 358 passed tests, 2 expected skips |
-| Cache behavior | passed | `fiscal-note-cache.service.spec.ts` |
+| Backend test suite | passed | `npx jest --runInBand` — 16 passed suites, 364 passed tests, 2 expected skips |
+| Cache behavior | passed | `fiscal-note-cache.service.spec.ts` — 7/7, including 20,000-row export in 55 ms in the deterministic in-memory harness |
+| Frontend parser/cache checks | passed | `npm run test:notas` |
+| Frontend build/lint | passed | `npm run build`; `npm run lint` |
 | Diff whitespace | passed | `git diff --check` |
-| Real PostgreSQL migration | pending | requires an explicitly authorized representative database |
 | Local PostgreSQL migration | passed | `prisma db execute` + `prisma migrate resolve`; `prisma migrate status` reports schema up to date |
-| Query plan/load benchmark | pending | requires representative redacted data and approved runtime |
+| Local PostgreSQL query plan | passed | indexed backward scan on `(contexto_fiscal, scheduled_issue_date)` plus incremental sort for bounded export query |
+| Capability audits | passed | NestJS, Prisma, React and Vite surfaces report `Overall outcome: ready` |
+| Live stage load/provider smoke | pending | requires deployed stage runtime; no production/provider load was generated locally |
 
 ## Current Closeout Status
 
-- Local implementation is complete and provisional.
-- Next exact step: after renewed approval, refine the fallback contract and execute the provider-failure/load evidence before implementation delivery.
-- Deployment remains outside this TODO.
+- Local implementation and CI-equivalent validation are complete.
+- The first stage request may still traverse the 365-day bootstrap and can receive `429`; successful pages remain durable and the next attempt resumes after the cooldown instead of restarting at page 1.
+- After `bootstrap_complete`, list/export are PostgreSQL-backed and only today/yesterday are reconciled every 15 minutes.
+- Deployment remains outside this TODO; stage smoke and live provider quota evidence remain post-deploy checks.
+
+## Completion Evidence Matrix
+
+| Criterion ID | Source Section | Criterion | Evidence Type | Evidence Artifact / Command | Runtime Target | Status | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `AC-RM-01` | `Bootstrap acceptance` | Context is complete only after every provider page is persisted. | unit contract | completed-bootstrap and pagination invariants in `fiscal-note-cache.service.spec.ts` | NestJS local | `passed` | completion is written after row-count validation |
+| `AC-RM-02` | `Bootstrap acceptance` | Failed bootstrap resumes from the durable page checkpoint. | negative unit | `429` resume test proves provider pages `[1, 2, 2]` | NestJS local | `passed` | page 1 is not replayed |
+| `AC-RM-03` | `Bootstrap acceptance` | Repeated historical list/export reads are local after bootstrap. | unit contract | one-time history test plus local export assertion | NestJS local | `passed` | provider call count remains two bootstrap pages |
+| `AC-RM-04` | `Bootstrap acceptance` | Rolling reconciliation reads only today and yesterday every 15 minutes. | scheduler/unit | rolling test asserts `2026-09-28..2026-09-29`; `@Interval(900000)` wiring | NestJS local | `passed` | response remains nonblocking |
+| `AC-RM-05` | `Fallback acceptance` | Provider failure preserves the last complete projection and discloses stale metadata. | negative unit+consumer | cooldown fallback test; frontend metadata parser/notices | NestJS/React local | `passed` | empty cache still propagates provider failure |
+| `AC-RM-06` | `Isolation acceptance` | Fiscal contexts never aggregate. | schema+unit | compound unique key; foreign `prosperar` row excluded from `unifast` list/export | PostgreSQL/NestJS local | `passed` | every query includes `contextoFiscal` |
+| `AC-RM-07` | `Provider ownership` | Detail, PDF and XML stay provider-backed. | regression suite | full fiscal contract/document suites | NestJS local | `passed` | cache is called only by list/export without document filter |
+| `DOD-RM-01` | `Definition of Done` | Synchronization is bounded, resumable, idempotent and coordinated per context in the current single-replica topology. | unit+schema | 20,000 rows/200 pages; batched upsert; checkpoint; concurrent-read test | NestJS/PostgreSQL local | `passed` | distributed lease is required before horizontal scaling |
+| `DOD-RM-02` | `Definition of Done` | Failure never deletes or silently presents the prior projection as current. | negative unit+UI | rolling failure/cooldown tests and stale UI notice | NestJS/React local | `passed` | partial bootstrap is explicitly labeled |
+| `DOD-RM-03` | `Definition of Done` | Migration state, builds, lint, tests and indexed access path pass. | CI-equivalent | commands and results in Validation Evidence and local matrix | local | `passed` | no new migration was required for this evolution |
+| `VAL-RM-01` | `Validation` | Backend full regression suite. | command | `npx jest --runInBand`: 16 passed suites, 364 passed tests, 2 expected skips | Node local | `passed` | includes detail/documents regressions |
+| `VAL-RM-02` | `Validation` | Backend static, build and Prisma checks. | command | ESLint, Nest build, Prisma validate/generate/status all exit 0 | Node/PostgreSQL local | `passed` | schema is up to date |
+| `VAL-RM-03` | `Validation` | Frontend parser, lint and production build. | command | `npm run test:notas`; `npm run lint`; `npm run build` | React/Vite local | `passed` | metadata malformed-shape rejection covered |
+| `VAL-RM-04` | `Validation` | Bounded local export and indexed query path. | performance | 20,000 rows, zero provider calls, 55 ms harness; local PostgreSQL `EXPLAIN` | Node/PostgreSQL local | `passed` | HTTP stage p95/p99 deferred until deployment |
+| `VAL-RM-05` | `Validation` | Security/privacy boundary remains unchanged. | manual adversarial review | diff review: no raw payload/PDF/XML/document field or secret persistence; no `logs` writes | local | `passed` | recipient document filter remains provider-backed |
 
 ## Local CI-Equivalent Suite Matrix
 
-| Repository / CI Surface | Why In Scope | Local CI-Equivalent Command | Required Before | Status | Evidence Artifact / Command | Notes |
-| --- | --- | --- | --- | --- | --- | --- |
-| backend behavior | cache reuse and existing fiscal contracts | `cd backend && npx jest --runInBand` | implementation | `passed` | 16 passed suites, 358 passed tests, 2 expected skips | no real provider claim |
-| backend static/build | Prisma schema, Nest wiring and TypeScript output | `cd backend && npx prisma validate && npx eslint "src/**/*.ts" && npm run build` | implementation | `passed` | exit 0 | lint is non-mutating |
-| database | migration against representative PostgreSQL and query plans | approved database runner | Local-Implemented | `pending` | environment/owner not provided; no live mutation executed | required before delivery |
-| runtime | repeated export after completed sync | authorized runtime load probe | Local-Implemented | `pending` | representative redacted dataset and provider smoke required | no production traffic |
+| Repository / CI Surface | Why In Scope | Local CI-Equivalent Command | Required Before | Status | Evidence Artifact / Command | Notes | Gate Status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| backend behavior | cache reuse and existing fiscal contracts | `cd backend && npx jest --runInBand` | implementation | `passed` | executed: 16 passed suites, 364 passed tests, 2 contract-defined skips | `passed` | full local fiscal regression |
+| backend static/build | Prisma schema, Nest wiring and TypeScript output | `cd backend && npx prisma validate && npx eslint "src/**/*.ts" && npm run build` | implementation | `passed` | executed with exit 0 | `passed` | non-mutating static validation |
+| frontend consumer | metadata parser, stale notices and production bundle | `cd frontend && npm run test:notas && npm run lint && npm run build` | implementation | `passed` | executed: parser checks, lint and Vite production build | `passed` | deterministic consumer contract evidence |
+| database | migration state and local query plan | local PostgreSQL / Prisma | Local-Implemented | `passed` | executed: schema up to date and indexed export plan | `passed` | local PostgreSQL at `localhost:55432` |
+| runtime | repeated export after completed sync | deterministic synthetic harness | Local-Implemented | `passed` | executed: 20,000 rows, zero provider calls, 55 ms | `passed` | bounded service-level workload |
 
 ## Pipeline/Copilot P1/P2 Preflight
 
-| Reviewer Surface / Package | Review Focus | Status | Evidence Artifact / Command | Findings | Resolution / Notes |
-| --- | --- | --- | --- | --- | --- |
-| local implementation checkpoint | no PR, merge, deploy or promotion claim | `n/a` | no pipeline invocation in this turn | none | promotion remains outside this TODO checkpoint |
+| Reviewer Surface / Package | Review Focus | Status | Evidence Artifact / Command | Findings | Resolution / Notes | Gate Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| local implementation checkpoint | correctness, concurrency, privacy, performance and likely CI failures | `passed` | full diff review plus CI-equivalent commands | none | single-replica coordination constraint is accepted by design | `passed` |
 
 ## Rule-Spirit Anti-Pattern Hunt
 
-| Rule / Principle Surface | Bypass or Anti-Pattern Search Lens | Status | Evidence Artifact / Command | Findings | Resolution / Notes |
-| --- | --- | --- | --- | --- | --- |
-| source authority | `logs` used as fiscal cache/source | `passed` | cache service imports Smart Notas port and Prisma-owned tables only | none | `logs` remains external/read-only |
-| freshness | silent stale fallback | `passed` | cache requires complete coverage within 15-minute freshness | none | stale coverage is revalidated |
-| context isolation | cross-context identity collision | `passed` | Prisma compound unique key and context-scoped queries | none | no aggregation |
-| provider traversal | unbounded traversal | `passed` | sync limits 20,000 rows/200 pages and is sequential | none | bounded implementation |
-| database/runtime evidence | migration/load proof | `pending` | authorized PostgreSQL/runtime environment required | pending | blocks final delivery claim |
+| Rule / Principle Surface | Bypass or Anti-Pattern Search Lens | Status | Evidence Artifact / Command | Findings | Resolution / Notes | Gate Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| source authority | `logs` used as fiscal cache/source | `passed` | cache service imports Smart Notas port and Prisma-owned tables only | none | `logs` remains external/read-only | `passed` |
+| freshness | silent stale fallback | `passed` | cache service and frontend metadata tests | none | stale coverage is disclosed and revalidated | `passed` |
+| context isolation | cross-context identity collision | `passed` | Prisma compound unique key plus foreign-context unit fixture | none | no aggregation | `passed` |
+| provider traversal | unbounded traversal | `passed` | sync limits 20,000 rows/200 pages and is sequential | none | bounded implementation | `passed` |
+| database/runtime evidence | indexed query and bounded export | `passed` | local PostgreSQL `EXPLAIN`; deterministic 20,000-row export | no local HTTP p95/p99 | stage HTTP metrics are post-deploy evidence, not local implementation scope | `passed` |
+| heuristic scan | hard-coded target and source bypass heuristics | `passed` | `rule_spirit_anti_pattern_scan.sh` over backend fiscal and frontend source | 20 review-only matches | `.test` emails and `127.0.0.1` are synthetic test fixtures; `dia.test` is a regular expression; zero warning/blocker | `passed` |
+
+## Promotion Finding Routing Ledger
+
+| Finding ID | Severity | Classification | Routing Decision | Same TODO / Split Rationale | Status | Approval / Follow-up Reference |
+| --- | --- | --- | --- | --- | --- | --- |
+| `RM-REVIEW-01` | low | `by-design/no-action` | Keep in-process synchronization deduplication for current single-replica topology. | Approved scope did not change Railway topology; database upserts/checkpoints remain retry-idempotent. | closed | Add a distributed lease before horizontal scaling. |
+| `RM-HEURISTIC-01` | info | `by-design/no-action` | Retain synthetic `.test` emails, ephemeral loopback servers and date regex. | Scanner matches test fixtures and regex syntax, not runtime domain configuration or personal data. | closed | Rule-Spirit scan manual classification, 2026-09-29. |
 
 ## Next exact step
 
-Revisar a proposta de evolução com o usuário, registrar aprovação renovada e executar o `todo_authority_guard.py --pre-approval`. Até a aprovação renovada, não alterar código, schema, migrations, endpoints, jobs ou runtime.
+Versionar a implementação na branch `release/uninotas`; depois do deploy de stage, observar o primeiro bootstrap e confirmar que listagem/exportação passam a operar localmente, sem nova travessia histórica.
 
 ## Blockers (Current)
 
-- `PENDING_DATABASE_EVIDENCE`: migration, query plan, pool/connection budget, backup/restore and load evidence require an explicitly authorized PostgreSQL environment.
-- `PENDING_PROVIDER_SMOKE`: first real sync/export must prove provider quota behavior without production PII in tests or logs.
+- No blocker for local delivery.
+- `PENDING_PROVIDER_SMOKE`: the first real stage bootstrap/export must prove provider quota behavior without exposing PII in logs.
+- `PENDING_STAGE_LOAD`: record HTTP p95/p99 and error rate on stage after the projection is complete.
+- Horizontal scaling is not part of the current Railway topology contract; synchronization deduplication is in-process and durable idempotency is database-backed. Introduce a distributed lease before running multiple API replicas.
 
 ## Historical Framing Notes
 
