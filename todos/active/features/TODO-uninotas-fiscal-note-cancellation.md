@@ -501,11 +501,11 @@ The `cancelled` transition and update of an existing cache row occur in one DB t
 - **Why this decision:** medium cross-stack mutation requires a stable review packet before planning guards.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `feature/uninotas-fiscal-note-cancellation`
-- **Baseline commit:** `80817136bddba8576ef791353e63a3a073bb2f2c`
+- **Baseline commit:** `712fb2d429de5c83e71684e44a17b0efaf5a7efc`
 - **Baseline push reference:** `origin/feature/uninotas-fiscal-note-cancellation`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** durable cross-replica election, fail-closed uncertain state, cache-absent tombstone, split quota accounting, complete consumers and canonical capability ownership were committed and pushed before final convergence reviews.
-- **Evidence / reference:** `80817136bddba8576ef791353e63a3a073bb2f2c` pushed to `origin/feature/uninotas-fiscal-note-cancellation`.
+- **Findings summary:** durable cross-replica election, fail-closed uncertain state, cache-absent tombstone, split quota accounting, complete consumers, canonical capability ownership and all required architecture/preflight fields were committed and pushed before the retried final reviews.
+- **Evidence / reference:** `712fb2d429de5c83e71684e44a17b0efaf5a7efc` pushed to `origin/feature/uninotas-fiscal-note-cancellation`.
 - **Waiver authority / reference:** `n/a`
 - **Scope-neutral evidence update:** this freeze record and guard outcomes may be committed after the baseline without changing the frozen feature scope.
 
