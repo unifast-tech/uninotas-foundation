@@ -30,7 +30,8 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 - Expor `POST /api/v1/notas/:noteId/cancelar` para `ADMIN|GESTOR|ANALISTA`.
 - Chamar `POST /notas/{idInterno}/cancelar` no SmartNotas sem corpo e sem retry automático.
 - Aceitar somente o envelope limitado `{cancelada:boolean,mensagem:string}` e projetar uma resposta pública pequena.
-- Atualizar o status local para `Cancelada` quando `cancelada=true`, sem transformar o PostgreSQL em autoridade fiscal.
+- Coordenar chamadas por `{contextoFiscal,providerIdInterno}` no backend, compartilhar a operação em voo e aplicar fence temporário quando o resultado externo for incerto.
+- Atualizar o status local para `Cancelada` quando `cancelada=true` e impedir atomicamente que uma página antiga do rolling sync rebaixe esse estado terminal.
 - Recarregar o detalhe após resultado conhecido ou incerto e invalidar o estado cliente relacionado.
 - Organizar o cabeçalho como `[dados flexíveis] [Cancelar nota] | [⋮]`, com os três pontos no extremo direito.
 
@@ -55,6 +56,7 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 - `SCOPE-CAN-05`: layout desktop/mobile com botão antes da divisória e menu no extremo direito.
 - `SCOPE-CAN-06`: testes de contrato, autorização, concorrência, corrida, falhas externas e regressão de detalhes/documentos.
 - `SCOPE-CAN-07`: documentação e evidência de entrega.
+- `SCOPE-CAN-08`: decisão canônica limitada `FISC-CAN-01`, que abre exceção ao guardrail de provider writes somente para este cancelamento aprovado.
 
 ## Out of Scope
 
@@ -64,29 +66,32 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 - Emissão, reprocessamento, edição, procedimento manual de prefeitura ou mudança de quota/credencial.
 - Persistência de mensagem bruta, payload externo, token ou documento adicional.
 - Deploy, promoção, alteração de Railway/CI ou escala horizontal.
+- Garantia distribuída entre réplicas; a coordenação aprovada é process-local enquanto a topologia permanecer em uma réplica.
 
 ## Definition of Done
 
 - [ ] `POST /api/v1/notas/:noteId/cancelar` usa o ID opaco assinado e rejeita `LEITOR`.
-- [ ] O adapter envia `POST` sem body para o path oficial, com contexto/headers internos corretos, sem redirect/retry.
-- [ ] Somente resposta `200` com envelope exato e limitado cruza o trust boundary; falhas têm códigos públicos estáveis.
-- [ ] Duplo clique, resposta tardia, navegação, logout e unmount não produzem segunda mutação nem efeito visual tardio.
-- [ ] Timeout/abort após envio é comunicado como resultado incerto e nunca dispara retry automático.
-- [ ] `cancelada=true` atualiza o cache local para `Cancelada` em best effort e o detalhe é recarregado pelo provider.
+- [ ] O adapter envia `POST` sem body para o path oficial, com contexto/headers internos corretos, sem redirect/retry e com timeout interno não cancelado por disconnect posterior ao despacho.
+- [ ] Somente resposta `200` com envelope exato, body de até 16 KiB e mensagem normalizada de 1..2048 code points cruza o trust boundary; falhas têm códigos públicos estáveis.
+- [ ] Duplo clique, duas abas/clientes, resposta tardia, navegação, logout e unmount produzem no máximo um POST simultâneo por nota e nenhum efeito visual tardio.
+- [ ] Timeout/reset/`5xx`/`2xx` inválido após envio é comunicado como resultado incerto, cria fence process-local de 60 segundos e nunca dispara retry automático.
+- [ ] `cancelada=true` atualiza o cache local para `Cancelada` em best effort; o rolling sync não pode rebaixar esse estado terminal e o detalhe é recarregado pelo provider.
 - [ ] `cancelada=false` preserva o status e mostra uma orientação textual limitada, inclusive procedimento manual.
 - [ ] O botão aparece somente para perfil editor e detalhe `Autorizada`; confirmação explícita precede a chamada.
 - [ ] O cabeçalho mantém `[dados] [Cancelar nota] | [⋮]`, com menu no extremo direito e comportamento móvel acessível.
 - [ ] Lista, exportação, detalhe, PDF e XML não sofrem regressão.
+- [ ] O endpoint usa `Cache-Control: private, no-store`, `Pragma: no-cache` e `X-Content-Type-Options: nosniff`.
+- [ ] Confirmação e feedback obedecem ao estado `idle -> confirming -> submitting -> known-success|known-false|uncertain|failed -> reloading`, com foco, Escape, retorno de foco e anúncio acessível.
 - [ ] Testes, lint, builds, guards e documentação passam sem segredo ou PII real nas evidências.
 
 ## Validation Steps
 
-1. Executar testes fail-first do adapter, service/controller, autorização e cache update.
+1. Executar testes fail-first do adapter, coordenador de cancelamento, service/controller, autorização e cache update monotônico.
 2. Executar testes frontend do parser, confirmação, single-flight e lifecycle abort/late-result.
 3. Executar suíte backend completa, Prisma validate, lint e build.
 4. Executar testes, lint e build frontend.
 5. Executar fluxo browser com APIs interceptadas para sucesso, `cancelada=false`, erro, timeout e mobile.
-6. Executar BCI para dupla submissão/resultado incerto e FRC para navegação/logout/unmount.
+6. Executar BCI com 5/10/20 chamadas concorrentes de clientes distintos, disconnect/timeout/reset e interleavings de sync; executar FRC para navegação/logout/unmount.
 7. Executar revisão de segurança, diff guard, authority guard e completion guard.
 
 ## Diff Expectation Contract
@@ -110,6 +115,7 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 | `MonitorNotes` | `backend/src/fiscal-notes/**` | `M, A` | mutation port, adapter, endpoint, service, cache reconciliation and tests |
 | `MonitorNotes` | `frontend/src/api/notas.ts` | `M` | cancel API contract |
 | `MonitorNotes` | `frontend/src/paginas/DetalheNota.tsx` | `M` | confirmation, lifecycle and result UI |
+| `MonitorNotes` | `frontend/src/auth/SessaoContexto.tsx` | `M` | semantic `podeCancelarNota` permission |
 | `MonitorNotes` | `frontend/src/componentes/**` | `M, A` | accessible confirmation/action component if extracted |
 | `MonitorNotes` | `frontend/src/estilos/layout.css` | `M` | action placement and responsive layout |
 | `MonitorNotes` | `frontend/e2e/**` | `M, A` | deterministic UI/browser evidence |
@@ -125,7 +131,7 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 | Repository | Path glob | Change types | Reason |
 | --- | --- | --- | --- |
 | `MonitorNotes` | `backend/.env` | `A, M, D, R` | credentials and local environment are excluded |
-| `MonitorNotes` | `backend/prisma/**` | `A, M, D, R` | existing cache schema is sufficient |
+| `MonitorNotes` | `backend/prisma/**` | `A, M, D, R` | existing composite key is sufficient; monotonic upsert requires no schema change |
 | `MonitorNotes` | `backend/src/logs/**` | `A, M, D, R` | external logs are outside this mutation |
 | `MonitorNotes` | `Dockerfile` | `A, M, D, R` | deployment topology is excluded |
 | `MonitorNotes` | `railway.json` | `A, M, D, R` | deployment topology is excluded |
@@ -165,74 +171,115 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 | `D-CAN-04` | Public success response is bounded `{cancelled,message}`; provider message is text-only, not logged or persisted. | Municipal manual instructions must remain visible without widening data retention. |
 | `D-CAN-05` | On `cancelled=true`, update cached status best-effort and refetch detail; cache failure cannot reverse or relabel provider success. | SmartNotas mutation is authoritative and irreversible. |
 | `D-CAN-06` | Header layout is `[detail] [cancel] | [documents menu]`; menu aligns to far right. | Matches requested hierarchy and keeps documents secondary. |
+| `D-CAN-07` | `FISC-CAN-01` supersedes the module's `provider writes` guardrail only for the approved single-note cancellation endpoint. | Keeps the canonical exception narrow and reviewable. |
+| `D-CAN-08` | A process-local coordinator shares one in-flight promise per `{context,providerId}`; every caller is independently authenticated/rate-admitted, and uncertain outcomes fence new writes for 60 seconds. | Covers tabs/clients without pretending provider or multi-replica exactly-once support. |
+| `D-CAN-09` | Once locally observed as `Cancelada`, the cache status is terminal; all page upserts preserve it atomically while other fields may refresh. | Prevents stale rolling pages from resurrecting an authorized action. |
+| `D-CAN-10` | Client disconnect may suppress the response/UI, but cannot abort an already dispatched provider mutation; the internal operation retains its own bounded timeout and reconciliation. | Avoids converting a browser lifecycle event into an unsafe repeatable unknown write. |
+| `D-CAN-11` | The frontend owns an explicit cancellation state machine and a semantic `podeCancelarNota` permission. | Prevents scattered flags, stale effects and accidental coupling to occurrence-treatment permission. |
 
 ## Decision Baseline (Frozen Before Implementation)
 
 - **State:** proposed, pending `APROVADO`.
-- Material changes to roles, retry/idempotency semantics, accepted statuses, public response or cache failure behavior require renewed approval.
+- Material changes to roles, retry/idempotency/fence semantics, accepted statuses, terminal-cache precedence, public response or cache failure behavior require renewed approval.
 
 ## Architecture Change Governance
 
-- **Applicability:** `not_needed`
-- **Rationale:** adds one bounded mutation through the existing fiscal adapter/service/controller architecture; it does not establish a new shared architecture.
+- **Applicability:** `required`
+- **Rationale:** the implementation preserves the existing port/adapter/service/controller shape, but `FISC-CAN-01` deliberately and narrowly supersedes the canonical `provider writes` exclusion for one irreversible operation.
+- **Decision:** `FISC-CAN-01` becomes `Current` only after explicit TODO approval; before product implementation, the fiscal module must publish the endpoint, roles, strict response/error contract, uncertain-result policy and monotonic cache rule.
+- **Supersession boundary:** no other SmartNotas write, bulk mutation, issue/reprocess path or client-supplied provider ID is authorized.
 
 ## Architecture Review Gates
 
-- **Architecture decision review:** `not_needed`
-- **Decision review lifecycle:** `n/a`
-- **Decision review kind:** `n/a`
-- **Decision review package:** `n/a`
-- **Decision review status:** `n/a`
-- **Decision review evidence / resolution:** existing fiscal port/adapter/service/controller boundary remains unchanged.
-- **Architecture adherence review:** `not_needed`
-- **Adherence review lifecycle:** `n/a`
-- **Adherence review kind:** `n/a`
-- **Adherence review package:** `n/a`
-- **Adherence review status:** `n/a`
-- **Adherence review evidence / resolution:** implementation uses the existing architecture; delivery adherence is covered by final review.
-- **No-go handling:** when a new architectural boundary becomes necessary, return to planning and renewed approval.
+- **Architecture decision review:** `required`
+- **Decision review lifecycle:** `after diagnosis is closed and before APROVADO`
+- **Decision review kind:** `architecture_opinion`
+- **Decision review package:** `bounded-file-set`
+- **Decision review status:** `not_run`
+- **Decision review evidence / resolution:** pending fresh no-context opinion on the narrow `FISC-CAN-01` supersession and its protection harness.
+- **Architecture adherence review:** `required`
+- **Adherence review lifecycle:** `after implementation and before Completed`
+- **Adherence review kind:** `architecture_adherence`
+- **Adherence review package:** `bounded-file-set`
+- **Adherence review status:** `not_run`
+- **Adherence review evidence / resolution:** pending delivery review proving the implementation stayed inside `FISC-CAN-01` and its protection harness.
+- **No-go handling:** an unresolved objection to the supersession boundary returns the TODO to planning; implementation cannot begin.
+
+### Architecture Protection Harness
+
+| Harness Type | Surface | Command / Rule / Artifact | Regression It Must Catch | Adoption Timing | Evidence Plan |
+| --- | --- | --- | --- | --- | --- |
+| contract test | cancellation endpoint | Nest application test through JWT + `RolesGuard` | `LEITOR` or unauthenticated access and controller metadata precedence failure | implement-in-this-todo | backend integration suite |
+| adapter contract test | SmartNotas POST | exact method/path/headers/no-body/envelope/size/error matrix | redirect, retry, oversized or malformed external response | implement-in-this-todo | adapter tests |
+| concurrency test | cancellation coordinator | 5/10/20 callers for one signed note | more than one simultaneous provider POST or premature fence release | implement-in-this-todo | BCI artifact |
+| data-integrity test | cache upsert | stale sync before/during/after direct cancellation update | downgrade from terminal `Cancelada` | implement-in-this-todo | cache integration test |
 
 ## External Dependency Readiness
 
 | Dependency | Required contract | Evidence | Readiness | Failure handling |
 | --- | --- | --- | --- | --- |
 | SmartNotas | `POST /notas/{idInterno}/cancelar`, no body, `200 {cancelada,mensagem}`, `401/403/404` | official OpenAPI inspected 2026-09-29 | ready for mocked implementation; live smoke deferred | mapped errors, no retry, detail refresh |
-| PostgreSQL read model | context + provider ID cache row may be updated | existing Prisma model and cache service | ready | best-effort update; rolling sync repairs |
+| PostgreSQL read model | context + provider ID cache row may be updated and `Cancelada` cannot regress | existing Prisma composite key and cache service | ready without migration | best-effort direct update; atomic rolling upsert preserves terminal cancellation |
+
+## Cancellation Public Contract
+
+- Request: `POST /api/v1/notas/:noteId/cancelar`, no query and no body; route identity is the signed opaque `noteId` only.
+- Provider response admission: HTTP `200`, body at most 16 KiB, exactly properties `cancelada:boolean` and `mensagem:string`; message is trimmed, normalized to LF, 1..2048 code points, and rejects NUL/unsupported control characters.
+- Public success: HTTP `200` exact `{cancelled:boolean,message:string}` with private/no-store headers. `cancelled=false` is a known business result, not a transport failure.
+- Every request is authenticated and actor-rate-admitted before joining/creating the process-local per-note operation.
+
+| Condition | HTTP | Public code / response | Retry policy | Reconciliation |
+| --- | --- | --- | --- | --- |
+| provider `200`, exact `cancelada=true` | `200` | `{cancelled:true,message}` | none | terminal cache update best-effort + detail refetch |
+| provider `200`, exact `cancelada=false` | `200` | `{cancelled:false,message}` | only a new explicit action if detail still authorizes it | no cache status update + detail refetch |
+| no JWT | `401` | existing auth envelope | none automatic | none |
+| `LEITOR` | `403` | existing role envelope | forbidden | zero service/adapter call |
+| invalid/tampered `noteId` | `400` | existing invalid-note-ID code | none automatic | none |
+| provider `401|403` | `502` | `SmartNotasCredencialRejeitada` | none automatic | operational correction |
+| provider `404` | `409` | `CancelamentoFiscalNaoDisponivel` | no automatic retry | detail refetch; may already be canceled |
+| provider `429` | `503` | `SmartNotasLimiteExterno` + bounded `Retry-After` when available | no automatic retry | retain current detail |
+| local concurrent call | shared result | same bounded result/error from the single in-flight operation | no second POST | per-caller UI ownership still applies |
+| active uncertain fence | `503` | `CancelamentoFiscalResultadoIncerto` + remaining bounded `Retry-After` | write forbidden during 60 s fence | read-only detail refetch allowed |
+| timeout/reset/disconnect from provider, provider `5xx`, redirect, malformed/oversized successful response after dispatch | `503` | `CancelamentoFiscalResultadoIncerto` | no automatic retry; 60 s fence | detail refetch without claiming failure or success |
+| local admission saturation before dispatch | `503` | `SmartNotasOcupado` | new explicit action later | known zero provider POST |
+
+The operation checks the caller abort signal before dispatch. After dispatch it uses an internal bounded signal and completes independently of client disconnect; only delivery of its result and UI effects remain caller-owned. After an uncertain fence expires, a new explicit confirmation is allowed only if a fresh provider detail still reports `Autorizada`; this is risk reduction, not an exactly-once claim.
 
 ## Assumptions Preview
 
 | Assumption ID | Assumption | Evidence | If False | Confidence | Handling |
 | --- | --- | --- | --- | --- | --- |
-| `A-CAN-01` | `cancelada=false` may carry a manual municipal procedure. | `artifacts/feature-briefs/uninotas-fiscal-note-cancellation.md` records the official operation description that some NFS-e municipalities require manual cancellation. | UI guidance copy and false-result path would simplify. | High | Keep as Assumption |
-| `A-CAN-02` | Provider `404` cannot distinguish missing, non-authorized or already canceled. | `artifacts/feature-briefs/uninotas-fiscal-note-cancellation.md` records the official response description combining all three cases. | Public error mapping could become more specific. | High | Keep as Assumption |
-| `A-CAN-03` | Timeout after dispatch has unknown mutation outcome. | `backend/src/fiscal-notes/smart-notas.adapter.ts` owns the abortable external fetch and `backend/src/fiscal-notes/smart-notas.port.ts` exposes no provider idempotency key or result token. | Automatic retry could be considered only under a new provider guarantee. | High | Keep as Assumption |
-| `A-CAN-04` | Current runtime uses one API replica. | `modules/fiscal-notes-and-documents.md` limits coordination claims to the process and `C:/Unifast/MonitorNotas/MonitorNotes/railway.json` declares no replica topology. | Distributed lease/idempotency design becomes approval-material. | Medium | Keep as Assumption |
-| `A-CAN-05` | A matching cache row may be absent. | `backend/src/fiscal-notes/fiscal-note-cache.service.ts` treats the read model as derived and `todos/active/features/TODO-uninotas-fiscal-note-read-model.md` preserves provider-backed detail during partial bootstrap/resume. | Cache update can be mandatory but provider success semantics stay unchanged. | High | Keep as Assumption |
+| `A-CAN-01` | `cancelada=false` may carry a manual municipal procedure. | `artifacts/feature-briefs/uninotas-fiscal-note-cancellation.md` records the official operation description; `C:/Unifast/MonitorNotas/MonitorNotes/frontend/src/paginas/DetalheNota.tsx` is the existing bounded detail-feedback surface. | UI guidance copy and false-result path would simplify. | High | Keep as Assumption |
+| `A-CAN-02` | Provider `404` cannot distinguish missing, non-authorized or already canceled. | `artifacts/feature-briefs/uninotas-fiscal-note-cancellation.md` records the official combined response description; `C:/Unifast/MonitorNotas/MonitorNotes/backend/src/fiscal-notes/smart-notas.adapter.ts` owns current provider error normalization. | Public error mapping could become more specific. | High | Keep as Assumption |
+| `A-CAN-03` | Timeout after dispatch has unknown mutation outcome. | `C:/Unifast/MonitorNotas/MonitorNotes/backend/src/fiscal-notes/smart-notas.adapter.ts` owns the abortable external fetch and `C:/Unifast/MonitorNotas/MonitorNotes/backend/src/fiscal-notes/smart-notas.port.ts` exposes no provider idempotency key or result token. | Automatic retry could be considered only under a new provider guarantee. | High | Keep as Assumption |
+| `A-CAN-04` | Current runtime uses one API replica. | `C:/Unifast/MonitorNotas/MonitorNotes/backend/src/fiscal-notes/fiscal-rate-coordinator.ts` explicitly owns only in-process coordination; `modules/fiscal-notes-and-documents.md` preserves that limit and `C:/Unifast/MonitorNotas/MonitorNotes/railway.json` declares no replica topology. | Distributed lease/idempotency design becomes approval-material. | Medium | Keep as Assumption |
+| `A-CAN-05` | A matching cache row may be absent. | `C:/Unifast/MonitorNotas/MonitorNotes/backend/src/fiscal-notes/fiscal-note-cache.service.ts` treats the read model as derived and `todos/active/features/TODO-uninotas-fiscal-note-read-model.md` preserves provider-backed detail during partial bootstrap/resume. | Cache update can be mandatory but provider success semantics stay unchanged. | High | Keep as Assumption |
 
 ## Execution Plan
 
 ### Touched Surfaces
 
-- NestJS fiscal port, adapter, service, controller, errors and cache service.
-- React API client, detail screen, optional confirmation component, layout CSS and fiscal tests.
+- NestJS fiscal port, adapter, service, controller, errors, dedicated cancellation coordinator and cache service.
+- React API client, semantic session permission, detail state machine, accessible confirmation component, layout CSS and fiscal tests.
 - Foundation fiscal module and this TODO.
 
 ### Ordered Steps
 
-1. Add fail-first adapter/port tests for method, path, headers, body absence, strict envelope and error mapping.
-2. Add service/controller authorization and single-attempt tests, including cache success/failure semantics.
-3. Implement provider cancellation through the existing concurrency/rate boundaries and non-sensitive audit event.
-4. Add frontend response parser and fail-first lifecycle tests for confirmation, duplicate click, abort and stale completion.
-5. Implement the status-gated button, confirmation/result feedback, refetch and three-column responsive header.
-6. Run browser/mobile flow, full suites, BCI/FRC/security reviews and deterministic TODO guards.
-7. Consolidate the final stable mutation contract into the fiscal module documentation.
+1. Publish approved `FISC-CAN-01` and the complete mutation contract in the fiscal module before product code.
+2. Add fail-first adapter/port tests for method, path, headers, body absence, 16 KiB/2048-code-point limits, exact envelope and closed error matrix.
+3. Add a bounded process-local cancellation coordinator and fail-first BCI tests for shared in-flight work, per-actor admission, uncertain fence and cleanup/cardinality.
+4. Add application-level JWT/`RolesGuard` tests and service/cache tests, including zero adapter calls for unauthorized users and monotonic cache interleavings.
+5. Implement provider cancellation with a pre-dispatch caller-abort check, then an internally bounded non-retried POST and non-sensitive audit event.
+6. Add frontend parser/state-machine tests for confirmation, duplicate click, uncertain fence guidance, ownership generation, logout/navigation/unmount and failed refetch.
+7. Implement semantic permission, status-gated accessible confirmation/result feedback, refetch and three-column responsive header.
+8. Run browser/mobile flow, full suites, BCI/FRC/security reviews and deterministic TODO guards.
 
 ### Test Strategy
 
 - Test-first for every mutation boundary.
 - No live cancellation in automated tests.
 - Synthetic opaque IDs and `.test` data only.
-- Validate success true/false, malformed envelope, 401/403/404/429/5xx/redirect/timeout/abort, denied role, duplicate submission and cache-update failure.
+- Validate success true/false, properties extra/absent, invalid types/control characters, body/message limits, 401/403/404/429/5xx/redirect/timeout/reset/disconnect, denied role, multi-client duplicate submission and cache-update failure/delay.
 
 ### Flow Evidence Planning Matrix
 
@@ -243,6 +290,8 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 | read-only | `LEITOR` | inspect authorized detail / attempt endpoint | no button; backend 403 | integration + browser | planned |
 | duplicate/race | editor; request pending | click repeatedly / navigate / logout | one upstream attempt; no late state effect | BCI + FRC + browser | planned |
 | uncertain outcome | provider timeout/abort after dispatch | confirm cancel | no auto retry; neutral uncertain message and detail refresh path | integration + browser | planned |
+| stale rolling page | sync overlaps confirmed cancellation | finish sync before/during/after cache mark | `Cancelada` remains terminal in local projection | cache integration + BCI | planned |
+| authorization boundary | no JWT, `LEITOR`, then each editor role | call endpoint through Nest guards | `401`, `403` with zero adapter call, and editor admission | application integration | planned |
 | responsive layout | desktop and mobile detail | inspect actions | cancel before divider; menu at far edge; no overflow | browser | planned |
 
 ### Frontend / Consumer Matrix
@@ -250,7 +299,7 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 | Producer | Consumer | Contract | Compatibility / Invalidation | Planned Evidence |
 | --- | --- | --- | --- | --- |
 | `POST /api/v1/notas/:noteId/cancelar` | `DetalheNota` | `{cancelled:boolean,message:string}` | additive endpoint; no existing consumer break | parser + application + browser |
-| cache status update | list/export local readers | `providerStatus=Cancelada` for context + provider ID | update only after confirmed true | cache/service unit |
+| cache status update | list/export local readers | `providerStatus=Cancelada` for context + provider ID | confirmed true is terminal; stale sync cannot downgrade | cache/service integration |
 | detail refetch | `DetalheNota` | existing detail DTO | invalidate current screen generation after mutation | FRC/browser |
 
 ### Local CI-Equivalent Suite Matrix
@@ -265,6 +314,7 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 ### Runtime / Rollout Notes
 
 - No migration or environment variable is planned.
+- The cancellation coordinator is intentionally process-local and bounded; deploying more than one API replica requires a new approved distributed fence/idempotency design.
 - Stage smoke must use a disposable authorized test note explicitly approved for cancellation; automated/live production cancellation is forbidden.
 - After deploy, confirm one successful mutation, cache/list convergence and provider/manual-false handling without recording PII.
 
@@ -308,9 +358,10 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 
 - Status changes between detail render and click: provider decides; frontend handles conflict and reloads.
 - Provider returns `200 cancelada=false`: no success claim or local status mutation.
-- Provider succeeds and cache update fails: return fiscal success, log only aggregate cache reconciliation failure, refetch detail; rolling sync repairs list.
-- Client disconnects after upstream dispatch: abort local work but do not claim cancellation failed or retry.
-- Two tabs cancel the same note: second may receive provider `404`; reload reveals authoritative status.
+- Provider succeeds and cache update fails: return fiscal success, log only aggregate cache reconciliation failure and refetch detail; a later non-stale sync may converge, while no sync may downgrade an existing `Cancelada`.
+- Client disconnects after upstream dispatch: suppress caller response/effects, but let the internally bounded shared operation finish; do not retry.
+- Two tabs/clients cancel the same note concurrently: both join one process-local operation after independent authorization/admission and observe the same bounded result.
+- A second API replica would bypass the in-memory fence: deployment topology change is approval-material and forbidden in this TODO.
 - Message overflow/malformed body: fail closed as provider contract error.
 
 ## Security Risk Assessment
@@ -339,7 +390,7 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 ## Audit Trigger Matrix
 
 - **Latest audit derivation:** `audit_escalation_guard.py` returned `go` on 2026-09-29 with fingerprint `584a99faf1f8`.
-- **Derived delivery floor:** critique `required`; test-quality audit `required`; final review `required`; dedicated triple review `required`; security review `required`; verification-debt audit `required`; performance/concurrency validation `recommended` with BCI/FRC mandatory from the risk matrix.
+- **Derived delivery floor:** critique `required`; architecture decision/adherence reviews `required`; test-quality audit `required`; final review `required`; dedicated triple review `required`; security review `required`; verification-debt audit `required`; performance/concurrency validation `recommended` with BCI/FRC mandatory from the risk matrix.
 
 | Trigger | Value | Notes |
 | --- | --- | --- |
@@ -361,20 +412,27 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 - **Why this decision:** medium, cross-stack, authenticated, irreversible fiscal mutation with a new public endpoint.
 - **Impact signals in scope:** `cross-module blast radius|public API|auth|critical user journey`
 - **Package mode:** `bounded-file-set`
-- **Package minimum contents:** frozen TODO, feature brief, fiscal module contract and directly touched backend/frontend anchors.
+- **Package minimum contents:** frozen TODO, feature brief, fiscal module contract, service/errors/rate/auth/cache anchors and directly touched frontend anchors.
 - **Critique isolation mode:** `fresh internal no-context reviewer`
 - **Internal reviewer mandate:** required; reviewer must differ from the implementing agent and return findings before implementation advice.
 - **Canonical multi-lane audit protocol:** `n/a` for planning critique; dedicated triple review remains a delivery gate.
 - **Audit session / round evidence:** `n/a`
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
-- **Critique status:** `not_run`
-- **Findings summary:** pending fresh no-context review against the pushed baseline.
+- **Critique status:** `findings_integrated`; convergence confirmation pending a fresh no-context pass after refreshed baseline.
+- **Findings summary:** seven findings identified canonical-authority, per-note concurrency/uncertainty, cache monotonicity, closed error bounds, real guard evidence, explicit UI state/accessibility and validation-package gaps; all were integrated into decisions, contract, DoD and validation.
 - **Resolution ledger:** findings, if any, will be classified below as `Integrated|Challenged|Deferred`.
 
 | Finding ID | Resolution | Usefulness | Formalizable | Candidate Rule Level | Candidate Rule ID | Rationale / Evidence |
 | --- | --- | --- | --- | --- | --- | --- |
+| `CRIT-CAN-01` | Integrated | useful | yes | project | `FISC-CAN-01` | Architecture governance now requires a narrow canonical supersession published before product code. |
+| `CRIT-CAN-02` | Integrated | useful | yes | project | `D-CAN-08,D-CAN-10` define shared process-local in-flight work, independent actor admission, 60 s uncertain fence and disconnect semantics. |
+| `CRIT-CAN-03` | Integrated | useful | yes | project | `D-CAN-09` and the protection harness require atomic terminal-status preservation across all sync interleavings. |
+| `CRIT-CAN-04` | Integrated | useful | yes | project | Cancellation Public Contract closes body/message limits, exact envelope, headers and HTTP/public-code mapping. |
+| `CRIT-CAN-05` | Integrated | useful | yes | project | Application-level JWT/`RolesGuard` matrix proves method metadata override and zero downstream calls for denied roles. |
+| `CRIT-CAN-06` | Integrated | useful | partial | project | `D-CAN-11` freezes semantic permission, explicit UI states, lifecycle ownership and accessibility evidence. |
+| `CRIT-CAN-07` | Integrated | useful | no | none | Bounded review/validation anchors now include service, errors, coordinator, rate, auth and concrete concurrent/interleaving scenarios. |
 
-- **Evidence / reference:** pending reviewer output.
+- **Evidence / reference:** fresh reviewer `Leibniz` (`01a0ee41-ca9b-7c62-93f8-03f04bf106b7`), verdict `findings_require_integration`, 2026-09-29; follow-up convergence review pending refreshed baseline.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Baseline Freeze

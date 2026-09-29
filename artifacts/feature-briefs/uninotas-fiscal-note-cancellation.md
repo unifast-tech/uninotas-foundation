@@ -25,6 +25,7 @@
 ## Canonical Touchpoints
 
 - **Constitution impact:** none — preserva autenticação, isolamento de contexto e SmartNotas como autoridade.
+- **Module-authority impact:** required — a decisão proposta `FISC-CAN-01` cria uma exceção limitada ao guardrail atual de `provider writes`; permanece inativa até aprovação explícita do TODO.
 - **Roadmap impact:** none — evolução delimitada do módulo fiscal existente.
 - **Primary module candidates:** `foundation_documentation/modules/fiscal-notes-and-documents.md`
 - **Secondary module candidates:** `foundation_documentation/modules/access-control-and-users.md`
@@ -44,8 +45,9 @@
 | --- | --- | --- | --- | --- |
 | `AMB-CAN-01` | Quem pode cancelar? | É uma mutação fiscal de alto impacto. | Usuário confirmou `ADMIN|GESTOR|ANALISTA`; `LEITOR` somente leitura. | `resolved` |
 | `AMB-CAN-02` | Há motivo de cancelamento? | Mudaria DTO, UX e contrato externo. | OpenAPI não define request body. | `resolved: no body` |
-| `AMB-CAN-03` | Como tratar timeout? | Retry automático pode duplicar uma operação irreversível. | Provider não publica chave de idempotência. | `resolved: resultado incerto, sem retry automático, recarregar detalhe` |
-| `AMB-CAN-04` | Como refletir no banco? | Lista local não pode permanecer autorizada após sucesso conhecido. | Read model é derivado e indexado por contexto + ID interno. | `resolved: update imediato best-effort + reconciliação normal` |
+| `AMB-CAN-03` | Como tratar timeout? | Retry automático pode duplicar uma operação irreversível. | Provider não publica chave de idempotência. | `resolved: operação process-local compartilhada, resultado incerto, fence de 60 s, sem retry automático, recarregar detalhe` |
+| `AMB-CAN-04` | Como refletir no banco? | Lista local não pode permanecer autorizada após sucesso conhecido nem ser rebaixada por página antiga. | Read model é derivado e indexado por contexto + ID interno. | `resolved: update imediato best-effort + Cancelada terminal preservada atomicamente no rolling upsert` |
+| `AMB-CAN-05` | Como tratar duas abas/clientes? | Single-flight apenas no React não protege o provider. | Runtime atual coordena somente dentro do processo. | `resolved: compartilhar uma promise por contexto + ID interno, com admissão individual; multi-réplica fora do escopo` |
 
 ## Story Decomposition
 
