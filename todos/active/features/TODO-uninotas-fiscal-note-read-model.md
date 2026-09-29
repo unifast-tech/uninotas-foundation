@@ -152,13 +152,13 @@ This proposal replaces the current per-request/per-period full coverage strategy
 | `D-RM-C17` | Bounded set-based publication | Final candidate promotion uses parameterized set-based SQL inside one bounded Prisma transaction, supported by generation/date indexes. Provider I/O never runs inside this transaction; timeout/lock failure preserves the previous published generation and enters normal persisted retry/backoff. | Keeps 20,000-row publication predictable and avoids thousands of row-by-row statements or long unbounded locks. |
 | `D-RM-C18` | Durable distinct completeness | Publication requires the active generation's candidate `COUNT(*)` to equal both its durable raw-observed item count and the provider's frozen expected total, with page/per-page invariants satisfied. A duplicate provider ID across any pages or restart collapses in candidates but increments raw observations, causing rollback and `pagination_inconsistent`. | Prevents a resumed generation from publishing false complete coverage after duplicate IDs. |
 | `D-RM-C19` | Interval-scoped freshness | Each daily proof stores `published_at`. The API adds `freshnessState=current|historical_snapshot|stale_rolling|unknown`; existing freshness fields are conservative aggregates over the exact interval, and historical snapshots never advertise an unsupported retry/deep refresh. | Intentionally refines `D-RM-07`: the 15-minute rule applies to requested rolling days, while older proof is disclosed as a historical snapshot rather than falsely revalidated. |
-| `D-RM-C20` | Database-aligned request date | Interactive local list/export derive `D` from PostgreSQL `transaction_timestamp()` in the same `REPEATABLE READ` transaction before horizon admission; application-wall-clock `D` is not used for request admission. | Aligns the request horizon with its MVCC snapshot so midnight retention cannot invalidate an already admitted lower bound. |
+| `D-RM-C20` | Snapshot-visible retained horizon | Add one context-state row containing `horizon_date`, `retained_from` and `retained_through`. Retention updates this row and prunes rows/proofs in the same transaction; local list/export admit dates from the context-state row visible in their `REPEATABLE READ` snapshot, never from transaction/application wall-clock alone. | Aligns horizon bounds and retained rows in one MVCC state so midnight retention cannot invalidate an already admitted lower bound. |
 
 ### Refined Publication, Calendar, Scheduler and Consumer Contract
 
 #### Atomic candidate publication
 
-- Add an expand-only Prisma/PostgreSQL candidate table keyed by `{sync_id, generation_id, provider_id_interno}` and a coverage-day table uniquely keyed by `{contexto_fiscal, coverage_date}` with durable `published_at`; the sync row records its active generation and durable raw-observed count. Candidates contain only the existing summary projection allowlist plus `observed_at`; no raw payload, recipient document, PDF/XML or ephemeral URL is added.
+- Add expand-only Prisma/PostgreSQL tables for candidates keyed by `{sync_id, generation_id, provider_id_interno}`, coverage days uniquely keyed by `{contexto_fiscal, coverage_date}` with durable `published_at`, and retained-horizon context state uniquely keyed by `contexto_fiscal`; the sync row records its active generation and durable raw-observed count. Candidates contain only the existing summary projection allowlist plus `observed_at`; no raw payload, recipient document, PDF/XML or ephemeral URL is added.
 - A window traversal writes and idempotently replaces rows only in its candidate generation. List/export continue reading the canonical cache and therefore cannot observe page-by-page or retry-partial data.
 - After the final page, one database transaction locks and rechecks the current sync/generation, validates exact context/date membership and page invariants, deletes canonical rows for that exact context/date interval that are absent from the candidate set, upserts the candidate rows, upserts one completed coverage-day proof for every day in the interval, marks the operational sync complete, and removes its candidates.
 - The generation durably increments `raw_items_observed` for every provider item before candidate-key deduplication. Publication requires `candidate COUNT(*) = raw_items_observed = total_esperado`, plus the frozen `paginas_esperadas`, `itens_por_pagina` and final-page cardinality invariants. Any mismatch, including a duplicate provider ID separated by checkpoint/restart, rolls back publication and records sanitized `pagination_inconsistent`.
@@ -173,15 +173,16 @@ This proposal replaces the current per-request/per-period full coverage strategy
 - Operational sync rows describe provider traversals and may overlap across rolling/day/month boundaries. They never authorize reads. Successful publication writes/upserts the canonical daily coverage ledger for each exact day, so the proof set is non-overlapping by database uniqueness and requires no interval-precedence heuristic.
 - When `D` advances, yesterday's successful rolling publication already provides the daily proof for the newly historical `D-2`. If that proof is missing, `D-2` enters the historical queue as an immutable one-day traversal; no completed day is refetched merely to change its rolling/historical label.
 - Month compaction affects completed operational sync/checkpoint records only. A transaction may replace contiguous completed operational records with a summary after verifying the daily coverage ledger; it never changes coverage-day proofs or canonical note rows.
-- After rolling/frontier maintenance, a short transaction deletes canonical rows and daily coverage proofs strictly before `D-366`, removes candidates from inactive/superseded generations, and retires operational metadata that cannot support retry or observability inside `[D-366,D]`. Legacy-repair startup preserves all existing cache rows; routine pruning begins only after the new model has at least one successfully published generation for the context.
+- After rolling/frontier maintenance, a short transaction derives its next `D` from PostgreSQL `statement_timestamp() AT TIME ZONE 'America/Sao_Paulo'`, deletes canonical rows and daily proofs strictly before `D-366`, removes inactive/superseded candidates, retires irrelevant operational metadata, and upserts `{horizon_date: D, retained_from: D-366, retained_through: D}` in the same commit. Legacy-repair startup preserves all existing cache rows; routine pruning/first context-state publication begins only after the new model has at least one successfully published generation for the context.
 - Coverage is the exact count/continuity of daily proof rows for the requested context/dates. Month/year/leap-day transitions, midnight interleavings, inverted bounds and cross-context reuse therefore have one set-based answer and are explicit test fixtures.
 
 #### Request snapshot and horizon admission
 
-- The first statement inside each local list/export `REPEATABLE READ` transaction derives `D` from PostgreSQL `transaction_timestamp() AT TIME ZONE 'America/Sao_Paulo'`; horizon admission and every following read use that same value and MVCC snapshot.
-- Local list/export without `documento` require `dataInicio >= D-366`, `dataFim <= D` and the existing maximum-span rule. A violation performs no provider/cache/export work and returns HTTP `422` with `{statusCode: 422, erro: 'PeriodoFiscalForaDoHorizonte', mensagem: 'O período deve estar entre as datas suportadas.', detalhes: {dataMinima: 'YYYY-MM-DD', dataMaxima: 'YYYY-MM-DD'}}`, where the bounds come from the transaction-derived `D`.
+- The first statement inside each local list/export `REPEATABLE READ` transaction selects the fiscal context-state row and establishes the MVCC snapshot. When the row exists, its `horizon_date`, `retained_from` and `retained_through` are the only admission/freshness clock for that request.
+- Before the first retained-horizon row exists, the same first statement also returns PostgreSQL `statement_timestamp()` and derives provisional `[D-366,D]` bounds. This is safe because retention is forbidden until it atomically creates that row; if another transaction creates/prunes afterward, the older request snapshot still sees pre-prune rows/proofs. Once an anchor is snapshot-visible, provisional bounds are never used.
+- Local list/export without `documento` require `dataInicio >= retained_from`, `dataFim <= retained_through` and the existing maximum-span rule. A violation performs no provider/cache/export work and returns HTTP `422` with `{statusCode: 422, erro: 'PeriodoFiscalForaDoHorizonte', mensagem: 'O período deve estar entre as datas suportadas.', detalhes: {dataMinima: 'YYYY-MM-DD', dataMaxima: 'YYYY-MM-DD'}}`, using the snapshot-visible bounds.
 - React constrains the local date controls to the same `[D-366,D]` bounds and renders the exact backend error if a stale URL violates them. The provider-backed `documento` path preserves its existing valid-date/max-span contract and is not reclassified as local coverage.
-- After deriving/admitting `D`, list reads coverage metadata, total and page rows inside that same logical Prisma transaction; export reads coverage/admission and all bounded rows inside its equivalent snapshot before building the CSV buffer.
+- After admitting the snapshot-visible retained bounds, list reads coverage metadata, total and page rows inside that same logical Prisma transaction; export reads coverage/admission and all bounded rows inside its equivalent snapshot before building the CSV buffer.
 - Publication or retention that commits during a request is wholly before or wholly after that request's database snapshot. Responses cannot combine old totals/coverage with new rows, and an export admitted as complete cannot lose rows to concurrent pruning.
 
 #### Scheduler ownership and bounded work
@@ -207,7 +208,7 @@ For list responses without `documento`, `readModel` preserves the existing field
 - Existing `syncing` is retained as an additive-compatibility alias and equals `syncState === 'syncing'`. `syncState` is `syncing` when any relevant interval generation is active; otherwise `failed` when an incomplete relevant window has a latest failure; otherwise `idle`. A successful relevant publication clears its prior `lastSyncError` and `retryAfterSeconds`.
 - `completedWindows` and `totalWindows` are computed from the canonical daily coverage ledger for the exact requested interval; a valid local list interval has `totalWindows >= 1` and `0 <= completedWindows <= totalWindows`.
 - For `coverage=complete`, `lastSuccessfulSyncAt` is the minimum `published_at` across all requested daily proofs and `cacheAgeSeconds` is its non-negative age at the transaction timestamp. For `coverage=partial`, both fields are `null` because no interval-wide successful snapshot exists.
-- `freshnessState=unknown` for partial coverage. For complete coverage it is `stale_rolling` when any requested `D-1`/`D` proof is older than 15 minutes; otherwise `historical_snapshot` when the interval includes any date `<=D-2`; otherwise `current`. Existing `stale` is the compatibility alias `freshnessState !== 'current'`.
+- `freshnessState=unknown` for partial coverage. Using snapshot-visible `horizon_date` as `D`, complete coverage is `stale_rolling` when any requested `D-1`/`D` proof is older than 15 minutes; otherwise `historical_snapshot` when the interval includes any date `<=D-2`; otherwise `current`. Existing `stale` is the compatibility alias `freshnessState !== 'current'`.
 - Historical proofs are immutable snapshots, not continuously fresh assertions. `historical_snapshot` discloses the conservative timestamp and offers no retry/deep-refresh action because periodic deep reconciliation remains outside this TODO; a separate approved evolution is required to change that ownership.
 - `coverage=complete` with zero rows means a proven empty result and uses the ordinary empty-state copy.
 - `coverage=partial` with zero rows remains HTTP `200`, suppresses the ordinary empty-state copy and shows an actionable synchronization message with progress/error/retry data; it must not imply that no fiscal notes exist.
@@ -403,7 +404,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - [ ] `DOD-RM-C14` Publicação de 0, poucas e 20.000 linhas é set-based, indexada, limitada por timeout e deixa a geração anterior intacta em qualquer rollback.
 - [ ] `DOD-RM-C15` Duplicata de `providerIdInterno` entre páginas ou após restart impede publicação e preserva cache/coverage anterior com `pagination_inconsistent`.
 - [ ] `DOD-RM-C16` Frescor de intervalo completo/zero é derivado de prova diária durável e distingue histórico, rolling atual e rolling vencido sem oferecer deep refresh inexistente.
-- [ ] `DOD-RM-C17` Admissão de horizonte usa `D` derivado dentro do mesmo snapshot das linhas, permanecendo coerente durante retenção na virada do dia.
+- [ ] `DOD-RM-C17` Admissão usa o horizonte persistido visível no mesmo snapshot das linhas; poda e avanço do horizonte confirmam juntos na virada do dia.
 
 ## Validation Steps
 
@@ -423,7 +424,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - [ ] `VAL-RM-C14` Medir `EXPLAIN`, statements, locks, rollback e latência concorrente para publicação vazia/pequena/20.000 linhas.
 - [ ] `VAL-RM-C15` Reiniciar após checkpoint e repetir o mesmo provider ID em páginas diferentes; provar `candidate count != raw observed`, rollback e cobertura inalterada em PostgreSQL real.
 - [ ] `VAL-RM-C16` Cobrir complete-zero, histórico puro, histórico+rolling atual, rolling vencido/falhado e respectivas mensagens/ações no backend e browser.
-- [ ] `VAL-RM-C17` Pausar entre abertura da transação/derivação de `D` e leituras enquanto retenção de meia-noite confirma; provar lista/export coerentes.
+- [ ] `VAL-RM-C17` Abrir transação antes da meia-noite, confirmar retenção+novo horizonte antes da primeira leitura que estabelece o snapshot e provar que lista/export veem juntos os novos limites e linhas; repetir com snapshot estabelecido antes da retenção para provar a visão antiga coerente.
 
 ## Test Decisions — Frozen
 
@@ -452,8 +453,8 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 
 | Repository | Path glob | Change types | Reason |
 | --- | --- | --- | --- |
-| `MonitorNotes` | `backend/prisma/schema.prisma` | `M` | required candidate-generation ownership, daily coverage proof and atomic publication relational contract |
-| `MonitorNotes` | `backend/prisma/migrations/**` | `A` | required expand-only candidate/coverage migration and supporting constraints/indexes |
+| `MonitorNotes` | `backend/prisma/schema.prisma` | `M` | required candidate ownership, daily coverage proof, retained-horizon context state and atomic publication contract |
+| `MonitorNotes` | `backend/prisma/migrations/**` | `A` | required expand-only candidate/coverage/horizon migration and supporting constraints/indexes |
 | `MonitorNotes` | `backend/src/fiscal-notes/**` | `A, M` | windowed bootstrap, rolling independence, local reads, truthful errors and regression tests |
 | `MonitorNotes` | `backend/src/common/filters/**` | `M` | public error mapping for incomplete read-model coverage if centrally owned there |
 | `MonitorNotes` | `frontend/src/api/notas.ts` | `M` | interval coverage/progress contract and export error handling |
@@ -521,7 +522,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 
 ## Decision Pending
 
-- [ ] `none`; as opções materiais foram comparadas no Plan Review e a direção refinada está congelada em `D-RM-C01..C20`, aguardando refreeze, R4 e aprovação humana renovada.
+- [ ] `none`; as opções materiais foram comparadas no Plan Review e a direção refinada está congelada em `D-RM-C01..C20`, aguardando refreeze, R5 focado e aprovação humana renovada.
 
 ## Module Decision Baseline Snapshot
 
@@ -572,7 +573,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 
 - **Strategy:** `test-first`
 - **Why:** production-like stage symptoms passed all existing immutable-total unit tests; regression must be proven before changing the state machine.
-- **Fail-first targets:** provider total changes after page 1/resume; duplicate provider ID across pages separated by durable restart; late-page failure with zero visible partial publication; stale/superseded generation; removed/moved/null/malformed/out-of-window notes; complete-zero freshness; historical-only/mixed/stale-rolling states; month/year/leap-day rolling→daily transition and retention; publication between coverage/count/items; midnight retention between transaction start/date derivation/reads; exact horizon boundaries/URL/path `documento`; simultaneous ticks/startup/requests/shutdown; rolling priority/context fairness; covered/partial zero-row UI; incomplete export exact `409`; no provider call on covered reads; 20.000-row set-based timeout/rollback; exact provider-error preservation.
+- **Fail-first targets:** provider total changes after page 1/resume; duplicate provider ID across pages separated by durable restart; late-page failure with zero visible partial publication; stale/superseded generation; removed/moved/null/malformed/out-of-window notes; complete-zero freshness; historical-only/mixed/stale-rolling states; month/year/leap-day rolling→daily transition and retention; publication between coverage/count/items; BEGIN-before-midnight with retention commit before/after the first horizon snapshot read; exact horizon boundaries/URL/path `documento`; simultaneous ticks/startup/requests/shutdown; rolling priority/context fairness; covered/partial zero-row UI; incomplete export exact `409`; no provider call on covered reads; 20.000-row set-based timeout/rollback; exact provider-error preservation.
 
 ### Package-First Assessment
 
@@ -633,7 +634,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 
 ## Plan Review Gate
 
-- **Status:** `r3-material-revision-integrated-pending-r4`; R3 accepted performance/elegance direction but found three durable-count/freshness/midnight gaps now resolved in `D-RM-C18..C20`, pending one focused frozen-baseline convergence review.
+- **Status:** `r4-single-finding-integrated-pending-r5`; R4 closed duplicate/freshness and isolated one PostgreSQL snapshot-timing flaw, now replaced by an MVCC-visible retained-horizon anchor pending final focused verification.
 
 ### Review Sections
 
@@ -748,8 +749,8 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Decision review lifecycle:** `after diagnosis is closed and before APROVADO`
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set`
-- **Decision review status:** `r1_r2_r3_material_findings_integrated; r4_pending`
-- **Decision review evidence / resolution:** R1 found `FRM-CRIT-01..05`, R2 found `FRM-R2-01..05`, and R3 found `FRM-R3-01..03`. The plan now also requires durable distinct completeness, interval-scoped daily-proof freshness and transaction-derived request dates. A focused R4 reviewer must converge before approval.
+- **Decision review status:** `r1_through_r4_findings_integrated; r5_pending`
+- **Decision review evidence / resolution:** R4 closed `FRM-R3-01/02` and kept `FRM-R3-03` open because transaction start time is not the snapshot boundary. `D-RM-C20` now uses a retained-horizon context row advanced atomically with pruning and read from the request snapshot. A final focused R5 reviewer must converge before approval.
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -763,11 +764,11 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Why this decision:** big architecture correction needs a committed/pushed immutable TODO packet before independent review.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `c5220a77c5a54c7d3142016799d32de6952b0926`; R3 reviewed `f02abf863bda45b64c5deb9b6e39aaadc020e2f5`
-- **Baseline push reference:** `origin/main@c5220a77c5a54c7d3142016799d32de6952b0926`; R3 source was `origin/main@f02abf863bda45b64c5deb9b6e39aaadc020e2f5`
-- **Gate status:** `no_material_findings`
-- **Findings summary:** the R3 durable-count/freshness/midnight resolutions were frozen and pushed as one TODO-only commit; no product/module/runtime file was changed.
-- **Evidence / reference:** `https://github.com/unifast-tech/uninotas-foundation/commit/c5220a77c5a54c7d3142016799d32de6952b0926`; R3 package `artifacts/tmp/fiscal-read-model-critique-r3-package.md`.
+- **Baseline commit:** `pending R5 focused freeze`; R4 reviewed `c5220a77c5a54c7d3142016799d32de6952b0926`
+- **Baseline push reference:** `pending refined origin/main`; R4 source was `origin/main@c5220a77c5a54c7d3142016799d32de6952b0926`
+- **Gate status:** `running`
+- **Findings summary:** R4 proved `transaction_timestamp()` could predate the first repeatable-read snapshot; the plan now uses a context horizon row committed atomically with pruning. No product/module/runtime file was changed.
+- **Evidence / reference:** R4 package `artifacts/tmp/fiscal-read-model-critique-r4-package.md`; dispatch `artifacts/tmp/fiscal-read-model-critique-r4-dispatch.json`; focused R5 freeze pending.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
@@ -794,37 +795,43 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Internal reviewer mandate:** `required after baseline freeze; reviewer cannot be implementing agent`
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
 - **Critique status:** `running`
-- **Findings summary:** R1 reported `FRM-CRIT-01..05`, R2 reported `FRM-R2-01..05`, and R3 reported `FRM-R3-01..03`. All resolution sets are integrated below and require one focused fresh R4 verification.
-- **Evidence / reference:** R1/R2/R3 packages and dispatches under `artifacts/tmp/fiscal-read-model-critique*`; fresh reviewers recorded in their dispatch results.
+- **Findings summary:** R1 reported `FRM-CRIT-01..05`, R2 `FRM-R2-01..05`, R3 `FRM-R3-01..03`, and R4 kept only `FRM-R3-03` open. All resolutions are integrated below and require one final focused fresh R5 verification.
+- **Evidence / reference:** R1 through R4 packages and dispatches under `artifacts/tmp/fiscal-read-model-critique*`; fresh reviewers recorded in their dispatch results.
 - **Waiver authority / reference:** `n/a`
 
 ### Critique Finding Resolution Ledger
 
 | Finding ID | Severity | Finding | Resolution in refined baseline | Status |
 | --- | --- | --- | --- | --- |
-| `FRM-CRIT-01` | high | Mutable canonical page writes cannot prove atomic complete-window visibility or absence. | `D-RM-C11/C12/C16/C18`; candidate generation, distinct completeness, set publication and snapshot readers; targeted PostgreSQL tests. | `R3 carry-forward strengthened; pending R4` |
-| `FRM-CRIT-02` | high | D-2 frontier, retention, rollover, gaps/overlaps and month lifecycle were underspecified. | `D-RM-C13/C15/C16/C20`; daily proof, deterministic rolling/retention/admission and DB-aligned date snapshot. | `R3 carry-forward strengthened; pending R4` |
-| `FRM-CRIT-03` | high | Scheduler had no bounded priority, fairness, overlap or shutdown contract. | `D-RM-C14`; captured `D`, single pump, rolling-first, one historical window globally per pump, context rotation, sequential provider walks and shutdown admission. | `R3 accepted direction; pending R4` |
-| `FRM-CRIT-04` | high | Public `readModel` fields/states and zero-row UI behavior were not frozen. | `D-RM-C14/C16/C19` public/UI tables; truthful complete-zero, freshness, exact export `409` and horizon `422`. | `R3 carry-forward strengthened; pending R4` |
-| `FRM-CRIT-05` | medium | Tests omitted atomic failure, absence/movement/null dates, rollover, scheduler starvation and incomplete-zero UI. | Expanded `D-T01..03`, `VAL-RM-C09..17`, ordered plan and named fail-first interleavings. | `R3 carry-forward strengthened; pending R4` |
+| `FRM-CRIT-01` | high | Mutable canonical page writes cannot prove atomic complete-window visibility or absence. | `D-RM-C11/C12/C16/C18`; candidate generation, distinct completeness, set publication and snapshot readers; targeted PostgreSQL tests. | `Closed through R4` |
+| `FRM-CRIT-02` | high | D-2 frontier, retention, rollover, gaps/overlaps and month lifecycle were underspecified. | `D-RM-C13/C15/C16/C20`; daily proof, deterministic rolling/retention/admission and snapshot-visible horizon. | `Closed except FRM-R3-03 focused refinement` |
+| `FRM-CRIT-03` | high | Scheduler had no bounded priority, fairness, overlap or shutdown contract. | `D-RM-C14`; captured `D`, single pump, rolling-first, one historical window globally per pump, context rotation, sequential provider walks and shutdown admission. | `Closed through R4` |
+| `FRM-CRIT-04` | high | Public `readModel` fields/states and zero-row UI behavior were not frozen. | `D-RM-C14/C16/C19` public/UI tables; truthful complete-zero, freshness, exact export `409` and horizon `422`. | `Closed through R4` |
+| `FRM-CRIT-05` | medium | Tests omitted atomic failure, absence/movement/null dates, rollover, scheduler starvation and incomplete-zero UI. | Expanded `D-T01..03`, `VAL-RM-C09..17`, ordered plan and named fail-first interleavings. | `Closed except FRM-R3-03 focused refinement` |
 
 ### R2 Critique Finding Resolution Ledger
 
 | Finding ID | Severity | Finding | Resolution in refined baseline | Status |
 | --- | --- | --- | --- | --- |
-| `FRM-R2-01` | high | Separate coverage/count/row statements can mix committed generations. | `D-RM-C16/C20`; database-derived request date and one PostgreSQL snapshot for list/export; barrier tests. | `R3 alignment strengthened; pending R4` |
-| `FRM-R2-02` | high | Retention horizon conflicts with unrestricted valid date intervals. | `D-RM-C16/C20`; exact local horizon, DB-aligned admission, `422` bounds and React tests. | `R3 alignment strengthened; pending R4` |
-| `FRM-R2-03` | high | Rolling/frontier/compaction metadata can overlap without deterministic supersession. | `D-RM-C15`; canonical context/date coverage ledger; operational overlaps do not authorize reads. | `R3 accepted direction; pending R4` |
-| `FRM-R2-04` | medium | 20.000-row promotion could become thousands of statements/unbounded locks. | `D-RM-C17`; set-based parameterized publication, indexes and fixed timeouts with rollback/backoff. | `R3 accepted; pending R4` |
-| `FRM-R2-05` | medium | Tests did not force reader/publication races, horizon boundaries or metadata failures. | `VAL-RM-C12..17`, `D-T01..03` and named PostgreSQL/browser/concurrency interleavings. | `R3 carry-forward strengthened; pending R4` |
+| `FRM-R2-01` | high | Separate coverage/count/row statements can mix committed generations. | `D-RM-C16/C20`; snapshot-visible horizon and one PostgreSQL snapshot for list/export; barrier tests. | `Closed except FRM-R3-03 focused refinement` |
+| `FRM-R2-02` | high | Retention horizon conflicts with unrestricted valid date intervals. | `D-RM-C16/C20`; exact local horizon, snapshot-visible admission, `422` bounds and React tests. | `Closed except FRM-R3-03 focused refinement` |
+| `FRM-R2-03` | high | Rolling/frontier/compaction metadata can overlap without deterministic supersession. | `D-RM-C15`; canonical context/date coverage ledger; operational overlaps do not authorize reads. | `Closed through R4` |
+| `FRM-R2-04` | medium | 20.000-row promotion could become thousands of statements/unbounded locks. | `D-RM-C17`; set-based parameterized publication, indexes and fixed timeouts with rollback/backoff. | `Closed through R4` |
+| `FRM-R2-05` | medium | Tests did not force reader/publication races, horizon boundaries or metadata failures. | `VAL-RM-C12..17`, `D-T01..03` and named PostgreSQL/browser/concurrency interleavings. | `Closed except FRM-R3-03 focused refinement` |
 
 ### R3 Critique Finding Resolution Ledger
 
 | Finding ID | Severity | Finding | Resolution in refined baseline | Status |
 | --- | --- | --- | --- | --- |
-| `FRM-R3-01` | high | Duplicate provider IDs separated by checkpoint/restart can collapse and falsely satisfy completion. | `D-RM-C18`; durable raw observation count; exact candidate/raw/expected equality and page invariants; PostgreSQL restart regression `VAL-RM-C15`. | `Integrated; pending focused R4` |
-| `FRM-R3-02` | high | Preserved freshness fields lack truthful interval derivation after sync compaction. | `D-RM-C19`; durable daily `published_at`; exact conservative aggregates and `freshnessState`; historical snapshots have no unsupported retry; tests `VAL-RM-C16`. | `Integrated; pending focused R4` |
-| `FRM-R3-03` | medium | Application-captured `D` can disagree with the MVCC snapshot during midnight retention. | `D-RM-C20`; first transaction statement derives `D` from PostgreSQL; admission/read share one snapshot; barrier tests `VAL-RM-C17`. | `Integrated; pending focused R4` |
+| `FRM-R3-01` | high | Duplicate provider IDs separated by checkpoint/restart can collapse and falsely satisfy completion. | `D-RM-C18`; durable raw observation count; exact candidate/raw/expected equality and page invariants; PostgreSQL restart regression `VAL-RM-C15`. | `Closed by R4` |
+| `FRM-R3-02` | high | Preserved freshness fields lack truthful interval derivation after sync compaction. | `D-RM-C19`; durable daily `published_at`; exact conservative aggregates and `freshnessState`; historical snapshots have no unsupported retry; tests `VAL-RM-C16`. | `Closed by R4` |
+| `FRM-R3-03` | medium | Application-captured/time-derived `D` can disagree with the MVCC snapshot during midnight retention. | `D-RM-C20`; snapshot-visible retained-horizon row advances in the same commit as pruning; before/after snapshot barrier tests `VAL-RM-C17`. | `R4 carry-forward replaced; pending R5` |
+
+### R4 Critique Finding Resolution Ledger
+
+| Finding ID | Severity | Finding | Resolution in refined baseline | Status |
+| --- | --- | --- | --- | --- |
+| `FRM-R3-03` | medium | `transaction_timestamp()` is fixed at transaction start, not necessarily the first repeatable-read snapshot. | `D-RM-C20` now persists `{horizon_date, retained_from, retained_through}` and advances it atomically with pruning; requests read the anchor and rows in one MVCC snapshot; `VAL-RM-C17` forces both decisive commit orders. | `Integrated; pending focused R5` |
 
 ## Gate: Assumption Code Coherence
 
