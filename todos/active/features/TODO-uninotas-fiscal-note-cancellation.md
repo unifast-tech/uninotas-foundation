@@ -525,11 +525,11 @@ After every provider detail read, one indexed composite-key lookup projects `can
 - **Why this decision:** medium cross-stack mutation requires a stable review packet before planning guards.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `feature/uninotas-fiscal-note-cancellation`
-- **Baseline commit:** `712fb2d429de5c83e71684e44a17b0efaf5a7efc`
+- **Baseline commit:** `4dc282c77dff346df92b9c2c1800112c8415fae2`
 - **Baseline push reference:** `origin/feature/uninotas-fiscal-note-cancellation`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** durable cross-replica election, fail-closed uncertain state, cache-absent tombstone, split quota accounting, complete consumers, canonical capability ownership and all required architecture/preflight fields were committed and pushed before the retried final reviews.
-- **Evidence / reference:** `712fb2d429de5c83e71684e44a17b0efaf5a7efc` pushed to `origin/feature/uninotas-fiscal-note-cancellation`.
+- **Findings summary:** the complete pre/post-dispatch state machine, terminal false-result semantics, detail overlay, forward-only rollback, split-quota harness and migration evidence plan were committed and pushed before final convergence confirmation.
+- **Evidence / reference:** `4dc282c77dff346df92b9c2c1800112c8415fae2` pushed to `origin/feature/uninotas-fiscal-note-cancellation`.
 - **Waiver authority / reference:** `n/a`
 - **Scope-neutral evidence update:** this freeze record and guard outcomes may be committed after the baseline without changing the frozen feature scope.
 
