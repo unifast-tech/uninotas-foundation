@@ -222,8 +222,8 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 - **Decision review lifecycle:** `after diagnosis is closed and before APROVADO`
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set`
-- **Decision review status:** `findings_integrated`; clean follow-up opinion pending refreshed baseline.
-- **Decision review evidence / resolution:** architecture reviewer `Bacon` found five material gaps; durable PostgreSQL election/tombstone, negative write allowlist, complete consumer invalidation and split quota accounting were integrated.
+- **Decision review status:** `no_material_findings`
+- **Decision review evidence / resolution:** fresh round-5 reviewer `Codex-Architecture-Round5` found no material findings at baseline `6b92f716744bdc287ac7f730406d33efbaffb3ef`; all prior architecture findings remain integrated.
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -506,8 +506,8 @@ After every provider detail read, one indexed composite-key lookup projects `can
 - **Canonical multi-lane audit protocol:** `n/a` for planning critique; dedicated triple review remains a delivery gate.
 - **Audit session / round evidence:** `n/a`
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
-- **Critique status:** `findings_integrated`; convergence confirmation pending a fresh no-context pass after refreshed baseline.
-- **Findings summary:** seven findings identified canonical-authority, per-note concurrency/uncertainty, cache monotonicity, closed error bounds, real guard evidence, explicit UI state/accessibility and validation-package gaps; all were integrated into decisions, contract, DoD and validation.
+- **Critique status:** `no_material_findings`
+- **Findings summary:** round-5 fresh no-context critique found no objective material blockers; all earlier findings remain integrated and D-CAN-16/D-CAN-17 were explicitly accepted.
 - **Resolution ledger:** findings, if any, will be classified below as `Integrated|Challenged|Deferred`.
 
 | Finding ID | Resolution | Usefulness | Formalizable | Candidate Rule Level | Candidate Rule ID | Rationale / Evidence |
@@ -531,7 +531,7 @@ After every provider detail read, one indexed composite-key lookup projects `can
 | `CRIT3-CAN-03` | Integrated | useful | yes | project | Detail now projects indexed durable cancellation state, overlays stale authorized status after confirmed cancellation and suppresses non-available actions. |
 | `CRIT3-CAN-04` | Integrated | useful | yes | project | Disposable empty/baseline PostgreSQL migration runner validates application, constraints, indexes and fail-closed startup. |
 
-- **Evidence / reference:** `Leibniz` initial critique and fresh convergence reviewer `Noether` (`01a0ee4f-03d1-7bd0-8263-4b70acdd8ace`); both finding sets integrated; final clean convergence pass pending refreshed baseline.
+- **Evidence / reference:** prior findings from `Leibniz`, `Noether`, `Curie` and architecture rounds were integrated; final `manual-bounded/fiscal-cancellation-final-critique-round5` returned empty findings at baseline `6b92f716744bdc287ac7f730406d33efbaffb3ef`.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Baseline Freeze
@@ -555,9 +555,9 @@ After every provider detail read, one indexed composite-key lookup projects `can
 - **Trigger stage:** `after critique convergence and before APROVADO`
 - **Guard scope:** `A-CAN-01,A-CAN-02,A-CAN-03,A-CAN-04,A-CAN-05`
 - **Guard command:** `python delphi-ai/tools/assumption_code_coherence_guard.py --todo <todo-path>`
-- **Gate status:** `not_run`
-- **Findings summary:** pending guard execution after audit-floor derivation.
-- **Evidence / reference:** pending
+- **Gate status:** `no_material_findings`
+- **Findings summary:** all five live assumptions resolve to concrete code/doc anchors; no wrong-code assumption remains.
+- **Evidence / reference:** `assumption_code_coherence_guard.py` final run at baseline `6b92f716744bdc287ac7f730406d33efbaffb3ef`.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
@@ -569,9 +569,9 @@ After every provider detail read, one indexed composite-key lookup projects `can
 - **Material sections compared:** `Context|Contract Boundary|Scope|Out of Scope|Definition of Done|Validation Steps|Canonical Module Anchors|Decisions|Decision Baseline|Architecture Change Governance|Assumptions Preview|Execution Plan|Flow Evidence Planning Matrix|Local CI-Equivalent Suite Matrix|Runtime / Rollout Notes|Security Risk Assessment|Performance & Concurrency Risk Assessment`
 - **Guard command:** `python delphi-ai/tools/review_scope_drift_guard.py --todo <todo-path>`
 - **No-go handling rule:** return to review, revalidate material scope with the user and refresh the baseline when necessary.
-- **Gate status:** `not_run`
-- **Findings summary:** pending review convergence.
-- **Evidence / reference:** pending
+- **Gate status:** `no_material_findings`
+- **Findings summary:** zero material section changes after the pushed baseline; only review/freeze evidence changed.
+- **Evidence / reference:** unmodified `review_scope_drift_guard.py` logic executed under `PYTHONUTF8=1` with a separator-only Windows compatibility shim against `6b92f716744bdc287ac7f730406d33efbaffb3ef`.
 - **Waiver authority / reference:** `n/a`
 
 ## Delivery Review Gates
@@ -614,7 +614,7 @@ After every provider detail read, one indexed composite-key lookup projects `can
 ### Independent No-Context Final Review Gate
 
 - **Final review decision:** `required`
-- **Why this decision:** medium cross-stack public API/auth change with irreversible external side effect.
+- **Why this decision:** big cross-stack public API/auth/runtime change with irreversible external side effect and durable coordination.
 - **Package mode:** `bounded-file-set`
 - **Review isolation mode:** `fresh internal no-context reviewer`
 - **Final review status:** `not_run`
@@ -654,6 +654,7 @@ After every provider detail read, one indexed composite-key lookup projects `can
 - **Worktree authorization:** not requested; no worktree or auxiliary checkout may be created.
 - **Scope:** `nestjs, react, vite`
 - **Guard outcome:** `go`
+- **Authority preflight evidence:** `todo_authority_guard.py --pre-approval` returned `Overall outcome: preflight-go` with no violations on 2026-09-29.
 
 ## Blockers (Current)
 
@@ -664,4 +665,4 @@ After every provider detail read, one indexed composite-key lookup projects `can
 - **Disposition:** `keep-active`
 - **Disposition reason:** planning contract awaiting freeze/review/approval.
 - **Post-commit/push status:** `complete`
-- **Next path/status action:** complete planning guards and request explicit approval.
+- **Next path/status action:** request the exact explicit approval phrase; implementation remains unauthorized until received and recorded.
