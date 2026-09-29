@@ -76,6 +76,7 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 - [ ] Duplo clique, duas abas/clientes, resposta tardia, navegação, logout e unmount produzem no máximo um POST simultâneo por nota e nenhum efeito visual tardio.
 - [ ] Timeout/reset/`5xx`/`2xx` inválido após envio ou lease vencido é persistido como `uncertain`, bloqueia novos writes em qualquer réplica e nunca expira/reexecuta automaticamente.
 - [ ] `cancelada=true` persiste `cancelled` e atualiza o cache na mesma transação; rolling upserts consultam o tombstone atomicamente, inclusive quando a linha de cache ainda não existe.
+- [ ] A transação de `cancelled` e toda transação de upsert adquirem a mesma advisory lock por nota antes de consultar/escrever tombstone/cache; lotes ordenam chaves para evitar deadlock.
 - [ ] O detalhe consulta o estado durável após o provider: tombstone `cancelled` força `providerStatus=Cancelada`, e `cancellationState` impede reapresentar a ação para `in_progress|uncertain|not_cancelled|cancelled`.
 - [ ] `cancelada=false` preserva o status e mostra uma orientação textual limitada, inclusive procedimento manual.
 - [ ] O botão aparece somente para perfil editor e detalhe `Autorizada`; confirmação explícita precede a chamada.
@@ -85,6 +86,7 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 - [ ] Query, body (inclusive `{}`) ou content type de payload são rejeitados com `400 CancelamentoFiscalRequisicaoInvalida` antes do service.
 - [ ] Confirmação e feedback obedecem ao estado `idle -> confirming -> submitting -> known-success|known-false|uncertain|failed -> reloading`, com foco, Escape, retorno de foco e anúncio acessível.
 - [ ] Rollback desativa somente rota e UI; migração, linhas terminais, overlay do detalhe e barreira tombstone-aware dos upserts permanecem ativos.
+- [ ] `SMART_NOTAS_CANCEL_ENABLED=false` é o kill switch padrão: rota falha antes do claim, detalhe retorna ação indisponível, mas overlay/tombstone/upserts continuam ativos.
 - [ ] Testes, lint, builds, guards e documentação passam sem segredo ou PII real nas evidências.
 
 ## Validation Steps
@@ -119,6 +121,9 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 | `MonitorNotes` | `backend/prisma/schema.prisma` | `M` | durable cancellation-operation/tombstone model |
 | `MonitorNotes` | `backend/prisma/migrations/**` | `A` | additive cancellation-operation migration |
 | `MonitorNotes` | `backend/package.json` | `M` | project-owned disposable PostgreSQL migration test command |
+| `MonitorNotes` | `backend/src/config/**` | `M` | cancellation-specific fail-closed feature flag and tests |
+| `MonitorNotes` | `backend/.env.example` | `M` | document disabled-by-default cancellation flag |
+| `MonitorNotes` | `backend/README.md` | `M` | local runtime and forward-only rollback contract |
 | `MonitorNotes` | `frontend/src/api/cliente.ts` | `M` | POST signal plus bounded public error code and Retry-After |
 | `MonitorNotes` | `frontend/src/api/notas.ts` | `M` | cancel API contract |
 | `MonitorNotes` | `frontend/src/paginas/DetalheNota.tsx` | `M` | confirmation, lifecycle and result UI |
@@ -191,6 +196,8 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 | `D-CAN-13` | `uncertain` and `not_cancelled` are durable fail-closed states for Monitor writes; only confirmed provider `Cancelada` reconciliation or an out-of-scope audited operator resolution changes them. | Time alone cannot prove the outcome of an irreversible provider write. |
 | `D-CAN-14` | Public detail adds bounded `cancellationState`; durable `cancelled` overrides stale provider status and all non-available states suppress the action. | Detail refetch cannot regress the UI or reoffer a terminal/ambiguous mutation. |
 | `D-CAN-15` | Rollback is forward-only for persistence/projection safety: disable route/UI, retain migration, terminal rows, detail overlay and tombstone-aware sync. | Reverting cache writers would invalidate already recorded cancellation facts. |
+| `D-CAN-16` | Cancellation commit and every cache upsert serialize per note with the same transaction-scoped PostgreSQL advisory lock; batch locks use canonical key order. | READ COMMITTED snapshots alone do not close the cache-absent insert race. |
+| `D-CAN-17` | `SMART_NOTAS_CANCEL_ENABLED` defaults false and independently gates only new cancellation claims/UI availability; durable safety readers/writers ignore the flag. | Provides an executable forward-only kill switch without disabling fiscal reads or erasing prior facts. |
 
 ## Decision Baseline (Frozen Before Implementation)
 
@@ -205,7 +212,7 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 - **Deviation / debt being retired:** provider writes were categorically excluded and no durable idempotency/fence contract existed.
 - **Target steady-state after closeout:** exactly one allowlisted cancellation write guarded by signed context identity, PostgreSQL leader/tombstone state and monotonic consumers.
 - **Temporary exceptions allowed:** none; process-local-only coordination, timed uncertainty expiry and cache-regressing writes are forbidden.
-- **Cutover / removal condition:** migration is applied before endpoint activation and all backend/frontend consumers pass the protection harness; rollback disables the endpoint but preserves operation/tombstone rows.
+- **Cutover / removal condition:** migration is applied before `SMART_NOTAS_CANCEL_ENABLED=true` and all backend/frontend consumers pass the protection harness; rollback sets the flag false while preserving operation/tombstone rows and all safety projections.
 - **Decision:** `FISC-CAN-01` becomes `Current` only after explicit TODO approval; before product implementation, the fiscal module must publish the endpoint, roles, strict response/error contract, uncertain-result policy and monotonic cache rule.
 - **Supersession boundary:** no other SmartNotas write, bulk mutation, issue/reprocess path or client-supplied provider ID is authorized.
 
@@ -235,6 +242,8 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 | `ARCH-FINAL-CAN-01` | Integrated | exact `200 false` persists terminal `not_cancelled`; no later Monitor write is permitted |
 | `ARCH-FINAL-CAN-02` | Integrated | rollback is forward-only and retains migration, rows, detail overlay and tombstone-aware sync |
 | `ARCH-FINAL-CAN-03` | Integrated | quota harness asserts every actor admission and exactly one leader context/upstream charge |
+| `ARCH-R4-01` | Integrated | cancellation/tombstone and every cache upsert now share a transaction advisory lock; deterministic cache-absent interleavings are required |
+| `ARCH-R4-02` | Integrated | `SMART_NOTAS_CANCEL_ENABLED` is the real independent kill switch; durable overlay/locks/writers remain unconditional |
 
 ### Architecture Protection Harness
 
@@ -249,6 +258,7 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 | quota-accounting test | rate coordinator + durable leader | same/cross-process 5/10/20 callers including rejected actors | joiner bypass or more than one context/upstream charge | implement-in-this-todo | BCI raw-state assertions |
 | migration test | PostgreSQL + Prisma | apply from empty DB and baseline schema; inspect constraints/indexes | unapplied/invalid migration, missing unique key/state/lease indexes or endpoint startup before migration | implement-in-this-todo | `npm run test:fiscal-migration` against disposable PostgreSQL |
 | rollback-mode test | route/UI + detail/cache writers | cancellation disabled with existing terminal rows and stale pages | rollback deletes state or allows status downgrade | implement-in-this-todo | integration + browser evidence |
+| serialization test | advisory lock + tombstone/cache transactions | force cache-absent sync and cancellation in both commit orders | snapshot-before-tombstone/insert-after-commit writes stale `Autorizada` or batch deadlock | implement-in-this-todo | deterministic PostgreSQL interleaving test |
 
 ### Patterns To Enforce
 
@@ -258,6 +268,8 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 | fail-closed uncertainty | `D-CAN-13` | operation state machine | elapsed time or restart never re-enables an outcome-ambiguous write |
 | terminal cancellation tombstone | `D-CAN-09` | cache and detail projections | stale provider data cannot resurrect `Autorizada` or the action |
 | exact provider-write allowlist | `FISC-CAN-01` | SmartNotas port/adapter | all provider writes except the exact cancel POST remain forbidden |
+| shared per-note serialization | `D-CAN-16` | cancellation/cache DB transactions | tombstone and cache-present/absent writers cannot cross unsafely under READ COMMITTED |
+| independent kill switch | `D-CAN-17` | route/detail UI availability | rollback blocks new claims without disabling durable safety behavior |
 
 ### Prohibited Anti-Patterns
 
@@ -267,6 +279,7 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 | uncertain state expires to write-ready | time-based delete/retry transition | elapsed time does not prove provider outcome | none |
 | cache update without tombstone check | unconditional status upsert | stale page can recreate `Autorizada` | none |
 | new provider POST/PATCH/DELETE outside exact cancel path | port/adapter method/path diff | broadens the approved fiscal-write authority | new approved canonical decision only |
+| rollback that reverts schema/tombstone-aware writers | migration/diff/runtime test | preserved terminal rows would no longer protect projections | none |
 
 ## External Dependency Readiness
 
@@ -278,6 +291,7 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 ## Cancellation Public Contract
 
 - Request: `POST /api/v1/notas/:noteId/cancelar`, no query and no body; route identity is the signed opaque `noteId` only. Any query, parsed body including `{}`, or payload content type maps to `400 CancelamentoFiscalRequisicaoInvalida`.
+- Activation: `SMART_NOTAS_CANCEL_ENABLED=false` is the default and returns `503 SmartNotasCancelamentoDesabilitado` before durable claim/rate charge; detail exposes `cancellationState=unavailable` unless a terminal/active row requires a stronger state.
 - Provider response admission: HTTP `200`, body at most 16 KiB, exactly properties `cancelada:boolean` and `mensagem:string`; message is trimmed, normalized to LF, 1..2048 code points, and rejects NUL/unsupported control characters.
 - Public success: HTTP `200` exact `{cancelled:boolean,message:string}` with private/no-store headers. `cancelled=false` is a known business result, not a transport failure.
 - Every request is authenticated and actor-rate-admitted before observing/creating the durable per-note operation; only the atomically elected leader consumes one context/upstream quota unit.
@@ -298,6 +312,7 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 | durable `not_cancelled` | `409` | `CancelamentoFiscalNaoDisponivel` | no retry by Monitor | show the bounded message only to original caller; later calls use neutral text |
 | timeout/reset/disconnect from provider, provider `5xx`, redirect, malformed/oversized successful response after dispatch | `503` | `CancelamentoFiscalResultadoIncerto` | persist `uncertain`; no automatic/manual Monitor retry | detail refetch without claiming failure or success |
 | local admission saturation before dispatch | `503` | `SmartNotasOcupado` | new explicit action later | known zero provider POST |
+| cancellation kill switch disabled | `503` | `SmartNotasCancelamentoDesabilitado` | no claim/POST | detail hides action; safety overlay/upserts remain active |
 
 The operation checks the caller abort signal before durable claim/provider dispatch. After dispatch it uses an internal bounded signal and completes independently of client disconnect; only delivery of its result and UI effects remain caller-owned. `in_flight` uses a bounded lease for crash detection, but lease expiry transitions to `uncertain`, never back to write-ready. The operation row persists no provider message, token, actor or recipient data.
 
@@ -305,7 +320,7 @@ The operation checks the caller abort signal before durable claim/provider dispa
 
 `absent -> in_flight -> cancelled|not_cancelled|uncertain`. The composite key is `{contextoFiscal,providerIdInterno}`. `in_flight` stores only an opaque owner token, lease timestamps and nullable `dispatchStartedAt`. A second process cannot claim an active row; an expired lease is atomically changed to `uncertain`. If actor admission, leader/context admission, DB readiness or caller abort fails before claim, the state stays `absent`. If leader admission fails after claim but before dispatch, only that owner token may conditionally delete the row while `dispatchStartedAt IS NULL`. Immediately before network dispatch, the leader atomically stamps `dispatchStartedAt`; every subsequent exception/`401|403|404|429|5xx`/invalid response becomes `uncertain`, except exact `200 true -> cancelled` and exact `200 false -> not_cancelled`. `cancelled`, `not_cancelled` and `uncertain` are fail-closed for future Monitor POSTs. Reconciliation may promote `uncertain|not_cancelled` to `cancelled` only when an authoritative provider read reports `Cancelada`; no automatic transition returns any terminal state to `absent`.
 
-The `cancelled` transition and update of an existing cache row occur in one DB transaction. Rolling/bootstrap upserts use one atomic SQL statement whose status expression checks both the existing cache status and the durable cancellation row at statement execution; when either is terminal, the inserted/updated status is `Cancelada`. This closes both cache-present and cache-absent races without storing a full synthetic note.
+The `cancelled` transition and update of an existing cache row occur in one DB transaction. It and every rolling/bootstrap upsert acquire the same transaction-scoped PostgreSQL advisory lock derived from `{contextoFiscal,providerIdInterno}` before reading/writing operation/cache state. A hash collision may serialize unrelated notes but cannot weaken correctness. Batch upserts acquire locks in canonical key order, then use a status expression that checks both existing cache status and the durable cancellation row. Thus either sync commits first and cancellation updates its row, or cancellation commits first and sync observes the tombstone; cache-present and cache-absent races are closed under READ COMMITTED.
 
 After every provider detail read, one indexed composite-key lookup projects `cancellationState=available|unavailable|in_progress|uncertain|not_cancelled|cancelled`. A durable `cancelled` row overrides stale provider status to `Cancelada`; every non-`available` state suppresses the cancel action. No history scan is allowed.
 
@@ -384,11 +399,11 @@ After every provider detail read, one indexed composite-key lookup projects `can
 
 ### Runtime / Rollout Notes
 
-- One additive Prisma migration and project-owned `test:fiscal-migration` runner are required; no environment variable is planned.
+- One additive Prisma migration, project-owned `test:fiscal-migration` runner and `SMART_NOTAS_CANCEL_ENABLED` variable are required; the variable defaults to `false`.
 - Coordination is PostgreSQL-backed and safe across restarts/replicas that share the environment database. DB unavailability fails before provider dispatch.
 - Stage smoke must use a disposable authorized test note explicitly approved for cancellation; automated/live production cancellation is forbidden.
 - After deploy, confirm one successful mutation, cache/list convergence and provider/manual-false handling without recording PII.
-- Emergency rollback is forward-only: disable route/UI activation only; never roll back the schema, terminal rows, detail overlay or tombstone-aware cache writes.
+- Emergency rollback is forward-only: set `SMART_NOTAS_CANCEL_ENABLED=false`; never roll back the schema, terminal rows, detail overlay, advisory locks or tombstone-aware cache writes.
 
 ## Plan Review Gate
 
