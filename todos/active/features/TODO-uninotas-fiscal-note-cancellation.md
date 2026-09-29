@@ -441,11 +441,11 @@ The operation checks the caller abort signal before dispatch. After dispatch it 
 - **Why this decision:** medium cross-stack mutation requires a stable review packet before planning guards.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `feature/uninotas-fiscal-note-cancellation`
-- **Baseline commit:** `b20cd3124bbc684ab19c4872666fb7144407700c`
+- **Baseline commit:** `c29ab41a248de6935bc47f98cec0aeb9c9be1a0d`
 - **Baseline push reference:** `origin/feature/uninotas-fiscal-note-cancellation`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** refined feature brief/TODO decisions, assumptions, execution plan and review-gate floor were committed and pushed before the independent critique.
-- **Evidence / reference:** `b20cd3124bbc684ab19c4872666fb7144407700c` pushed to `origin/feature/uninotas-fiscal-note-cancellation`.
+- **Findings summary:** the critique-integrated canonical decision, concurrency/fence policy, terminal cache rule, closed API contract, UI lifecycle and validation plan were committed and pushed before convergence and architecture reviews.
+- **Evidence / reference:** `c29ab41a248de6935bc47f98cec0aeb9c9be1a0d` pushed to `origin/feature/uninotas-fiscal-note-cancellation`.
 - **Waiver authority / reference:** `n/a`
 - **Scope-neutral evidence update:** this freeze record and guard outcomes may be committed after the baseline without changing the frozen feature scope.
 
