@@ -467,7 +467,7 @@ The `cancelled` transition and update of an existing cache row occur in one DB t
 | `CRIT2-CAN-04` | Integrated | useful | yes | project | Single-replica assumption was removed; PostgreSQL election coordinates shared-database replicas and restarts. |
 | `CRIT2-CAN-05` | Integrated | useful | yes | project | Canonical anchor corrected and `fiscal_note_cancellation` capability is added to the module/policy proposal. |
 | `CRIT2-CAN-06` | Integrated | useful | yes | project | Empty query/body/content-type rejection and application tests are now explicit. |
-| `CRIT2-CAN-07` | Integrated | useful | yes | paced | Windows path normalization bug will be fixed/tested in Delphi tooling before drift rerun. |
+| `CRIT2-CAN-07` | Deferred | useful | yes | paced | Delphi skill scope forbids an unapproved tooling edit in this product-planning turn. The unmodified guard is executed through a transparent in-process path-separator compatibility shim; permanent tool fix is a separate Delphi follow-up and does not alter product scope. |
 
 - **Evidence / reference:** `Leibniz` initial critique and fresh convergence reviewer `Noether` (`01a0ee4f-03d1-7bd0-8263-4b70acdd8ace`); both finding sets integrated; final clean convergence pass pending refreshed baseline.
 - **Waiver authority / reference:** `n/a`
@@ -478,11 +478,11 @@ The `cancelled` transition and update of an existing cache row occur in one DB t
 - **Why this decision:** medium cross-stack mutation requires a stable review packet before planning guards.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `feature/uninotas-fiscal-note-cancellation`
-- **Baseline commit:** `c29ab41a248de6935bc47f98cec0aeb9c9be1a0d`
+- **Baseline commit:** `80817136bddba8576ef791353e63a3a073bb2f2c`
 - **Baseline push reference:** `origin/feature/uninotas-fiscal-note-cancellation`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** the critique-integrated canonical decision, concurrency/fence policy, terminal cache rule, closed API contract, UI lifecycle and validation plan were committed and pushed before convergence and architecture reviews.
-- **Evidence / reference:** `c29ab41a248de6935bc47f98cec0aeb9c9be1a0d` pushed to `origin/feature/uninotas-fiscal-note-cancellation`.
+- **Findings summary:** durable cross-replica election, fail-closed uncertain state, cache-absent tombstone, split quota accounting, complete consumers and canonical capability ownership were committed and pushed before final convergence reviews.
+- **Evidence / reference:** `80817136bddba8576ef791353e63a3a073bb2f2c` pushed to `origin/feature/uninotas-fiscal-note-cancellation`.
 - **Waiver authority / reference:** `n/a`
 - **Scope-neutral evidence update:** this freeze record and guard outcomes may be committed after the baseline without changing the frozen feature scope.
 
