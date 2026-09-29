@@ -15,19 +15,19 @@
 - **Complexity:** `big`
 - **Primary profile:** `Operational / Coder`
 - **Technical scope:** `nestjs, react, vite, postgresql, prisma`
-- **Current work state:** `planning-review-reconvergence`
-- **Implementation authority:** `pending renewed APROVADO`; as aprovações anteriores cobrem apenas a baseline já entregue e não autorizam esta evolução corretiva.
+- **Current work state:** `implementation-authorized`
+- **Implementation authority:** `granted by renewed user APROVADO on 2026-09-29 for D-RM-C01..C20`.
 
 ## Delivery Status Canon
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** apresentar as mudanças materiais convergidas ao usuário e solicitar novo `APROVADO`; somente depois iniciar RED/implementação na branch `release/uninotas`.
+- **Next exact step:** capturar RED fail-first e implementar schema/publication/coverage/scheduler/backend/frontend na branch `release/uninotas`, sob single-writer discipline.
 
 ## Active Work State
 
-- **Work state:** `review`
-- **Why this state now:** a primeira critique independente encontrou lacunas materiais de atomicidade, calendário, concorrência e contrato público antes de qualquer alteração de produto; o plano está sendo refinado e será revisto novamente.
+- **Work state:** `implementation`
+- **Why this state now:** o contrato convergiu após R1–R5, todos os gates pre-approval passaram e o usuário renovou explicitamente o `APROVADO` para `D-RM-C01..C20`.
 - **Exit condition:** baseline corretiva revisada, aprovada, implementada e validada na branch `release/uninotas`.
 
 ## Provisional Notes
@@ -64,9 +64,9 @@
 
 ## Approval
 
-- **Approved by:** `pending`
-- **Approval scope:** `pending renewed APROVADO for the corrective evolution defined in D-RM-C01..D-RM-C20`
-- **Execution not authorized by approval:** nenhuma implementação corretiva, alteração de banco, reparação de stage, deploy, credencial, quota ou topologia está autorizada enquanto este campo permanecer pendente.
+- **Approved by:** `usuário — APROVADO em 2026-09-29`
+- **Approval scope:** `corrective implementation defined in D-RM-C01..D-RM-C20: additive Prisma/PostgreSQL migration, NestJS synchronization/read/export contract, React consumer/UI states, source-owned tests and canonical module synchronization on release/uninotas`
+- **Execution not authorized by approval:** deploy/merge/promoção, credenciais/quota, mudança Railway/topologia, escrita em logs, cancelamento fiscal ou operações destrutivas no banco de stage.
 - **Renewed approval required when:** mudar janela histórica, semântica de cobertura/exportação, contrato público, estratégia de recuperação, schema, topologia, limites, riscos ou evidências obrigatórias.
 
 ## Historical Approval Evidence — Delivered Baseline Only
@@ -76,7 +76,8 @@
 - **Prior renewed approval:** `APROVADO o fluxo de carga histórica única e reconciliação diária do TODO.` (`2026-09-29`).
 - **Prior renewed scope:** bootstrap de 365 dias, reconciliação de hoje/ontem, fallback local, metadados de frescor e detalhe/PDF/XML no provedor.
 - **Authority boundary:** estas evidências explicam a baseline instalada em stage, mas foram explicitamente encerradas para a nova evolução porque o comportamento observado invalida premissas materiais de convergência e exportação.
-- **Latest approval attempt:** o usuário respondeu `APROVADO` em `2026-09-29`, porém as critiques obrigatórias posteriores encontraram mudanças materiais ainda não apresentadas (`FRM-CRIT-01..05`, `FRM-R2-01..05`, `FRM-R3-01..03`). Nenhuma implementação foi iniciada e essa aprovação não é aplicada ao contrato refinado `D-RM-C11..C20`; um novo `APROVADO` será solicitado após a reconvergência dos gates.
+- **Superseded approval attempt:** o usuário respondeu `APROVADO` em `2026-09-29`, porém as critiques obrigatórias posteriores encontraram mudanças materiais ainda não apresentadas (`FRM-CRIT-01..05`, `FRM-R2-01..05`, `FRM-R3-01..03`). Nenhuma implementação foi iniciada sob essa aprovação; ela foi substituída pela aprovação convergida registrada abaixo.
+- **Renewed converged approval:** `APROVADO` recebido em `2026-09-29` após apresentação explícita de atomic publication, daily coverage, retained horizon, snapshot reads, bounded scheduler, truthful freshness and test expansion. Esta é a autoridade vigente para `D-RM-C01..C20`.
 
 ## Historical Decision Baseline — Delivered 2026-09-29
 
