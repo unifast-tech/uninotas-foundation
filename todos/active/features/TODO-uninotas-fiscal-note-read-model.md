@@ -396,7 +396,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 | Repository | Path | Baseline ref | Comparison mode |
 | --- | --- | --- | --- |
 | `MonitorNotes` | `.` | `release/uninotas@5cd1d5bc0c91c784ac4be985baba8a21fdc702f4` | `working_tree` |
-| `uninotas-foundation` | `C:/Unifast/MonitorDeNotas/uninotas-foundation` | `main@434c7c7` | `working_tree` |
+| `uninotas-foundation` | `C:/Unifast/MonitorDeNotas/uninotas-foundation` | `main@e804632` | `working_tree` |
 
 ### Expected Changed Paths
 
@@ -711,11 +711,11 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Why this decision:** big architecture correction needs a committed/pushed immutable TODO packet before independent review.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `pending refined freeze`; R1 reviewed `f096ca47685f311f684758811c66945a2cde9f24`
-- **Baseline push reference:** `pending refined origin/main`; R1 source was `origin/main@f096ca47685f311f684758811c66945a2cde9f24`
-- **Gate status:** `running`
-- **Findings summary:** R1 proved the original frozen contract did not define atomic visibility, full window lifecycle, bounded scheduler ownership, exact consumer states or the necessary regressions. No product/module/runtime file was changed.
-- **Evidence / reference:** R1 package `artifacts/tmp/fiscal-read-model-critique-package.md`; dispatch `artifacts/tmp/fiscal-read-model-critique-dispatch.json`; refined freeze pending.
+- **Baseline commit:** `e804632b523caae754f00c495a7a64627e6353fe`; R1 reviewed `f096ca47685f311f684758811c66945a2cde9f24`
+- **Baseline push reference:** `origin/main@e804632b523caae754f00c495a7a64627e6353fe`; R1 source was `origin/main@f096ca47685f311f684758811c66945a2cde9f24`
+- **Gate status:** `no_material_findings`
+- **Findings summary:** the material R1 resolutions were frozen and pushed as a single TODO-only commit; no product/module/runtime file was included.
+- **Evidence / reference:** `https://github.com/unifast-tech/uninotas-foundation/commit/e804632b523caae754f00c495a7a64627e6353fe`; R1 package `artifacts/tmp/fiscal-read-model-critique-package.md`.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
