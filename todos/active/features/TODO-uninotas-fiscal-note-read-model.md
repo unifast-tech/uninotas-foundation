@@ -428,7 +428,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 | Repository | Path | Baseline ref | Comparison mode |
 | --- | --- | --- | --- |
 | `MonitorNotes` | `.` | `release/uninotas@5cd1d5bc0c91c784ac4be985baba8a21fdc702f4` | `working_tree` |
-| `uninotas-foundation` | `C:/Unifast/MonitorDeNotas/uninotas-foundation` | `main@e804632` | `working_tree` |
+| `uninotas-foundation` | `C:/Unifast/MonitorDeNotas/uninotas-foundation` | `main@f02abf8` | `working_tree` |
 
 ### Expected Changed Paths
 
@@ -745,11 +745,11 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Why this decision:** big architecture correction needs a committed/pushed immutable TODO packet before independent review.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `pending R3 refined freeze`; R2 reviewed `e804632b523caae754f00c495a7a64627e6353fe`; R1 reviewed `f096ca47685f311f684758811c66945a2cde9f24`
-- **Baseline push reference:** `pending refined origin/main`; R2 source was `origin/main@e804632b523caae754f00c495a7a64627e6353fe`
-- **Gate status:** `running`
-- **Findings summary:** R2 proved the e804 baseline still lacked reader snapshots, horizon admission, canonical rolling/frontier supersession and set-based publication bounds. No product/module/runtime file was changed.
-- **Evidence / reference:** R2 package `artifacts/tmp/fiscal-read-model-critique-r2-package.md`; dispatch `artifacts/tmp/fiscal-read-model-critique-r2-dispatch.json`; refined R3 freeze pending.
+- **Baseline commit:** `f02abf863bda45b64c5deb9b6e39aaadc020e2f5`; R2 reviewed `e804632b523caae754f00c495a7a64627e6353fe`; R1 reviewed `f096ca47685f311f684758811c66945a2cde9f24`
+- **Baseline push reference:** `origin/main@f02abf863bda45b64c5deb9b6e39aaadc020e2f5`; R2 source was `origin/main@e804632b523caae754f00c495a7a64627e6353fe`
+- **Gate status:** `no_material_findings`
+- **Findings summary:** the R2 snapshot/horizon/lifecycle/performance/test resolutions were frozen and pushed as one TODO-only commit; no product/module/runtime file was changed.
+- **Evidence / reference:** `https://github.com/unifast-tech/uninotas-foundation/commit/f02abf863bda45b64c5deb9b6e39aaadc020e2f5`; R2 package `artifacts/tmp/fiscal-read-model-critique-r2-package.md`.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
