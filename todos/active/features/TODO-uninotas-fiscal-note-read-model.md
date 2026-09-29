@@ -22,7 +22,7 @@
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** executar audit escalation, critique no-contexto, assumption-code coherence, scope-drift e authority preflight a partir da baseline publicada `fe1157216fa43f016685014d117068663e47deb5`.
+- **Next exact step:** executar critique no-contexto, assumption-code coherence, scope-drift e authority preflight a partir da baseline publicada `f096ca47685f311f684758811c66945a2cde9f24`.
 
 ## Active Work State
 
@@ -651,11 +651,11 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Why this decision:** big architecture correction needs a committed/pushed immutable TODO packet before independent review.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `fe1157216fa43f016685014d117068663e47deb5`
-- **Baseline push reference:** `origin/main@fe1157216fa43f016685014d117068663e47deb5`
+- **Baseline commit:** `f096ca47685f311f684758811c66945a2cde9f24`
+- **Baseline push reference:** `origin/main@f096ca47685f311f684758811c66945a2cde9f24`
 - **Gate status:** `no_material_findings`
 - **Findings summary:** corrective contract frozen as a single-file TODO commit; no product/module/runtime file was included.
-- **Evidence / reference:** `https://github.com/unifast-tech/uninotas-foundation/commit/fe1157216fa43f016685014d117068663e47deb5`
+- **Evidence / reference:** `https://github.com/unifast-tech/uninotas-foundation/commit/f096ca47685f311f684758811c66945a2cde9f24`
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
@@ -983,4 +983,4 @@ Versionar a implementação na branch `release/uninotas`; depois do deploy de st
 - **Disposition:** `keep-active`
 - **Disposition reason:** corrective contract is prepared but not frozen/reviewed/approved or implemented.
 - **Post-commit/push status:** `complete`
-- **Next path/status action:** run audit escalation, fresh no-context critique, assumption-code coherence, scope-drift and pre-approval authority guards from baseline `fe1157216fa43f016685014d117068663e47deb5`.
+- **Next path/status action:** run fresh no-context critique, assumption-code coherence, scope-drift and pre-approval authority guards from baseline `f096ca47685f311f684758811c66945a2cde9f24`.
