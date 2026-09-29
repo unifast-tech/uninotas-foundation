@@ -22,7 +22,7 @@
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** congelar a baseline refinada que resolve `FRM-CRIT-01..05`, executar nova critique no-contexto, assumption-code coherence, scope-drift e authority preflight; somente então solicitar novo `APROVADO`.
+- **Next exact step:** executar assumption-code coherence, scope-drift e authority preflight sobre a baseline convergida; então apresentar as mudanças materiais e solicitar novo `APROVADO`.
 
 ## Active Work State
 
@@ -424,7 +424,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - [ ] `VAL-RM-C14` Medir `EXPLAIN`, statements, locks, rollback e latência concorrente para publicação vazia/pequena/20.000 linhas.
 - [ ] `VAL-RM-C15` Reiniciar após checkpoint e repetir o mesmo provider ID em páginas diferentes; provar `candidate count != raw observed`, rollback e cobertura inalterada em PostgreSQL real.
 - [ ] `VAL-RM-C16` Cobrir complete-zero, histórico puro, histórico+rolling atual, rolling vencido/falhado e respectivas mensagens/ações no backend e browser.
-- [ ] `VAL-RM-C17` Abrir transação antes da meia-noite, confirmar retenção+novo horizonte antes da primeira leitura que estabelece o snapshot e provar que lista/export veem juntos os novos limites e linhas; repetir com snapshot estabelecido antes da retenção para provar a visão antiga coerente.
+- [ ] `VAL-RM-C17` Em PostgreSQL real: (a) com anchor existente, abrir transação antes da meia-noite e confirmar retenção+novo horizonte antes e depois da primeira leitura, provando visões nova/antiga coerentes; (b) sem context-state, estabelecer o snapshot/provisional bounds, confirmar em paralelo a primeira criação do anchor+poda e provar que a requisição original ainda vê coverage/count/rows pré-poda, enquanto nova requisição vê o anchor e nunca usa bounds provisórios.
 
 ## Test Decisions — Frozen
 
@@ -542,11 +542,11 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 
 | Assumption ID | Assumption | Evidence | If False | Confidence | Handling |
 | --- | --- | --- | --- | --- | --- |
-| `A-RM-C01` | Smart Notas has no transactional snapshot/cursor/stable-order contract for list pagination. | canonical module `FISC-EX-04`; current adapter/list contract | provider-native delta/snapshot could simplify sync and would require contract refresh | `High` | `Keep as Assumption` |
-| `A-RM-C02` | The moving total can change because the delivered bootstrap includes the current day and freezes metadata across pages/retries. | `fiscal-note-cache.service.ts:164-181,249-303,326-358` | if provider guarantees immutable totals, windowing remains bounded and safer but root cause may be another stored error | `High` | `Keep as Assumption` |
+| `A-RM-C01` | Smart Notas has no transactional snapshot/cursor/stable-order contract for list pagination. | `uninotas-foundation/modules/fiscal-notes-and-documents.md` (`FISC-EX-04`); `backend/src/fiscal-notes/smart-notas.adapter.ts` | provider-native delta/snapshot could simplify sync and would require contract refresh | `High` | `Keep as Assumption` |
+| `A-RM-C02` | The moving total can change because the delivered bootstrap includes the current day and freezes metadata across pages/retries. | `backend/src/fiscal-notes/fiscal-note-cache.service.ts:164`; `backend/src/fiscal-notes/fiscal-note-cache.service.ts:249`; `backend/src/fiscal-notes/fiscal-note-cache.service.ts:326` | if provider guarantees immutable totals, windowing remains bounded and safer but root cause may be another stored error | `High` | `Keep as Assumption` |
 | `A-RM-C03` | Existing canonical cache/sync rows cannot prove atomic complete-window publication because page writes are immediately visible and have no isolated generation ownership. | `schema.prisma:91-109`; `fiscal-note-cache.service.ts` page upserts | an expand-only candidate-generation migration is required and must be validated on empty and delivered-baseline schemas | `High` | `Resolved into D-RM-C11/C12` |
 | `A-RM-C04` | Stage runs one API replica. | dependency readiness records `replicas=1` | distributed lease becomes required before deployment | `Medium` | `Block deployment, not planning` |
-| `A-RM-C05` | The exact stage failure row/error code is unknown from the local DB. | local read-only query returned empty sync/cache; user supplied public stage symptoms | operational repair branch may differ, but list/export contract remains valid | `High` | `Keep as Assumption` |
+| `A-RM-C05` | The exact stage failure row/error code is unknown from the local DB. | local read-only query returned empty sync/cache; user supplied public stage symptoms | operational repair branch may differ, but list/export contract remains valid | `High` | `Operational runtime evidence pending; not a code assumption` |
 | `A-RM-C06` | Historical statuses older than `D-1` may change externally, but broad periodic deep reconciliation is outside this correction. | Smart Notas authority + no changed-since contract | stale older status remains residual risk; cancellation overlay covers only Monitor-owned cancellation | `Medium` | `Keep as Assumption; document residual risk` |
 
 ## Execution Plan
@@ -634,7 +634,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 
 ## Plan Review Gate
 
-- **Status:** `r4-single-finding-integrated-pending-r5`; R4 closed duplicate/freshness and isolated one PostgreSQL snapshot-timing flaw, now replaced by an MVCC-visible retained-horizon anchor pending final focused verification.
+- **Status:** `converged-findings-integrated`; R5 confirmou o desenho MVCC do horizonte e sua única lacuna de teste no caminho sem anchor foi incorporada em `VAL-RM-C17`.
 
 ### Review Sections
 
@@ -749,8 +749,8 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Decision review lifecycle:** `after diagnosis is closed and before APROVADO`
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set`
-- **Decision review status:** `r1_through_r4_findings_integrated; r5_pending`
-- **Decision review evidence / resolution:** R4 closed `FRM-R3-01/02` and kept `FRM-R3-03` open because transaction start time is not the snapshot boundary. `D-RM-C20` now uses a retained-horizon context row advanced atomically with pruning and read from the request snapshot. A final focused R5 reviewer must converge before approval.
+- **Decision review status:** `findings_integrated`
+- **Decision review evidence / resolution:** R5 confirmou que `D-RM-C20` fecha `FRM-R3-03` nas duas ordens MVCC com anchor. O único finding restante foi de falsificabilidade do primeiro caminho sem anchor e está explicitamente integrado em `VAL-RM-C17`.
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -764,10 +764,10 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Why this decision:** big architecture correction needs a committed/pushed immutable TODO packet before independent review.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `d10c04fb2a9d4aa8339fb08f9b537eb4cf7f4f36`; R4 reviewed `c5220a77c5a54c7d3142016799d32de6952b0926`
-- **Baseline push reference:** `origin/main@d10c04fb2a9d4aa8339fb08f9b537eb4cf7f4f36`; R4 source was `origin/main@c5220a77c5a54c7d3142016799d32de6952b0926`
+- **Baseline commit:** `d10c04fb2a9d4aa8339fb08f9b537eb4cf7f4f36`
+- **Baseline push reference:** `origin/main@d10c04fb2a9d4aa8339fb08f9b537eb4cf7f4f36`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** the snapshot-visible retained-horizon resolution was frozen and pushed as one TODO-only commit; no product/module/runtime file was changed.
+- **Findings summary:** the snapshot-visible retained-horizon resolution was frozen and pushed as one TODO-only commit; no product/module/runtime file was changed. R4 reviewed `c5220a77c5a54c7d3142016799d32de6952b0926`; R5 reviewed the `d10c04f` focused baseline.
 - **Evidence / reference:** `https://github.com/unifast-tech/uninotas-foundation/commit/d10c04fb2a9d4aa8339fb08f9b537eb4cf7f4f36`; R4 package `artifacts/tmp/fiscal-read-model-critique-r4-package.md`.
 - **Waiver authority / reference:** `n/a`
 
@@ -794,9 +794,9 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Critique isolation mode:** `fresh internal no-context reviewer`
 - **Internal reviewer mandate:** `required after baseline freeze; reviewer cannot be implementing agent`
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
-- **Critique status:** `running`
-- **Findings summary:** R1 reported `FRM-CRIT-01..05`, R2 `FRM-R2-01..05`, R3 `FRM-R3-01..03`, and R4 kept only `FRM-R3-03` open. All resolutions are integrated below and require one final focused fresh R5 verification.
-- **Evidence / reference:** R1 through R4 packages and dispatches under `artifacts/tmp/fiscal-read-model-critique*`; fresh reviewers recorded in their dispatch results.
+- **Critique status:** `findings_integrated`
+- **Findings summary:** R1–R4 findings were resolved in `D-RM-C11..C20`; R5 found the retained-horizon design structurally sound and requested one explicit no-anchor race test, now integrated in `VAL-RM-C17`.
+- **Evidence / reference:** R1 through R5 packages and dispatches under `artifacts/tmp/fiscal-read-model-critique*`; fresh reviewers recorded in their dispatch results.
 - **Waiver authority / reference:** `n/a`
 
 ### Critique Finding Resolution Ledger
@@ -825,13 +825,19 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 | --- | --- | --- | --- | --- |
 | `FRM-R3-01` | high | Duplicate provider IDs separated by checkpoint/restart can collapse and falsely satisfy completion. | `D-RM-C18`; durable raw observation count; exact candidate/raw/expected equality and page invariants; PostgreSQL restart regression `VAL-RM-C15`. | `Closed by R4` |
 | `FRM-R3-02` | high | Preserved freshness fields lack truthful interval derivation after sync compaction. | `D-RM-C19`; durable daily `published_at`; exact conservative aggregates and `freshnessState`; historical snapshots have no unsupported retry; tests `VAL-RM-C16`. | `Closed by R4` |
-| `FRM-R3-03` | medium | Application-captured/time-derived `D` can disagree with the MVCC snapshot during midnight retention. | `D-RM-C20`; snapshot-visible retained-horizon row advances in the same commit as pruning; before/after snapshot barrier tests `VAL-RM-C17`. | `R4 carry-forward replaced; pending R5` |
+| `FRM-R3-03` | medium | Application-captured/time-derived `D` can disagree with the MVCC snapshot during midnight retention. | `D-RM-C20`; snapshot-visible retained-horizon row advances in the same commit as pruning; anchored/no-anchor before/after snapshot barriers in `VAL-RM-C17`. | `Closed by R5; test refinement integrated` |
 
 ### R4 Critique Finding Resolution Ledger
 
 | Finding ID | Severity | Finding | Resolution in refined baseline | Status |
 | --- | --- | --- | --- | --- |
-| `FRM-R3-03` | medium | `transaction_timestamp()` is fixed at transaction start, not necessarily the first repeatable-read snapshot. | `D-RM-C20` now persists `{horizon_date, retained_from, retained_through}` and advances it atomically with pruning; requests read the anchor and rows in one MVCC snapshot; `VAL-RM-C17` forces both decisive commit orders. | `Integrated; pending focused R5` |
+| `FRM-R3-03` | medium | `transaction_timestamp()` is fixed at transaction start, not necessarily the first repeatable-read snapshot. | `D-RM-C20` persists `{horizon_date, retained_from, retained_through}` and advances it atomically with pruning; requests read anchor/rows in one MVCC snapshot; `VAL-RM-C17` forces anchored and first-no-anchor commit orders. | `Closed by R5` |
+
+### R5 Critique Finding Resolution Ledger
+
+| Finding ID | Severity | Finding | Resolution in refined baseline | Status |
+| --- | --- | --- | --- | --- |
+| `FRM-R5-01` | medium | The provisional no-anchor race lacked an explicit falsifying test. | `VAL-RM-C17(b)` now requires no context-state, provisional first snapshot, concurrent first-anchor creation+pruning, continued old-snapshot visibility and a subsequent anchor-visible request. | `Integrated` |
 
 ## Gate: Assumption Code Coherence
 
@@ -840,9 +846,9 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Trigger stage:** `after critique convergence and before APROVADO`
 - **Guard scope:** `A-RM-C01..A-RM-C06`
 - **Guard command:** `python3 delphi-ai/tools/assumption_code_coherence_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-fiscal-note-read-model.md`
-- **Gate status:** `not_run`
-- **Findings summary:** pending baseline freeze and critique.
-- **Evidence / reference:** `pending`
+- **Gate status:** `no_material_findings`
+- **Findings summary:** live assumptions `A-RM-C01/C02` resolve to the canonical fiscal module and current Smart Notas/cache implementation; stage-only unknown `A-RM-C05` is correctly classified as runtime evidence rather than a code assumption.
+- **Evidence / reference:** `python3 delphi-ai/tools/assumption_code_coherence_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-fiscal-note-read-model.md`.
 - **Waiver authority / reference:** `n/a`
 
 ## External Dependency Readiness
