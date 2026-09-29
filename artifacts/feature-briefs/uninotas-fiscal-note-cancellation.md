@@ -28,7 +28,7 @@
 - **Module-authority impact:** required — a decisão proposta `FISC-CAN-01` cria uma exceção limitada ao guardrail atual de `provider writes`; permanece inativa até aprovação explícita do TODO.
 - **Roadmap impact:** none — evolução delimitada do módulo fiscal existente.
 - **Primary module candidates:** `foundation_documentation/modules/fiscal-notes-and-documents.md`
-- **Secondary module candidates:** `foundation_documentation/modules/access-control-and-users.md`
+- **Secondary module candidates:** `foundation_documentation/modules/identity-and-team.md`
 
 ## Evidence / References
 
@@ -45,15 +45,15 @@
 | --- | --- | --- | --- | --- |
 | `AMB-CAN-01` | Quem pode cancelar? | É uma mutação fiscal de alto impacto. | Usuário confirmou `ADMIN|GESTOR|ANALISTA`; `LEITOR` somente leitura. | `resolved` |
 | `AMB-CAN-02` | Há motivo de cancelamento? | Mudaria DTO, UX e contrato externo. | OpenAPI não define request body. | `resolved: no body` |
-| `AMB-CAN-03` | Como tratar timeout? | Retry automático pode duplicar uma operação irreversível. | Provider não publica chave de idempotência. | `resolved: operação process-local compartilhada, resultado incerto, fence de 60 s, sem retry automático, recarregar detalhe` |
-| `AMB-CAN-04` | Como refletir no banco? | Lista local não pode permanecer autorizada após sucesso conhecido nem ser rebaixada por página antiga. | Read model é derivado e indexado por contexto + ID interno. | `resolved: update imediato best-effort + Cancelada terminal preservada atomicamente no rolling upsert` |
-| `AMB-CAN-05` | Como tratar duas abas/clientes? | Single-flight apenas no React não protege o provider. | Runtime atual coordena somente dentro do processo. | `resolved: compartilhar uma promise por contexto + ID interno, com admissão individual; multi-réplica fora do escopo` |
+| `AMB-CAN-03` | Como tratar timeout? | Retry automático pode duplicar uma operação irreversível. | Provider não publica chave de idempotência. | `resolved: estado uncertain durável e fail-closed, sem expiração ou retry pelo Monitor` |
+| `AMB-CAN-04` | Como refletir no banco? | Lista local não pode permanecer autorizada após sucesso conhecido nem ser rebaixada por página antiga. | Read model é derivado e indexado por contexto + ID interno. | `resolved: operação/tombstone durável + upsert atômico que cobre cache presente ou ausente` |
+| `AMB-CAN-05` | Como tratar duas abas/clientes/réplicas? | Single-flight apenas no React ou processo não protege o provider. | PostgreSQL já é dependência compartilhada do read model. | `resolved: eleição atômica durável por contexto + ID, uma chamada líder e lease vencido convertido em uncertain` |
 
 ## Story Decomposition
 
 | Story ID | Story / User Value | Primary Module | Secondary Modules | Acceptance Boundary | Candidate Validation Signal | Candidate TODO Decision | Dependencies / Blockers | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `ST-FISCAL-CANCEL-01` | Cancelar uma nota autorizada no detalhe com confirmação e feedback seguro. | fiscal-notes-and-documents | access-control-and-users, React UI | Uma única mutação por ação confirmada; perfis corretos; cache atualizado; layout responsivo; erros e resultado manual explícitos. | adapter/service/application tests, concorrência/race, parser/UI e browser responsivo | `create-now` | aprovação do TODO | história atual |
+| `ST-FISCAL-CANCEL-01` | Cancelar uma nota autorizada no detalhe com confirmação e feedback seguro. | fiscal-notes-and-documents | identity-and-team, React UI | Uma única mutação líder por nota; perfis corretos; tombstone/cache monotônico; layout responsivo; erros e resultado manual explícitos. | adapter/service/PostgreSQL application tests, concorrência/race, parser/UI e browser responsivo | `create-now` | aprovação do TODO | história atual |
 | `ST-FISCAL-CANCEL-02` | Cancelamento em lote ou por motivo customizado. | fiscal-notes-and-documents | operations | contrato próprio e suporte oficial do provider | contrato/provider + carga | `defer` | API não oferece esse contrato | fora do pedido |
 
 ## Retire This Brief When
