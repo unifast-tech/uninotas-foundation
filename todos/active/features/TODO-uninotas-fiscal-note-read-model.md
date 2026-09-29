@@ -769,11 +769,11 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Why this decision:** big architecture correction needs a committed/pushed immutable TODO packet before independent review.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `a1c42017e34f5a47e86e064ea8be900f35a873c9`
+- **Baseline commit:** `9d3bf5534f0c02450805f0fe8b34f9d7bb4479a2`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** the snapshot-visible retained-horizon resolution and R5 no-anchor test refinement were frozen and pushed as TODO-only commits; no product/module/runtime file was changed. R4 reviewed `c5220a7`; R5 reviewed `d10c04f` and its sole finding is integrated in `a1c4201`.
-- **Evidence / reference:** `https://github.com/unifast-tech/uninotas-foundation/commit/a1c42017e34f5a47e86e064ea8be900f35a873c9`; R5 package `artifacts/tmp/fiscal-read-model-critique-r5-package.md`.
+- **Findings summary:** the converged design, R5 no-anchor test refinement and passing pre-approval gate metadata were frozen and pushed as TODO-only commits; no product/module/runtime file was changed. R4 reviewed `c5220a7`; R5 reviewed `d10c04f` and its sole finding was integrated before the final freeze.
+- **Evidence / reference:** `https://github.com/unifast-tech/uninotas-foundation/commit/9d3bf5534f0c02450805f0fe8b34f9d7bb4479a2`; R5 package `artifacts/tmp/fiscal-read-model-critique-r5-package.md`.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
