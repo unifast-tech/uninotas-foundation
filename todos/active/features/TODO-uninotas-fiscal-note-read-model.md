@@ -65,7 +65,7 @@
 ## Approval
 
 - **Approved by:** `pending`
-- **Approval scope:** `pending renewed APROVADO for the corrective evolution defined in D-RM-C01..D-RM-C14`
+- **Approval scope:** `pending renewed APROVADO for the corrective evolution defined in D-RM-C01..D-RM-C17`
 - **Execution not authorized by approval:** nenhuma implementação corretiva, alteração de banco, reparação de stage, deploy, credencial, quota ou topologia está autorizada enquanto este campo permanecer pendente.
 - **Renewed approval required when:** mudar janela histórica, semântica de cobertura/exportação, contrato público, estratégia de recuperação, schema, topologia, limites, riscos ou evidências obrigatórias.
 
@@ -76,7 +76,7 @@
 - **Prior renewed approval:** `APROVADO o fluxo de carga histórica única e reconciliação diária do TODO.` (`2026-09-29`).
 - **Prior renewed scope:** bootstrap de 365 dias, reconciliação de hoje/ontem, fallback local, metadados de frescor e detalhe/PDF/XML no provedor.
 - **Authority boundary:** estas evidências explicam a baseline instalada em stage, mas foram explicitamente encerradas para a nova evolução porque o comportamento observado invalida premissas materiais de convergência e exportação.
-- **Latest approval attempt:** o usuário respondeu `APROVADO` em `2026-09-29`, porém a critique obrigatória imediatamente posterior encontrou mudanças materiais ainda não apresentadas (`FRM-CRIT-01..05`). Nenhuma implementação foi iniciada e essa aprovação não é aplicada ao contrato refinado `D-RM-C11..C14`; um novo `APROVADO` será solicitado após a reconvergência dos gates.
+- **Latest approval attempt:** o usuário respondeu `APROVADO` em `2026-09-29`, porém as critiques obrigatórias posteriores encontraram mudanças materiais ainda não apresentadas (`FRM-CRIT-01..05`, `FRM-R2-01..05`). Nenhuma implementação foi iniciada e essa aprovação não é aplicada ao contrato refinado `D-RM-C11..C17`; um novo `APROVADO` será solicitado após a reconvergência dos gates.
 
 ## Historical Decision Baseline — Delivered 2026-09-29
 
@@ -145,31 +145,44 @@ This proposal replaces the current per-request/per-period full coverage strategy
 | `D-RM-C10` | Runtime boundary | Use the existing NestJS process and scheduler in the current single-replica topology. No queue, worker service, Railway topology, provider quota or credential change is authorized. | Preserves the prior topology limitation and requires a separate TODO before horizontal scaling. |
 | `D-RM-C11` | Atomic window publication | Provider pages are written to an isolated candidate generation. Canonical cache rows and interval coverage change together in one database transaction only after the complete traversal validates; failed or superseded generations are never visible to list/export. | Closes the partial-publication gap in `D-RM-C02/C05` and preserves the last valid projection. |
 | `D-RM-C12` | Exact membership and absence | Every candidate must have a valid scheduled issue date inside the exact context/window. Null, malformed or out-of-window rows fail that generation. Successful publication deletes canonical rows proven absent from the same exact interval before upserting the candidate set. | Makes complete/empty/removed/moved semantics provable rather than count-derived. |
-| `D-RM-C13` | Gap-free calendar frontier | Initial history is the inclusive 365-day interval `[D-366,D-2]`, split at calendar-month boundaries in `America/Sao_Paulo`. Thereafter each new `D-2` day is published independently; after a month closes, a full-month verification may atomically supersede its daily metadata. | Makes month/year/leap-day rollover, retention and gap/overlap behavior deterministic. |
+| `D-RM-C13` | Gap-free calendar frontier | Initial history is the inclusive 365-day interval `[D-366,D-2]`, split into month-clipped provider traversals in `America/Sao_Paulo`; rolling owns `[D-1,D]`. Each successful traversal publishes canonical daily proof, so a newly eligible `D-2` reuses its prior rolling proof or enters history as one missing day. | Makes month/year/leap-day rollover, retention and gap/overlap behavior deterministic. |
 | `D-RM-C14` | Bounded scheduler and public state | One in-process pump runs at startup and every 15 minutes, never overlaps itself, prioritizes rolling for both contexts, then advances at most one historical window globally in round-robin order. The API exposes the frozen coverage/sync/progress/error fields below, including complete-zero versus partial-zero semantics. | Closes priority, fairness, concurrency and consumer ambiguity without changing the single-replica topology. |
+| `D-RM-C15` | Daily canonical coverage proof | Add a context/date coverage ledger as the only authority for local completeness. Monthly historical and two-day rolling traversals publish one proof row for every calendar day in their exact interval, including days with zero notes; operational sync intervals may overlap, but canonical coverage never does. | Resolves rolling/frontier supersession and boundary clipping without deriving completeness from mutable sync rows or row counts. |
+| `D-RM-C16` | Request snapshot and admissible horizon | Every pump/request captures `D` once in `America/Sao_Paulo`. Local list/export accept only intervals fully inside `[D-366,D]`; outside intervals fail with HTTP `422 PeriodoFiscalForaDoHorizonte`. Coverage, count and rows/CSV are read in one PostgreSQL `REPEATABLE READ` transaction. | Prevents mixed-generation responses, permanently partial requests and retention races while preserving provider-backed `documento` queries. |
+| `D-RM-C17` | Bounded set-based publication | Final candidate promotion uses parameterized set-based SQL inside one bounded Prisma transaction, supported by generation/date indexes. Provider I/O never runs inside this transaction; timeout/lock failure preserves the previous published generation and enters normal persisted retry/backoff. | Keeps 20,000-row publication predictable and avoids thousands of row-by-row statements or long unbounded locks. |
 
 ### Refined Publication, Calendar, Scheduler and Consumer Contract
 
 #### Atomic candidate publication
 
-- Add an expand-only Prisma/PostgreSQL candidate table keyed by `{sync_id, generation_id, provider_id_interno}` and containing only the existing summary projection allowlist plus `observed_at`; the sync row records its active generation. No raw payload, recipient document, PDF/XML or ephemeral URL is added.
+- Add an expand-only Prisma/PostgreSQL candidate table keyed by `{sync_id, generation_id, provider_id_interno}` and a coverage-day table uniquely keyed by `{contexto_fiscal, coverage_date}`; the sync row records its active generation. Candidates contain only the existing summary projection allowlist plus `observed_at`; no raw payload, recipient document, PDF/XML or ephemeral URL is added.
 - A window traversal writes and idempotently replaces rows only in its candidate generation. List/export continue reading the canonical cache and therefore cannot observe page-by-page or retry-partial data.
-- After the final page, one database transaction locks and rechecks the current sync/generation, validates exact context/date membership and page invariants, deletes canonical rows for that exact context/date interval that are absent from the candidate set, upserts the candidate rows, marks the window complete, and removes its candidates.
+- After the final page, one database transaction locks and rechecks the current sync/generation, validates exact context/date membership and page invariants, deletes canonical rows for that exact context/date interval that are absent from the candidate set, upserts the candidate rows, upserts one completed coverage-day proof for every day in the interval, marks the operational sync complete, and removes its candidates.
+- Absence deletion and candidate promotion use parameterized set-based `DELETE ... NOT EXISTS` and `INSERT ... SELECT ... ON CONFLICT DO UPDATE`, not a per-row Prisma upsert loop. The migration adds candidate indexes for active generation/date membership and retains the canonical context/date index. Provider calls and page staging occur before the publication transaction.
+- Publication sets local PostgreSQL `lock_timeout <= 2s` and `statement_timeout <= 30s`, with the Prisma interactive transaction bounded to `<= 35s`. A timeout rolls back the entire publication, records a sanitized failure after rollback and follows persisted cooldown/backoff; it never expands the timeout dynamically.
 - A failure, restart, provider-total change or stale generation leaves the prior canonical projection and coverage unchanged. Cleanup may delete only candidates owned by that failed/superseded generation.
 - Legacy `bootstrap_*` metadata is retired without deleting canonical cache rows. Every new window is provider-verified before it can become complete; existing rows remain visible only under truthful partial coverage until publication proves the interval.
 
 #### Calendar frontier and lifecycle
 
-- `D` is derived in `America/Sao_Paulo`. Initial historical membership is exactly 365 inclusive calendar days, from `D-366` through `D-2`, split into immutable, non-overlapping month-clipped windows.
-- Once initial windows exist, each newly eligible `D-2` day is represented by a one-day immutable frontier window, so advancing the clock cannot mutate an already completed interval.
-- At month closure, a transaction may compact a contiguous, gap-free set of already completed month-clipped/daily windows into one completed month record; compaction makes no provider call and changes no canonical note row. It supersedes source metadata only after rechecking context, exact bounds and completeness.
-- After the newly eligible `D-2` frontier has published, retention removes canonical rows strictly before the new `D-366` boundary and retires sync/candidate metadata that cannot intersect `[D-366,D]`. Legacy-repair startup preserves every existing cache row; routine horizon pruning begins only after frontier publication succeeds.
-- Window construction and coverage queries reject gaps, overlaps, inverted bounds and cross-context reuse. Leap days, year/month rollover and daylight-saving-independent calendar arithmetic are test fixtures, not implicit behavior.
+- `D` is captured once per pump and once per interactive request in `America/Sao_Paulo`; it is never recomputed mid-operation. Initial historical membership is exactly 365 inclusive calendar days, from `D-366` through `D-2`, split into immutable month-clipped provider traversals. Rolling is the exact two-day interval `[D-1,D]`.
+- Operational sync rows describe provider traversals and may overlap across rolling/day/month boundaries. They never authorize reads. Successful publication writes/upserts the canonical daily coverage ledger for each exact day, so the proof set is non-overlapping by database uniqueness and requires no interval-precedence heuristic.
+- When `D` advances, yesterday's successful rolling publication already provides the daily proof for the newly historical `D-2`. If that proof is missing, `D-2` enters the historical queue as an immutable one-day traversal; no completed day is refetched merely to change its rolling/historical label.
+- Month compaction affects completed operational sync/checkpoint records only. A transaction may replace contiguous completed operational records with a summary after verifying the daily coverage ledger; it never changes coverage-day proofs or canonical note rows.
+- After rolling/frontier maintenance, a short transaction deletes canonical rows and daily coverage proofs strictly before `D-366`, removes candidates from inactive/superseded generations, and retires operational metadata that cannot support retry or observability inside `[D-366,D]`. Legacy-repair startup preserves all existing cache rows; routine pruning begins only after the new model has at least one successfully published generation for the context.
+- Coverage is the exact count/continuity of daily proof rows for the requested context/dates. Month/year/leap-day transitions, midnight interleavings, inverted bounds and cross-context reuse therefore have one set-based answer and are explicit test fixtures.
+
+#### Request snapshot and horizon admission
+
+- Local list/export without `documento` require `dataInicio >= D-366`, `dataFim <= D` and the existing maximum-span rule, using the request-captured `D`. A violation returns the normal JSON error envelope with HTTP `422`, exact code `PeriodoFiscalForaDoHorizonte`, and no provider/cache/export work.
+- React constrains the local date controls to the same `[D-366,D]` bounds and renders the exact backend error if a stale URL violates them. The provider-backed `documento` path preserves its existing valid-date/max-span contract and is not reclassified as local coverage.
+- List reads coverage metadata, total and page rows inside one read-only logical Prisma transaction at PostgreSQL `REPEATABLE READ`; export reads coverage/admission and all bounded rows inside one equivalent snapshot before building the CSV buffer.
+- Publication or retention that commits during a request is wholly before or wholly after that request's database snapshot. Responses cannot combine old totals/coverage with new rows, and an export admitted as complete cannot lose rows to concurrent pruning.
 
 #### Scheduler ownership and bounded work
 
 - One `pumpPromise` owns synchronization in the NestJS process. Startup and 15-minute ticks coalesce onto it; a tick never creates a second pump, and shutdown stops admitting new work before awaiting/cancelling the current bounded provider operation.
-- Each pump services rolling `D-1..D` for every configured fiscal context first. It then advances at most one historical window globally, rotating the starting context after each attempt so Unifast and Prosperar cannot starve each other.
+- Each pump captures `D` once and services rolling `D-1..D` for every configured fiscal context first. It then advances at most one missing historical coverage window globally, rotating the starting context after each attempt so Unifast and Prosperar cannot starve each other.
 - Provider page walks are sequential globally in the approved one-replica topology. Persisted cooldown/backoff is honored before admission, and stale `running` ownership is recovered deterministically without concurrent generations.
 - Interactive list/export never awaits the pump. A request may issue a coalesced nudge only; it reads the canonical projection and persisted state immediately.
 
@@ -180,18 +193,29 @@ For list responses without `documento`, `readModel` preserves the existing field
 | Field | Type / values | Consumer meaning |
 | --- | --- | --- |
 | `syncState` | `idle \| syncing \| failed` | current operational state for the requested context/interval |
-| `completedWindows` | non-negative integer | number of exact coverage windows complete for the requested interval |
-| `totalWindows` | non-negative integer | number of windows required for the requested interval |
+| `completedWindows` | non-negative integer | number of canonical daily coverage proof units complete for the requested interval |
+| `totalWindows` | positive integer | inclusive number of calendar days required for the requested interval |
 | `lastSyncError` | `provider_rate_limited \| provider_unavailable \| provider_timeout \| pagination_inconsistent \| unexpected \| null` | sanitized reason for the latest relevant failed generation |
 | `retryAfterSeconds` | non-negative integer or `null` | remaining persisted cooldown when known |
 
 - Existing `syncing` is retained as an additive-compatibility alias and equals `syncState === 'syncing'`. `syncState` is `syncing` when any relevant interval generation is active; otherwise `failed` when an incomplete relevant window has a latest failure; otherwise `idle`. A successful relevant publication clears its prior `lastSyncError` and `retryAfterSeconds`.
-- `completedWindows` and `totalWindows` are computed over the canonical non-overlapping coverage decomposition for the exact requested interval after metadata compaction; a valid local list interval has `totalWindows >= 1` and `0 <= completedWindows <= totalWindows`.
+- `completedWindows` and `totalWindows` are computed from the canonical daily coverage ledger for the exact requested interval; a valid local list interval has `totalWindows >= 1` and `0 <= completedWindows <= totalWindows`.
 - `coverage=complete` with zero rows means a proven empty result and uses the ordinary empty-state copy.
 - `coverage=partial` with zero rows remains HTTP `200`, suppresses the ordinary empty-state copy and shows an actionable synchronization message with progress/error/retry data; it must not imply that no fiscal notes exist.
 - `coverage=partial` with stored rows renders those canonical rows with the same actionable partial-state disclosure.
 - Export checks coverage before opening the CSV response. Incomplete coverage returns the JSON error envelope with HTTP `409` and exact code `ExportacaoFiscalCoberturaIncompleta`; it writes no CSV bytes.
 - Detail, PDF, XML and `documento`-filtered operations retain the existing provider-backed contract and do not claim these local coverage guarantees.
+
+| List state | Rows | React presentation | Export action |
+| --- | --- | --- | --- |
+| `coverage=complete`, `stale=false` | any | ordinary table or ordinary proven-empty state; no synchronization warning | enabled |
+| `coverage=complete`, `stale=true` | any | table/empty state plus existing stale-data notice and retry/update action | enabled against the same complete local snapshot |
+| `coverage=partial`, `syncState=syncing` | any | stored rows when present; otherwise no ordinary empty copy; show progress `completedWindows/totalWindows` | disabled with incomplete-coverage explanation |
+| `coverage=partial`, `syncState=failed` | any | stored rows when present; otherwise no ordinary empty copy; show sanitized reason and retry delay/action | disabled with incomplete-coverage explanation |
+| `coverage=partial`, `syncState=idle` | any | stored rows when present; otherwise no ordinary empty copy; show pending-synchronization action | disabled with incomplete-coverage explanation |
+| HTTP `422 PeriodoFiscalForaDoHorizonte` | none | preserve filters, show supported `[D-366,D]` dates and offer reset to the default 30-day interval | disabled; no download |
+
+The backend remains authoritative: a stale client that submits export during partial coverage still receives exact `409`, and a stale URL outside the horizon receives exact `422`; neither response creates a download.
 
 ### Corrective Acceptance Criteria
 
@@ -275,13 +299,15 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 
 ## Scope
 
-- [ ] Substituir o bootstrap móvel de 365 dias por janelas mensais fechadas até `D-2`, com checkpoint e estado durável por janela/contexto.
+- [ ] Substituir o bootstrap móvel por travessias históricas month-clipped em `[D-366,D-2]`, com checkpoint operacional e prova diária canônica por contexto.
 - [ ] Persistir páginas em gerações candidatas invisíveis e publicar cache/cobertura atomicamente apenas após a validação integral da janela.
 - [ ] Aplicar pertença exata por data/contexto e remover, na publicação, registros comprovadamente ausentes da janela sem apagar dados fora dela.
+- [ ] Registrar completude em um ledger diário canônico e executar promoção/ausência em SQL set-based com índices e timeouts limitados.
 - [ ] Executar reconciliação `D-1..D` independentemente do bootstrap histórico e sem bloquear listagem/exportação.
 - [ ] Orquestrar startup/ticks em um único pump não sobreposto, com rolling prioritário, trabalho histórico globalmente limitado e alternância justa entre contextos.
 - [ ] Calcular cobertura do intervalo solicitado a partir das janelas concluídas e da janela rolling aplicável.
 - [ ] Fazer listagem/paginação sem `documento` lerem PostgreSQL imediatamente, divulgando cobertura, sincronização, frescor e progresso de modo explícito.
+- [ ] Ler cobertura/contagem/linhas em um único snapshot `REPEATABLE READ` e rejeitar intervalos locais fora de `[D-366,D]` com `422 PeriodoFiscalForaDoHorizonte`.
 - [ ] Fazer exportação sem `documento` ler PostgreSQL quando o intervalo estiver coberto e rejeitar cobertura incompleta com erro próprio antes de gerar CSV.
 - [ ] Preservar e reaproveitar as notas já armazenadas; migrar/aposentar com segurança o registro legado de bootstrap sem declarar cobertura não comprovada.
 - [ ] Corrigir o mapeamento de erros para separar indisponibilidade real do provedor de projeção incompleta/inconsistente.
@@ -349,7 +375,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 
 ## Definition of Done
 
-- [ ] `DOD-RM-C01` Histórico é particionado em janelas mensais fechadas até `D-2`, com retomada/restart local e sem perda das notas já armazenadas.
+- [ ] `DOD-RM-C01` Histórico usa travessias month-clipped até `D-2`, publica prova diária canônica, retoma/reinicia localmente e não perde notas já armazenadas.
 - [ ] `DOD-RM-C02` Rolling `D-1..D` executa a cada 15 minutos independentemente da conclusão histórica.
 - [ ] `DOD-RM-C03` Listagem/paginação sem `documento` nunca aguarda provider e representa corretamente intervalos completos, parciais e vazios.
 - [ ] `DOD-RM-C04` Exportação sem `documento` usa somente PostgreSQL para intervalo coberto e retorna `409 ExportacaoFiscalCoberturaIncompleta` sem bytes CSV quando incompleto.
@@ -360,6 +386,9 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - [ ] `DOD-RM-C09` Uma janela incompleta/falha nunca altera cache ou cobertura visível; publicação concluída troca conjunto canônico, ausências e estado em uma única transação.
 - [ ] `DOD-RM-C10` Horizonte e frontier não possuem gap/overlap em viradas de mês/ano/29 de fevereiro, e o scheduler não sobrepõe pumps nem causa starvation entre contextos.
 - [ ] `DOD-RM-C11` Contrato público distingue `complete+zero`, `partial+zero`, sincronizando e falha pelos campos congelados em `D-RM-C14`.
+- [ ] `DOD-RM-C12` Listagem e exportação nunca misturam cobertura/total/linhas de gerações diferentes, mesmo quando publicação ou retenção confirma entre statements.
+- [ ] `DOD-RM-C13` Consultas locais fora de `[D-366,D]` falham deterministicamente com `422 PeriodoFiscalForaDoHorizonte`; o ledger diário não mantém prova de datas podadas.
+- [ ] `DOD-RM-C14` Publicação de 0, poucas e 20.000 linhas é set-based, indexada, limitada por timeout e deixa a geração anterior intacta em qualquer rollback.
 
 ## Validation Steps
 
@@ -374,14 +403,17 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - [ ] `VAL-RM-C09` Injetar falha tardia após páginas persistidas e provar que nenhum candidato, ausência ou cobertura parcial se torna visível.
 - [ ] `VAL-RM-C10` Cobrir nota removida, nota movida de data, data nula/malformada/fora da janela, publicação vazia, compactação mensal, restart e geração supersedida.
 - [ ] `VAL-RM-C11` Cobrir ticks simultâneos, startup concorrente, shutdown, cooldown, prioridade rolling, alternância justa e ausência de starvation.
+- [ ] `VAL-RM-C12` Forçar publicação/retenção entre leitura de cobertura, contagem e linhas por barreiras reais no PostgreSQL, provando snapshot coerente para página e CSV.
+- [ ] `VAL-RM-C13` Cobrir limites `D-366`/`D`, um dia antes/depois, URL antiga, caminho `documento`, avanço de retenção e transição rolling→frontier à meia-noite.
+- [ ] `VAL-RM-C14` Medir `EXPLAIN`, statements, locks, rollback e latência concorrente para publicação vazia/pequena/20.000 linhas.
 
 ## Test Decisions — Frozen
 
 | ID | Decision | Evidence lane |
 | --- | --- | --- |
-| `D-T01` | Test-first | Add fail-first cache-service tests for atomic late-page failure, superseded generation, removed/moved/null/out-of-window records, complete-zero and partial-zero, rolling reconciliation and stale fallback. |
-| `D-T02` | Integration | Prove the publication transaction and exact interval coverage on real PostgreSQL; preserve Nest module wiring and provider-backed detail/PDF/XML contracts. |
-| `D-T03` | Concurrency | Simultaneous startup/ticks/requests share one pump; rolling has priority, historical work is globally bounded, contexts alternate fairly and shutdown admits no new work. |
+| `D-T01` | Test-first | Add fail-first cache-service tests for atomic late-page failure, superseded generation, removed/moved/null/out-of-window records, complete-zero/partial-zero, rolling→daily proof, horizon admission and stale fallback. |
+| `D-T02` | Integration | On real PostgreSQL, prove set-based atomic publication, daily proof/retention and one-snapshot list/export under forced commit interleavings; preserve provider-backed detail/PDF/XML contracts. |
+| `D-T03` | Concurrency | Simultaneous startup/ticks/requests share one pump and captured `D`; rolling has priority, historical work is globally bounded, contexts alternate fairly and shutdown admits no new work. |
 | `D-T04` | Real infrastructure | Prisma validate/generate and the authorized local PostgreSQL are required; live Smart Notas traffic is excluded from automated tests. |
 
 ## Diff Expectation Contract
@@ -402,12 +434,13 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 
 | Repository | Path glob | Change types | Reason |
 | --- | --- | --- | --- |
-| `MonitorNotes` | `backend/prisma/schema.prisma` | `M` | required candidate-generation ownership and atomic publication relational contract |
-| `MonitorNotes` | `backend/prisma/migrations/**` | `A` | required expand-only candidate-generation migration and supporting constraints/indexes |
+| `MonitorNotes` | `backend/prisma/schema.prisma` | `M` | required candidate-generation ownership, daily coverage proof and atomic publication relational contract |
+| `MonitorNotes` | `backend/prisma/migrations/**` | `A` | required expand-only candidate/coverage migration and supporting constraints/indexes |
 | `MonitorNotes` | `backend/src/fiscal-notes/**` | `A, M` | windowed bootstrap, rolling independence, local reads, truthful errors and regression tests |
 | `MonitorNotes` | `backend/src/common/filters/**` | `M` | public error mapping for incomplete read-model coverage if centrally owned there |
 | `MonitorNotes` | `frontend/src/api/notas.ts` | `M` | interval coverage/progress contract and export error handling |
 | `MonitorNotes` | `frontend/src/notas/**` | `A, M` | metadata normalization/cache/export controller regression coverage |
+| `MonitorNotes` | `frontend/src/notas/urlFiscal.ts` | `M` | request-snapshotted local horizon normalization and stale-URL handling |
 | `MonitorNotes` | `frontend/src/paginas/ListaNotas.tsx` | `M` | actionable partial/complete synchronization state |
 | `MonitorNotes` | `frontend/e2e/**` | `A, M` | browser-visible list/export regressions when this is the source-owned runner |
 | `MonitorNotes` | `frontend/src/**/*.spec.ts*` | `A, M` | frontend contract/render regressions |
@@ -470,7 +503,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 
 ## Decision Pending
 
-- [ ] `none`; as opções materiais foram comparadas no Plan Review e a direção refinada está congelada em `D-RM-C01..C14`, aguardando refreeze, R2 e aprovação humana renovada.
+- [ ] `none`; as opções materiais foram comparadas no Plan Review e a direção refinada está congelada em `D-RM-C01..C17`, aguardando refreeze, R3 e aprovação humana renovada.
 
 ## Module Decision Baseline Snapshot
 
@@ -502,18 +535,18 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 ### Touched Surfaces
 
 - `backend/src/fiscal-notes/**`, conditional `backend/src/common/filters/**`
-- required `backend/prisma/schema.prisma` and additive candidate-generation migration
+- required `backend/prisma/schema.prisma` and additive candidate-generation/daily-coverage migration
 - `frontend/src/api/notas.ts`, `frontend/src/notas/**`, `frontend/src/paginas/ListaNotas.tsx`, source-owned tests
 - `foundation_documentation/modules/fiscal-notes-and-documents.md` and this TODO
 
 ### Ordered Steps
 
 1. Add fail-first tests for atomic late-page failure, changed totals/generation restart, removed/moved/null/out-of-window notes, frontier rollover, non-blocking list, scheduler overlap/fairness, interval coverage, complete-only export and truthful zero/error states.
-2. Add the expand-only candidate-generation relational contract and implement one-transaction window publication, including exact membership, proven-absence deletion and safe generation cleanup.
-3. Model the exact `[D-366,D-2]` calendar frontier, immutable daily advancement, month compaction, gap/overlap validation, legacy retirement and per-window restart/backoff.
+2. Add the expand-only candidate-generation plus daily-coverage relational contract and implement set-based one-transaction publication, including exact membership, proven-absence deletion and safe generation cleanup.
+3. Model the exact `[D-366,D-2]` historical frontier, `[D-1,D]` rolling publication into daily proofs, horizon admission/retention, operational metadata compaction, legacy retirement and per-window restart/backoff.
 4. Decouple synchronization from requests and implement the single bounded scheduler pump with rolling priority, global sequential provider walks, context rotation and shutdown behavior.
-5. Implement interval coverage queries and local list/export semantics, preserving context/filter/order/20,000-row CSV bounds.
-6. Update the exact public read-model/error contract and React complete-zero/partial-zero/progress/error/download lifecycle.
+5. Implement `REPEATABLE READ` interval coverage/count/row snapshots and local list/export semantics, preserving context/filter/order/20,000-row CSV bounds.
+6. Update the exact public read-model/horizon-error contract and React complete-zero/partial-zero/progress/error/date-bound/download lifecycle.
 7. Implement non-destructive legacy-state repair and verify against empty/baseline PostgreSQL databases; do not mutate stage directly from this lane.
 8. Update the canonical fiscal module, run CI-equivalent/performance/concurrency/security gates, then hand off deployment/smoke to DevOps.
 
@@ -521,7 +554,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 
 - **Strategy:** `test-first`
 - **Why:** production-like stage symptoms passed all existing immutable-total unit tests; regression must be proven before changing the state machine.
-- **Fail-first targets:** provider total changes after page 1/resume; late-page failure with zero visible partial publication; stale/superseded generation; removed/moved/null/malformed/out-of-window notes; empty successful window; month/year/leap-day rollover and compaction; simultaneous ticks/startup/requests/shutdown; rolling priority and context fairness; covered/partial zero-row UI; covered export with unrelated incomplete window; incomplete export exact `409`; no provider call on covered reads; exact provider-error preservation.
+- **Fail-first targets:** provider total changes after page 1/resume; late-page failure with zero visible partial publication; stale/superseded generation; removed/moved/null/malformed/out-of-window notes; empty successful window; month/year/leap-day rolling→daily transition and retention; publication between coverage/count/items; retention between export admission/rows; exact horizon boundaries/URL/path `documento`; simultaneous ticks/startup/requests/shutdown; rolling priority/context fairness; covered/partial zero-row UI; incomplete export exact `409`; no provider call on covered reads; 20.000-row set-based timeout/rollback; exact provider-error preservation.
 
 ### Package-First Assessment
 
@@ -558,6 +591,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 | --- | --- | --- | --- | --- | --- |
 | `GET /api/v1/notas` coverage/source metadata | `NotasFiscaisContexto` + `ListaNotas` | covered interval renders local rows without historical-loading warning | partial/failed sync renders an actionable synchronization notice without hiding stored rows | frontend parser/unit + browser list flow | consumer implemented and must be updated/evidenced in this TODO |
 | `GET /api/v1/notas/exportar` interval coverage contract | `ListaNotas` export controller | covered interval downloads exactly one CSV | incomplete interval handles `409 ExportacaoFiscalCoberturaIncompleta` and downloads zero bytes | backend contract + browser download flow | consumer implemented and must be updated/evidenced in this TODO |
+| local list/export horizon admission | URL normalizer + date controls + `ListaNotas` | interval inside request-captured `[D-366,D]` proceeds | stale/outside URL handles `422 PeriodoFiscalForaDoHorizonte`, preserves filters, offers 30-day reset and downloads nothing | backend boundary contract + browser stale-URL flow | consumer must be added/evidenced in this TODO |
 | provider-backed detail/PDF/XML/document-filter paths | `DetalheNota`, `AcoesDocumento`, document-filter list | existing provider behavior remains unchanged | provider errors retain existing user-visible behavior | existing unit/browser regression suites | preserve without new consumer behavior |
 | background historical/rolling synchronization | no direct UI command surface | UI consumes only explicit read-model metadata | no polling loop or provider traversal is owned by React | backend scheduler tests + frontend negative assertion | consumer intentionally observes metadata only |
 
@@ -565,10 +599,10 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 
 | Repository / CI Surface | Why In Scope | Behavior / Scenario Covered | Fixture / Seed / Runtime Preconditions | Local CI-Equivalent Command | Required Before | Status | Evidence Artifact / Command | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| backend cache focused | state machine correction | moving total, restart, rolling, coverage/export/error semantics | deterministic provider pages + sync rows | `cd backend && npx jest fiscal-note-cache.service.spec.ts --runInBand` | `Local-Implemented` | `planned` | pending | diagnostic plus fail-first evidence |
+| backend cache focused | state machine correction | moving total, restart, daily proof, rolling, horizon, coverage/export/error semantics | deterministic provider pages + sync/coverage rows | `cd backend && npx jest fiscal-note-cache.service.spec.ts --runInBand` | `Local-Implemented` | `planned` | pending | diagnostic plus fail-first evidence |
 | backend full | API/error/provider regressions | all fiscal endpoints and common error envelope | normal test env, no live provider | `cd backend && npx jest --runInBand` | `Local-Implemented` | `planned` | pending | broad regression |
 | backend static/build | Nest/TypeScript/Prisma | compile and schema/client coherence | installed dependencies | `cd backend && npx prisma validate && npm run prisma:generate && npx eslint "src/**/*.ts" && npm run build` | `Local-Implemented` | `planned` | pending | use repo-owned versions |
-| PostgreSQL real integration | relational window/coverage/repair path | gaps, overlaps, legacy row and indexed list/export | disposable empty + baseline schema fixtures | project-owned local PostgreSQL runner/Prisma commands resolved during execution | `Local-Implemented` | `planned` | pending | no stage mutation |
+| PostgreSQL real integration | relational publication/coverage/repair path | generation rollback, snapshot barriers, daily proof/retention, legacy row and indexed list/export | disposable empty + baseline schema fixtures | project-owned local PostgreSQL runner/Prisma commands resolved during execution | `Local-Implemented` | `planned` | pending | no stage mutation |
 | frontend unit/build | metadata/messages/download lifecycle | partial/complete notices and incomplete export | deterministic API fixtures | `cd frontend && npm run test:notas && npm run lint && npm run build` | `Local-Implemented` | `planned` | pending | add source-owned spec if current runner lacks rendering |
 | browser flow | actual list/export UX | partial notice disappears when covered; incomplete export downloads nothing | locally published exact checkout + deterministic backend fixture | project-owned browser runner discovered during execution | `Local-Implemented` | `planned` | pending | freshness attestation required |
 
@@ -581,7 +615,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 
 ## Plan Review Gate
 
-- **Status:** `material-revision-integrated-pending-r2`; critique R1 found five material gaps and the plan now carries their explicit resolutions, pending a fresh frozen-baseline review.
+- **Status:** `r2-material-revision-integrated-pending-r3`; R2 confirmed progress but found five remaining snapshot/horizon/lifecycle/performance/test gaps now resolved in `D-RM-C15..C17`, pending a fresh frozen-baseline review.
 
 ### Review Sections
 
@@ -696,8 +730,8 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Decision review lifecycle:** `after diagnosis is closed and before APROVADO`
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set`
-- **Decision review status:** `r1_material_findings_integrated; r2_pending`
-- **Decision review evidence / resolution:** R1 fresh no-context critique found `FRM-CRIT-01..05`; the plan adds atomic generations/publication, exact calendar lifecycle, bounded scheduler semantics, frozen public fields and missing test targets. A second fresh reviewer must converge before approval.
+- **Decision review status:** `r1_and_r2_material_findings_integrated; r3_pending`
+- **Decision review evidence / resolution:** R1 found `FRM-CRIT-01..05`; R2 found `FRM-R2-01..05`. The plan now adds daily canonical coverage, request-level `D`/`REPEATABLE READ`, exact horizon admission, deterministic rolling/frontier proof and bounded set-based publication. A fresh R3 reviewer must converge before approval.
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -711,11 +745,11 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Why this decision:** big architecture correction needs a committed/pushed immutable TODO packet before independent review.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `e804632b523caae754f00c495a7a64627e6353fe`; R1 reviewed `f096ca47685f311f684758811c66945a2cde9f24`
-- **Baseline push reference:** `origin/main@e804632b523caae754f00c495a7a64627e6353fe`; R1 source was `origin/main@f096ca47685f311f684758811c66945a2cde9f24`
-- **Gate status:** `no_material_findings`
-- **Findings summary:** the material R1 resolutions were frozen and pushed as a single TODO-only commit; no product/module/runtime file was included.
-- **Evidence / reference:** `https://github.com/unifast-tech/uninotas-foundation/commit/e804632b523caae754f00c495a7a64627e6353fe`; R1 package `artifacts/tmp/fiscal-read-model-critique-package.md`.
+- **Baseline commit:** `pending R3 refined freeze`; R2 reviewed `e804632b523caae754f00c495a7a64627e6353fe`; R1 reviewed `f096ca47685f311f684758811c66945a2cde9f24`
+- **Baseline push reference:** `pending refined origin/main`; R2 source was `origin/main@e804632b523caae754f00c495a7a64627e6353fe`
+- **Gate status:** `running`
+- **Findings summary:** R2 proved the e804 baseline still lacked reader snapshots, horizon admission, canonical rolling/frontier supersession and set-based publication bounds. No product/module/runtime file was changed.
+- **Evidence / reference:** R2 package `artifacts/tmp/fiscal-read-model-critique-r2-package.md`; dispatch `artifacts/tmp/fiscal-read-model-critique-r2-dispatch.json`; refined R3 freeze pending.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
@@ -742,19 +776,29 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Internal reviewer mandate:** `required after baseline freeze; reviewer cannot be implementing agent`
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
 - **Critique status:** `running`
-- **Findings summary:** R1 reported two high-level correctness gaps in atomic publication/calendar lifecycle, one scheduler-contract gap, one public-contract gap and one test-matrix gap. All are integrated below and require verification by a fresh R2 reviewer.
-- **Evidence / reference:** `artifacts/tmp/fiscal-read-model-critique-package.md`; `artifacts/tmp/fiscal-read-model-critique-dispatch.json`; reviewer `/root/fiscal_read_model_critique`.
+- **Findings summary:** R1 reported `FRM-CRIT-01..05`; R2 reported `FRM-R2-01..05`. Both resolution sets are integrated below and require verification by a fresh R3 reviewer.
+- **Evidence / reference:** R1/R2 packages and dispatches under `artifacts/tmp/fiscal-read-model-critique*`; reviewers `/root/fiscal_read_model_critique` and `/root/fiscal_read_model_critique_r2`.
 - **Waiver authority / reference:** `n/a`
 
 ### Critique Finding Resolution Ledger
 
 | Finding ID | Severity | Finding | Resolution in refined baseline | Status |
 | --- | --- | --- | --- | --- |
-| `FRM-CRIT-01` | high | Mutable canonical page writes cannot prove atomic complete-window visibility or absence. | `D-RM-C11/C12`; required candidate-generation schema; one-transaction publication; exact membership and proven-absence deletion; late-failure/removal/move/null tests. | `Integrated; pending R2 verification` |
-| `FRM-CRIT-02` | high | D-2 frontier, retention, rollover, gaps/overlaps and month lifecycle were underspecified. | `D-RM-C13`; exact inclusive horizon, month-clipped initial windows, immutable daily frontier, successful full-month compaction and calendar fixtures. | `Integrated; pending R2 verification` |
-| `FRM-CRIT-03` | high | Scheduler had no bounded priority, fairness, overlap or shutdown contract. | `D-RM-C14`; single pump, rolling-first, one historical window globally per pump, context rotation, sequential provider walks and shutdown admission rule. | `Integrated; pending R2 verification` |
-| `FRM-CRIT-04` | high | Public `readModel` fields/states and zero-row UI behavior were not frozen. | `D-RM-C14` public field table; complete-zero versus partial-zero semantics; exact export `409` code and zero-byte boundary. | `Integrated; pending R2 verification` |
-| `FRM-CRIT-05` | medium | Tests omitted atomic failure, absence/movement/null dates, rollover, scheduler starvation and incomplete-zero UI. | Expanded `D-T01..03`, `VAL-RM-C09..11`, ordered plan and fail-first targets. | `Integrated; pending R2 verification` |
+| `FRM-CRIT-01` | high | Mutable canonical page writes cannot prove atomic complete-window visibility or absence. | `D-RM-C11/C12/C16`; candidate generation, one-transaction set publication and one-snapshot readers; late-failure/removal/move/null/race tests. | `R2 carry-forward strengthened; pending R3` |
+| `FRM-CRIT-02` | high | D-2 frontier, retention, rollover, gaps/overlaps and month lifecycle were underspecified. | `D-RM-C13/C15/C16`; exact horizon plus canonical daily proof, deterministic rolling transition/retention/admission and calendar fixtures. | `R2 carry-forward strengthened; pending R3` |
+| `FRM-CRIT-03` | high | Scheduler had no bounded priority, fairness, overlap or shutdown contract. | `D-RM-C14`; captured `D`, single pump, rolling-first, one historical window globally per pump, context rotation, sequential provider walks and shutdown admission. | `R2 accepted direction; pending R3` |
+| `FRM-CRIT-04` | high | Public `readModel` fields/states and zero-row UI behavior were not frozen. | `D-RM-C14/C16` public field/UI tables; complete-zero versus partial-zero; exact export `409` and horizon `422` zero-byte boundaries. | `R2 carry-forward strengthened; pending R3` |
+| `FRM-CRIT-05` | medium | Tests omitted atomic failure, absence/movement/null dates, rollover, scheduler starvation and incomplete-zero UI. | Expanded `D-T01..03`, `VAL-RM-C09..14`, ordered plan and named fail-first interleavings. | `R2 carry-forward strengthened; pending R3` |
+
+### R2 Critique Finding Resolution Ledger
+
+| Finding ID | Severity | Finding | Resolution in refined baseline | Status |
+| --- | --- | --- | --- | --- |
+| `FRM-R2-01` | high | Separate coverage/count/row statements can mix committed generations. | `D-RM-C16`; request-captured `D`; one PostgreSQL `REPEATABLE READ` snapshot for list and export; barrier tests in `VAL-RM-C12`. | `Integrated; pending R3 verification` |
+| `FRM-R2-02` | high | Retention horizon conflicts with unrestricted valid date intervals. | `D-RM-C16`; exact local `[D-366,D]` admission; `422 PeriodoFiscalForaDoHorizonte`; React bounds and boundary tests. | `Integrated; pending R3 verification` |
+| `FRM-R2-03` | high | Rolling/frontier/compaction metadata can overlap without deterministic supersession. | `D-RM-C15`; canonical context/date coverage ledger; operational overlaps do not authorize reads; rolling publishes daily proofs and missing `D-2` alone enters history. | `Integrated; pending R3 verification` |
+| `FRM-R2-04` | medium | 20.000-row promotion could become thousands of statements/unbounded locks. | `D-RM-C17`; set-based parameterized publication, indexes and fixed lock/statement/transaction timeouts with rollback/backoff. | `Integrated; pending R3 verification` |
+| `FRM-R2-05` | medium | Tests did not force reader/publication races, horizon boundaries or metadata failures. | `VAL-RM-C12..14`, `D-T01..03` and named fail-first interleavings across PostgreSQL/browser/concurrency lanes. | `Integrated; pending R3 verification` |
 
 ## Gate: Assumption Code Coherence
 
@@ -911,7 +955,7 @@ Versionar a implementação na branch `release/uninotas`; depois do deploy de st
 
 | Criterion ID | Source Section | Criterion | Evidence Type | Evidence Artifact / Command | Runtime Target | Status | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `DOD-RM-C01` | `Definition of Done` | monthly closed history through D-2, local restart, stored rows preserved | test+database | fail-first cache spec + real PostgreSQL window assertions | local | `planned` | exact artifacts pending implementation |
+| `DOD-RM-C01` | `Definition of Done` | month-clipped history through D-2, canonical daily proof, local restart, stored rows preserved | test+database | fail-first cache spec + real PostgreSQL window assertions | local | `planned` | exact artifacts pending implementation |
 | `DOD-RM-C02` | `Definition of Done` | rolling D-1..D independent every 15 minutes | unit+scheduler | cache spec and scheduler wiring assertion | local | `planned` | must run while history incomplete |
 | `DOD-RM-C03` | `Definition of Done` | list never waits provider and handles complete/partial/empty | integration+browser | Nest application spec + source-owned browser flow | local/browser | `planned` | provider mock must remain uncalled for local path |
 | `DOD-RM-C04` | `Definition of Done` | covered DB export; incomplete exact 409 and no CSV | integration+browser | export application spec + browser download assertion | local/browser | `planned` | exact public code required |
