@@ -194,6 +194,11 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 
 - **Applicability:** `required`
 - **Rationale:** the implementation preserves the existing port/adapter/service/controller shape, but `FISC-CAN-01` deliberately and narrowly supersedes the canonical `provider writes` exclusion for one irreversible operation.
+- **Why this applies:** a new provider write, durable relational state machine and cross-replica coordination become canonical module behavior.
+- **Deviation / debt being retired:** provider writes were categorically excluded and no durable idempotency/fence contract existed.
+- **Target steady-state after closeout:** exactly one allowlisted cancellation write guarded by signed context identity, PostgreSQL leader/tombstone state and monotonic consumers.
+- **Temporary exceptions allowed:** none; process-local-only coordination, timed uncertainty expiry and cache-regressing writes are forbidden.
+- **Cutover / removal condition:** migration is applied before endpoint activation and all backend/frontend consumers pass the protection harness; rollback disables the endpoint but preserves operation/tombstone rows.
 - **Decision:** `FISC-CAN-01` becomes `Current` only after explicit TODO approval; before product implementation, the fiscal module must publish the endpoint, roles, strict response/error contract, uncertain-result policy and monotonic cache rule.
 - **Supersession boundary:** no other SmartNotas write, bulk mutation, issue/reprocess path or client-supplied provider ID is authorized.
 
@@ -231,6 +236,24 @@ O detalhe fiscal permite leitura e abertura de PDF/XML, mas não executa a opera
 | data-integrity test | cancellation tombstone + cache upsert | stale sync before/during/after cancellation with cache row present/absent | create/downgrade from terminal `Cancelada` | implement-in-this-todo | PostgreSQL cache integration test |
 | negative contract test | SmartNotas port/adapter | explicit allowlist of existing GETs plus exact cancel POST path | any future issue/edit/reprocess/bulk/provider write | implement-in-this-todo | port/adapter architecture test |
 | identity binding test | signed note ID and credentials | tampered ID, context swap and both configured contexts | caller-controlled provider ID/CNPJ/token or cross-context write | implement-in-this-todo | application + adapter tests |
+
+### Patterns To Enforce
+
+| Pattern / Decision | Surface | Enforcement |
+| --- | --- | --- |
+| one durable leader per context + provider ID | cancellation coordinator | unique relational key, conditional state transition and cross-instance BCI |
+| fail-closed uncertainty | operation state machine | expired/ambiguous operations can only remain uncertain or reconcile to cancelled |
+| terminal cancellation tombstone | all cache writers | atomic SQL expression checks tombstone and existing terminal status |
+| exact provider-write allowlist | SmartNotas port/adapter | architecture contract test permits existing GETs plus only the cancel POST |
+
+### Prohibited Anti-Patterns
+
+| Prohibited Path | Detection Signal | Why Forbidden | Exception |
+| --- | --- | --- | --- |
+| in-memory-only mutation fence | provider POST protected only by Map/React flag | fails across restart and replicas | none |
+| uncertain state expires to write-ready | time-based delete/retry transition | elapsed time does not prove provider outcome | none |
+| cache update without tombstone check | unconditional status upsert | stale page can recreate `Autorizada` | none |
+| new provider POST/PATCH/DELETE outside exact cancel path | port/adapter method/path diff | broadens the approved fiscal-write authority | new approved canonical decision only |
 
 ## External Dependency Readiness
 
@@ -567,16 +590,18 @@ The `cancelled` transition and update of an existing cache row occur in one DB t
 
 ## Rules Acknowledgement / Ingestion
 
-| Source | Why It Applies | Execution Impact | Status |
-| --- | --- | --- | --- |
-| `delphi-ai/skills/rule-nestjs-nestjs-architecture-always-on/SKILL.md` | controller/service/adapter mutation | preserve Nest ownership and explicit failures | planned |
-| `delphi-ai/skills/wf-nestjs-change-application-boundary-method/SKILL.md` | new application endpoint | contract-first implementation | planned |
-| `delphi-ai/skills/rule-react-react-architecture-always-on/SKILL.md` | detail UI mutation | explicit async state and accessible layout | planned |
-| `delphi-ai/skills/wf-react-change-ui-boundary-method/SKILL.md` | action/confirmation consumer | consumer lifecycle evidence | planned |
-| `delphi-ai/skills/backend-concurrency-idempotency-validation/SKILL.md` | irreversible write | prove duplicate policy and uncertain outcome | planned |
-| `delphi-ai/skills/frontend-race-condition-validation/SKILL.md` | abort/navigation/late response | deterministic race scenarios | planned |
-| `delphi-ai/skills/security-adversarial-review/SKILL.md` | authenticated fiscal mutation | adversarial auth/context/message review | planned |
-| `delphi-ai/skills/test-creation-standard/SKILL.md` | behavior-defining tests | fail-first and boundary coverage | planned |
+| Source | Why It Applies Now | Must Preserve | Must Avoid | Execution Impact |
+| --- | --- | --- | --- | --- |
+| `delphi-ai/skills/rule-nestjs-nestjs-architecture-always-on/SKILL.md` | controller/service/adapter mutation | Nest ownership and explicit failures | direct controller/provider coupling | planned ingestion after approval |
+| `delphi-ai/skills/wf-nestjs-change-application-boundary-method/SKILL.md` | new application endpoint | contract-first boundary | implicit request/error semantics | planned ingestion after approval |
+| `delphi-ai/skills/rule-react-react-architecture-always-on/SKILL.md` | detail/list-cache UI mutation | explicit state ownership and accessible layout | scattered mutation flags | planned ingestion after approval |
+| `delphi-ai/skills/wf-react-change-ui-boundary-method/SKILL.md` | action/confirmation consumer | consumer lifecycle evidence | stale effects and message matching | planned ingestion after approval |
+| `delphi-ai/skills/rule-prisma-prisma-schema-migration-always-on/SKILL.md` | additive operation-state model | migration/schema compatibility | schema-only or deploy-unsafe change | planned ingestion after approval |
+| `delphi-ai/skills/rule-postgresql-postgresql-data-integrity-always-on/SKILL.md` | durable election/tombstone | atomic unique-key transitions | read-then-write races | planned ingestion after approval |
+| `delphi-ai/skills/backend-concurrency-idempotency-validation/SKILL.md` | irreversible write | one leader and fail-closed uncertainty | retries or per-process-only fence | planned BCI |
+| `delphi-ai/skills/frontend-race-condition-validation/SKILL.md` | abort/navigation/late response | generation ownership | late UI effects | planned FRC |
+| `delphi-ai/skills/security-adversarial-review/SKILL.md` | authenticated fiscal mutation | auth/context/message trust boundary | credential/raw-ID leakage | planned security review |
+| `delphi-ai/skills/test-creation-standard/SKILL.md` | behavior-defining tests | fail-first boundary coverage | weak status-only assertions | planned test matrix |
 
 ## Agent Routing Preflight
 
@@ -589,7 +614,7 @@ The `cancelled` transition and update of an existing cache row occur in one DB t
 - **Execution topology:** `primary-checkout-single-writer`
 - **Worktree authorization:** not requested; no worktree or auxiliary checkout may be created.
 - **Scope:** `nestjs, react, vite`
-- **Guard outcome:** pending review baseline and pre-approval guards.
+- **Guard outcome:** `review-required` until final critique, architecture opinion and deterministic guards converge.
 
 ## Blockers (Current)
 
