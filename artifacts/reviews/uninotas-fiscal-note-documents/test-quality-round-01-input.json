@@ -1,0 +1,43 @@
+{
+  "schema_version": "subagent-review-result-v1",
+  "artifact_kind": "subagent_review_result",
+  "dispatch_path": "/mnt/c/unifast/monitordenotas/uninotas-foundation/artifacts/reviews/uninotas-fiscal-note-documents/triple-audit/round-01/dispatch/test-quality.dispatch.json",
+  "review_kind": "test_quality_audit",
+  "reviewer_label": "fresh-test-quality-reviewer",
+  "overall_assessment": "Backend tests provide useful contract, authentication, decoding, and bounds coverage. Required frontend document lifecycle, external-effect, and mobile-interaction evidence remains incomplete. The reported race-suite pass covers existing cache/export behavior rather than document actions.",
+  "recommended_path": "Add targeted document lifecycle and mobile browser regression coverage, resolve failures, and rerun the affected verification before closing the audit.",
+  "performance_position": "acceptable",
+  "elegance_position": "acceptable",
+  "structural_soundness_position": "mixed",
+  "operational_fit_position": "mixed",
+  "findings": [
+    {
+      "finding_id": "TQA-DOC-001",
+      "severity": "high",
+      "category": "tests",
+      "formalizable_hint": "partial",
+      "candidate_rule_level": "project",
+      "title": "Document race tests do not verify required lifecycle suppression or external effects",
+      "rationale": "The original browser coverage counted pending requests but did not observe successful external effects, late non-AbortError rejection after reopen, or navigation/unmount suppression.",
+      "suggested_action": "Add controlled document responses and an observable external effect for bursts, close/reopen, rejection and navigation/unmount cases.",
+      "affected_paths": [
+        "frontend/e2e/notas.mjs",
+        "frontend/src/componentes/AcoesDocumento.tsx"
+      ]
+    },
+    {
+      "finding_id": "TQA-DOC-002",
+      "severity": "high",
+      "category": "tests",
+      "formalizable_hint": "partial",
+      "candidate_rule_level": "project",
+      "title": "The required mobile document disclosure journey is not exercised",
+      "rationale": "The original mobile assertions ran with document panels closed, leaving a concrete left-overflow risk untested on list and detail.",
+      "suggested_action": "Open and operate list and detail document disclosures at the declared mobile viewport, assert bounds and focus return, and correct any geometry failure.",
+      "affected_paths": [
+        "frontend/e2e/notas.mjs",
+        "frontend/src/estilos/layout.css"
+      ]
+    }
+  ]
+}

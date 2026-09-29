@@ -1,0 +1,42 @@
+{
+  "schema_version": "subagent-review-merge-v2",
+  "artifact_kind": "subagent_review_merge",
+  "authoritative": false,
+  "edit_policy": "derived_merge_packet",
+  "dispatch_path": "/mnt/c/unifast/monitordenotas/uninotas-foundation/artifacts/reviews/uninotas-fiscal-note-documents/triple-audit/round-02/dispatch/test-quality.dispatch.json",
+  "review_kind": "test_quality_audit",
+  "review_count": 1,
+  "reviewer_labels": [
+    "fresh-no-context-test-quality-round-02"
+  ],
+  "highest_finding_severity": "medium",
+  "axis_summary": {
+    "performance": "acceptable",
+    "elegance": "acceptable",
+    "structural_soundness": "acceptable",
+    "operational_fit": "acceptable"
+  },
+  "recommended_paths": [
+    "Correct the streamed boundary fixture with valid JSON and rerun the focused adapter suite."
+  ],
+  "exact_next_step": "Record reviewer resolutions in the governing TODO using the machine-checkable resolution table or equivalent gate ledger, then extract the derived resolution packet and decide whether another bounded review pass is still required.",
+  "findings": [
+    {
+      "finding_id": "F-1551665E",
+      "severity": "medium",
+      "title": "Streamed overflow test passes even when the streaming byte limit is removed",
+      "rationale": "The previous stream used zero bytes inside JSON, so decoding failed independently of size; the exact fixture was also below the declared boundary.",
+      "suggested_action": "Use measured valid JSON at 16,384 and 16,385 bytes, stream the latter in chunks without Content-Length, assert rejection and cancellation, then rerun the focused suite.",
+      "reviewer_labels": [
+        "fresh-no-context-test-quality-round-02"
+      ],
+      "source_finding_ids": [
+        "TQA-DOC-R2-001"
+      ],
+      "category": "tests",
+      "formalizable_hint": "yes",
+      "candidate_rule_level": "project",
+      "candidate_rule_id": "n/a"
+    }
+  ]
+}

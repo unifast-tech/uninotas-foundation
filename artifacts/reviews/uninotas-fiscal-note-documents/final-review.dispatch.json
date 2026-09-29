@@ -1,0 +1,112 @@
+{
+  "schema_version": "subagent-review-dispatch-v1",
+  "artifact_kind": "subagent_review_dispatch",
+  "authoritative": false,
+  "edit_policy": "derived_dispatch_packet",
+  "review_kind": "final_review",
+  "bounded_package_path": "uninotas-foundation/artifacts/reviews/uninotas-fiscal-note-documents/delivery-package.md",
+  "reviewer_count": 1,
+  "no_context_required": true,
+  "required_axes": [
+    "adherence",
+    "residual_risk",
+    "performance",
+    "elegance",
+    "structural_soundness"
+  ],
+  "focus_points": [
+    "Review the delivered bounded package for regressions, adherence gaps, residual risk, and waiver quality.",
+    "Explicitly call out any performance regressions, elegance regressions, or brittle structural shortcuts.",
+    "Stay inside the bounded package and treat the review as closure-focused.",
+    "For each material finding, add category and formalizable-hint when you can judge them honestly.",
+    "When assessing design, seek the simplest faithful Clean Code/SOLID design for the approved intent. Do not invent future-facing work or erase explicit TODO intent. Planning review may challenge proposed intent; delivery review must preserve approved intent or return for renewed approval."
+  ],
+  "result_contract_fields": [
+    "overall_assessment",
+    "recommended_path",
+    "performance_position",
+    "elegance_position",
+    "structural_soundness_position",
+    "operational_fit_position",
+    "findings[].finding_id (optional)",
+    "findings[].category (optional)",
+    "findings[].formalizable_hint (optional)",
+    "findings[].candidate_rule_level (optional)",
+    "findings[]"
+  ],
+  "todo_path": "uninotas-foundation/todos/active/features/TODO-uninotas-fiscal-note-documents.md",
+  "historical_disposition_policy": [
+    "Resolved findings are historical context only. Do not reopen them unless the current bounded package materially changes the same locus/behavior or fresh evidence shows regression.",
+    "Challenged findings stay closed unless the current bounded package materially changes the same locus/behavior or the prior rationale is objectively insufficient.",
+    "Deferred findings must cite the recorded follow-up/waiver path first. Re-raise them only when the current bounded package changes the same locus or closure now depends on that deferred risk.",
+    "Unresolved findings remain valid to re-raise until they are fixed, challenged, or formally deferred with authority."
+  ],
+  "historical_dispositions": [
+    {
+      "source_kind": "promotion_routing",
+      "finding_id": "PERF-DOC-001",
+      "carry_forward_class": "resolved",
+      "source_disposition": "classification=release-blocker; routing=validar ownership tamb\u00e9m em rejection tardia; status=resolved",
+      "summary": "mesma lifecycle aprovada",
+      "reference": "triple round-01 resolution"
+    },
+    {
+      "source_kind": "promotion_routing",
+      "finding_id": "TQA-DOC-001",
+      "carry_forward_class": "resolved",
+      "source_disposition": "classification=release-blocker; routing=provar efeitos externos e lifecycle resolve/reject/navigation; status=resolved",
+      "summary": "mesma matriz de testes aprovada",
+      "reference": "triple round-01 resolution + FRC artifact"
+    },
+    {
+      "source_kind": "promotion_routing",
+      "finding_id": "TQA-DOC-002",
+      "carry_forward_class": "resolved",
+      "source_disposition": "classification=release-blocker; routing=corrigir/provar disclosure m\u00f3vel list/detail; status=resolved",
+      "summary": "mesmo escopo responsivo aprovado",
+      "reference": "triple round-01 resolution"
+    },
+    {
+      "source_kind": "promotion_routing",
+      "finding_id": "SEC-DOC-01",
+      "carry_forward_class": "resolved",
+      "source_disposition": "classification=release-blocker; routing=exigir sintaxe absoluta e retornar somente `parsed.href`; status=resolved",
+      "summary": "mesma boundary URL aprovada",
+      "reference": "security confirmation"
+    },
+    {
+      "source_kind": "promotion_routing",
+      "finding_id": "SEC-DOC-02",
+      "carry_forward_class": "resolved",
+      "source_disposition": "classification=release-blocker; routing=manter flags e usar texto neutro para retorno `null` amb\u00edguo; status=resolved",
+      "summary": "mesma UX/fallback aprovada",
+      "reference": "security confirmation"
+    },
+    {
+      "source_kind": "promotion_routing",
+      "finding_id": "SEC-DOC-03",
+      "carry_forward_class": "resolved",
+      "source_disposition": "classification=release-blocker; routing=bound tamb\u00e9m ap\u00f3s canonicaliza\u00e7\u00e3o; status=resolved",
+      "summary": "mesmo limite de 8 KiB aprovado",
+      "reference": "Unicode expansion regression"
+    },
+    {
+      "source_kind": "promotion_routing",
+      "finding_id": "TQA-DOC-R2-001",
+      "carry_forward_class": "resolved",
+      "source_disposition": "classification=release-blocker; routing=fixture JSON v\u00e1lida exata/over, stream sem length e cancel; status=resolved",
+      "summary": "mesma evid\u00eancia de 16 KiB aprovada",
+      "reference": "triple round-02 resolution"
+    },
+    {
+      "source_kind": "promotion_routing",
+      "finding_id": "TQA-DOC-R3-001",
+      "carry_forward_class": "resolved",
+      "source_disposition": "classification=release-blocker; routing=asser\u00e7\u00e3o direta zero-prefetch ao abrir/trocar disclosure; status=resolved",
+      "summary": "ajuste inline no teste aprovado",
+      "reference": "triple round-03 resolution + fresh browser"
+    }
+  ],
+  "goal": "Expanded final review: findings first; verify adherence, P1/P2 correctness/security/test risks, rule-spirit triage, performance/elegance/structural soundness, unresolved debt and local-delivery claim.",
+  "review_result_dispatch_path": "/mnt/c/unifast/monitordenotas/uninotas-foundation/artifacts/reviews/uninotas-fiscal-note-documents/final-review.dispatch.json"
+}

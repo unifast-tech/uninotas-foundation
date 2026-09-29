@@ -1,0 +1,59 @@
+{
+  "schema_version": "subagent-review-merge-v2",
+  "artifact_kind": "subagent_review_merge",
+  "authoritative": false,
+  "edit_policy": "derived_merge_packet",
+  "dispatch_path": "/mnt/c/unifast/monitordenotas/uninotas-foundation/artifacts/reviews/uninotas-fiscal-note-documents/triple-audit/round-01/dispatch/test-quality.dispatch.json",
+  "review_kind": "test_quality_audit",
+  "review_count": 1,
+  "reviewer_labels": [
+    "fresh-test-quality-reviewer"
+  ],
+  "highest_finding_severity": "high",
+  "axis_summary": {
+    "performance": "acceptable",
+    "elegance": "acceptable",
+    "structural_soundness": "mixed",
+    "operational_fit": "mixed"
+  },
+  "recommended_paths": [
+    "Add targeted document lifecycle and mobile browser regression coverage, resolve failures, and rerun the affected verification before closing the audit."
+  ],
+  "exact_next_step": "Record reviewer resolutions in the governing TODO using the machine-checkable resolution table or equivalent gate ledger, then extract the derived resolution packet and decide whether another bounded review pass is still required.",
+  "findings": [
+    {
+      "finding_id": "F-BDBE9475",
+      "severity": "high",
+      "title": "The required mobile document disclosure journey is not exercised",
+      "rationale": "The original mobile assertions ran with document panels closed, leaving a concrete left-overflow risk untested on list and detail.",
+      "suggested_action": "Open and operate list and detail document disclosures at the declared mobile viewport, assert bounds and focus return, and correct any geometry failure.",
+      "reviewer_labels": [
+        "fresh-test-quality-reviewer"
+      ],
+      "source_finding_ids": [
+        "TQA-DOC-002"
+      ],
+      "category": "tests",
+      "formalizable_hint": "partial",
+      "candidate_rule_level": "project",
+      "candidate_rule_id": "n/a"
+    },
+    {
+      "finding_id": "F-B7DEBFFE",
+      "severity": "high",
+      "title": "Document race tests do not verify required lifecycle suppression or external effects",
+      "rationale": "The original browser coverage counted pending requests but did not observe successful external effects, late non-AbortError rejection after reopen, or navigation/unmount suppression.",
+      "suggested_action": "Add controlled document responses and an observable external effect for bursts, close/reopen, rejection and navigation/unmount cases.",
+      "reviewer_labels": [
+        "fresh-test-quality-reviewer"
+      ],
+      "source_finding_ids": [
+        "TQA-DOC-001"
+      ],
+      "category": "tests",
+      "formalizable_hint": "partial",
+      "candidate_rule_level": "project",
+      "candidate_rule_id": "n/a"
+    }
+  ]
+}

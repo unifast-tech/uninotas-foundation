@@ -1,0 +1,42 @@
+{
+  "schema_version": "subagent-review-merge-v2",
+  "artifact_kind": "subagent_review_merge",
+  "authoritative": false,
+  "edit_policy": "derived_merge_packet",
+  "dispatch_path": "/mnt/c/unifast/monitordenotas/uninotas-foundation/artifacts/reviews/uninotas-fiscal-note-documents/triple-audit/round-01/dispatch/performance.dispatch.json",
+  "review_kind": "critique",
+  "review_count": 1,
+  "reviewer_labels": [
+    "fresh-performance-reviewer"
+  ],
+  "highest_finding_severity": "medium",
+  "axis_summary": {
+    "performance": "strong_positive",
+    "elegance": "acceptable",
+    "structural_soundness": "acceptable",
+    "operational_fit": "mixed"
+  },
+  "recommended_paths": [
+    "Accept the performance lane. Address the rejected-result ownership gap within the approved frontend lifecycle scope and retain the explicitly deferred provider smoke, latency, and quota checks for cutover."
+  ],
+  "exact_next_step": "Record reviewer resolutions in the governing TODO using the machine-checkable resolution table or equivalent gate ledger, then extract the derived resolution packet and decide whether another bounded review pass is still required.",
+  "findings": [
+    {
+      "finding_id": "F-61B9ABF3",
+      "severity": "medium",
+      "title": "Late rejected document requests can overwrite current disclosure feedback",
+      "rationale": "AcoesDocumento.tsx accepted a non-AbortError rejection without checking request cancellation or current ownership. Closing and reopening could therefore allow the prior request to write stale feedback into the current disclosure. This conflicts with the approved lifecycle contract.",
+      "suggested_action": "Apply the same aborted-signal and current-controller checks before handling rejected results and add a deterministic close/reopen late-rejection regression.",
+      "reviewer_labels": [
+        "fresh-performance-reviewer"
+      ],
+      "source_finding_ids": [
+        "PERF-DOC-001"
+      ],
+      "category": "operational_fit",
+      "formalizable_hint": "yes",
+      "candidate_rule_level": "project",
+      "candidate_rule_id": "n/a"
+    }
+  ]
+}

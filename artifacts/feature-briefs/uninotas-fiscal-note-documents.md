@@ -63,4 +63,6 @@ Referências oficiais informadas:
 
 ## Retire This Brief When
 
-- O TODO `todos/active/features/TODO-uninotas-fiscal-note-documents.md` estiver aprovado e não houver ambiguidade de framing pendente.
+- Condição satisfeita: o TODO foi aprovado, implementado e convergiu em revisão final independente sem ambiguidade de framing pendente.
+- Resultado promovido: detalhes existentes preservados; PDF/XML sob demanda, URL efêmera protegida e gatilho de configurações ampliado estão documentados em `modules/fiscal-notes-and-documents.md`.
+- Estado: `retired by completed tactical TODO`; deploy e smoke real continuam sob autoridade do TODO de cutover.

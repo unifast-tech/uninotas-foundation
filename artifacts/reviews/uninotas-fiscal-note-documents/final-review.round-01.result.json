@@ -1,0 +1,43 @@
+{
+  "findings": [
+    {
+      "finding_id": "FINAL-DOC-001",
+      "severity": "medium",
+      "category": "adherence",
+      "title": "Cached list navigation does not invalidate the active document request",
+      "rationale": "D-07 requires navigation to close the disclosure and abort or invalidate pending work. ListaNotas preserved disclosure/request ownership when browser navigation selected another cached query containing the same noteId.",
+      "suggested_action": "Invalidate document ownership and clear the disclosure on navigation/query-generation changes even when the note remains mounted, with a browser regression using warmed cache entries sharing a noteId.",
+      "formalizable_hint": "yes",
+      "candidate_rule_level": "project",
+      "affected_paths": [
+        "frontend/src/paginas/ListaNotas.tsx",
+        "frontend/src/componentes/AcoesDocumento.tsx",
+        "frontend/e2e/notas.mjs"
+      ]
+    },
+    {
+      "finding_id": "FINAL-DOC-002",
+      "severity": "medium",
+      "category": "adherence",
+      "title": "Escape loses keyboard focus while a document request is pending",
+      "rationale": "close(true) scheduled the busy-state release and immediately focused a still-disabled trigger, leaving document.activeElement on BODY after the trigger became enabled.",
+      "suggested_action": "Restore focus after the enabled trigger commits and add pending-request Escape coverage for abort and focus restoration.",
+      "formalizable_hint": "yes",
+      "candidate_rule_level": "project",
+      "affected_paths": [
+        "frontend/src/componentes/AcoesDocumento.tsx",
+        "frontend/e2e/notas.mjs"
+      ]
+    }
+  ],
+  "schema_version": "subagent-review-result-v1",
+  "artifact_kind": "subagent_review_result",
+  "review_kind": "final_review",
+  "reviewer_label": "fresh-independent-final-reviewer",
+  "overall_assessment": "Two reproducible frontend lifecycle/accessibility defects remained within the approved scope; the backend and other reviewed boundaries were aligned.",
+  "recommended_path": "Resolve both findings, refresh browser/lifecycle evidence, then repeat the independent final review.",
+  "performance_position": "acceptable",
+  "elegance_position": "acceptable",
+  "structural_soundness_position": "mixed",
+  "operational_fit_position": "acceptable"
+}

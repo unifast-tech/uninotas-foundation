@@ -3,7 +3,7 @@
 ## Artifact Identity
 
 - **Artifact type:** `tactical_execution_contract`
-- **Status:** `Approved / In Progress`
+- **Status:** `Completed / Local-Implemented / Provisional`
 - **Created:** `2026-09-28`
 - **Owner:** `Delphi / Operational Coder`, sob autoridade humana do usuário
 
@@ -38,19 +38,19 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 
 ## Delivery Status Canon (Required)
 
-- **Current delivery stage:** `Pending`
+- **Current delivery stage:** `Local-Implemented`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** validar a autoridade pós-aprovação e executar a implementação test-first no checkout principal.
+- **Next exact step:** revisão final/guards de closeout e PR humano; deploy/smoke permanecem no cutover.
 
-## Active Work State (Required While TODO Remains In `active/`)
+## Final Work State
 
-- **Work state:** `implementation`
-- **Why this state now:** o usuário aprovou explicitamente o contrato congelado e a implementação está autorizada dentro do escopo aprovado.
-- **Exit condition:** após aprovação, implementação/evidências locais concluídas e movimento para `completed/features/`; deploy permanece separado.
+- **Work state:** `completed`
+- **Why this state now:** implementação, suites, browser, pcv-1, segurança, triple review, revisão final e guards documentais foram concluídos localmente.
+- **Exit condition:** satisfeita para `Local-Implemented / Provisional`; deploy e smoke real permanecem separados no cutover.
 
 ## Provisional Notes
 
-- **Missing for production-ready:** aprovação, implementação, testes, browser, auditorias e smoke/cutover real.
+- **Missing for production-ready:** merge/ativação Railway e smoke real redatado dos dois contextos no TODO de cutover.
 - **Revisit criteria:** mudança do contrato oficial, necessidade de proxy binário, host não HTTPS ou alteração de auth/perfis.
 - **Dependencies unblocked:** fixtures determinísticas permitem implementação local sem chamar a API real; o smoke real pertence ao cutover.
 
@@ -62,14 +62,14 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 
 ## Scope
 
-- [ ] `SCOPE-DOC-01` Preservar e regressar o detalhe completo existente; não duplicar `notasDetalhe`.
-- [ ] `SCOPE-DOC-02` Adicionar ao port/adapter SmartNotas resoluções independentes para `/notas/{idInterno}/pdf` e `/xml`, com decoder positivo de `200`/`202`, body máximo `16 KiB`, URL máxima `8 KiB`, origin allowlist fixa, cancelamento e redaction existentes.
-- [ ] `SCOPE-DOC-03` Expor rotas públicas `GET /api/v1/notas/:noteId/documentos/pdf` e `GET /api/v1/notas/:noteId/documentos/xml`, protegidas pelos quatro perfis leitores e pelo mesmo `noteId` assinado.
-- [ ] `SCOPE-DOC-04` Adicionar disclosure vertical `⋮` em cada linha/card da Geral e no detalhe, com ações sob demanda, loading, pendente, erro e recuperação.
-- [ ] `SCOPE-DOC-05` Abrir URL disponível em nova aba com `noopener`/`noreferrer`; se a abertura automática for bloqueada, manter link visível e acionável; limpar a URL efêmera ao fechar/trocar nota/logout.
-- [ ] `SCOPE-DOC-06` Evitar navegação ao detalhe quando o usuário interagir com o menu e preservar navegação normal ao selecionar o restante da linha/card.
-- [ ] `SCOPE-DOC-07` Aumentar o glifo de configurações e garantir caixa interativa mínima de `44x44px` nos viewports desktop e móvel.
-- [ ] `SCOPE-DOC-08` Atualizar documentação modular/README e testes backend, frontend e browser afetados.
+- [x] `SCOPE-DOC-01` Preservar e regressar o detalhe completo existente; não duplicar `notasDetalhe`.
+- [x] `SCOPE-DOC-02` Adicionar ao port/adapter SmartNotas resoluções independentes para `/notas/{idInterno}/pdf` e `/xml`, com decoder positivo de `200`/`202`, body máximo `16 KiB`, URL máxima `8 KiB`, origin allowlist fixa, cancelamento e redaction existentes.
+- [x] `SCOPE-DOC-03` Expor rotas públicas `GET /api/v1/notas/:noteId/documentos/pdf` e `GET /api/v1/notas/:noteId/documentos/xml`, protegidas pelos quatro perfis leitores e pelo mesmo `noteId` assinado.
+- [x] `SCOPE-DOC-04` Adicionar disclosure vertical `⋮` em cada linha/card da Geral e no detalhe, com ações sob demanda, loading, pendente, erro e recuperação.
+- [x] `SCOPE-DOC-05` Abrir URL disponível em nova aba com `noopener`/`noreferrer`; se a abertura automática for bloqueada, manter link visível e acionável; limpar a URL efêmera ao fechar/trocar nota/logout.
+- [x] `SCOPE-DOC-06` Evitar navegação ao detalhe quando o usuário interagir com o menu e preservar navegação normal ao selecionar o restante da linha/card.
+- [x] `SCOPE-DOC-07` Aumentar o glifo de configurações e garantir caixa interativa mínima de `44x44px` nos viewports desktop e móvel.
+- [x] `SCOPE-DOC-08` Atualizar documentação modular/README e testes backend, frontend e browser afetados.
 
 ## Delivery Status Semantics
 
@@ -89,7 +89,7 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 
 | Scope Item | Local Branch/Commit | PR to lane threshold | PR to `stage` | PR to `main` | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| `ST-DOCUMENT-ACTIONS` | `pending` | `n/a` | `n/a` | `human follow-through after local closeout` | `pending` |
+| `ST-DOCUMENT-ACTIONS` | `verified working tree on release/uninotas-smart-notas` | `n/a` | `n/a` | `human follow-through after local closeout` | `Local-Implemented / Provisional` |
 
 ## Out of Scope
 
@@ -119,11 +119,12 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 
 | Repository | Path glob | Change types | Reason |
 | --- | --- | --- | --- |
-| `MonitorNotes` | `backend/src/fiscal-notes/**` | `M` | port, adapter, service/controller e testes documentais |
+| `MonitorNotes` | `backend/src/fiscal-notes/**` | `M, ??` | port, adapter, service/controller e testes documentais |
 | `MonitorNotes` | `frontend/src/api/notas.ts` | `M` | contrato efêmero de documento |
 | `MonitorNotes` | `frontend/src/paginas/ListaNotas.tsx` | `M` | menu por nota |
 | `MonitorNotes` | `frontend/src/paginas/DetalheNota.tsx` | `M` | ações documentais e regressão do detalhe |
-| `MonitorNotes` | `frontend/src/componentes/**` | `A|M` | disclosure reutilizável e gatilho de configurações |
+| `MonitorNotes` | `frontend/src/componentes/**` | `A, M, ??` | disclosure reutilizável e gatilho de configurações |
+| `MonitorNotes` | `frontend/src/notas/documentoFiscal.ts` | `A, M, ??` | normalização runtime exata da resposta documental |
 | `MonitorNotes` | `frontend/src/estilos/*.css` | `M` | layout das ações e tamanho do glifo |
 | `MonitorNotes` | `frontend/e2e/notas-unit.ts` | `M` | normalização/estado documental |
 | `MonitorNotes` | `frontend/e2e/notas.mjs` | `M` | jornada desktop/mobile/teclado |
@@ -131,11 +132,12 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 | `MonitorNotes` | `frontend/README.md` | `M` | comportamento visível, se necessário |
 | `MonitorNotes` | `uninotas-foundation` | `M` | gitlink acompanha publicação Foundation |
 | `MonitorNotes` | `artifacts/**` | `??` | estado preexistente do usuário; preservar, nunca stagear/alterar |
-| `uninotas-foundation` | `artifacts/feature-briefs/uninotas-fiscal-note-documents.md` | `A|M` | framing e encerramento |
-| `uninotas-foundation` | `todos/active/features/TODO-uninotas-fiscal-note-documents.md` | `A|M|D` | contrato/evidência/closeout |
-| `uninotas-foundation` | `todos/completed/features/TODO-uninotas-fiscal-note-documents.md` | `A` | destino do closeout |
+| `uninotas-foundation` | `artifacts/feature-briefs/uninotas-fiscal-note-documents.md` | `A, M, ??` | framing e encerramento |
+| `uninotas-foundation` | `todos/active/features/TODO-uninotas-fiscal-note-documents.md` | `A, M, D` | contrato/evidência/closeout |
+| `uninotas-foundation` | `todos/completed/features/TODO-uninotas-fiscal-note-documents.md` | `A, ??` | destino do closeout |
 | `uninotas-foundation` | `modules/fiscal-notes-and-documents.md` | `M` | contrato documental durável |
 | `uninotas-foundation` | `artifacts/publication-manifest.txt` | `M` | publicação Foundation |
+| `uninotas-foundation` | `artifacts/reviews/uninotas-fiscal-note-documents/**` | `A, M, ??` | pacote derivado e evidências das revisões obrigatórias |
 
 ### Not Expected Changed Paths
 
@@ -160,44 +162,52 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 
 ## Definition of Done
 
-- [ ] `DOD-DOC-01` Abrir uma nota continua exibindo exatamente os 27 campos públicos aprovados, obtidos pelo endpoint de detalhe já existente.
-- [ ] `DOD-DOC-02` `noteId` é validado/decodificado antes de I/O e exatamente seu contexto, credencial e `providerIdInterno` compõem uma única chamada direta; adulteração, raw `idInterno` e entrada alternativa falham. O conteúdo remoto não pode ter sua identidade atestada pelo contrato URL-only e nenhuma garantia além da chamada exata é alegada.
-- [ ] `DOD-DOC-03` Upstream `200` aceita somente envelope bounded com URL absoluta de até `8 KiB`, `https`, porta padrão, sem userinfo/fragmento e origin allowlisted; `202` exige mensagem bounded mas não a ecoa; redirects, status/shape inválidos, timeout, body acima de `16 KiB`, abort e limites seguem a matriz HTTP estável.
-- [ ] `DOD-DOC-04` Nenhuma URL/token/CNPJ/`noteId`/payload entra em logs, erros, storage, cache fiscal ou telemetria controlados pelo UniNotas; a URL existe apenas na resposta e estado efêmero, é rotulada como capability sensível e nunca aparece como texto bruto na UI.
-- [ ] `DOD-DOC-05` Cada nota na Geral e o detalhe oferecem `⋮`, `Abrir PDF` e `Abrir XML`; consulta ocorre somente após clique. Existe um owner ativo por tela, chaveado por `noteId+documentType+generation`; burst do mesmo clique aceita uma chamada, e todos os botões documentais ficam desabilitados até conclusão/abort.
-- [ ] `DOD-DOC-06` O menu é operável por teclado, possui nome/estado acessível, fecha por Escape/clique externo/navegação, preserva foco e não aciona o link da nota ao selecionar documento.
-- [ ] `DOD-DOC-07` Documento pendente/erro é anunciado e recuperável; popup bloqueado mantém link seguro visível; logout/unmount/nova ação aborta ou invalida resultado tardio.
-- [ ] `DOD-DOC-08` Configurações mantém comportamento existente com glifo visual maior e alvo mínimo `44x44px` em desktop/mobile.
-- [ ] `DOD-DOC-09` Quatro perfis leitores passam; JWT ausente/inválido/expirado falha; nenhuma rota pública aceita token/CNPJ/provider ID do consumidor.
-- [ ] `DOD-DOC-10` Testes, browser, revisões e guards passam no checkout principal sem tocar persistência/runtime/deploy.
+- [x] `DOD-DOC-01` Abrir uma nota continua exibindo exatamente os 27 campos públicos aprovados, obtidos pelo endpoint de detalhe já existente.
+- [x] `DOD-DOC-02` `noteId` é validado/decodificado antes de I/O e exatamente seu contexto, credencial e `providerIdInterno` compõem uma única chamada direta; adulteração, raw `idInterno` e entrada alternativa falham. O conteúdo remoto não pode ter sua identidade atestada pelo contrato URL-only e nenhuma garantia além da chamada exata é alegada.
+- [x] `DOD-DOC-03` Upstream `200` aceita somente envelope bounded com URL absoluta de até `8 KiB`, `https`, porta padrão, sem userinfo/fragmento e origin allowlisted; `202` exige mensagem bounded mas não a ecoa; redirects, status/shape inválidos, timeout, body acima de `16 KiB`, abort e limites seguem a matriz HTTP estável.
+- [x] `DOD-DOC-04` Nenhuma URL/token/CNPJ/`noteId`/payload entra em logs, erros, storage, cache fiscal ou telemetria controlados pelo UniNotas; a URL existe apenas na resposta e estado efêmero, é rotulada como capability sensível e nunca aparece como texto bruto na UI.
+- [x] `DOD-DOC-05` Cada nota na Geral e o detalhe oferecem `⋮`, `Abrir PDF` e `Abrir XML`; consulta ocorre somente após clique. Existe um owner ativo por tela, chaveado por `noteId+documentType+generation`; burst do mesmo clique aceita uma chamada, e todos os botões documentais ficam desabilitados até conclusão/abort.
+- [x] `DOD-DOC-06` O menu é operável por teclado, possui nome/estado acessível, fecha por Escape/clique externo/navegação, preserva foco e não aciona o link da nota ao selecionar documento.
+- [x] `DOD-DOC-07` Documento pendente/erro é anunciado e recuperável; popup bloqueado mantém link seguro visível; logout/unmount/nova ação aborta ou invalida resultado tardio.
+- [x] `DOD-DOC-08` Configurações mantém comportamento existente com glifo visual maior e alvo mínimo `44x44px` em desktop/mobile.
+- [x] `DOD-DOC-09` Quatro perfis leitores passam; JWT ausente/inválido/expirado falha; nenhuma rota pública aceita token/CNPJ/provider ID do consumidor.
+- [x] `DOD-DOC-10` Testes, browser, revisões e guards passam no checkout principal sem tocar persistência/runtime/deploy.
 
 ## Validation Steps
 
-- [ ] `VAL-DOC-01` `cd backend && npm test -- --runInBand && npm run build && npm run lint`.
-- [ ] `VAL-DOC-02` `cd frontend && npm run test:notas && npm run lint && npm run build`.
-- [ ] `VAL-DOC-03` build/preview fresco + `npm run e2e:notas`, cobrindo desktop/mobile, mouse/teclado, lista/detalhe, PDF/XML disponível/pendente/erro, popup fallback e configurações.
-- [ ] `VAL-DOC-04` capability audits NestJS/React/Vite, `git diff --check`, validators e guards Foundation.
-- [ ] `VAL-DOC-05` probe real redatado de um documento autorizado por contexto fica no cutover; nunca imprimir URL/token/CNPJ/IDs.
+- [x] `VAL-DOC-01` `cd backend && npm test -- --runInBand && npm run build && npm run lint`.
+- [x] `VAL-DOC-02` `cd frontend && npm run test:notas && npm run lint && npm run build`.
+- [x] `VAL-DOC-03` build/preview fresco + `npm run e2e:notas`, cobrindo desktop/mobile, mouse/teclado, lista/detalhe, PDF/XML disponível/pendente/erro, popup fallback e configurações.
+- [x] `VAL-DOC-04` capability audits NestJS/React/Vite, `git diff --check`, validators e guards Foundation.
+- [x] `VAL-DOC-05` probe real redatado de um documento autorizado por contexto fica no cutover; nunca imprimir URL/token/CNPJ/IDs. Aceite local: explicitamente delegado ao cutover, sem claim runtime neste TODO.
 
 ## Completion Evidence Matrix
 
 | Criterion ID | Source Section | Criterion | Evidence Type | Evidence Artifact / Command | Runtime Target | Status | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `DOD-DOC-01` | `Definition of Done` | detalhe de 27 campos preservado | `test+browser` | exact-key tests + `e2e:notas` detalhe | `local browser` | `planned` | regressão, sem nova rota |
-| `DOD-DOC-02` | `Definition of Done` | identidade/contexto protegidos | `integration-test` | Nest application/contract matrices | `backend local` | `planned` | inclui tamper/raw ID/cross-context |
-| `DOD-DOC-03` | `Definition of Done` | contrato 200/202 e falhas | `adapter+application/controller-test` | adapter fixtures + HTTP assertions de status/body/headers | `backend local` | `planned` | inclui 201/204/206, exact keys e URL nunca impressa |
-| `DOD-DOC-04` | `Definition of Done` | zero retenção/vazamento | `test+review` | canários de log/storage/cache | `local` | `planned` | privacy boundary |
-| `DOD-DOC-05` | `Definition of Done` | menu/consulta sob demanda | `browser` | `frontend/e2e/notas.mjs` | `Chrome local` | `planned` | uma chamada por escolha |
-| `DOD-DOC-06` | `Definition of Done` | acessibilidade e navegação | `browser` | teclado/Escape/foco/click propagation | `Chrome local` | `planned` | desktop/mobile |
-| `DOD-DOC-07` | `Definition of Done` | pending/erro/race/fallback | `unit+browser` | unit ownership + browser states | `local browser` | `planned` | late result invalidado |
-| `DOD-DOC-08` | `Definition of Done` | settings 44x44 e glifo maior | `browser` | computed CSS e jornada disclosure | `Chrome local` | `planned` | sem mudar conteúdo |
-| `DOD-DOC-09` | `Definition of Done` | auth dos quatro perfis | `integration-test` | controller/application matrix | `backend local` | `planned` | inclui 401 |
-| `DOD-DOC-10` | `Definition of Done` | pacote verde e bounded | `command+review` | suites/guards finais | `local` | `planned` | sem runtime/persistence |
-| `VAL-DOC-01` | `Validation Steps` | backend completo | `command` | comando exato | `local` | `planned` | Jest/build/lint |
-| `VAL-DOC-02` | `Validation Steps` | frontend completo | `command` | comando exato | `local` | `planned` | unit/lint/build |
-| `VAL-DOC-03` | `Validation Steps` | browser fiel | `browser` | preview fresco + `e2e:notas` | `Chrome local` | `planned` | APIs interceptadas |
-| `VAL-DOC-04` | `Validation Steps` | audits/guards | `guard` | capability/diff/Foundation | `local` | `planned` | exact owners |
-| `VAL-DOC-05` | `Validation Steps` | smoke real redatado | `runtime` | TODO cutover | `Railway stage` | `blocked` | explicitamente fora do closeout local |
+| `SCOPE-DOC-01` | `Scope` | `SCOPE-DOC-01` Preservar e regressar o detalhe completo existente; não duplicar `notasDetalhe`. | `test+browser` | exact 27-field detail contract + `e2e:notas` detail map | `local browser` | `passed` | existing route preserved |
+| `SCOPE-DOC-02` | `Scope` | `SCOPE-DOC-02` Adicionar ao port/adapter SmartNotas resoluções independentes para `/notas/{idInterno}/pdf` e `/xml`, com decoder positivo de `200`/`202`, body máximo `16 KiB`, URL máxima `8 KiB`, origin allowlist fixa, cancelamento e redaction existentes. | `adapter-test` | `fiscal-documents.spec.ts` 26/26 focused + full Jest | `backend local` | `passed` | exact/over bounds and cancellation |
+| `SCOPE-DOC-03` | `Scope` | `SCOPE-DOC-03` Expor rotas públicas `GET /api/v1/notas/:noteId/documentos/pdf` e `GET /api/v1/notas/:noteId/documentos/xml`, protegidas pelos quatro perfis leitores e pelo mesmo `noteId` assinado. | `integration-test` | application/controller/contract matrices | `backend local` | `passed` | roles, JWT and tamper cases |
+| `SCOPE-DOC-04` | `Scope` | `SCOPE-DOC-04` Adicionar disclosure vertical `⋮` em cada linha/card da Geral e no detalhe, com ações sob demanda, loading, pendente, erro e recuperação. | `browser` | list/detail document journey in `frontend/e2e/notas.mjs` | `Chrome local` | `passed` | desktop/mobile |
+| `SCOPE-DOC-05` | `Scope` | `SCOPE-DOC-05` Abrir URL disponível em nova aba com `noopener`/`noreferrer`; se a abertura automática for bloqueada, manter link visível e acionável; limpar a URL efêmera ao fechar/trocar nota/logout. | `browser+security-review` | exact popup spy, neutral fallback and lifecycle canaries | `Chrome local` | `passed` | capability never rendered as text |
+| `SCOPE-DOC-06` | `Scope` | `SCOPE-DOC-06` Evitar navegação ao detalhe quando o usuário interagir com o menu e preservar navegação normal ao selecionar o restante da linha/card. | `browser` | sibling action/link and navigation assertions | `Chrome local` | `passed` | no nested interactive control |
+| `SCOPE-DOC-07` | `Scope` | `SCOPE-DOC-07` Aumentar o glifo de configurações e garantir caixa interativa mínima de `44x44px` nos viewports desktop e móvel. | `browser` | computed geometry/font assertions | `Chrome local` | `passed` | desktop/mobile |
+| `SCOPE-DOC-08` | `Scope` | `SCOPE-DOC-08` Atualizar documentação modular/README e testes backend, frontend e browser afetados. | `diff+review` | `backend/README.md`; `frontend/README.md`; module doc; Jest tests; `frontend/e2e/notas.mjs` browser suite | `principal checkout` | `passed` | diff guard classified all paths |
+| `DOD-DOC-01` | `Definition of Done` | `DOD-DOC-01` Abrir uma nota continua exibindo exatamente os 27 campos públicos aprovados, obtidos pelo endpoint de detalhe já existente. | `test+browser` | endpoint exact-key tests + browser detail map in `frontend/e2e/notas.mjs` via `npm run e2e:notas` | `local browser` | `passed` | no duplicate route |
+| `DOD-DOC-02` | `Definition of Done` | `DOD-DOC-02` `noteId` é validado/decodificado antes de I/O e exatamente seu contexto, credencial e `providerIdInterno` compõem uma única chamada direta; adulteração, raw `idInterno` e entrada alternativa falham. O conteúdo remoto não pode ter sua identidade atestada pelo contrato URL-only e nenhuma garantia além da chamada exata é alegada. | `integration-test` | signed-ID and exact-call matrices; EPS artifact | `backend local` | `passed` | zero list/detail/page-walk |
+| `DOD-DOC-03` | `Definition of Done` | `DOD-DOC-03` Upstream `200` aceita somente envelope bounded com URL absoluta de até `8 KiB`, `https`, porta padrão, sem userinfo/fragmento e origin allowlisted; `202` exige mensagem bounded mas não a ecoa; redirects, status/shape inválidos, timeout, body acima de `16 KiB`, abort e limites seguem a matriz HTTP estável. | `adapter+HTTP-test` | 26 adapter fixtures + controller/application assertions | `backend local` | `passed` | includes streamed overflow cancellation |
+| `DOD-DOC-04` | `Definition of Done` | `DOD-DOC-04` Nenhuma URL/token/CNPJ/`noteId`/payload entra em logs, erros, storage, cache fiscal ou telemetria controlados pelo UniNotas; a URL existe apenas na resposta e estado efêmero, é rotulada como capability sensível e nunca aparece como texto bruto na UI. | `integration+browser+security-review` | log/storage/cache/sink canaries and browser navigation in `frontend/e2e/notas.mjs` via `npm run e2e:notas`; clean security gate | `local browser` | `passed` | privacy boundary |
+| `DOD-DOC-05` | `Definition of Done` | `DOD-DOC-05` Cada nota na Geral e o detalhe oferecem `⋮`, `Abrir PDF` e `Abrir XML`; consulta ocorre somente após clique. Existe um owner ativo por tela, chaveado por `noteId+documentType+generation`; burst do mesmo clique aceita uma chamada, e todos os botões documentais ficam desabilitados até conclusão/abort. | `browser+FRC` | no-prefetch assertions + bursts 5/10/20 x3 | `Chrome local` | `passed` | FRC final-r2 9/9 |
+| `DOD-DOC-06` | `Definition of Done` | `DOD-DOC-06` O menu é operável por teclado, possui nome/estado acessível, fecha por Escape/clique externo/navegação, preserva foco e não aciona o link da nota ao selecionar documento. | `browser` | `frontend/e2e/notas.mjs` via `CHROME=... ALVO=http://localhost:4181 npm run e2e:notas`; FRC final-r2 report | `Chrome local` | `passed` | active-request Escape abort/focus and cached-history regression |
+| `DOD-DOC-07` | `Definition of Done` | `DOD-DOC-07` Documento pendente/erro é anunciado e recuperável; popup bloqueado mantém link seguro visível; logout/unmount/nova ação aborta ou invalida resultado tardio. | `unit+browser` | `frontend/e2e/notas.mjs` 202/error/fallback/logout/navigation assertions via `npm run e2e:notas` | `local browser` | `passed` | current feedback preserved |
+| `DOD-DOC-08` | `Definition of Done` | `DOD-DOC-08` Configurações mantém comportamento existente com glifo visual maior e alvo mínimo `44x44px` em desktop/mobile. | `browser` | computed geometry + disclosure journey | `Chrome local` | `passed` | permissions/content unchanged |
+| `DOD-DOC-09` | `Definition of Done` | `DOD-DOC-09` Quatro perfis leitores passam; JWT ausente/inválido/expirado falha; nenhuma rota pública aceita token/CNPJ/provider ID do consumidor. | `integration-test` | document route auth/application matrix in `backend/src/fiscal-notes/fiscal-notes.application.spec.ts` and contract spec | `backend local` | `passed` | ADMIN/GESTOR/ANALISTA/LEITOR |
+| `DOD-DOC-10` | `Definition of Done` | `DOD-DOC-10` Testes, browser, revisões e guards passam no checkout principal sem tocar persistência/runtime/deploy. | `command+review` | full Jest/unit/build/lint; browser `npm run e2e:notas`; triple/security/final reviews; diff/closeout guards | `principal checkout` | `passed` | no forbidden surface |
+| `VAL-DOC-01` | `Validation Steps` | `VAL-DOC-01` `cd backend && npm test -- --runInBand && npm run build && npm run lint`. | `command` | 346 passed/2 skipped; build/lint exit 0 | `backend local` | `passed` | 15 suites passed/1 skipped |
+| `VAL-DOC-02` | `Validation Steps` | `VAL-DOC-02` `cd frontend && npm run test:notas && npm run lint && npm run build`. | `command` | unit/lint/build exit 0 | `frontend local` | `passed` | fresh bundle generated |
+| `VAL-DOC-03` | `Validation Steps` | `VAL-DOC-03` build/preview fresco + `npm run e2e:notas`, cobrindo desktop/mobile, mouse/teclado, lista/detalhe, PDF/XML disponível/pendente/erro, popup fallback e configurações. | `browser` | main and independent reviewer runs against byte-matched `:4181` assets | `Chrome local` | `passed` | all APIs intercepted |
+| `VAL-DOC-04` | `Validation Steps` | `VAL-DOC-04` capability audits NestJS/React/Vite, `git diff --check`, validators e guards Foundation. | `guard+review+browser` | capability ready; `git diff --check`; diff guard go; browser navigation suite `frontend/e2e/notas.mjs`; final closeout guards | `local browser` | `passed` | no external CI claim |
+| `VAL-DOC-05` | `Validation Steps` | `VAL-DOC-05` probe real redatado de um documento autorizado por contexto fica no cutover; nunca imprimir URL/token/CNPJ/IDs. Aceite local: explicitamente delegado ao cutover, sem claim runtime neste TODO. | `boundary-adjudication` | named SmartNotas read cutover TODO + Local-Implemented/Provisional stage | `cutover owner` | `passed` | no runtime claim made |
 
 ## External Dependency Readiness
 
@@ -217,8 +227,8 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 
 | From Profile | To Profile | Why the Handoff Exists | Touched Surfaces | Status / Evidence |
 | --- | --- | --- | --- | --- |
-| `operational-coder` | `assurance-security-adversarial` | URL externa, PII e credenciais backend-only | adapter/API/browser handoff | `planned` |
-| `operational-coder` | `assurance-tester-quality` | matriz 200/202/races/a11y | testes backend/frontend/browser | `planned` |
+| `operational-coder` | `assurance-security-adversarial` | URL externa, PII e credenciais backend-only | adapter/API/browser handoff | `passed; security gate clean for local delivery` |
+| `operational-coder` | `assurance-tester-quality` | matriz 200/202/races/a11y | testes backend/frontend/browser | `passed; triple audit + final review round 02` |
 
 ## Complexity
 
@@ -253,6 +263,30 @@ O UniNotas já consulta o endpoint oficial de detalhe e mostra a allowlist compl
 | `no captured URL persistence` | URLs não persistem | `Preserve` | módulo > Invariants |
 | `detail exact 27` | detalhe público allowlisted | `Preserve` | módulo > Fiscal read response allowlists |
 | `four reader roles` | todos podem consultar | `Preserve` | módulo > API Endpoint Definitions |
+
+## Decision Adherence Validation
+
+| Decision ID | Status | Evidence | Notes |
+| --- | --- | --- | --- |
+| `D-01` | `Adherent` | exact 27-field detail contract and browser regression | existing detail path preserved; no duplicate endpoint |
+| `D-02` | `Adherent` | signed-ID application/controller tests | public document routes accept only context-bound `noteId` |
+| `D-03` | `Adherent` | no-prefetch browser assertions and source review | URL resolves only after explicit PDF/XML choice; no cache/persistence |
+| `D-04` | `Adherent` | adapter/application/controller matrices | exact public `200 available` / `202 pending` contract |
+| `D-05` | `Adherent` | strict raw/canonical URL and sink regressions | exact HTTPS origins, bounds, no raw URL text, protected fallback |
+| `D-06` | `Adherent` | direct-call/count tests and log canaries | existing rate/concurrency/audit reused; fixed operation names |
+| `D-07` | `Adherent` | browser bursts, cached-history and late-outcome tests; refreshed FRC | single owner, drop duplicate, abort/invalidate across lifecycle |
+| `D-08` | `Adherent` | computed desktop/mobile geometry | settings target >=44x44 and glyph >=20px without behavior change |
+
+## Module Decision Consistency Validation
+
+| Module Decision Ref | Planned Handling | Delivery Status | Evidence | Notes |
+| --- | --- | --- | --- | --- |
+| `FISC-VIS-03` | `Preserve` | `Adherent` | signed `noteId` route/application tests | provider ID never becomes route authority |
+| `Smart Notas sole source` | `Preserve` | `Adherent` | adapter path/source review | document URL comes only from the selected SmartNotas context |
+| `no captured URL persistence` | `Preserve` | `Adherent` | browser canaries, source review and security gate | capability remains response/state-only and clears on lifecycle exit |
+| `detail exact 27` | `Preserve` | `Adherent` | exact-key tests and browser detail map | detail allowlist unchanged |
+| `four reader roles` | `Preserve` | `Adherent` | application/auth matrix | ADMIN, GESTOR, ANALISTA and LEITOR preserved |
+| `FISC-DOC-01..03` | `Promote delivered truth` | `Adherent` | module URL-resolution and browser-lifecycle sections | durable document decisions match implementation and final evidence |
 
 ## Decision Baseline (Frozen Before Implementation)
 
@@ -418,14 +452,14 @@ Every public JSON property above is required. `url` is non-null only for `availa
 
 ### Local CI-Equivalent Suite Matrix
 
-| Repository / CI Surface | Why In Scope | Behavior / Scenario Covered | Fixture / Seed / Runtime Preconditions | Local CI-Equivalent Command | Required Before | Status | Evidence Artifact / Command | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| backend Jest | contrato Nest/SmartNotas muda | 200/202, errors, auth, noteId, redaction, bounds | fetch loopback/determinístico, sem segredo real | `cd backend && npm test -- --runInBand` | `Local-Implemented` | `planned` | command output | suite completa |
-| backend static/build | tipos/wiring/controller | build/lint do módulo | install existente | `cd backend && npm run build && npm run lint` | `Local-Implemented` | `planned` | command output | project-owned |
-| frontend unit | API/state/menu | normalização, race, cleanup, no duplicate | DOM/unit fixtures existentes | `cd frontend && npm run test:notas` | `Local-Implemented` | `planned` | command output | deterministic |
-| frontend static/build | React/TS/CSS | hooks e bundle | install existente | `cd frontend && npm run lint && npm run build` | `Local-Implemented` | `planned` | command output | project-owned |
-| frontend browser | jornada visível | Geral/detalhe/docs/a11y/settings | build fresco, preview e APIs interceptadas | `cd frontend && npm run e2e:notas` | `Local-Implemented` | `planned` | browser report | desktop/mobile |
-| Foundation | contrato/guards | TODO, módulo, diff/authority/closeout | baseline publicado | validators/guards declarados | `Completed` | `planned` | outputs | não alegar CI hospedada |
+| Repository / CI Surface | Why In Scope | Local CI-Equivalent Command | Required Before | Status | Evidence Artifact / Command | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| backend Jest | contrato Nest/SmartNotas, auth, ID, redaction e bounds | `cd backend && npm test -- --runInBand` | `Local-Implemented` | `passed` | 15 suites passed/1 skipped; 346 tests passed/2 skipped | fixtures sintéticas, sem segredo real |
+| backend static/build | tipos, wiring e controller | `cd backend && npm run build && npm run lint` | `Local-Implemented` | `passed` | ambos exit 0 após as correções finais | lint proprietário contém `--fix`; nenhum diff estranho produzido |
+| frontend unit/race | API, normalização, cache, cleanup e duplicate-drop | `cd frontend && npm run test:notas && npm run test:notas:race` | `Local-Implemented` | `passed` | deterministic unit + `clear-late`/`same-key-refresh` burst 20 | runner project-owned |
+| frontend static/build | React/TS/CSS e bundle | `cd frontend && npm run lint && npm run build` | `Local-Implemented` | `passed` | bundle fresco servido em `:4181`; reviewer byte-matched assets | sem dependência nova |
+| frontend browser/FRC | Geral/detalhe/docs/a11y/settings e lifecycle cache | `cd frontend && npm run e2e:notas`; formal race probe 5/10/20 x3 | `Local-Implemented` | `passed` | main + independent review browser; FRC final-r2 9/9 | APIs interceptadas; sem live provider |
+| Foundation delivery | contrato, módulo, reviews e evidências de closeout | diff/authority/completion/closeout guards + validator | `Completed` | `passed` | diff, authority, completion and closeout guards `go`; Foundation validator passed | nenhuma pipeline hospedada alegada |
 
 ### Runtime / Rollout Notes
 
@@ -473,19 +507,19 @@ Every public JSON property above is required. `url` is non-null only for `availa
 
 ### Failure Modes & Edge Cases
 
-- [ ] `202` pendente não abre aba vazia e anuncia estado.
-- [ ] URL inválida/HTTP/userinfo/fragmento falha fechada sem ecoar valor.
-- [ ] clique duplo e troca rápida PDF/XML não entregam resultado tardio incorreto.
-- [ ] fechar menu, navegar, logout ou unmount invalida/aborta request.
-- [ ] ação `⋮` não navega para detalhe; restante da linha continua navegável.
-- [ ] mobile não corta disclosure e settings mantém 44x44.
-- [ ] `noteId` adulterado/ID cru/contexto cruzado nunca chama documento errado.
-- [ ] bursts determinísticos de 5/10/20 cliques na mesma ação produzem exatamente uma chamada aceita, um efeito visível e zero entrega tardia; todas as ações documentais ficam disabled enquanto pending.
+- [x] `202` pendente não abre aba vazia e anuncia estado.
+- [x] URL inválida/HTTP/userinfo/fragmento/sintaxe ambígua falha fechada sem ecoar valor; somente `href` canônica bounded é retornada.
+- [x] clique duplo e troca rápida PDF/XML não entregam resultado tardio incorreto.
+- [x] fechar menu, navegar, logout ou unmount invalida/aborta request.
+- [x] ação `⋮` não navega para detalhe; restante da linha continua navegável.
+- [x] mobile não corta disclosure e settings mantém 44x44.
+- [x] `noteId` adulterado/ID cru/contexto cruzado nunca chama documento errado.
+- [x] bursts determinísticos de 5/10/20 cliques na mesma ação produzem exatamente uma chamada aceita, um efeito visível e zero entrega tardia; todas as ações documentais ficam disabled enquanto pending.
 
 ### Residual Unknowns / Risks
 
-- [ ] Browser pode bloquear abertura automática após fetch; fallback visível obrigatório remove o bloqueio funcional.
-- [ ] O OpenAPI usa uma origin de exemplo diferente da observada no probe Prosperar; ambas ficam allowlisted. Unifast ainda precisa de smoke redatado no cutover porque suas credenciais locais estão vazias. Qualquer terceira origin exige revisão material antes de ser aceita.
+- [x] Browser pode bloquear ou retornar `null` mesmo após abertura segura; mensagem neutra e fallback visível obrigatório removem o bloqueio funcional sem alegar detecção perfeita.
+- [x] O OpenAPI usa uma origin de exemplo diferente da observada no probe Prosperar; ambas ficam allowlisted. Unifast permanece explicitamente delegado ao smoke redatado no cutover porque suas credenciais locais estão vazias. Qualquer terceira origin exige revisão material antes de ser aceita.
 
 ### Independent Critique Findings — Rounds 1–5
 
@@ -518,7 +552,7 @@ Every public JSON property above is required. `url` is non-null only for `availa
 
 - **Canonical method:** `wf-docker-audit-escalation-method`
 - **Guard command:** `python3 delphi-ai/tools/audit_escalation_guard.py --todo uninotas-foundation/todos/active/features/TODO-uninotas-fiscal-note-documents.md`
-- **Latest TEACH evidence / artifact:** `pending pushed freeze`.
+- **Latest TEACH evidence / artifact:** `Overall outcome: go`, fingerprint `f37acaea8184`, rerun after implementation on `2026-09-28`.
 
 | Trigger | Value | Notes |
 | --- | --- | --- |
@@ -560,16 +594,16 @@ Every public JSON property above is required. `url` is non-null only for `availa
 - **Policy schema version:** `pcv-1`
 - **Global sensitivity level:** `medium`
 - **Why this level:** duas leituras exatas externas são novas e a ação React é retriggerable/lifecycle-sensitive; não há mutation, batch, fila ou claim de SLO.
-- **Current delivery stage at review time:** `Pending`
+- **Current delivery stage at review time:** `Local-Implemented / Provisional`
 
 | Policy | Lane ID | Lane | Trigger Result | Trigger Severity | Trigger Reason Code | Trigger Rationale | Gate Deadline | Min Evidence Rule ID | State | Residual Risk | Uncertainty Reason Code | Recorded At UTC | Executor ID |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `pcv-1` | `EPS` | `endpoint-performance-scrutiny` | `required` | `medium` | `EPS-EXACT-LOOKUP-SURFACE-CHANGED` | novas rotas fazem lookup direto por noteId/provider ID e não podem page-walk/list-filter | `before_local_implemented` | `EPS-E2` | `pending` | chamada externa direta ainda consome quota/latência | `none` | `2026-09-28T22:18:45Z` | `root-operational-coder` |
-| `pcv-1` | `FRC` | `frontend-race-condition-validation` | `required` | `medium` | `FRC-LIFECYCLE-ASYNC-EFFECT` | menu dispara read assíncrono com close/navigation/logout/unmount e efeito visível externo | `before_local_implemented` | `FRC-E2` | `pending` | browser pode bloquear nova aba; fallback permanece | `none` | `2026-09-28T22:18:45Z` | `root-operational-coder` |
+| `pcv-1` | `EPS` | `endpoint-performance-scrutiny` | `required` | `medium` | `EPS-EXACT-LOOKUP-SURFACE-CHANGED` | novas rotas fazem lookup direto por noteId/provider ID e não podem page-walk/list-filter | `before_local_implemented` | `EPS-E2` | `passed` | chamada externa direta ainda consome quota/latência | `none` | `2026-09-28T23:42:58Z` | `root-operational-coder` |
+| `pcv-1` | `FRC` | `frontend-race-condition-validation` | `required` | `medium` | `FRC-LIFECYCLE-ASYNC-EFFECT` | menu dispara read assíncrono com close/navigation/logout/unmount e efeito visível externo | `before_local_implemented` | `FRC-E2` | `passed` | browser pode bloquear nova aba; fallback permanece | `none` | `2026-09-28T23:42:58Z` | `root-operational-coder` |
 | `pcv-1` | `BCI` | `backend-concurrency-idempotency-validation` | `not_needed` | `low` | `BCI-NON-IDEMPOTENT-WRITE` | predicate falso: nenhuma escrita, mutation ou efeito backend irreversível muda | `before_local_implemented` | `BCI-E1` | `not_applicable` | `none` | `none` | `2026-09-28T22:18:45Z` | `root-operational-coder` |
 | `pcv-1` | `RLS` | `runtime-load-stress-validation` | `not_needed` | `low` | `RLS-SLO-CLAIM` | predicate falso: sem batch/bulk/fila/realtime/cache-index sensível ou compromisso de SLO/capacidade | `before_production_ready` | `RLS-E1` | `not_applicable` | `none` | `none` | `2026-09-28T22:18:45Z` | `root-operational-coder` |
 
-### Planned pcv-1 Evidence Contracts
+### pcv-1 Evidence Contracts
 
 | Lane | Sample Profile | Acceptance Rule | Planned Machine Artifact | Required Payload |
 | --- | --- | --- | --- | --- |
@@ -577,6 +611,13 @@ Every public JSON property above is required. `url` is non-null only for `availa
 | `FRC` | `FRC-SP-M` plus explicit bursts `5|10|20` | `FRC-A1` | `artifacts/tmp/uninotas-fiscal-documents/pcv/frc.json`, canonical JSON + SHA-256 | `concurrency_policy=drop duplicate`, burst/repetitions, runner path, one accepted call/effect, lifecycle abort/late suppression |
 
 Artifacts in `running|passed` must carry every `pcv-1` evidence field, including environment/run IDs, schema, executor/reviewer IDs, sample/acceptance IDs, summary and canonical hash. Prose or generic suite passes do not satisfy EPS/FRC.
+
+### pcv-1 Evidence Objects
+
+| Lane | Evidence Type | Environment / Run | Artifact / Schema / SHA-256 | Profile / Acceptance | Result / Reviewer |
+| --- | --- | --- | --- | --- | --- |
+| `EPS` | `benchmark-equivalent` | `local-wsl-principal-checkout` / `uninotas-fiscal-documents-eps-20260928T234258Z` | `artifacts/tmp/uninotas-fiscal-documents/pcv/eps.json` / `pcv-1` / `02da47841a3359aa0d9c3cfc0c7ebd28b52d2ccf063c44b7db04eae3aa7c3e9b` | `EPS-SP-STRONG` / `EPS-A2` | one direct call, zero list/detail/page-walk/retry / `fresh-performance-reviewer` |
+| `FRC` | `deterministic-browser-race-probe` | `local-wsl-principal-checkout-chrome` / `uninotas-fiscal-documents-frc-20260929T000945Z` | `artifacts/tmp/uninotas-fiscal-documents/pcv/frc.json` / `pcv-1` / `6e1c2212a1496a7e87b24ef6090ad180d42be424cd0fc56884d9ff3892fa6f59` | `FRC-SP-M` + bursts `5|10|20` / `FRC-A1` | refreshed 9/9 runner attempts; cached-history/abort/focus regression passed / `fresh-test-quality-reviewer` |
 
 ## Package-First Verification
 
@@ -623,3 +664,72 @@ Artifacts in `running|passed` must carry every `pcv-1` evidence field, including
 - **Renewed approval required when:** houver mudança material no contrato público, allowlist, perfis, persistência, arquitetura de entrega de documentos ou qualquer expansão das exclusões acima.
 - **Exclusions:** `proxy/persistence/runtime/deploy/worktrees`.
 - **Renewal trigger:** qualquer mudança material em contrato público, segurança da URL, perfis, proxy/persistência, runtime ou validação.
+
+## Independent No-Context Final Review Gate
+
+- **Final review decision:** `required / expanded`.
+- **Round 01 status:** `material_findings_resolved`; `FINAL-DOC-001` and `FINAL-DOC-002` were reproduced, fixed and revalidated.
+- **Final review status:** `no_material_findings`.
+- **Evidence / reference:** `artifacts/reviews/uninotas-fiscal-note-documents/final-review.round-02.result.json`; the fresh reviewer byte-matched the served `:4181` assets to the principal checkout and reran the complete intercepted browser journey.
+- **P1/P2 position:** zero open P1/P2-equivalent correctness, security or test finding; deployment/provider behavior remains explicitly outside the local claim.
+- **Residual evidence boundary:** browser APIs were intercepted and synthetic; real SmartNotas document availability, latency, quota and Railway activation remain owned by cutover.
+
+## Pipeline/Copilot P1/P2 Preflight
+
+| Reviewer Surface / Package | Review Focus | Status | Evidence Artifact / Command | Findings | Resolution / Notes |
+| --- | --- | --- | --- | --- | --- |
+| fiscal document cross-stack package | correctness, auth/context, capability URL, body bounds, lifecycle races, accessibility and evidence quality | `passed` | triple audit rounds 01–03, security gate, final review rounds 01–02, backend 346/2 skipped, fresh browser and FRC 9/9 | `none` | all previously routed blockers resolved and revalidated; hosted PR comments remain outside this local claim |
+
+## Rule-Spirit Anti-Pattern Hunt
+
+| Rule / Principle Surface | Search Lens | Status | Evidence | Findings | Resolution |
+| --- | --- | --- | --- | --- | --- |
+| NestJS/React/document boundary | auth bypass, raw provider leakage, unsafe URL sink, list/page-walk, hidden cache/persistence, test-only shortcut | `passed` | `artifacts/tmp/uninotas-fiscal-documents/rule-spirit.json` + manual classification | 25 heuristic warnings; zero material blocker | synthetic fixtures, loopback and parameterized runner targets classified `by-design/no-action` |
+
+## Verification Debt Assessment
+
+- **Audit outcome:** `no blocking verification debt`.
+- **Inline code/TODO debt:** none in the changed product paths; all approved checklists are complete.
+- **Evidence:** verification-debt helper plus manual adjudication of lexical `n/a`, `Provisional`, `pending` and `abort` occurrences.
+- **Accepted residual:** no waived code defect. Only deploy and real-provider smoke are deferred to the named cutover TODO and therefore are not part of this local completion claim.
+
+## Module Consolidation Gate
+
+- [x] `FISC-DOC-01..03` and the delivered URL-resolution/browser-lifecycle truth are present in `modules/fiscal-notes-and-documents.md`.
+- [x] No runtime ownership, Railway activation, database authority or new environment contract was promoted.
+- [x] The feature brief is retired with cutover ownership preserved.
+
+## TODO Closeout Disposition
+
+- **Disposition:** `move-completed`
+- **Reason:** approved scope is locally implemented; suites, pcv-1, security, triple audit and fresh final review are green; no material finding or verification debt remains.
+- **Target stage:** `Local-Implemented / Provisional`.
+- **Post-commit/push status:** Foundation closeout published as the final documentation batch; product code remains an uncommitted PR-ready working tree and no merge/deploy is authorized.
+- **Next path/status action:** publish Foundation closeout, move this TODO to `completed/features/`, then hand the product branch to the user for commit/PR; Railway activation and real-provider smoke stay in the cutover TODO.
+
+## Delivery Audit Evidence
+
+- **Test-quality audit (`full`):** três rodadas fresh/no-context no pacote derivado `artifacts/reviews/uninotas-fiscal-note-documents/`; lifecycle/mobile, stream-boundary e no-prefetch findings foram corrigidos. A terceira rodada registrou zero blocker não resolvido; o único finding low foi corrigido inline e o browser fresco passou.
+- **Dedicated multi-lane audit (`additive`):** sessão `artifacts/reviews/uninotas-fiscal-note-documents/triple-audit/session.json`; rounds 01–03 possuem results, summaries e resolutions determinísticas. Estado final: zero finding bloqueante ou dívida aceita em aberto.
+- **Security adversarial review:** `high` inherent risk, ataque sintético/offline executado; `SEC-DOC-01..03` resolvidos por sintaxe HTTPS explícita, retorno canônico, bound raw/canônico, fallback neutro e regressões. Gate final: `clean for reviewed local delivery`; nenhum serviço real foi chamado.
+- **Performance/concurrency:** EPS/FRC `passed` pelos artefatos pcv-1 canônicos e hashes acima; BCI/RLS `not_applicable` pelos predicates congelados.
+- **Rule-Spirit hunt:** scanner retornou 25 heurísticas, máximo `warning`; revisão manual classificou todas como fixtures sintéticas/loopback/test-domain e o fallback local parametrizável do runner, sem hard-code runtime de produto ou bypass. Artefato: `artifacts/tmp/uninotas-fiscal-documents/rule-spirit.json`.
+- **Verification debt:** helper retornou `high` por sinais lexicais esperados (`n/a`, `Provisional`, palavras `pending/abort` dentro do contrato e delegation explícita ao cutover). Adjudicação manual: `none` para o closeout local — zero checklist unchecked, zero inline cleanup/canonical-link debt, zero waiver real, durable decisions promovidas ao módulo e toda limitação runtime possui owner/trigger no TODO de cutover.
+- **Capability/test helpers:** NestJS e React owners/scripts retornaram `overall_outcome=ready`; test-quality static helper retornou `low`, sem bypass/auth shortcut/status-only/no-exception/ambient fallback/DI override.
+
+## Promotion Finding Routing Ledger
+
+| Finding ID | Severity | Classification | Routing Decision | Same TODO / Split Rationale | Status | Approval / Follow-up Reference |
+| --- | --- | --- | --- | --- | --- | --- |
+| `PERF-DOC-001` | `medium` | `release-blocker` | validar ownership também em rejection tardia | mesma lifecycle aprovada | `resolved` | triple round-01 resolution |
+| `TQA-DOC-001` | `high` | `release-blocker` | provar efeitos externos e lifecycle resolve/reject/navigation | mesma matriz de testes aprovada | `resolved` | triple round-01 resolution + FRC artifact |
+| `TQA-DOC-002` | `high` | `release-blocker` | corrigir/provar disclosure móvel list/detail | mesmo escopo responsivo aprovado | `resolved` | triple round-01 resolution |
+| `SEC-DOC-01` | `medium` | `release-blocker` | exigir sintaxe absoluta e retornar somente `parsed.href` | mesma boundary URL aprovada | `resolved` | security confirmation |
+| `SEC-DOC-02` | `low` | `release-blocker` | manter flags e usar texto neutro para retorno `null` ambíguo | mesma UX/fallback aprovada | `resolved` | security confirmation |
+| `SEC-DOC-03` | `low` | `release-blocker` | bound também após canonicalização | mesmo limite de 8 KiB aprovado | `resolved` | Unicode expansion regression |
+| `TQA-DOC-R2-001` | `medium` | `release-blocker` | fixture JSON válida exata/over, stream sem length e cancel | mesma evidência de 16 KiB aprovada | `resolved` | triple round-02 resolution |
+| `TQA-DOC-R3-001` | `low` | `release-blocker` | asserção direta zero-prefetch ao abrir/trocar disclosure | ajuste inline no teste aprovado | `resolved` | triple round-03 resolution + fresh browser |
+| `FINAL-DOC-001` | `medium` | `release-blocker` | vincular owner documental à geração de navegação e regressar cache com a mesma nota | mesma lifecycle aprovada | `resolved` | final review round-01 resolution + fresh browser |
+| `FINAL-DOC-002` | `medium` | `release-blocker` | restaurar foco somente após o trigger voltar a estar habilitado | mesma acessibilidade aprovada | `resolved` | final review round-01 resolution + fresh browser |
+
+Nenhum finding real permanece em `follow-up-fast-follow|follow-up-hardening`; não há TODO derivado ou waiver. A correção material do round 01 exige uma rodada final independente fresca antes do closeout.
