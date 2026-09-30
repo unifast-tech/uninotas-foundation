@@ -21,6 +21,8 @@ Em 2026-09-28, o usuário esclareceu que a exportação deve abranger **todos os
 
 Ainda em 2026-09-28, o usuário solicitou uma terceira evolução: incluir `Tomador` na Geral, exibir compra e chaves completas para a equipe financeira e apresentar no card todos os campos enumerados do `GET /notas`. O filtro por número foi considerado e explicitamente cancelado por não existir suporte equivalente no provedor.
 
+Em 2026-09-30, o usuário ampliou especificamente o contrato de exportação: o CSV autenticado deve conter todos os campos normalizados disponíveis no `GET /notas`, inclusive documento, e-mail e localização do tomador. Essa decisão substitui a restrição anterior do CSV sem PII; a resposta JSON da listagem pública permanece restrita à allowlist de 17 campos.
+
 ## Confirmed Product Direction
 
 - `Geral` continua sendo a lista fiscal de um único contexto: Unifast ou Prosperar.
@@ -31,7 +33,7 @@ Ainda em 2026-09-28, o usuário solicitou uma terceira evolução: incluir `Toma
 - Todos os perfis leitores podem exportar o filtro fiscal do contexto ativo.
 - A exportação pertence ao backend; o navegador faz uma única solicitação autenticada e nunca percorre páginas do provedor.
 - Todos os perfis autenticados atuais podem visualizar os dados fiscais allowlisted; lista e detalhe continuam protegidos pelas rotas existentes.
-- A Geral acrescenta somente o nome do tomador como nova PII. Documento, e-mail e localização ficam exclusivamente no detalhe; o CSV permanece sem PII do tomador.
+- A Geral continua exibindo somente o nome do tomador como nova PII. Documento, e-mail e localização não entram na resposta JSON da listagem, mas passam a integrar o CSV autenticado solicitado pela equipe financeira e permanecem disponíveis no detalhe.
 - `noteId` assinado continua sendo a única identidade aceita na rota de detalhe. O ID interno pode ser exibido como referência, mas nunca enviado cru como autoridade de consulta.
 
 ## Story Decomposition

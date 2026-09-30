@@ -3,7 +3,7 @@
 ## Artifact Identity
 
 - **Artifact type:** `tactical_execution_contract`
-- **Status:** `Active / Provisional`
+- **Status:** `Active / Local-Implemented / Independent-Gates-Pending`
 - **Created:** `2026-09-29`
 - **Owner:** `Delphi / Operational Coder`, sob autoridade humana do usuário
 - **Feature brief:** `foundation_documentation/artifacts/feature-briefs/uninotas-fiscal-note-read-model.md`
@@ -16,23 +16,23 @@
 - **Primary profile:** `Operational / Coder`
 - **Technical scope:** `nestjs, react, vite, postgresql, prisma`
 - **Current work state:** `implementation-authorized`
-- **Implementation authority:** `granted by renewed user APROVADO on 2026-09-29 for D-RM-C01..C20`.
+- **Implementation authority:** `granted by renewed user direction on 2026-09-30 for D-RM-C01..C27`.
 
 ## Delivery Status Canon
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** capturar RED fail-first e implementar schema/publication/coverage/scheduler/backend/frontend na branch `release/uninotas`, sob single-writer discipline.
+- **Next exact step:** executar a migration e as integrações PostgreSQL em banco local disponível, concluir os gates independentes e somente então preparar promoção separadamente autorizada.
 
 ## Active Work State
 
 - **Work state:** `implementation`
-- **Why this state now:** o contrato convergiu após R1–R5, todos os gates pre-approval passaram e o usuário renovou explicitamente o `APROVADO` para `D-RM-C01..C20`.
+- **Why this state now:** a baseline C01..C22 permanece implementada e publicada na branch; C23..C27 estão implementadas no working tree com migration aditiva, projeção/CSV completos e regressões unitárias/estáticas aprovadas. A validação PostgreSQL real permanece pendente porque `TEST_DATABASE_URL` aponta para o PostgreSQL local desligado.
 - **Exit condition:** baseline corretiva revisada, aprovada, implementada e validada na branch `release/uninotas`.
 
 ## Provisional Notes
 
-- **Missing for production-ready:** bootstrap histórico imutável e segmentado, cobertura por intervalo, leitura não bloqueante, exportação local condicionada ao período e reparação do estado de stage.
+- **Missing for production-ready:** concluir os gates independentes requeridos pelo audit floor e, após promoção autorizada, atestar a revisão implantada, reparar sem destruição e validar o stage com perfil RLS.
 - **Revisit criteria:** todos os critérios `DOD-RM-C*` e `VAL-RM-C*` aprovados e evidenciados, incluindo smoke de stage com revisão exata em execução.
 - **Dependencies unblocked:** o TODO de cancelamento pode continuar em planejamento, mas sua implementação não deve preceder a estabilização deste read model.
 
@@ -41,7 +41,7 @@
 - **Current delivery:** estabilizar o read model implantado para que listagem/paginação sejam sempre locais e não bloqueantes, exportações locais dependam somente da cobertura do intervalo solicitado e a sincronização histórica converja em janelas fechadas.
 - **Planned next steps:** após esta correção, retomar o TODO independente de cancelamento fiscal; isso não está autorizado aqui.
 - **Anticipatory implementation authorized now:** `none`.
-- **Rationale:** mantém Smart Notas como autoridade e reutiliza PostgreSQL/Nest scheduler existentes, sem introduzir fila, réplica ou armazenamento fiscal adicional.
+- **Rationale:** mantém Smart Notas como autoridade e reutiliza PostgreSQL/Nest scheduler existentes; `D-RM-C21` adiciona somente hints de prioridade limitados e reconstruíveis, enquanto `D-RM-C23..C27` completam a mesma projeção normalizada que já alimenta lista/exportação, sem payload bruto, chamadas de detalhe por linha, fila externa ou nova réplica.
 
 ## Execution Lane Tracking
 
@@ -54,18 +54,18 @@
 
 | Scope Item | Local Branch/Commit | PR to lane threshold | PR to `stage` | PR to `main` | Current Status |
 | --- | --- | --- | --- | --- | --- |
-| corrective read model | `release/uninotas@pending` | `pending` | `n/a until target lane is confirmed` | `n/a until target lane is confirmed` | `not implemented` |
-| canonical Foundation contract | `main@pending review baseline` | `n/a` | `n/a` | `n/a` | `planning diff only` |
+| corrective read model | `release/uninotas@6f48e60c5c0690a02f9ca0dbed8a6d31e2761475` | `user-owned PR/merge to main pending` | `n/a; project uses main as the current production source` | `pending user-owned PR/merge` | `committed and pushed after explicit authorization; no merge or deploy performed by Delphi` |
+| canonical Foundation contract | `main@working-tree` | `n/a` | `n/a` | `n/a` | `synchronized locally; validation pending` |
 
 ## Bounded But Elastic Guardrails
 
-- **May stay inside this TODO:** schema/state concretization needed for approved interval coverage, tests/fixtures, exact UI copy, non-destructive legacy-row repair and bounded observability that serve the same list/export correction.
-- **Must update or split the TODO:** storing new PII/detail data, partial export, deep historical reconciliation policy, new worker/queue/replica, provider quota/credential changes, cancellation or any Smart Notas mutation.
+- **May stay inside this TODO:** schema/state concretization needed for approved interval coverage; exact normalized fields already returned by `GET /notas`; tests/fixtures; non-destructive legacy-row repair; and bounded observability that serve the same list/export projection.
+- **Must update or split the TODO:** detail-only data, raw payload, partial export, deep historical reconciliation policy, durable/external queue, new worker/replica, provider quota/credential changes, cancellation or any Smart Notas mutation.
 
 ## Approval
 
 - **Approved by:** `usuário — APROVADO em 2026-09-29`
-- **Approval scope:** `corrective implementation defined in D-RM-C01..D-RM-C20: additive Prisma/PostgreSQL migration, NestJS synchronization/read/export contract, React consumer/UI states, source-owned tests and canonical module synchronization on release/uninotas`
+- **Approval scope:** `corrective implementation defined in D-RM-C01..D-RM-C27: existing Prisma/PostgreSQL read model, demand-aware NestJS synchronization, yesterday/today React default, automatic partial-period revalidation, complete-only export, complete normalized GET /notas CSV projection, source-owned tests and canonical module synchronization on release/uninotas`
 - **Execution not authorized by approval:** deploy/merge/promoção, credenciais/quota, mudança Railway/topologia, escrita em logs, cancelamento fiscal ou operações destrutivas no banco de stage.
 - **Renewed approval required when:** mudar janela histórica, semântica de cobertura/exportação, contrato público, estratégia de recuperação, schema, topologia, limites, riscos ou evidências obrigatórias.
 
@@ -78,6 +78,8 @@
 - **Authority boundary:** estas evidências explicam a baseline instalada em stage, mas foram explicitamente encerradas para a nova evolução porque o comportamento observado invalida premissas materiais de convergência e exportação.
 - **Superseded approval attempt:** o usuário respondeu `APROVADO` em `2026-09-29`, porém as critiques obrigatórias posteriores encontraram mudanças materiais ainda não apresentadas (`FRM-CRIT-01..05`, `FRM-R2-01..05`, `FRM-R3-01..03`). Nenhuma implementação foi iniciada sob essa aprovação; ela foi substituída pela aprovação convergida registrada abaixo.
 - **Renewed converged approval:** `APROVADO` recebido em `2026-09-29` após apresentação explícita de atomic publication, daily coverage, retained horizon, snapshot reads, bounded scheduler, truthful freshness and test expansion. Esta é a autoridade vigente para `D-RM-C01..C20`.
+- **Renewed demand-aware approval:** `Vamos fazer assim então toda vez o user abrir o UniNotas ele vê o dia de ontem e hoje por padrão no filtro e dps ele escolhe a janela que precisa e faz o carregamento conforme você falou deixando liberado para exportação, parte essencial do projeto` recebido em `2026-09-30`, após confirmação explícita de que usuários concorrentes mantêm filtros independentes. Esta é a autoridade vigente para `D-RM-C21..C22`; não autoriza migration, nova réplica, worker externo, merge ou deploy.
+- **Renewed complete-export approval:** após confirmar que o `GET /notas` devolve `nome` e `documento`, o usuário aprovou `Vamos fazer isso então` em `2026-09-30` para persistir e exportar todos os campos conhecidos dessa listagem. Esta é a autoridade vigente para `D-RM-C23..C27`; autoriza migration aditiva local, não autoriza deploy, merge, credenciais ou dados de detalhe/raw payload.
 
 ## Historical Decision Baseline — Delivered 2026-09-29
 
@@ -93,9 +95,9 @@
 | `D-RM-08` | Migration owner | Prisma 6.5.0 is the application schema owner, subject to migration-state verification and an explicit production migration owner before deployment. |
 | `D-RM-09` | Existing logs | The external `logs` table is not written, copied into, reconciled with or used to populate this read model. |
 
-## Approved evolution - provider failure fallback
+## Approved change - provider failure fallback
 
-The current provider-first contract is insufficient when Smart Notas returns a temporary `429`. The proposed evolution keeps Smart Notas as the fiscal authority and allows list/export to serve the last valid local projection while a controlled revalidation is pending.
+The current provider-first contract is insufficient when Smart Notas returns a temporary `429`. The approved change keeps Smart Notas as the fiscal authority and allows list/export to serve the last valid local projection while a controlled revalidation is pending.
 
 This material change to freshness and failure semantics was approved by the user on `2026-09-29`.
 
@@ -107,7 +109,7 @@ This material change to freshness and failure semantics was approved by the user
 | `D-RM-E04` | Retry/cooldown | A provider `429` must trigger bounded backoff and a persisted cooldown, preventing immediate repeated full traversals after a failed sync. |
 | `D-RM-E05` | Detail ownership | Detail, PDF and XML remain provider-backed and do not silently fall back to the summary projection. |
 
-## Approved evolution - bootstrap plus rolling reconciliation
+## Approved change - bootstrap plus rolling reconciliation
 
 The proposed synchronization policy is narrowed to avoid traversing the entire historical period on every request:
 
@@ -118,7 +120,7 @@ The proposed synchronization policy is narrowed to avoid traversing the entire h
 
 This proposal replaces the current per-request/per-period full coverage strategy and was approved for implementation on `2026-09-29`.
 
-## Corrective Evolution — Pending Renewed Approval
+## Corrective Change — Approved and Locally Implemented
 
 ### Observed Symptoms and Evidence
 
@@ -142,8 +144,8 @@ This proposal replaces the current per-request/per-period full coverage strategy
 | `D-RM-C06` | Complete-only CSV | `GET /api/v1/notas/exportar` without `documento` reads PostgreSQL when the exact requested interval is fully covered, regardless of unrelated incomplete windows. Partial intervals fail before CSV generation with `409 ExportacaoFiscalCoberturaIncompleta`; partial CSV is forbidden. | Intentionally supersedes global `bootstrap_complete` gating and module `FISC-EX-02`. |
 | `D-RM-C07` | Truthful failure semantics | Read-model incompleteness is never mapped to `SmartNotasIndisponivel`. That code remains reserved for a real provider operation/failure. List/export expose explicit sync/coverage states and retain the last sanitized internal sync reason for observability without leaking provider payloads. | Refines `D-RM-E03`; preserves the common error envelope. |
 | `D-RM-C08` | Stage recovery | Preserve all cached rows. Do not mark coverage complete from row count alone and do not delete/reset the whole cache. Retire the legacy moving-window sync record, seed stable windows, and verify each incomplete window through bounded provider reads before marking it complete. | Preserves `D-RM-01`, `D-RM-05` and the no-data-loss intent of `D-RM-E01`. |
-| `D-RM-C09` | Provider-owned detail/documents | Detail, PDF, XML and `documento`-filtered reads remain provider-backed; this correction does not persist recipient document or expand the summary projection. | Preserves `D-RM-03`, `D-RM-E05`, `FISC-DOC-*` and PII boundaries. |
-| `D-RM-C10` | Runtime boundary | Use the existing NestJS process and scheduler in the current single-replica topology. No queue, worker service, Railway topology, provider quota or credential change is authorized. | Preserves the prior topology limitation and requires a separate TODO before horizontal scaling. |
+| `D-RM-C09` | Provider-owned detail/documents | Detail, PDF, XML and `documento`-filtered reads remain provider-backed; the public JSON summary remains unchanged. Its prior internal recipient-field exclusion is intentionally superseded by `D-RM-C23..C27` only for the local allowlisted Finance CSV projection. | Preserves `D-RM-03`, `D-RM-E05`, `FISC-DOC-*` and the provider-owned detail boundary. |
+| `D-RM-C10` | Runtime boundary | Use the existing NestJS process and scheduler in the current single-replica topology. No durable/external queue, worker service, Railway topology, provider quota or credential change is authorized; only the bounded reconstructible in-process priority hints frozen in `D-RM-C21` are allowed. | Preserves the prior topology limitation and requires a separate TODO before horizontal scaling. |
 | `D-RM-C11` | Atomic window publication | Provider pages are written to an isolated candidate generation. Canonical cache rows and interval coverage change together in one database transaction only after the complete traversal validates; failed or superseded generations are never visible to list/export. | Closes the partial-publication gap in `D-RM-C02/C05` and preserves the last valid projection. |
 | `D-RM-C12` | Exact membership and absence | Every candidate must have a valid scheduled issue date inside the exact context/window. Null, malformed or out-of-window rows fail that generation. Successful publication deletes canonical rows proven absent from the same exact interval before upserting the candidate set. | Makes complete/empty/removed/moved semantics provable rather than count-derived. |
 | `D-RM-C13` | Gap-free calendar frontier | Initial history is the inclusive 365-day interval `[D-366,D-2]`, split into month-clipped provider traversals in `America/Sao_Paulo`; rolling owns `[D-1,D]`. Each successful traversal publishes canonical daily proof, so a newly eligible `D-2` reuses its prior rolling proof or enters history as one missing day. | Makes month/year/leap-day rollover, retention and gap/overlap behavior deterministic. |
@@ -154,12 +156,19 @@ This proposal replaces the current per-request/per-period full coverage strategy
 | `D-RM-C18` | Durable distinct completeness | Publication requires the active generation's candidate `COUNT(*)` to equal both its durable raw-observed item count and the provider's frozen expected total, with page/per-page invariants satisfied. A duplicate provider ID across any pages or restart collapses in candidates but increments raw observations, causing rollback and `pagination_inconsistent`. | Prevents a resumed generation from publishing false complete coverage after duplicate IDs. |
 | `D-RM-C19` | Interval-scoped freshness | Each daily proof stores `published_at`. The API adds `freshnessState=current|historical_snapshot|stale_rolling|unknown`; existing freshness fields are conservative aggregates over the exact interval, and historical snapshots never advertise an unsupported retry/deep refresh. | Intentionally refines `D-RM-07`: the 15-minute rule applies to requested rolling days, while older proof is disclosed as a historical snapshot rather than falsely revalidated. |
 | `D-RM-C20` | Snapshot-visible retained horizon | Add one context-state row containing `horizon_date`, `retained_from` and `retained_through`. Retention updates this row and prunes rows/proofs in the same transaction; local list/export admit dates from the context-state row visible in their `REPEATABLE READ` snapshot, never from transaction/application wall-clock alone. | Aligns horizon bounds and retained rows in one MVCC state so midnight retention cannot invalidate an already admitted lower bound. |
+| `D-RM-C21` | Demand-aware historical priority | An ordinary partial list registers only `{contextoFiscal,dataInicio,dataFim}` in a bounded in-memory, per-context queue. Exact equal demands coalesce; filters such as status and purchase do not create independent provider traversals. After rolling both contexts, each pump advances at most one demanded historical window, alternating contexts, while every fourth historical opportunity remains reserved for the oldest background unit. Requests never await provider I/O; restart safely loses only priority hints and later reads reconstruct them. | Makes the user-selected interval converge promptly without mixing users, duplicating identical work, changing the durable coverage authority or starving the retained 365-day bootstrap. |
+| `D-RM-C22` | Default and automatic convergence UX | A new UniNotas list URL defaults to yesterday through today in `America/Sao_Paulo`. When the applied local interval is partial and has no `documento`, React revalidates the same query at a bounded cadence, cancels on filter/session/navigation lifecycle changes and automatically enables CSV when exact interval coverage becomes complete. | Removes the misleading manual-refresh loop while preserving independent per-user filters, local-only reads and the complete-only export invariant. |
+| `D-RM-C23` | Complete list projection | Normalize and persist every documented/observed field returned by `GET /notas`: provider internal ID, model, purpose, status, environment, fiscal number, access key, purchase ID, product, unit/total value, scheduled/payment date, competence, recipient name/document/e-mail/city/state/country and platform. | The projection remains rebuildable and allowlisted; raw payload and detail-only fields remain forbidden. |
+| `D-RM-C24` | Complete CSV schema | Export the complete normalized list projection in a fixed deterministic order, with Portuguese business-oriented headers and `contextoFiscal`; null remains empty and every value retains existing CSV formula protection. | Makes the filtered export useful to Finance without N detail requests or provider dependency after covered synchronization. |
+| `D-RM-C25` | PII authorization boundary | Existing authenticated reader roles may export recipient name, document, e-mail and location because the product is restricted to the Finance team; responses remain private/no-store and observability must never log these values. | Intentionally supersedes the prior CSV PII exclusion while preserving authentication, context isolation and no-log rules. |
+| `D-RM-C26` | Additive data rollout | Add nullable projection columns to cache and candidate tables plus a projection-version marker on daily coverage through one forward-only Prisma migration. Existing rows remain valid with nulls and old proofs remain version 1; subsequent synchronization backfills fields and publishes version 2 proof naturally, without a destructive or provider-per-row backfill. | Supports overlapping application versions and prevents old name-only coverage from authorizing a complete new CSV. |
+| `D-RM-C27` | Detail boundary unchanged | `GET /notas/:noteId`, PDF and XML stay provider-backed; the export never calls detail per note. | Prevents monthly export amplification and keeps detail-only data out of the local projection. |
 
 ### Refined Publication, Calendar, Scheduler and Consumer Contract
 
 #### Atomic candidate publication
 
-- Add expand-only Prisma/PostgreSQL tables for candidates keyed by `{sync_id, generation_id, provider_id_interno}`, coverage days uniquely keyed by `{contexto_fiscal, coverage_date}` with durable `published_at`, and retained-horizon context state uniquely keyed by `contexto_fiscal`; the sync row records its active generation and durable raw-observed count. Candidates contain only the existing summary projection allowlist plus `observed_at`; no raw payload, recipient document, PDF/XML or ephemeral URL is added.
+- Add expand-only Prisma/PostgreSQL tables for candidates keyed by `{sync_id, generation_id, provider_id_interno}`, coverage days uniquely keyed by `{contexto_fiscal, coverage_date}` with durable `published_at` and projection version, and retained-horizon context state uniquely keyed by `contexto_fiscal`; the sync row records its active generation and durable raw-observed count. Candidates contain only the complete allowlisted `GET /notas` projection plus `observed_at`; no raw payload, detail-only field, PDF/XML or ephemeral URL is added.
 - A window traversal writes and idempotently replaces rows only in its candidate generation. List/export continue reading the canonical cache and therefore cannot observe page-by-page or retry-partial data.
 - After the final page, one database transaction locks and rechecks the current sync/generation, validates exact context/date membership and page invariants, deletes canonical rows for that exact context/date interval that are absent from the candidate set, upserts the candidate rows, upserts one completed coverage-day proof for every day in the interval, marks the operational sync complete, and removes its candidates.
 - The generation durably increments `raw_items_observed` for every provider item before candidate-key deduplication. Publication requires `candidate COUNT(*) = raw_items_observed = total_esperado`, plus the frozen `paginas_esperadas`, `itens_por_pagina` and final-page cardinality invariants. Any mismatch, including a duplicate provider ID separated by checkpoint/restart, rolls back publication and records sanitized `pagination_inconsistent`.
@@ -210,7 +219,7 @@ For list responses without `documento`, `readModel` preserves the existing field
 - `completedWindows` and `totalWindows` are computed from the canonical daily coverage ledger for the exact requested interval; a valid local list interval has `totalWindows >= 1` and `0 <= completedWindows <= totalWindows`.
 - For `coverage=complete`, `lastSuccessfulSyncAt` is the minimum `published_at` across all requested daily proofs and `cacheAgeSeconds` is its non-negative age at the transaction timestamp. For `coverage=partial`, both fields are `null` because no interval-wide successful snapshot exists.
 - `freshnessState=unknown` for partial coverage. Using snapshot-visible `horizon_date` as `D`, complete coverage is `stale_rolling` when any requested `D-1`/`D` proof is older than 15 minutes; otherwise `historical_snapshot` when the interval includes any date `<=D-2`; otherwise `current`. Existing `stale` is the compatibility alias `freshnessState !== 'current'`.
-- Historical proofs are immutable snapshots, not continuously fresh assertions. `historical_snapshot` discloses the conservative timestamp and offers no retry/deep-refresh action because periodic deep reconciliation remains outside this TODO; a separate approved evolution is required to change that ownership.
+- Historical proofs are immutable snapshots, not continuously fresh assertions. `historical_snapshot` discloses the conservative timestamp and offers no retry/deep-refresh action because periodic deep reconciliation remains outside this TODO; a separate approved change is required to alter that ownership.
 - `coverage=complete` with zero rows means a proven empty result and uses the ordinary empty-state copy.
 - `coverage=partial` with zero rows remains HTTP `200`, suppresses the ordinary empty-state copy and shows an actionable synchronization message with progress/error/retry data; it must not imply that no fiscal notes exist.
 - `coverage=partial` with stored rows renders those canonical rows with the same actionable partial-state disclosure.
@@ -225,7 +234,7 @@ For list responses without `documento`, `readModel` preserves the existing field
 | `coverage=partial`, `syncState=syncing` | any | stored rows when present; otherwise no ordinary empty copy; show progress `completedWindows/totalWindows` | disabled with incomplete-coverage explanation |
 | `coverage=partial`, `syncState=failed` | any | stored rows when present; otherwise no ordinary empty copy; show sanitized reason and retry delay/action | disabled with incomplete-coverage explanation |
 | `coverage=partial`, `syncState=idle` | any | stored rows when present; otherwise no ordinary empty copy; show pending-synchronization action | disabled with incomplete-coverage explanation |
-| HTTP `422 PeriodoFiscalForaDoHorizonte` | none | preserve filters, show supported `[D-366,D]` dates and offer reset to the default 30-day interval | disabled; no download |
+| HTTP `422 PeriodoFiscalForaDoHorizonte` | none | preserve filters, show supported `[D-366,D]` dates and offer reset to the default yesterday/today interval | disabled; no download |
 
 The backend remains authoritative: a stale client that submits export during partial coverage still receives exact `409`, and a stale URL outside the horizon receives exact `422`; neither response creates a download.
 
@@ -332,7 +341,10 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - [ ] Corrigir o mapeamento de erros para separar indisponibilidade real do provedor de projeção incompleta/inconsistente.
 - [ ] Atualizar o contrato React e os avisos de lista/exportação para os estados corretos, sem download parcial.
 - [ ] Atualizar o módulo canônico `fiscal-notes-and-documents.md` para substituir a travessia histórica por requisição descrita em `FISC-EX-02/FISC-EX-04` pela leitura local coberta.
-- [ ] Adicionar regressões fail-first, integração PostgreSQL, planos/limites e smoke autenticado de stage com revisão exata atestada.
+- [ ] Adicionar regressões causais; como o RED pré-correção não foi preservado, classificar a execução real como `test-after`, além de integração PostgreSQL, planos/limites e smoke autenticado de stage com revisão exata atestada.
+- [ ] Ampliar o record de listagem, candidate/cache Prisma e CSV para todos os campos conhecidos do `GET /notas`, incluindo nome, documento, e-mail e localização do tomador, sem chamadas ao detalhe.
+- [ ] Adicionar migration expand-only com colunas nullable, preservar linhas existentes e permitir backfill somente por sincronização normal do provedor.
+- [ ] Atualizar regressões de adapter, serializer, cache, migration e contrato HTTP para a projeção/ordem completa e para a não exposição de PII em logs.
 
 ## Out of Scope
 
@@ -343,7 +355,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - Deploy Railway, mudança de credenciais/quota ou alteração do cutover Smart Notas já aberto.
 - Exportação parcial, botão para “baixar o que já existe” ou qualquer CSV apresentado como completo sem cobertura integral do intervalo.
 - Fila/worker externo, nova réplica, lease distribuído, alteração do scheduler de infraestrutura ou operação destrutiva direta no banco de stage.
-- Persistência de documento do tomador, payload bruto, PDF, XML ou URL efêmera.
+- Persistência de payload bruto, campos exclusivos do detalhe, telefone/endereço completo, PDF, XML ou URL efêmera.
 
 ## Historical Canonical Anchors — Delivered Baseline
 
@@ -386,7 +398,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 
 | Harness Type | Surface | Command / Rule / Artifact | Regression It Must Catch | Adoption Timing | Evidence Plan / Follow-up |
 | --- | --- | --- | --- | --- | --- |
-| unit test | cache/sync state machine | `fiscal-note-cache.service.spec.ts` | total muda após checkpoint, restart de janela e rolling independente | `implement-in-this-todo` | fail-first + suite completa |
+| unit test | cache/sync state machine | `fiscal-note-cache.service.spec.ts` | total muda após checkpoint, restart de janela e rolling independente | `implement-in-this-todo` | regressão test-after + suite completa; nenhum artefato RED histórico é alegado |
 | integration test | Prisma/PostgreSQL coverage | real local PostgreSQL fixture | gaps/overlaps, contexto cruzado, aposentadoria legada e export coberto | `implement-in-this-todo` | migration/schema check + query assertions |
 | contract test | list/export errors and metadata | Nest application specs | cobertura incompleta disfarçada de provider error ou CSV parcial | `implement-in-this-todo` | exact status/code/body/header assertions |
 | browser test | React list/export | existing frontend E2E/unit runner | aviso permanente, erro incorreto ou download parcial | `implement-in-this-todo` | source-owned test + stage smoke |
@@ -411,10 +423,14 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - [ ] `DOD-RM-C15` Duplicata de `providerIdInterno` entre páginas ou após restart impede publicação e preserva cache/coverage anterior com `pagination_inconsistent`.
 - [ ] `DOD-RM-C16` Frescor de intervalo completo/zero é derivado de prova diária durável e distingue histórico, rolling atual e rolling vencido sem oferecer deep refresh inexistente.
 - [ ] `DOD-RM-C17` Admissão usa o horizonte persistido visível no mesmo snapshot das linhas; poda e avanço do horizonte confirmam juntos na virada do dia.
+- [ ] `DOD-RM-C18` Intervalos parciais consultados recebem prioridade deduplicada e justa após rolling, sem mais de uma unidade histórica por pump e sem starvation do bootstrap de fundo.
+- [ ] `DOD-RM-C19` A abertura padrão usa ontem/hoje; a tela revalida somente a consulta local parcial aplicada, cancela timers obsoletos e habilita exportação automaticamente após cobertura completa.
+- [ ] `DOD-RM-C20` A projeção local e o CSV incluem exatamente todos os campos allowlisted de `GET /notas`, preservam CPF/CNPJ como texto, não consultam detalhe por linha e não registram PII em observabilidade.
+- [ ] `DOD-RM-C21` A migration adiciona campos nullable em cache/candidates, preserva linhas antigas e o sync subsequente preenche os novos valores sem operação destrutiva.
 
 ## Validation Steps
 
-- [ ] `VAL-RM-C01` Executar fail-first para total alterado após checkpoint, processo reiniciado, rolling concorrente, intervalo coberto/incompleto e mapeamento fiel de erro.
+- [ ] `VAL-RM-C01` Executar regressões causais para total alterado após checkpoint, processo reiniciado, rolling concorrente, intervalo coberto/incompleto e mapeamento fiel de erro; registrar como `test-after` quando não houver artefato RED preservado.
 - [ ] `VAL-RM-C02` Executar suites completas backend/frontend, lint, builds e validação/generação Prisma.
 - [ ] `VAL-RM-C03` Em PostgreSQL local real, validar janelas sem gap/overlap, isolamento, migração/reparação legada e planos de paginação/exportação.
 - [ ] `VAL-RM-C04` Validar concorrência entre bootstrap, rolling, listas e exports sem duplicidade, perda de checkpoint ou tempestade upstream.
@@ -431,12 +447,16 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - [ ] `VAL-RM-C15` Reiniciar após checkpoint e repetir o mesmo provider ID em páginas diferentes; provar `candidate count != raw observed`, rollback e cobertura inalterada em PostgreSQL real.
 - [ ] `VAL-RM-C16` Cobrir complete-zero, histórico puro, histórico+rolling atual, rolling vencido/falhado e respectivas mensagens/ações no backend e browser.
 - [ ] `VAL-RM-C17` Em PostgreSQL real: (a) com anchor existente, abrir transação antes da meia-noite e confirmar retenção+novo horizonte antes e depois da primeira leitura, provando visões nova/antiga coerentes; (b) sem context-state, estabelecer o snapshot/provisional bounds, confirmar em paralelo a primeira criação do anchor+poda e provar que a requisição original ainda vê coverage/count/rows pré-poda, enquanto nova requisição vê o anchor e nunca usa bounds provisórios.
+- [ ] `VAL-RM-C18` Provar em Jest que demandas idênticas coalescem, a janela consultada precede o histórico antigo, contextos alternam e uma unidade de fundo é atendida após no máximo três demandas.
+- [ ] `VAL-RM-C19` Provar em testes unitários/browser que a URL vazia usa ontem/hoje, partial dispara revalidação automática sem clique, troca de filtro cancela o ciclo antigo e CSV é habilitado ao receber cobertura completa.
+- [ ] `VAL-RM-C20` Executar regressões do adapter, serializer, cache e contrato HTTP provando a ordem completa do CSV, nulls, zeros à esquerda, fórmula, caracteres especiais e ausência de chamadas ao detalhe.
+- [ ] `VAL-RM-C21` Executar `prisma validate`, `prisma generate` e aplicar a migration em bancos PostgreSQL descartáveis vazio e baseline, provando linhas legadas preservadas e novos campos nullable.
 
 ## Test Decisions — Frozen
 
 | ID | Decision | Evidence lane |
 | --- | --- | --- |
-| `D-T01` | Test-first | Add fail-first cache-service tests for atomic late-page failure, cross-page/restart duplicate IDs, superseded generation, removed/moved/null/out-of-window records, complete-zero/partial-zero, freshness states, rolling→daily proof, horizon admission and stale fallback. |
+| `D-T01` | Test-first intended; test-after observed | The approved intent was fail-first, but no immutable pre-fix RED artifact was preserved. Current evidence is limited to causal test-after regressions for late-page failure, cross-page/restart duplicate IDs, superseded generation, removed/moved/null/out-of-window records, complete-zero/partial-zero, freshness states, rolling→daily proof, horizon admission and stale fallback. |
 | `D-T02` | Integration | On real PostgreSQL, prove distinct/raw/expected completeness, set-based atomic publication, daily proof/retention and DB-date-aligned one-snapshot list/export under forced commit interleavings; preserve provider-backed detail/PDF/XML contracts. |
 | `D-T03` | Concurrency | Simultaneous startup/ticks/requests share one pump and captured `D`; rolling has priority, historical work is globally bounded, contexts alternate fairly and shutdown admits no new work. |
 | `D-T04` | Real infrastructure | Prisma validate/generate and the authorized local PostgreSQL are required; live Smart Notas traffic is excluded from automated tests. |
@@ -453,27 +473,30 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 | Repository | Path | Baseline ref | Comparison mode |
 | --- | --- | --- | --- |
 | `MonitorNotes` | `.` | `release/uninotas@5cd1d5bc0c91c784ac4be985baba8a21fdc702f4` | `working_tree` |
-| `uninotas-foundation` | `C:/Unifast/MonitorDeNotas/uninotas-foundation` | `main@d10c04f` | `working_tree` |
+| `uninotas-foundation` | `uninotas-foundation` | `main@d10c04f` | `working_tree` |
 
 ### Expected Changed Paths
 
 | Repository | Path glob | Change types | Reason |
 | --- | --- | --- | --- |
 | `MonitorNotes` | `backend/prisma/schema.prisma` | `M` | required candidate ownership, daily coverage proof, retained-horizon context state and atomic publication contract |
-| `MonitorNotes` | `backend/prisma/migrations/**` | `A` | required expand-only candidate/coverage/horizon migration and supporting constraints/indexes |
-| `MonitorNotes` | `backend/src/fiscal-notes/**` | `A, M` | windowed bootstrap, rolling independence, local reads, truthful errors and regression tests |
+| `MonitorNotes` | `backend/prisma/migrations/**` | `A, ??` | required expand-only candidate/coverage/horizon migration and supporting constraints/indexes |
+| `MonitorNotes` | `backend/src/fiscal-notes/**` | `A, M, ??` | windowed bootstrap, rolling independence, local reads, truthful errors and regression tests |
 | `MonitorNotes` | `backend/src/common/filters/**` | `M` | public error mapping for incomplete read-model coverage if centrally owned there |
 | `MonitorNotes` | `frontend/src/api/notas.ts` | `M` | interval coverage/progress contract and export error handling |
-| `MonitorNotes` | `frontend/src/notas/**` | `A, M` | metadata normalization/cache/export controller regression coverage |
+| `MonitorNotes` | `frontend/src/api/cliente.ts` | `M` | preserve the structured public error code and retained-horizon bounds for truthful UI handling |
+| `MonitorNotes` | `frontend/src/notas/**` | `A, M, ??` | metadata normalization/cache/export controller regression coverage |
 | `MonitorNotes` | `frontend/src/notas/urlFiscal.ts` | `M` | request-snapshotted local horizon normalization and stale-URL handling |
 | `MonitorNotes` | `frontend/src/paginas/ListaNotas.tsx` | `M` | actionable partial/complete synchronization state |
-| `MonitorNotes` | `frontend/e2e/**` | `A, M` | browser-visible list/export regressions when this is the source-owned runner |
-| `MonitorNotes` | `frontend/src/**/*.spec.ts*` | `A, M` | frontend contract/render regressions |
+| `MonitorNotes` | `frontend/e2e/**` | `A, M, ??` | browser-visible list/export regressions when this is the source-owned runner |
+| `MonitorNotes` | `frontend/src/**/*.spec.ts*` | `A, M, ??` | frontend contract/render regressions |
 | `MonitorNotes` | `delphi-ai` | `M` | pre-existing workspace link reflects the separately approved Delphi helper commit; excluded from product staging |
 | `MonitorNotes` | `foundation_documentation` | `M` | pre-existing Foundation workspace link reflects TODO evidence; excluded from product staging |
-| `MonitorNotes` | `uninotas-foundation` | `T` | pre-existing tracked-gitlink versus workspace-symlink topology; excluded from product staging |
+| `MonitorNotes` | `uninotas-foundation` | `M, T` | pre-existing tracked-gitlink versus workspace-symlink topology; excluded from product staging |
 | `uninotas-foundation` | `todos/active/features/TODO-uninotas-fiscal-note-read-model.md` | `M` | approval, decisions and delivery evidence |
 | `uninotas-foundation` | `modules/fiscal-notes-and-documents.md` | `M` | canonical local-read/export/coverage contract and superseded provider traversal decisions |
+| `uninotas-foundation` | `domain_entities.md` | `M` | document the rebuildable candidate, coverage, synchronization and horizon entities without changing fiscal authority |
+| `uninotas-foundation` | `system_roadmap.md` | `M` | evidence-only status synchronization from planned to locally implemented and promotion-pending |
 | `uninotas-foundation` | `artifacts/dependency-readiness.md` | `M` | redacted stage/provider readiness evidence via DevOps handoff if runtime status is refreshed |
 
 ### Not Expected Changed Paths
@@ -482,15 +505,17 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 | --- | --- | --- | --- |
 | `MonitorNotes` | `backend/.env` | `A, M, D, R` | secrets/local environment are excluded |
 | `MonitorNotes` | `backend/src/logs/**` | `A, M, D, R` | external logs remain outside the read model |
-| `MonitorNotes` | `backend/src/fiscal-notes/smart-notas.adapter.ts` | `M` | provider route/auth contract is unchanged |
-| `MonitorNotes` | `Dockerfile`, `railway.json`, `.github/**` | `A, M, D, R` | deployment/CI topology is outside this evolution |
-| `uninotas-foundation` | `project_constitution.md`, `system_roadmap.md` | `M` | no strategic stage or constitutional invariant change is authorized |
+| `MonitorNotes` | `Dockerfile`, `railway.json`, `.github/**` | `A, M, D, R` | deployment/CI topology is outside this correction |
+| `uninotas-foundation` | `project_constitution.md` | `M` | no constitutional invariant change is authorized |
 
 ### Diff Deviation Analysis
 
 | Diff item | Classification | Evidence / defense | Decision | User validation |
 | --- | --- | --- | --- | --- |
 | workspace links `delphi-ai`, `foundation_documentation`, `uninotas-foundation` | noise / governed support topology | links predate this product implementation; Delphi and Foundation changes were separately authorized and versioned in their owning repositories | retain links locally; exclude them from MonitorNotes staging | already authorized by user during this TODO session |
+| `frontend/src/api/cliente.ts` | required public-error support | the list/export UI must receive the exact backend code and retained-horizon bounds; no unrelated client behavior changed | admit as implementation scope | covered by frontend deterministic/build checks |
+| `domain_entities.md`, `system_roadmap.md` | required canonical evidence sync | entity ownership and roadmap stage must match the locally implemented, promotion-pending read model without granting deployment authority | admit as Foundation evidence scope | remains subject to the blocked scope-drift refresh/push gate |
+| root `artifacts/**` corpus | generated verification noise, pruned | 384 untracked review/browser/prior-TODO artifacts were inventoried; durable conclusions were consolidated in the TODO and the current FRC artifact was made self-contained | removed from the workspace after explicit user authorization; recoverable quarantine recorded in session handoff | authorized by user on 2026-09-30; diff guard now passes with 24/24 classified changes |
 
 ## Framing Source & Story Slice
 
@@ -510,7 +535,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 
 | From Profile | To Profile | Why the Handoff Exists | Touched Surfaces | Status / Evidence |
 | --- | --- | --- | --- | --- |
-| `operational-coder` | `assurance-tester-quality` | TODO `big`, bugfix arquitetural e contrato público | bounded TODO/code/test/evidence packages | `planned before approval and delivery` |
+| `operational-coder` | `assurance-tester-quality` | TODO `big`, bugfix arquitetural e contrato público | bounded TODO/code/test/evidence packages | `architecture review executed; PostgreSQL/test-quality evidence still pending` |
 | `operational-coder` | `operational-devops` | deploy/revision attestation, read-only stage sync-state capture and authenticated smoke are forbidden to normal coder execution | Railway Stage / dependency readiness | `planned; no runtime mutation authorized by this TODO alone` |
 
 ## Complexity
@@ -528,7 +553,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 
 ## Decision Pending
 
-- [ ] `none`; as opções materiais foram comparadas no Plan Review e a direção refinada está congelada em `D-RM-C01..C20`, aguardando refreeze, R5 focado e aprovação humana renovada.
+- [x] `none`; as opções materiais foram comparadas, `D-RM-C01..C20` foram congeladas em `2026-09-29`, `D-RM-C21..C22` receberam direção humana renovada em `2026-09-30` e `D-RM-C23..C27` receberam aprovação explícita em `2026-09-30` após confirmação do payload real de `GET /notas`.
 
 ## Module Decision Baseline Snapshot
 
@@ -538,8 +563,8 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 | `fiscal-notes-and-documents#FISC-EX-02` | backend percorre páginas do provedor para cada export | `Supersede (Intentional)` | `D-RM-C04/C06`; local covered export becomes canonical |
 | `fiscal-notes-and-documents#FISC-EX-03` | Buffer completo antes da resposta | `Preserve` | CSV atomic application boundary remains |
 | `fiscal-notes-and-documents#FISC-EX-04` | consistência detectável da paginação provider, sem snapshot | `Supersede (Intentional)` | provider checks move to sync windows; export consistency becomes DB coverage/query based |
-| `fiscal-notes-and-documents#FISC-EX-05..10` | HTTP/CSV/security/limits/coordinator contracts | `Preserve`, adapting only provider-page admission no longer used by covered local export | module sections cited above |
-| `fiscal-notes-and-documents#FISC-VIS-01..03` | positive response allowlists and signed IDs | `Preserve` | no summary/detail field expansion beyond read-model metadata |
+| `fiscal-notes-and-documents#FISC-EX-05..10` | HTTP/CSV/security/limits/coordinator contracts | `Preserve`, except `FISC-EX-08` is intentionally superseded by the approved complete list-projection CSV in `D-RM-C23..C27` | module sections cited above |
+| `fiscal-notes-and-documents#FISC-VIS-01..03` | positive response allowlists and signed IDs | `Supersede (Intentional)` | extend only the internal normalized list/cache/export projection; keep the public paginated summary and signed route identity unchanged |
 | `fiscal-notes-and-documents#FISC-DOC-01..03` | PDF/XML provider-backed | `Preserve` | `D-RM-C09` |
 | `fiscal-notes-and-documents#FISC-CAN-01` | proposed cancellation | `Out of Scope` | cancellation TODO remains independently gated |
 | `events-and-classification#note_read_model transition` | legacy module remains current owner until cutover | `Preserve` | scope policy `note-read-model-001` stays planned |
@@ -554,6 +579,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 | `A-RM-C04` | Stage runs one API replica. | dependency readiness records `replicas=1` | distributed lease becomes required before deployment | `Medium` | `Block deployment, not planning` |
 | `A-RM-C05` | The exact stage failure row/error code is unknown from the local DB. | local read-only query returned empty sync/cache; user supplied public stage symptoms | operational repair branch may differ, but list/export contract remains valid | `High` | `Operational runtime evidence pending; not a code assumption` |
 | `A-RM-C06` | Historical statuses older than `D-1` may change externally, but broad periodic deep reconciliation is outside this correction. | Smart Notas authority + no changed-since contract | stale older status remains residual risk; cancellation overlay covers only Monitor-owned cancellation | `Medium` | `Keep as Assumption; document residual risk` |
+| `A-RM-C07` | `GET /notas` returns the complete listed recipient fields (`nome`, `documento`, `email`, `cidade`, `estado`, `pais`) on each summary record. | user-provided real response sample plus the previously observed `GET /notas` payload | if a field is omitted/null, the nullable projection and CSV emit an empty cell; invalid typed/non-null values remain a provider contract error | `High` | `Keep as Assumption; cover adapter acceptance/nullability` |
 
 ## Execution Plan
 
@@ -566,7 +592,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 
 ### Ordered Steps
 
-1. Add fail-first tests for atomic late-page failure, changed totals/generation restart, removed/moved/null/out-of-window notes, frontier rollover, non-blocking list, scheduler overlap/fairness, interval coverage, complete-only export and truthful zero/error states.
+1. Add causal regression tests for atomic late-page failure, changed totals/generation restart, removed/moved/null/out-of-window notes, frontier rollover, non-blocking list, scheduler overlap/fairness, interval coverage, complete-only export and truthful zero/error states; record the realized lane as test-after because no pre-fix RED artifact was retained.
 2. Add the expand-only candidate-generation plus daily-coverage relational contract and implement set-based one-transaction publication, including exact membership, proven-absence deletion and safe generation cleanup.
 3. Model the exact `[D-366,D-2]` historical frontier, `[D-1,D]` rolling publication into daily proofs, horizon admission/retention, operational metadata compaction, legacy retirement and per-window restart/backoff.
 4. Decouple synchronization from requests and implement the single bounded scheduler pump with rolling priority, global sequential provider walks, context rotation and shutdown behavior.
@@ -574,21 +600,24 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 6. Update the exact public read-model/horizon-error contract and React complete-zero/partial-zero/progress/error/date-bound/download lifecycle.
 7. Implement non-destructive legacy-state repair and verify against empty/baseline PostgreSQL databases; do not mutate stage directly from this lane.
 8. Update the canonical fiscal module, run CI-equivalent/performance/concurrency/security gates, then hand off deployment/smoke to DevOps.
+9. Expand the normalized `GET /notas` record and candidate/cache schema with nullable recipient document/e-mail/city/state/country fields, then propagate them through normal synchronization without detail calls.
+10. Replace the partial fiscal CSV allowlist with the approved complete list projection, preserving deterministic order, quoting, formula neutralization, size bounds and no-store transport.
+11. Validate the additive migration on empty/baseline PostgreSQL plus focused adapter/serializer/cache/application regressions; no frontend change is required because the download contract remains the same.
 
 ### Test Strategy
 
-- **Strategy:** `test-first`
-- **Why:** production-like stage symptoms passed all existing immutable-total unit tests; regression must be proven before changing the state machine.
-- **Fail-first targets:** provider total changes after page 1/resume; duplicate provider ID across pages separated by durable restart; late-page failure with zero visible partial publication; stale/superseded generation; removed/moved/null/malformed/out-of-window notes; complete-zero freshness; historical-only/mixed/stale-rolling states; month/year/leap-day rolling→daily transition and retention; publication between coverage/count/items; BEGIN-before-midnight with retention commit before/after the first horizon snapshot read; exact horizon boundaries/URL/path `documento`; simultaneous ticks/startup/requests/shutdown; rolling priority/context fairness; covered/partial zero-row UI; incomplete export exact `409`; no provider call on covered reads; 20.000-row set-based timeout/rollback; exact provider-error preservation.
+- **Strategy:** `test-after (variance from the approved test-first intent)`
+- **Why:** production-like stage symptoms passed all existing immutable-total unit tests, but this execution did not preserve an immutable pre-fix RED run. The final evidence therefore proves causal regressions only and must not be described as TDD/RED-GREEN.
+- **Regression targets:** provider total changes after page 1/resume; duplicate provider ID across pages separated by durable restart; late-page failure with zero visible partial publication; stale/superseded generation; removed/moved/null/malformed/out-of-window notes; complete-zero freshness; historical-only/mixed/stale-rolling states; month/year/leap-day rolling→daily transition and retention; publication between coverage/count/items; BEGIN-before-midnight with retention commit before/after the first horizon snapshot read; exact horizon boundaries/URL/path `documento`; simultaneous ticks/startup/requests/shutdown; rolling priority/context fairness; covered/partial zero-row UI; incomplete export exact `409`; no provider call on covered reads; 20.000-row set-based timeout/rollback; exact provider-error preservation.
 
 ### Package-First Assessment
 
-- **Query executed:** `bash delphi-ai/tools/query_packages.sh --project-root . --search "fiscal cache synchronization read model"`
+- **Query executed:** `bash delphi-ai/tools/query_packages.sh --project-root . --search "fiscal csv export"` (rechecked for C23..C27; prior query: `fiscal cache synchronization read model`)
 - **Relevant packages found:** none.
 - **READMEs read:** `n/a`.
 - **Decision:** extend the existing host-owned fiscal-notes module; do not create a package or add a dependency.
 - **Tier:** local host implementation.
-- **Rationale:** the correction changes UniNotas-specific persistence, synchronization, API and UI contracts and has no reusable proprietary package match.
+- **Rationale:** the correction changes UniNotas-specific persistence, synchronization and CSV projection contracts and has no reusable proprietary package match.
 
 ### Pre-APROVADO RED Evidence Capture
 
@@ -616,7 +645,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 | --- | --- | --- | --- | --- | --- |
 | `GET /api/v1/notas` coverage/source metadata | `NotasFiscaisContexto` + `ListaNotas` | covered interval renders local rows without historical-loading warning | partial/failed sync renders an actionable synchronization notice without hiding stored rows | frontend parser/unit + browser list flow | consumer implemented and must be updated/evidenced in this TODO |
 | `GET /api/v1/notas/exportar` interval coverage contract | `ListaNotas` export controller | covered interval downloads exactly one CSV | incomplete interval handles `409 ExportacaoFiscalCoberturaIncompleta` and downloads zero bytes | backend contract + browser download flow | consumer implemented and must be updated/evidenced in this TODO |
-| local list/export horizon admission | URL normalizer + date controls + `ListaNotas` | interval inside request-captured `[D-366,D]` proceeds | stale/outside URL handles `422 PeriodoFiscalForaDoHorizonte`, preserves filters, offers 30-day reset and downloads nothing | backend boundary contract + browser stale-URL flow | consumer must be added/evidenced in this TODO |
+| local list/export horizon admission | URL normalizer + date controls + `ListaNotas` | interval inside request-captured `[D-366,D]` proceeds | stale/outside URL handles `422 PeriodoFiscalForaDoHorizonte`, preserves filters, offers yesterday/today reset and downloads nothing | backend boundary contract + browser stale-URL flow | consumer must be added/evidenced in this TODO |
 | provider-backed detail/PDF/XML/document-filter paths | `DetalheNota`, `AcoesDocumento`, document-filter list | existing provider behavior remains unchanged | provider errors retain existing user-visible behavior | existing unit/browser regression suites | preserve without new consumer behavior |
 | background historical/rolling synchronization | no direct UI command surface | UI consumes only explicit read-model metadata | no polling loop or provider traversal is owned by React | backend scheduler tests + frontend negative assertion | consumer intentionally observes metadata only |
 
@@ -624,12 +653,12 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 
 | Repository / CI Surface | Why In Scope | Behavior / Scenario Covered | Fixture / Seed / Runtime Preconditions | Local CI-Equivalent Command | Required Before | Status | Evidence Artifact / Command | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| backend cache focused | state machine correction | moving total, restart, daily proof, rolling, horizon, coverage/export/error semantics | deterministic provider pages + sync/coverage rows | `cd backend && npx jest fiscal-note-cache.service.spec.ts --runInBand` | `Local-Implemented` | `planned` | pending | diagnostic plus fail-first evidence |
-| backend full | API/error/provider regressions | all fiscal endpoints and common error envelope | normal test env, no live provider | `cd backend && npx jest --runInBand` | `Local-Implemented` | `planned` | pending | broad regression |
-| backend static/build | Nest/TypeScript/Prisma | compile and schema/client coherence | installed dependencies | `cd backend && npx prisma validate && npm run prisma:generate && npx eslint "src/**/*.ts" && npm run build` | `Local-Implemented` | `planned` | pending | use repo-owned versions |
-| PostgreSQL real integration | relational publication/coverage/repair path | generation rollback, snapshot barriers, daily proof/retention, legacy row and indexed list/export | disposable empty + baseline schema fixtures | project-owned local PostgreSQL runner/Prisma commands resolved during execution | `Local-Implemented` | `planned` | pending | no stage mutation |
-| frontend unit/build | metadata/messages/download lifecycle | partial/complete notices and incomplete export | deterministic API fixtures | `cd frontend && npm run test:notas && npm run lint && npm run build` | `Local-Implemented` | `planned` | pending | add source-owned spec if current runner lacks rendering |
-| browser flow | actual list/export UX | partial notice disappears when covered; incomplete export downloads nothing | locally published exact checkout + deterministic backend fixture | project-owned browser runner discovered during execution | `Local-Implemented` | `planned` | pending | freshness attestation required |
+| backend cache focused | state machine correction | moving total, restart, daily proof, rolling, horizon, coverage/export/error semantics | deterministic provider pages + sync/coverage rows | `cd backend && npx jest fiscal-note-cache.service.spec.ts --runInBand` | `Local-Implemented` | `passed-local` | focused suite passed in current working tree | database-only assertions remain gated separately |
+| backend full | API/error/provider regressions | all fiscal endpoints and common error envelope | `TEST_DATABASE_URL`, no live provider | `cd backend && DOTENV_CONFIG_PATH=.env node -r dotenv/config node_modules/jest/bin/jest.js --runInBand` | `Local-Implemented` | `passed-local` | 18 suites passed, 1 skipped; 403 passed, 2 skipped, 405 total | includes 23 PostgreSQL cases across publication and disposable-schema migration suites; the remaining skipped suite is the separate RLS surface |
+| backend static/build | Nest/TypeScript/Prisma | compile and schema/client coherence | installed dependencies | `cd backend && npx prisma validate && npm run prisma:generate && npx eslint "src/**/*.ts" && npm run build` | `Local-Implemented` | `passed-local` | Prisma validation, lint and build exited 0 | use repo-owned versions |
+| PostgreSQL real integration | relational publication/coverage/repair path | generation rollback, service-level snapshot barriers, daily proof/retention, `20x5` overlap, restart duplicate, mutable total, resumable final publication, exact legacy collision and disposable legacy upgrade | local baseline schema fixture | `TEST_DATABASE_URL=... npx jest fiscal-note-read-model.integration.spec.ts fiscal-note-read-model.migration.integration.spec.ts --runInBand` | `Local-Implemented` | `passed-local` | 23/23 passed; migrations 2/2 up to date; 20k publication remains within the 35s bound | only project PostgreSQL container was started; no stage or remote DB mutation |
+| frontend unit/build | metadata/messages/download lifecycle | partial/complete notices and incomplete export | deterministic API fixtures | `cd frontend && npm run test:notas && npm run lint && npm run build` | `Local-Implemented` | `passed-local` | all three commands exited 0 | complete-zero and exact 409/422 covered |
+| browser flow | actual list/export UX | partial notice disappears when covered; incomplete export downloads nothing | Vite production preview + deterministic backend fixture | Windows Chrome against source-owned `frontend/e2e/notas.mjs` | `Local-Implemented` | `passed-local` | `OK mocked fiscal/cache/privacy/session and legacy PATCH flows` | local preview processes were stopped after execution |
 
 ## Runtime / Rollout Notes
 
@@ -743,7 +772,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 | `changes_public_contract` | `yes` | coverage metadata and `409 ExportacaoFiscalCoberturaIncompleta` |
 | `touches_auth_or_tenant` | `no` | existing auth/roles/context isolation preserved |
 | `touches_runtime_or_infra` | `yes` | in-process scheduler/startup behavior; no infrastructure files |
-| `touches_tests` | `yes` | fail-first and full regression coverage required |
+| `touches_tests` | `yes` | approved intent was fail-first; delivered evidence is explicitly test-after plus full regression coverage |
 | `critical_user_journey` | `yes` | fiscal list/pagination/export |
 | `release_or_promotion_critical` | `yes` | current stage behavior is degraded |
 | `high_severity_plan_review_issue` | `yes` | `ARCH-RM-C01` and `API-RM-C02` |
@@ -761,8 +790,8 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
 - **Adherence review package:** `bounded-summary`
-- **Adherence review status:** `not_run`
-- **Adherence review evidence / resolution:** `pending implementation`
+- **Adherence review status:** `findings_integrated_pending_rerun`
+- **Adherence review evidence / resolution:** the first final review found historical-seeding, resumable-candidate retention and durable-cardinality defects. These are corrected and exercised against PostgreSQL; a fresh reviewer must attest the new diff before Completed.
 
 ## Gate: Review Baseline Freeze
 
@@ -774,7 +803,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
 - **Findings summary:** the converged design, R5 no-anchor test refinement and passing pre-approval gate metadata were frozen and pushed as TODO-only commits; no product/module/runtime file was changed. R4 reviewed `c5220a7`; R5 reviewed `d10c04f` and its sole finding was integrated before the final freeze.
-- **Evidence / reference:** `https://github.com/unifast-tech/uninotas-foundation/commit/9d3bf5534f0c02450805f0fe8b34f9d7bb4479a2`; R5 package `artifacts/tmp/fiscal-read-model-critique-r5-package.md`.
+- **Evidence / reference:** `https://github.com/unifast-tech/uninotas-foundation/commit/9d3bf5534f0c02450805f0fe8b34f9d7bb4479a2`; the durable R5 finding and its resolution are consolidated in `R5 Critique Finding Resolution Ledger` below.
 - **Waiver authority / reference:** `n/a`
 
 ## Gate: Review Scope Drift
@@ -785,9 +814,9 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Baseline source:** `Review Baseline Freeze -> Baseline commit`
 - **Material sections compared:** `Context|Contract Boundary|Scope|Out of Scope|Definition of Done|Validation Steps|Execution Lane Tracking|Canonical Module Anchors|Decisions|Decision Baseline|Architecture Change Governance|Questions To Close|Assumptions Preview|Execution Plan|Flow Evidence Planning Matrix|Local CI-Equivalent Suite Matrix|Runtime / Rollout Notes|Security Risk Assessment|Performance & Concurrency Risk Assessment`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-fiscal-note-read-model.md`
-- **Gate status:** `no_material_findings`
-- **Findings summary:** zero material-section drift relative to `a1c42017e34f5a47e86e064ea8be900f35a873c9`; the post-review working diff contains baseline/gate metadata only.
-- **Evidence / reference:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-fiscal-note-read-model.md` returned `Overall outcome: go`, `Changed material sections: 0`.
+- **Gate status:** `blocked`
+- **Findings summary:** the guard reports seven changed material sections (`Scope`, `Validation Steps`, `Diff Expectation Contract`, `Architecture Change Governance`, `Execution Plan`, `Security Risk Assessment`, `Performance & Concurrency Risk Assessment`). They record the approved implementation refinements and execution evidence, but the immutable pushed review baseline cannot be refreshed without Foundation commit/push authority. This gate therefore remains explicit rather than being silently overridden.
+- **Evidence / reference:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo uninotas-foundation/todos/active/features/TODO-uninotas-fiscal-note-read-model.md` returned `Overall outcome: no-go`, `Changed material sections: 7` on `2026-09-30`.
 - **Waiver authority / reference:** `n/a`
 
 ## Independent No-Context Critique Gate
@@ -802,7 +831,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
 - **Critique status:** `findings_integrated`
 - **Findings summary:** R1–R4 findings were resolved in `D-RM-C11..C20`; R5 found the retained-horizon design structurally sound and requested one explicit no-anchor race test, now integrated in `VAL-RM-C17`.
-- **Evidence / reference:** R1 through R5 packages and dispatches under `artifacts/tmp/fiscal-read-model-critique*`; fresh reviewers recorded in their dispatch results.
+- **Evidence / reference:** R1 through R5 findings and resolutions are consolidated durably in the critique resolution ledgers below; disposable dispatch packages were pruned after consolidation.
 - **Waiver authority / reference:** `n/a`
 
 ### Critique Finding Resolution Ledger
@@ -813,7 +842,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 | `FRM-CRIT-02` | high | D-2 frontier, retention, rollover, gaps/overlaps and month lifecycle were underspecified. | `D-RM-C13/C15/C16/C20`; daily proof, deterministic rolling/retention/admission and snapshot-visible horizon. | `Closed except FRM-R3-03 focused refinement` |
 | `FRM-CRIT-03` | high | Scheduler had no bounded priority, fairness, overlap or shutdown contract. | `D-RM-C14`; captured `D`, single pump, rolling-first, one historical window globally per pump, context rotation, sequential provider walks and shutdown admission. | `Closed through R4` |
 | `FRM-CRIT-04` | high | Public `readModel` fields/states and zero-row UI behavior were not frozen. | `D-RM-C14/C16/C19` public/UI tables; truthful complete-zero, freshness, exact export `409` and horizon `422`. | `Closed through R4` |
-| `FRM-CRIT-05` | medium | Tests omitted atomic failure, absence/movement/null dates, rollover, scheduler starvation and incomplete-zero UI. | Expanded `D-T01..03`, `VAL-RM-C09..17`, ordered plan and named fail-first interleavings. | `Closed except FRM-R3-03 focused refinement` |
+| `FRM-CRIT-05` | medium | Tests omitted atomic failure, absence/movement/null dates, rollover, scheduler starvation and incomplete-zero UI. | Expanded `D-T01..03`, `VAL-RM-C09..17`, ordered plan and named regression interleavings; execution is classified as test-after. | `Closed except FRM-R3-03 focused refinement` |
 
 ### R2 Critique Finding Resolution Ledger
 
@@ -867,7 +896,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 
 ## Rules Acknowledgement / Ingestion
 
-- **Current status:** `planned declaration only`; all rows must be reloaded and bound after renewed `APROVADO` before execution.
+- **Current status:** `ingested for C23..C27 on 2026-09-30`; the NestJS, Prisma, PostgreSQL, package-first, test-creation and TODO-driven rules/workflows were reloaded before implementation.
 
 | Source | Why It Applies Now | Must Preserve | Must Avoid | Execution Impact |
 | --- | --- | --- | --- | --- |
@@ -881,15 +910,48 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 | `delphi-ai/skills/wf-react-change-ui-boundary-method/SKILL.md` | React consumer/UI contract changes | consumer matrix and race-safe behavior | unbounded client cache or silent empty state | conditional; ingest if UI changes |
 | `delphi-ai/skills/endpoint-performance-scrutiny/SKILL.md` | list/export query and provider-call performance | workload, latency, memory and call budgets | claiming speed without representative evidence | required before delivery |
 | `delphi-ai/skills/runtime-load-stress-validation/SKILL.md` | representative sync/export load validation | bounded concurrency and failure behavior | production load or real PII fixtures | required before delivery claim |
-| `delphi-ai/skills/bug-fix-evidence-loop/SKILL.md` | stage regression and missing immutable-total test coverage | evidence-first diagnosis and fail-first closure | solution-first patching | ingest before implementation |
-| `delphi-ai/skills/test-creation-standard/SKILL.md` | tests must define moving-total/coverage behavior | effective assertions across unit/integration/browser layers | implementation-shaped or weak tests | required during test-first execution |
+| `delphi-ai/skills/bug-fix-evidence-loop/SKILL.md` | stage regression and missing immutable-total test coverage | evidence-first diagnosis; approved fail-first intent, with the realized variance recorded as test-after | solution-first patching | ingested; no RED artifact is claimed |
+| `delphi-ai/skills/test-creation-standard/SKILL.md` | tests must define moving-total/coverage behavior | effective assertions across unit/integration/browser layers | implementation-shaped or weak tests | required during regression execution; realized evidence is test-after |
 | `delphi-ai/skills/test-orchestration-suite/SKILL.md` | full stack-aware verification is delivery-critical | targeted diagnostics plus full CI-equivalent suites | treating focused pass as delivery proof | required before delivery |
 | `delphi-ai/skills/frontend-race-condition-validation/SKILL.md` | background refresh/export UI lifecycle remains async | stale-result/abort/download ownership | late warning/download effects | required if React async path changes |
 | `delphi-ai/skills/rule-docker-shared-foundation-docs-sync-model-decision/SKILL.md` | canonical module conflicts with the local-export implementation | module/TODO/API vocabulary in lockstep | closing with TODO-only truth | required for module consolidation |
 
+## Corrective Implementation Evidence — Current Working Tree
+
+- `backend/prisma/schema.prisma` and `backend/prisma/migrations/20260929153000_fiscal_read_model_generations_coverage/` add candidate generations, raw-observation accounting, daily coverage and the context horizon anchor without deleting the canonical cache.
+- `backend/src/fiscal-notes/fiscal-note-cache.service.ts` implements one non-overlapping pump, rolling-first reconciliation for both contexts, globally round-robin historical progress, isolated candidates, durable equality checks, atomic set-based publication, exact absence and movement repair.
+- `backend/src/fiscal-notes/fiscal-notes.service.ts` keeps ordinary list/export on the local read model, uses one `REPEATABLE READ` snapshot for admission/coverage/count/data, returns exact `409` for incomplete export and `422` outside the retained horizon, and preserves provider ownership for detail, documents and `documento`-filtered reads.
+- `frontend/src/notas/apresentacaoFiscal.ts`, `frontend/src/notas/normalizacaoFiscal.ts` and `frontend/src/paginas/ListaNotas.tsx` derive one presentation state for complete, partial, stale, failed and empty results; complete-zero export remains enabled while partial export is blocked.
+- Source-owned backend and browser fixtures cover partial-zero, partial rows with usable pagination, stale/failure copy, exact `409`, exact `422` with date reset, detail/documents and complete-zero `204` export.
+- `backend/prisma/migrations/20260930130000_fiscal_note_complete_export_projection/` adds nullable recipient document/e-mail/city/state/country columns and versions coverage proofs so pre-change coverage cannot release a falsely complete CSV; existing rows stay readable while ordinary synchronization replaces version-1 proof with version 2.
+- `smart-notas.adapter`, the candidate/cache publisher and `fiscal-csv.serializer` now carry the complete allowlisted `GET /notas` projection. Public list JSON remains the existing 17-field allowlist and detail/PDF/XML remain provider-backed.
+- Product commit `6f48e60c5c0690a02f9ca0dbed8a6d31e2761475` was pushed to `MonitorNotes/release/uninotas` after explicit authorization. No merge, deploy, provider mutation, Railway change or remote database write was performed by Delphi.
+
+## Corrective Validation Evidence — Current Working Tree
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Backend full suite | passed locally with PostgreSQL enabled | `TEST_DATABASE_URL` + `jest --runInBand` — 18 suites passed, 1 skipped; 403 tests passed, 2 skipped, 405 total |
+| Backend static/build/schema | passed locally | Prisma validate/generate, migration status, ESLint and Nest build exited 0; 2/2 migrations applied |
+| Frontend contract/lint/build | passed locally | `npm run test:notas`; `npm run lint`; `npm run build` |
+| Browser flow | passed locally | Windows Chrome against Vite production preview: `OK mocked fiscal/cache/privacy/session and legacy PATCH flows` |
+| Diff hygiene | passed locally | `git diff --check` |
+| TODO diff expectation guard | passed / `go` | after authorized artifact pruning and durable evidence consolidation, the guard observed exactly 24 changes across MonitorNotes and uninotas-foundation, all 24 classified, with zero forbidden or unclassified paths. |
+| Independent architecture review | first review findings integrated; rerun pending | corrected incomplete historical seeding, retention of resumable failed candidates and durable raw-before-dedupe semantics; new review must attest the resulting diff |
+| Local PostgreSQL migration | passed | existing baseline schema was preserved; first migration was safely baselined, second migration deployed, and `prisma migrate status` reports up to date |
+| PostgreSQL integration specs | passed | 23/23 cases across publication and disposable-schema migration suites: atomic publication/rollback, daily proof, FK/unique, 20k rows, BCI `20x5`, anchored-list and no-anchor-export C20 barriers, movement repair, interrupted historical reconciliation, exact legacy-window recovery, failed-checkpoint/final-publication resume, mutable-total cleanup with projection preservation, restart duplicate cardinality, invalid membership, superseded generation and legacy upgrade preservation |
+| PostgreSQL plan/load/lock | passed locally | 20k publication 1,153 ms; page 2.735 ms; export SQL 26.538 ms; coverage 0.157 ms; zero waiting locks after rollback; EPS/BCI `pcv-1` artifacts hash-valid |
+| Test-quality heuristic | passed (`low`); independent findings integrated; rerun pending | obsolete seven-test `describe.skip` block removed; real regressions now cover `walkPages` total mutation, restart duplicate, resumable failure, invalid membership, superseded generation and disposable legacy upgrade; no bypass/support-route/auth-shortcut remains |
+| Security adversarial review | passed with no material finding | JWT/role guard, context scoping, parameterized production SQL, summary PII allowlist, CSV formula neutralization and sanitized logs reviewed; unsafe SQL is confined to a controlled integration-test trigger fixture |
+| Foundation deterministic validator | blocked by external structural drift | current validator reports missing identity-ledger binding for a pre-existing `origin:new` transition plus frozen lifecycle/publication-manifest mismatches; the registry, ledger and manifest were not changed by this TODO |
+| Complete-export focused regressions | passed locally | 5 suites passed; 163 passed, 1 skipped, 164 total; exact 22-column CSV, recipient null/text/formula handling, adapter mapping, unchanged 17-field public list and projection-version behavior covered |
+| Complete-export static/build/schema | passed locally | Prisma format/validate/generate, Nest build, ESLint and `git diff --check` exited 0 |
+| Backend suite excluding PostgreSQL integration files | passed locally | 16 suites passed, 1 skipped; 385 passed, 2 skipped, 387 total |
+| Complete-export PostgreSQL integration | blocked by local infrastructure | full run reached `localhost:55432` and failed only because the configured PostgreSQL was stopped; Docker was intentionally not restarted after the user's resource-usage request |
+
 ## Historical Implementation Evidence — Delivered Baseline
 
-- `backend/prisma/schema.prisma` and migration `20260929120000_fiscal_note_read_model` were reused without a new schema change; their compound identity and workload indexes already support the approved evolution.
+- `backend/prisma/schema.prisma` and migration `20260929120000_fiscal_note_read_model` were reused without a new schema change; their compound identity and workload indexes already support the previously approved change.
 - `backend/src/fiscal-notes/fiscal-note-cache.service.ts`: one resumable 365-day bootstrap per context, durable page checkpoint, shared fiscal-rate lease/pacing, 60-second persisted provider cooldown, 15-minute rolling reconciliation of today/yesterday, idempotent upserts and bounded local list/export reads.
 - `backend/src/fiscal-notes/fiscal-notes.service.ts`: list/export use PostgreSQL when no document filter is present; detail, PDF, XML and document-filtered operations remain provider-backed.
 - `backend/src/fiscal-notes/fiscal-notes.controller.ts`: CSV responses disclose local source, stale state and cache age through headers.
@@ -915,7 +977,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 | Capability audits | passed | NestJS, Prisma, React and Vite surfaces report `Overall outcome: ready` |
 | Live stage load/provider smoke | pending | requires deployed stage runtime; no production/provider load was generated locally |
 
-## Historical Closeout Status — Superseded by Corrective Evolution
+## Historical Closeout Status — Superseded by Corrective Change
 
 - Local implementation and CI-equivalent validation are complete.
 - The first stage request may still traverse the 365-day bootstrap and can receive `429`; successful pages remain durable and the next attempt resumes after the cooldown instead of restarting at page 1.
@@ -935,12 +997,12 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 | `AC-RM-07` | `Provider ownership` | Detail, PDF and XML stay provider-backed. | regression suite | full fiscal contract/document suites | NestJS local | `passed` | cache is called only by list/export without document filter |
 | `DOD-RM-01` | `Definition of Done` | Synchronization is bounded, resumable, idempotent and coordinated per context in the current single-replica topology. | unit+schema | 20,000 rows/200 pages; batched upsert; checkpoint; concurrent-read test | NestJS/PostgreSQL local | `passed` | distributed lease is required before horizontal scaling |
 | `DOD-RM-02` | `Definition of Done` | Failure never deletes or silently presents the prior projection as current. | negative unit+UI | rolling failure/cooldown tests and stale UI notice | NestJS/React local | `passed` | partial bootstrap is explicitly labeled |
-| `DOD-RM-03` | `Definition of Done` | Migration state, builds, lint, tests and indexed access path pass. | CI-equivalent | commands and results in Validation Evidence and local matrix | local | `passed` | no new migration was required for this evolution |
+| `DOD-RM-03` | `Definition of Done` | Migration state, builds, lint, tests and indexed access path pass. | CI-equivalent | commands and results in Validation Evidence and local matrix | local | `passed` | no new migration was required for that prior change |
 | `VAL-RM-01` | `Validation` | Backend full regression suite. | command | `npx jest --runInBand`: 16 passed suites, 364 passed tests, 2 expected skips | Node local | `passed` | includes detail/documents regressions |
 | `VAL-RM-02` | `Validation` | Backend static, build and Prisma checks. | command | ESLint, Nest build, Prisma validate/generate/status all exit 0 | Node/PostgreSQL local | `passed` | schema is up to date |
 | `VAL-RM-03` | `Validation` | Frontend parser, lint and production build. | command | `npm run test:notas`; `npm run lint`; `npm run build` | React/Vite local | `passed` | metadata malformed-shape rejection covered |
 | `VAL-RM-04` | `Validation` | Bounded local export and indexed query path. | performance | 20,000 rows, zero provider calls, 55 ms harness; local PostgreSQL `EXPLAIN` | Node/PostgreSQL local | `passed` | HTTP stage p95/p99 deferred until deployment |
-| `VAL-RM-05` | `Validation` | Security/privacy boundary remains unchanged. | manual adversarial review | diff review: no raw payload/PDF/XML/document field or secret persistence; no `logs` writes | local | `passed` | recipient document filter remains provider-backed |
+| `VAL-RM-05` | `Validation` | Security/privacy boundary remains allowlisted and authenticated after the approved CSV expansion. | manual adversarial review | diff review: no raw payload/PDF/XML URL or secret persistence; only normalized `GET /notas` fields enter candidate/cache and the authenticated CSV; no `logs` writes | local | `pending` | independent review of the expanded PII projection remains required |
 
 ## Historical Local CI-Equivalent Suite Matrix — Delivered Baseline
 
@@ -998,40 +1060,98 @@ Versionar a implementação na branch `release/uninotas`; depois do deploy de st
 
 ## Completion Evidence Matrix
 
+### Frozen Decision Adherence Matrix
+
+| Decision ID | Implementation / Evidence | Status | Residual |
+| --- | --- | --- | --- |
+| `D-RM-C01` | historical range ends at captured `D-2`; month-clipped seeding and PostgreSQL reconciliation fixture | `adherent-local` | stage calendar observation pending |
+| `D-RM-C02` | independent durable sync rows/checkpoints per canonical window | `adherent-local` | explicit monthly compaction fixture remains debt |
+| `D-RM-C03` | pump reconciles both rolling contexts before one historical unit | `adherent-local` | single-replica runtime only |
+| `D-RM-C04` | ordinary list reads one local snapshot and only nudges background work | `adherent-local` | stage latency/RLS pending |
+| `D-RM-C05` | daily coverage ledger computes exact requested interval state | `adherent-local` | none locally known |
+| `D-RM-C06` | incomplete export throws exact 409 before cache row query | `adherent-local` | stronger browser downloader oracle is P3 debt |
+| `D-RM-C07` | local sync/coverage errors remain distinct from provider-operation errors | `adherent-local` | stage copy observation pending |
+| `D-RM-C08` | additive migration preserves cache and retires legacy syncs in disposable schema | `adherent-local` | stage legacy aggregates pending |
+| `D-RM-C09` | detail/PDF/XML/document-filter paths remain provider-backed; public JSON summary remains unchanged while C23..C27 govern the internal Finance CSV projection | `adherent-local` | live provider smoke pending |
+| `D-RM-C10` | existing Nest process/scheduler and one-replica assumption retained | `adherent-local` | horizontal scaling remains forbidden without new design |
+| `D-RM-C11` | isolated generation plus bounded atomic publication/rollback | `adherent-local` | stage lock pressure pending |
+| `D-RM-C12` | exact absence, movement repair and invalid membership regressions | `adherent-local` | none locally known |
+| `D-RM-C13` | canonical months are always reconciled; post-anchor frontier uses one-day units | `adherent-local` | explicit midnight frontier fixture remains debt |
+| `D-RM-C14` | coalesced rolling-first, round-robin pump and frozen public state fields | `adherent-local` | failed/historical UI action matrix remains partial |
+| `D-RM-C15` | one unique context/date proof per published day, including zero | `adherent-local` | none locally known |
+| `D-RM-C16` | DB-clock admission and one `REPEATABLE READ` request snapshot | `adherent-local` | none locally known |
+| `D-RM-C17` | parameterized set SQL with lock/statement/transaction limits and indexes | `adherent-local` | RLS/stage capacity pending |
+| `D-RM-C18` | checkpoint/raw count is updated before candidate upserts; restart duplicate proves raw 2/candidate 1 | `adherent-local` | none locally known |
+| `D-RM-C19` | daily `published_at` derives exact interval freshness states | `adherent-local-partial-ui` | browser action presence/absence oracle remains P3 debt |
+| `D-RM-C20` | context horizon advances with pruning; anchored/no-anchor MVCC barriers pass | `adherent-local` | stage rollover observation pending |
+| `D-RM-C21` | bounded exact-demand coalescing, cross-context alternation, rolling-first and one background unit after three demand units | `adherent-local` | single-replica runtime smoke pending |
+| `D-RM-C22` | yesterday/today default, lifecycle-cancelled partial polling and automatic CSV enablement | `adherent-local` | stage browser smoke pending |
+| `D-RM-C23` | adapter, candidates and canonical cache carry every allowlisted `GET /notas` field while public list JSON remains unchanged | `adherent-local-static-unit` | real PostgreSQL publication pending |
+| `D-RM-C24` | serializer emits the frozen 22-column Finance CSV with null/text/formula handling | `adherent-local` | stage download smoke pending |
+| `D-RM-C25` | PII remains behind existing authenticated reader roles, private/no-store transport and sanitized observability | `adherent-local` | independent security rerun pending |
+| `D-RM-C26` | forward-only migration adds nullable recipient columns and versions old/new daily coverage as 1/2 | `adherent-local-static` | disposable PostgreSQL migration execution pending |
+| `D-RM-C27` | export uses list projection only; detail/PDF/XML paths and tests remain provider-backed | `adherent-local` | live provider smoke pending |
+
 | Criterion ID | Source Section | Criterion | Evidence Type | Evidence Artifact / Command | Runtime Target | Status | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `DOD-RM-C01` | `Definition of Done` | month-clipped history through D-2, canonical daily proof, local restart, stored rows preserved | test+database | fail-first cache spec + real PostgreSQL window assertions | local | `planned` | exact artifacts pending implementation |
-| `DOD-RM-C02` | `Definition of Done` | rolling D-1..D independent every 15 minutes | unit+scheduler | cache spec and scheduler wiring assertion | local | `planned` | must run while history incomplete |
-| `DOD-RM-C03` | `Definition of Done` | list never waits provider and handles complete/partial/empty | integration+browser | Nest application spec + source-owned browser flow | local/browser | `planned` | provider mock must remain uncalled for local path |
-| `DOD-RM-C04` | `Definition of Done` | covered DB export; incomplete exact 409 and no CSV | integration+browser | export application spec + browser download assertion | local/browser | `planned` | exact public code required |
-| `DOD-RM-C05` | `Definition of Done` | non-destructive legacy repair | migration+database | baseline-schema repair fixture and redacted stage evidence | local/stage | `planned` | no count-only completion |
-| `DOD-RM-C06` | `Definition of Done` | truthful API/UI synchronization errors | contract+browser | exception filter/service/frontend specs | local/browser | `planned` | provider code only after real provider call |
-| `DOD-RM-C07` | `Definition of Done` | provider detail/docs/document filter and context isolation preserved | regression | full fiscal suites | local | `planned` | no PII projection expansion |
-| `DOD-RM-C08` | `Definition of Done` | module/tests/build/DB/PCV/stage evidence coherent | review+runtime | gates and artifacts below | local/stage | `planned` | row cannot pass from aggregate suite alone |
-| `VAL-RM-C01` | `Validation Steps` | fail-first regression set | test | targeted Jest RED/GREEN evidence | local | `planned` | capture initial failures before code |
-| `VAL-RM-C02` | `Validation Steps` | full suites/static/build/Prisma | CI-equivalent | commands in current Local CI matrix | local | `planned` | all in-scope rows pass |
-| `VAL-RM-C03` | `Validation Steps` | real PostgreSQL coverage/repair/plans | database | disposable empty+baseline runs and EXPLAIN artifacts | local PostgreSQL | `planned` | no production payloads |
-| `VAL-RM-C04` | `Validation Steps` | bootstrap/rolling/list/export concurrency | concurrency | BCI artifact | local | `planned` | overlapping windows and restarts |
-| `VAL-RM-C05` | `Validation Steps` | bounded local performance and zero upstream covered export | performance | EPS/RLS JSON artifacts with SHA-256 | local | `planned` | representative 20,000-row fixture |
-| `VAL-RM-C06` | `Validation Steps` | React warning/progress/download behavior | browser | exact checkout publication + browser spec | browser | `planned` | freshness attestation mandatory |
+| `DOD-RM-C01` | `Definition of Done` | month-clipped history through D-2, canonical daily proof, local restart, stored rows preserved | test+database | cache specs + PostgreSQL integration spec | local | `passed-local` | real PostgreSQL publication, empty proof, rollback and repair cases pass |
+| `DOD-RM-C02` | `Definition of Done` | rolling D-1..D independent every 15 minutes | unit+scheduler | cache spec and scheduler wiring assertion | local | `passed-local` | runs while history is incomplete; PostgreSQL overlap proof remains under C08 |
+| `DOD-RM-C03` | `Definition of Done` | list never waits provider and handles complete/partial/empty | integration+browser | service specs + source-owned browser flow | local/browser | `passed-local` | provider remains uncalled on ordinary local path |
+| `DOD-RM-C04` | `Definition of Done` | covered DB export; incomplete exact 409 and no CSV | integration+browser | service/exception specs + browser download assertion | local/browser | `passed-local` | includes complete-zero `204`, partial `409` and outside-horizon `422` |
+| `DOD-RM-C05` | `Definition of Done` | non-destructive legacy repair | migration+database | additive migration and baseline repair fixture | local/stage | `passed-local` | local baseline retained pre-existing tables and rows; stage execution remains under C07 |
+| `DOD-RM-C06` | `Definition of Done` | truthful API/UI synchronization errors | contract+browser | exception filter/service/frontend specs | local/browser | `passed-local` | sanitized sync cause is distinct from provider-operation failure |
+| `DOD-RM-C07` | `Definition of Done` | provider detail/docs/document filter and context isolation preserved | regression | full fiscal suites | local | `passed-local` | PII expands only the authenticated internal CSV projection under C23..C27; detail ownership is unchanged |
+| `DOD-RM-C08` | `Definition of Done` | module/tests/build/DB/PCV/stage evidence coherent | review+runtime | gates and artifacts below | local/stage | `partial` | local PostgreSQL EPS/BCI pass; independent gates, RLS and stage evidence remain open |
+| `DOD-RM-C09` | `Definition of Done` | failed/incomplete generation never mutates visible cache/coverage | PostgreSQL transaction | late-failure and mismatch regressions | local | `passed-local` | rollback preserves prior projection and proof |
+| `DOD-RM-C10` | `Definition of Done` | gap-free frontier and fair non-overlapping scheduler | unit+PostgreSQL | seed reconciliation and pump specs | local | `passed-local` | partial legacy metadata cannot suppress missing canonical month units |
+| `DOD-RM-C11` | `Definition of Done` | public complete/partial/zero/sync/failure contract | contract+browser | backend/frontend fixtures | local/browser | `passed-local` | UI action-matrix strengthening remains test-quality debt |
+| `DOD-RM-C12` | `Definition of Done` | one-snapshot coverage/count/rows | PostgreSQL barriers | anchored and no-anchor interleavings | local | `passed-local` | list and export retain coherent MVCC views |
+| `DOD-RM-C13` | `Definition of Done` | exact retained horizon and pruned proof | boundary+database | admission and retention specs | local | `passed-local` | stage rollover observation remains runtime evidence |
+| `DOD-RM-C14` | `Definition of Done` | bounded set publication for zero/small/20k with rollback | load+database | EPS and publication specs | local | `passed-local` | 20k publication remained below 35s transaction bound |
+| `DOD-RM-C15` | `Definition of Done` | duplicate across restart cannot publish | PostgreSQL restart regression | durable raw/candidate inequality | local | `passed-local` | candidate count 1 versus raw observed 2 rejects publication |
+| `DOD-RM-C16` | `Definition of Done` | interval freshness is truthful | unit+browser | freshness/presentation fixtures | local/browser | `partial` | backend states pass; explicit failed/historical browser action matrix remains to strengthen |
+| `DOD-RM-C17` | `Definition of Done` | retained horizon is snapshot-visible | PostgreSQL barriers | context-state race regressions | local | `passed-local` | anchored and first-anchor cases pass |
+| `DOD-RM-C18` | `Definition of Done` | demanded intervals are deduplicated, fair and bounded without background starvation | unit | cache-service demand/pump regressions | local | `passed-local` | exact repeats coalesce; contexts alternate; fourth opportunity is background |
+| `DOD-RM-C19` | `Definition of Done` | default yesterday/today and automatic complete-only export convergence | unit+browser+race | parser, mocked browser transition and required race probes | local/browser | `passed-local` | partial response revalidates without click and enables CSV after complete response |
+| `DOD-RM-C20` | `Definition of Done` | complete allowlisted list projection and CSV without per-row detail or PII logs | adapter+serializer+contract | focused fiscal suites | local | `passed-local-unit` | exact 22 columns, leading-zero document, formula protection, nulls and unchanged 17-field public summary pass; real DB publication remains under C21 |
+| `DOD-RM-C21` | `Definition of Done` | additive nullable migration preserves legacy rows and ordinary sync backfills fields | migration+database | disposable-schema migration spec plus publication integration spec | local PostgreSQL | `blocked-infrastructure` | test and SQL are implemented; configured `localhost:55432` PostgreSQL is stopped |
+| `VAL-RM-C01` | `Validation Steps` | regression set for mutable total/restart/coverage/error | test | focused Jest and real PostgreSQL regressions | local | `passed-local-test-after` | causal failures were observed during implementation, but no immutable pre-fix RED artifact was preserved; do not claim formal RED/GREEN evidence |
+| `VAL-RM-C02` | `Validation Steps` | full suites/static/build/Prisma | CI-equivalent | commands in current Local CI matrix | local | `passed-local` | backend 403 passed/2 skipped/405 total; frontend checks green; Prisma status/validate/generate green |
+| `VAL-RM-C03` | `Validation Steps` | real PostgreSQL coverage/repair/plans | database | disposable legacy migration plus 22 publication cases and EPS artifact | local PostgreSQL | `passed-local` | migration semantics, daily coverage, legacy collision, final-checkpoint retry, mutable-total cleanup, restart and representative plans executed without remote DB access |
+| `VAL-RM-C04` | `Validation Steps` | bootstrap/rolling/list/export concurrency | concurrency | unit evidence plus BCI/PostgreSQL artifact | local | `passed-local` | `20x5` overlapping publications and both service-level reader/retention barriers pass |
+| `VAL-RM-C05` | `Validation Steps` | bounded local performance and zero upstream covered export | performance | 20,000-row test plus EXPLAIN/lock artifact | local | `passed-local` | 1,177 ms latest publication, indexed page/export plans and zero waiting locks; stage RLS remains separate |
+| `VAL-RM-C06` | `Validation Steps` | React warning/progress/download behavior | browser | Windows Chrome + production preview | browser | `passed-local` | exact mocked source-owned flow passed |
 | `VAL-RM-C07` | `Validation Steps` | revision-attested stage repair and smoke | runtime | redacted aggregate query + authenticated API smoke | Railway Stage | `planned` | DevOps handoff; bounded provider traffic |
 | `VAL-RM-C08` | `Validation Steps` | deterministic/review/consolidation gates | review | guard outputs, no-context audits and module diff | local/Foundation | `planned` | all blockers resolved before delivery |
+| `VAL-RM-C09` | `Validation Steps` | late failure cannot leak candidate publication | PostgreSQL fault injection | coverage-trigger rollback fixture | local | `passed-local` | canonical cache/coverage remain unchanged and resumable candidate survives |
+| `VAL-RM-C10` | `Validation Steps` | absence/movement/invalid membership/empty/restart/supersession | PostgreSQL regressions | publication integration suite | local | `partial` | named cases pass; explicit monthly-compaction fixture remains absent |
+| `VAL-RM-C11` | `Validation Steps` | pump concurrency/fairness/shutdown/cooldown | unit | cache-service pump specs | local | `passed-local` | non-overlap, rolling priority, alternation and shutdown pass |
+| `VAL-RM-C12` | `Validation Steps` | publication/retention reader races | PostgreSQL barriers | list/export repeatable-read cases | local | `passed-local` | forced commits do not mix generations |
+| `VAL-RM-C13` | `Validation Steps` | horizon/document/retention/frontier boundaries | unit+database+browser | admission and provider-preservation suites | local | `partial` | exact D-366/D and provider document path pass; explicit midnight frontier fixture remains open |
+| `VAL-RM-C14` | `Validation Steps` | plans/statements/locks/latency | EPS+PostgreSQL | pcv EPS artifact and 20k benchmark | local | `passed-local` | bounded transaction and zero residual waiting locks |
+| `VAL-RM-C15` | `Validation Steps` | restart duplicate creates durable inequality | PostgreSQL | restart staging/publication regression | local | `passed-local` | raw 2, candidate 1, no canonical rows/proofs published |
+| `VAL-RM-C16` | `Validation Steps` | complete-zero/historical/current/stale/failed UI states | unit+browser | parser/presentation/browser fixtures | local/browser | `partial` | state derivation passes; failed and historical action presence/absence needs stronger browser oracle |
+| `VAL-RM-C17` | `Validation Steps` | anchored/no-anchor retained-horizon MVCC races | PostgreSQL | two forced-interleaving cases | local | `passed-local` | old snapshot remains coherent and new request sees advanced anchor |
+| `VAL-RM-C18` | `Validation Steps` | demand coalescing, interval priority, fairness and background reservation | Jest | focused cache spec plus backend suite excluding stopped PostgreSQL fixture | local | `passed-local` | focused cache 23/23; executable non-DB suite 385 passed/2 skipped |
+| `VAL-RM-C19` | `Validation Steps` | yesterday/today default, automatic polling, obsolete-cycle cancellation and CSV enablement | unit+browser+race | `test:notas`, `e2e:notas`, `test:notas:race`, lint/build | local/browser | `passed-local` | browser observed partial→complete with at least two list requests and no click; race bursts 20 passed |
+| `VAL-RM-C20` | `Validation Steps` | adapter/serializer/cache/HTTP complete-export regressions | Jest | five focused fiscal suites | local | `passed-local` | 163 passed, 1 skipped; no detail calls introduced and exact CSV contract passes |
+| `VAL-RM-C21` | `Validation Steps` | Prisma validation/generation plus empty/baseline PostgreSQL migration | schema+database | Prisma validate/generate and migration integration spec | local PostgreSQL | `partial` | Prisma validate/generate pass; database execution is blocked only by stopped `localhost:55432` |
 
 ## Pipeline/Copilot P1/P2 Preflight
 
 | Reviewer Surface / Package | Review Focus | Status | Evidence Artifact / Command | Findings | Resolution / Notes |
 | --- | --- | --- | --- | --- | --- |
-| corrective implementation diff + frozen decisions + CI evidence | P1/P2 state-machine, API, schema, UI and evidence failures | `planned` | fresh internal no-context review after implementation | pending | unresolved P1/P2 blocks delivery |
+| corrective implementation diff + frozen decisions + CI evidence | P1/P2 state-machine, API, schema, UI and evidence failures | `no-material-findings` | fresh R5 test-quality and R3 final reviews plus current local CI evidence | exact legacy collision, final-checkpoint retry, mutable-total cleanup and local export audit findings integrated; no unresolved local P1/P2 | PostgreSQL, diff expectation and independent-review evidence are complete locally; scope-drift, cutover and stage gates still block delivery |
 
 ## Rule-Spirit Anti-Pattern Hunt
 
 | Rule / Principle Surface | Bypass or Anti-Pattern Search Lens | Status | Evidence Artifact / Command | Findings | Resolution / Notes |
 | --- | --- | --- | --- | --- | --- |
-| derived read model / P-6 | PostgreSQL treated as fiscal authority or manual completion | `planned` | code/diff scan + tests | pending | no authority inversion |
-| non-blocking local reads | hidden `await`/provider traversal in list/export | `planned` | call-count tests + heuristic scan | pending | zero upstream on covered path |
-| interval coverage | global boolean or count-only proof | `planned` | query/state tests | pending | exact interval required |
-| truthful errors | local coverage mapped to provider outage | `planned` | exact error tests | pending | public semantics must match cause |
-| test quality | immutable-total-only fixtures or weakened assertions | `planned` | independent test-quality audit | pending | moving-total/restart cases required |
+| derived read model / P-6 | PostgreSQL treated as fiscal authority or manual completion | `passed-local` | module/code diff and provider-preservation regressions | none found locally | Smart Notas remains authority; local rows are rebuildable summaries |
+| non-blocking local reads | hidden `await`/provider traversal in list/export | `passed-local` | service call-count and incomplete-export negative oracles | none found locally | covered ordinary list/export perform zero provider calls |
+| interval coverage | global boolean or count-only proof | `passed-local` | daily-proof, complete-zero and snapshot integration tests | none found locally | exact context/day coverage is required |
+| truthful errors | local coverage mapped to provider outage | `passed-local` | exception filter, service and UI contract tests | none found locally | incomplete/out-of-horizon/provider errors remain distinct |
+| test quality | immutable-total-only fixtures or weakened assertions | `findings-integrated-pending-rerun` | independent audit plus mutable-total/restart PostgreSQL regressions | prior P2 gaps integrated | fresh no-context test-quality verdict pending |
 
 ## Security Risk Assessment
 
@@ -1039,40 +1159,40 @@ Versionar a implementação na branch `release/uninotas`; depois do deploy de st
 - **Why this risk level:** persistence/query and API error/metadata paths change around fiscal data, while auth, permissions and stored PII are intentionally unchanged.
 - **Attack surface in scope:** authenticated list/export endpoints, query bounds, CSV generation, sync metadata/log redaction, context isolation and database repair.
 - **Attack simulation decision:** `required`
-- **Review evidence:** pending `security-adversarial-review` or equivalent bounded review before delivery.
-- **Residual security risk:** stage diagnostics could leak PII if unredacted; evidence is restricted to counts, dates, states, page progress and sanitized codes.
+- **Review evidence:** bounded `security-adversarial-review` executed on `2026-09-30` against the prior name-only projection; no material finding. JWT and role guards remain global/class-scoped; every local read/write is context-scoped; production raw SQL uses tagged parameter binding with explicit UUID casts; public summary still excludes recipient document/e-mail/location, while candidates/cache now retain these allowlisted fields solely for the authenticated Finance CSV under C23..C27; logs expose only actor, operation, context, outcome and correlation ID; CSV formula neutralization tests pass. `$executeRawUnsafe` is confined to a local integration-test trigger name derived from an internally generated alphanumeric context. An independent security rerun for the expanded projection remains pending.
+- **Residual security risk:** stage diagnostics could leak PII if unredacted; stage evidence remains restricted to counts, dates, states, page progress and sanitized codes. All authenticated financial roles intentionally see both fiscal contexts per prior human decision, so context selection is data partitioning rather than per-user tenant authorization.
 
 ## Performance & Concurrency Risk Assessment
 
 - **Policy schema version:** `pcv-1`
 - **Global sensitivity level:** `high`
 - **Why this level:** list/export query paths, scheduler concurrency, batch upserts and provider quota behavior all change.
-- **Current delivery stage at review time:** `Pending`
+- **Current delivery stage at review time:** `Local-Implemented / Evidence-Blocked`
 
 | Lane ID | Lane | Trigger Result | Trigger Severity | Trigger Reason Code | Gate Deadline | Minimum Evidence Rule | State | Residual Risk | Uncertainty Reason Code |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `EPS` | `endpoint-performance-scrutiny` | `required` | `high` | `EPS-QUERY-SHAPE-CHANGED` | `before_local_implemented` | `EPS-E2` | `pending` | indexed interval coverage/export plan not yet proven | `U-QUERY-PATH-UNKNOWN` |
-| `FRC` | `frontend-race-condition-validation` | `required` | `medium` | `FRC-STALE-RESPONSE` | `before_local_implemented` | `FRC-E2` | `pending` | background metadata may overwrite newer query state | `U-ASYNC-SURFACE-UNKNOWN` |
-| `BCI` | `backend-concurrency-idempotency-validation` | `required` | `high` | `BCI-JOB-WEBHOOK-API-OVERLAP` | `before_local_implemented` | `BCI-E3` | `pending` | bootstrap/rolling/restart overlap not yet proven | `U-WRITE-OVERLAP-UNKNOWN` |
+| `EPS` | `endpoint-performance-scrutiny` | `required` | `high` | `EPS-QUERY-SHAPE-CHANGED` | `before_local_implemented` | `EPS-E2` | `passed` | representative local PostgreSQL plan/load evidence passed; stage capacity remains RLS-owned | `none` |
+| `FRC` | `frontend-race-condition-validation` | `required` | `medium` | `FRC-STALE-RESPONSE` | `before_local_implemented` | `FRC-E2` | `passed` | browser and source-owned race fixtures passed | `none` |
+| `BCI` | `backend-concurrency-idempotency-validation` | `required` | `high` | `BCI-JOB-WEBHOOK-API-OVERLAP` | `before_local_implemented` | `BCI-E3` | `passed` | real PostgreSQL `20x5`, rollback and reader-retention barriers passed | `none` |
 | `RLS` | `runtime-load-stress-validation` | `required` | `high` | `RLS-CACHE-INDEX-SENSITIVE-PATH-CHANGED` | `before_production_ready` | `RLS-E2` | `pending` | real stage quota/latency remains unknown | `U-RUNTIME-PRESSURE-UNKNOWN` |
 
 ### EPS
 - **Trigger rationale:** list/export query and coverage shape changes materially.
 - **Recorded at (UTC):** `2026-09-29T19:53:54Z`
 - **Executor ID:** `codex-primary`
-- **Evidence object:** pending implementation and exact workload artifact.
+- **Evidence object:** `evidence_type=explain-analyze-buffers-and-benchmark`; `environment_id=local-wsl-postgresql16-principal-checkout`; `run_id=fiscal-read-model-eps-20260930T020927Z`; `artifact_uri=artifacts/tmp/uninotas-fiscal-read-model/pcv/eps.json`; `artifact_schema_version=pcv-1`; `artifact_sha256=2e0a535125263ffe778fbee81ac87e7c3408b04da9922c6cedb9d0ae4b3b1391`; `sample_profile_id=EPS-SP-STRONG`; `acceptance_rule_id=EPS-A2`; `result_summary=passed: indexed bounded page/export at 20k, bounded full-set scans, no waiting locks or exact-lookup anti-pattern`; `reviewer_id=codex-assurance-tester-quality`.
 
 ### FRC
 - **Trigger rationale:** asynchronous list refresh/export error/download state is user-visible.
 - **Recorded at (UTC):** `2026-09-29T19:53:54Z`
 - **Executor ID:** `codex-primary`
-- **Evidence object:** pending implementation and browser/unit artifact.
+- **Evidence object:** `evidence_type=deterministic-ui-race-and-browser-fixtures`; `environment_id=local-principal-checkout`; `run_id=fiscal-read-model-frc-20260930T110715Z`; `artifact_uri=uninotas-foundation/artifacts/tmp/uninotas-fiscal-read-model/pcv/frc.json`; `artifact_schema_version=pcv-1`; `artifact_sha256=437c8c676f5a3d18596af0bbcf0aa8dee535ab0125d8b7d44bf4084011c25fc9`; `sample_profile_id=FRC-SP-M`; `acceptance_rule_id=FRC-A2`; `result_summary=passed: 27/27 burst probes plus parser, cache TTL/dedupe/late-response/LRU, export abort/download and intercepted browser fiscal flows`; `reviewer_id=codex-assurance-tester-quality`.
 
 ### BCI
 - **Trigger rationale:** scheduled bootstrap and rolling writes may overlap and must remain idempotent.
 - **Recorded at (UTC):** `2026-09-29T19:53:54Z`
 - **Executor ID:** `codex-primary`
-- **Evidence object:** pending implementation and concurrency artifact.
+- **Evidence object:** `evidence_type=real-postgresql-overlapping-publication-probe`; `environment_id=local-wsl-postgresql16-principal-checkout`; `run_id=fiscal-read-model-bci-20260930T023300Z`; `artifact_uri=artifacts/tmp/uninotas-fiscal-read-model/pcv/bci.json`; `artifact_schema_version=pcv-1`; `artifact_sha256=c3157fd3ece4ff0e8c4485ff8b2f91f5f247d54dfe4bff1e8732ee96193c13ce`; `sample_profile_id=BCI-SP-H`; `acceptance_rule_id=BCI-A1`; `result_summary=passed: exactly one commit and nineteen safe rejects in each of five batches, with restart/resume and canonical invariants preserved`; `reviewer_id=codex-assurance-tester-quality`.
 
 ### RLS
 - **Trigger rationale:** bulk sync/cache/index path plus stage provider pacing is runtime sensitive.
@@ -1082,11 +1202,11 @@ Versionar a implementação na branch `release/uninotas`; depois do deploy de st
 
 ## Verification Debt Assessment
 
-- **Audit outcome:** `pending`
-- **Why this outcome:** TODO is `big`, existing tests missed the deployed failure and canonical module drift exists.
-- **Inline code TODO debt:** `unknown until implementation diff audit`
-- **Evidence / audit artifact:** pending `verification-debt-audit` before closeout.
-- **Accepted residual debt:** none accepted before review.
+- **Audit outcome:** `local-independent-gates-approved / external-and-stage-gates-open`
+- **Why this outcome:** deterministic, browser, disposable migration fixture, 23 real-PostgreSQL cases, C20 barriers, resumable failure, restart duplicate, `20x5` BCI and EPS plan/load/lock evidence pass. Fresh R5 test-quality and R3 final reviewers found no material local issue after all product, audit-log and falsifiability gaps were integrated; external drift and runtime gates remain separate.
+- **Inline code TODO debt:** no skipped corrective test block remains; UI action-matrix strengthening and stage RLS remain explicit evidence debt.
+- **Evidence / audit artifact:** first final review returned `NOT_APPROVABLE` and first test-quality audit returned `FINDINGS_INTEGRATED_REQUIRED`; their P1/P2 implementation findings are addressed in the current working tree.
+- **Accepted residual debt:** P3 browser hardening for explicit retry presence in `failed` and retry/refresh absence in `historical_snapshot`; this does not weaken the validated backend contract.
 
 ## Independent Test Quality Audit Gate
 
@@ -1099,9 +1219,9 @@ Versionar a implementação na branch `release/uninotas`; depois do deploy de st
 - **Audit isolation mode:** `fresh internal no-context reviewer`
 - **Internal reviewer mandate:** `required after implementation; reviewer cannot be implementing agent`
 - **Audit focus:** `product/test delta alignment|fail-first alignment|bypass detection|assertion efficacy/efficiency|moving-total/restart/coverage sufficiency`
-- **Audit status:** `not_run`
-- **Findings summary:** pending implementation.
-- **Evidence / reference:** pending.
+- **Audit status:** `no_material_findings`
+- **Findings summary:** fresh R5 confirmed the prior durable restart/total/generation/membership, legacy-upgrade, incomplete-export, audit-log and evidence-classification findings are integrated with no new material issue. The failed/historical browser action matrix remains explicitly classified as P3 hardening.
+- **Evidence / reference:** fresh no-context R5 on `2026-09-30`; PostgreSQL suites 23/23, focused post-correction set 50/50, backend full suite 403 passed/2 skipped/405 total, deterministic scanner `low` with no bypass or weak-assertion signal.
 - **Waiver authority / reference:** `n/a`
 
 ## Independent No-Context Final Review Gate
@@ -1113,9 +1233,9 @@ Versionar a implementação na branch `release/uninotas`; depois do deploy de st
 - **Review isolation mode:** `fresh internal no-context reviewer`
 - **Internal reviewer mandate:** `required after test-quality audit; reviewer cannot be implementing agent`
 - **Review focus:** `adherence|regressions|validation/test evidence|security/performance|elegance|structural soundness|verification debt`
-- **Final review status:** `not_run`
-- **Findings summary:** pending implementation.
-- **Evidence / reference:** pending.
+- **Final review status:** `no_material_findings`
+- **Findings summary:** fresh R3 found no remaining local P1/P2 after rechecking exact monthly/frontier legacy recovery, final-checkpoint publication retry, mutable-total cleanup, export-cache aggregate audit logging and all canonical PCV hashes. The failed/historical browser action matrix remains P3 hardening; scope/runtime blockers remain separate and explicit. The later artifact-pruning pass changed no product code and the diff expectation guard now passes.
+- **Evidence / reference:** fresh no-context final R3 on `2026-09-30`; focused post-correction set 50/50, PostgreSQL 23/23 and full backend 403 passed/2 skipped/405 total.
 - **Waiver authority / reference:** `n/a`
 
 ## Independent Cutover Integrity Audit Gate
@@ -1132,14 +1252,14 @@ Versionar a implementação na branch `release/uninotas`; depois do deploy de st
 
 ## Module Consolidation Gate
 
-- [ ] Canonical fiscal module records interval coverage, windowed sync, local list/export and truthful errors.
-- [ ] `FISC-EX-02/FISC-EX-04` are intentionally superseded with traceability to `D-RM-C*`.
-- [ ] Provider-backed detail/documents and legacy module transition remain preserved.
-- [ ] TODO/module cross-links and final decision/adherence evidence are recorded.
+- [x] Canonical fiscal module records interval coverage, windowed sync, local list/export and truthful errors.
+- [x] `FISC-EX-02/FISC-EX-04` are intentionally superseded with traceability to `D-RM-C*`.
+- [x] Provider-backed detail/documents and legacy module transition remain preserved.
+- [ ] TODO/module cross-links and final decision/adherence evidence are recorded after PostgreSQL execution.
 
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
-- **Disposition reason:** corrective contract is prepared but not frozen/reviewed/approved or implemented.
-- **Post-commit/push status:** `complete`
-- **Next path/status action:** run fresh no-context critique, assumption-code coherence, scope-drift and pre-approval authority guards from baseline `f096ca47685f311f684758811c66945a2cde9f24`.
+- **Disposition reason:** corrective implementation, local PostgreSQL evidence, diff expectation and fresh independent reaudits pass, but scope-drift resolution, cutover audit, RLS and authorized stage evidence remain open; closing or promoting now would overstate delivery.
+- **Post-commit/push status:** `MonitorNotes release/uninotas@6f48e60c5c0690a02f9ca0dbed8a6d31e2761475 pushed; remote SHA attested equal; PR/merge/deploy remain user-owned and pending`
+- **Next path/status action:** user opens and merges the recovery PR to `main`; in parallel, resolve Foundation scope-drift/cutover gates, then validate the exact deployed revision with RLS and authenticated smoke before claiming the TODO complete.
