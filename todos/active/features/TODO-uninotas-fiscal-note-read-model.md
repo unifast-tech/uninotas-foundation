@@ -923,13 +923,13 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Why this decision:** big architecture correction needs a committed/pushed immutable TODO packet before independent review.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `ad9b4e4961daefac48deab903668820aa744d8bf`
+- **Baseline commit:** `f5740f7c88c3ae4709f949c831a7664d96376be2`
 - **Baseline push reference:** `origin/main`
-- **Gate status:** `no_material_findings`
-- **Findings summary:** prior C01..C27 baseline `9d3bf55` passed R5. Incident `af6c34a` and `96ca8de` received independent critique/architecture findings, all integrated; the second-round refinement (scoped React timer, exhaustive deferred state handling, exact retry/error precedence) is frozen and pushed at `ad9b4e4` as a TODO-only commit. Fresh review of this refined baseline remains pending.
-- **Evidence / reference:** `https://github.com/unifast-tech/uninotas-foundation/commit/ad9b4e4961daefac48deab903668820aa744d8bf`; prior R5 evidence remains in its resolution ledger below.
+- **Gate status:** `pending-push-and-review`
+- **Findings summary:** prior C01..C27 baseline `9d3bf55` passed R5. Incident R1–R3 material findings were integrated in the user-validated Option A baseline at `f5740f7`; new independent review is pending. The baseline-evidence metadata commit changes no scope-governing decision.
+- **Evidence / reference:** `https://github.com/unifast-tech/uninotas-foundation/commit/f5740f7c88c3ae4709f949c831a7664d96376be2`; prior R5 evidence remains in its resolution ledger below.
 - **Waiver authority / reference:** `n/a`
-- **2026-10-01 incident delta:** `ad9b4e4` is the current pushed review baseline for I01..I03. Prior rounds are finding evidence, not approval of the refined plan; re-review, scope-drift and renewed human approval remain pending.
+- **2026-10-01 incident delta:** `f5740f7` is the Option A content baseline for I01..I03; push verification, re-review, scope-drift and renewed human approval remain pending.
 
 ## Gate: Review Scope Drift
 
