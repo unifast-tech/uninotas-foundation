@@ -926,13 +926,13 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Why this decision:** big architecture correction needs a committed/pushed immutable TODO packet before independent review.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `aee2d619167b8410f932aa0100f96dc3dab88816`
+- **Baseline commit:** `a62583870d6c970b11b2f7ea2c37a5e542dbd843`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** prior C01..C27 baseline `9d3bf55` passed R5. Option A baseline `f5740f7` received R4 independent findings; their 30-second cadence, all-producer contract and synthetic-error documentation refinements are frozen at `aee2d61` for focused re-review. The baseline-evidence metadata commit changes no scope-governing decision.
-- **Evidence / reference:** `https://github.com/unifast-tech/uninotas-foundation/commit/aee2d619167b8410f932aa0100f96dc3dab88816`; prior R5 evidence remains in its resolution ledger below.
+- **Findings summary:** prior C01..C27 baseline `9d3bf55` passed R5. Option A baseline `f5740f7` received R4 independent findings, integrated at `aee2d61`. Focused R5 found that idle/syncing partial responses still had 2-second polling; the all-partial 30-second cadence is frozen at `a625838` for a final focused review. The baseline-evidence metadata commit changes no scope-governing decision.
+- **Evidence / reference:** `https://github.com/unifast-tech/uninotas-foundation/commit/a62583870d6c970b11b2f7ea2c37a5e542dbd843`; prior R5 evidence remains in its resolution ledger below.
 - **Waiver authority / reference:** `n/a`
-- **2026-10-01 incident delta:** `aee2d61` is the refreshed Option A content baseline for I01..I03; focused re-review, scope-drift and renewed human approval remain pending.
+- **2026-10-01 incident delta:** `a625838` is the refreshed Option A content baseline for I01..I03; focused re-review, scope-drift and renewed human approval remain pending.
 
 ## Gate: Review Scope Drift
 
