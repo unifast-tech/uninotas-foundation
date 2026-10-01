@@ -22,7 +22,7 @@
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** a Opção A de `D-RM-I03/R3` foi validada pelo usuário em `2026-10-01`; congelar/revisar a baseline com `readModel.autoRetry`, executar os guards e só então pedir `APROVADO` renovado para código. O parser continua inalterado até a causa ser observada.
+- **Next exact step:** obter `APROVADO` renovado para implementar `D-RM-I01..I03` na baseline Option A revisada; antes do pedido, confirmar `preflight-go`. O parser continua inalterado até a causa ser observada.
 
 ## Active Work State
 
@@ -635,10 +635,10 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 ## Decision Resolution / Renewed Approval Pending
 
 - [x] `D-RM-C01..C27`: as opções da baseline anterior foram comparadas e aprovadas nas datas registradas; sua aprovação não se estende automaticamente ao incidente de `2026-10-01`.
-- [x] `D-RM-I01`: direção revisada: preservar geração/checkpoint/candidates; recusa **transitória** vira espera com relógio persistido, enquanto configuração sem capacidade é falha operacional visível sem loop. Linhas legadas ocupadas ganham projeção/retomada segura. Achados da primeira rodada integrados; requer nova baseline/revisão e `APROVADO`, não implementado.
-- [x] `D-RM-I02`: os 21 logs confirmam HTTP 200 em ambos os contextos mas não informam subtipo. Direção revisada: enriquecer o único evento existente de `list` com categoria sanitizada, inclusive comprimento declarado inválido, **sem alterar o parser**; outra decisão/aprovação será necessária se o contrato aceito mudar. Requer nova baseline/revisão e `APROVADO`, não implementado.
-- [x] `D-RM-I03`: direção revisada: reutilizar `idle`/`failed` e `retryAfterSeconds` públicos existentes para evitar polling de 2s durante a espera; preservar erro real anterior e bloquear CSV incompleto. Sem novo enum/mensagem. Requer nova baseline/revisão e `APROVADO`, não implementado.
-- [x] `D-RM-I03/R3`: usuário respondeu `Aprovo` em `2026-10-01` à Opção A: booleano aditivo `readModel.autoRetry` diferencia incapacidade estática de falha recuperável. A regra de parar todo `partial/failed` com prazo nulo foi rejeitada. Contrato/testes atualizados no TODO; congelamento, revisão e `APROVADO` de implementação ainda pendentes; nada implementado.
+- [x] `D-RM-I01`: preservar geração/checkpoint/candidates; recusa **transitória** vira espera com relógio persistido renovado somente em nova recusa elegível, enquanto configuração sem capacidade é falha operacional visível sem loop. Linhas legadas ocupadas ganham projeção/retomada segura. Baseline/revisões R1–R6 convergidas; `APROVADO` de implementação pendente.
+- [x] `D-RM-I02`: os 21 logs confirmam HTTP 200 em ambos os contextos mas não informam subtipo. Enriquecer o único evento existente de `list` com categoria sanitizada, inclusive comprimento declarado inválido, **sem alterar o parser**; outra decisão/aprovação será necessária se o contrato aceito mudar. Baseline/revisões R1–R6 convergidas; `APROVADO` de implementação pendente.
+- [x] `D-RM-I03`: opção A selecionada: booleano aditivo `readModel.autoRetry` com default legado `true`, stop de polling só para incapacidade estática e `max(30s, retryAfterSeconds)` para toda cobertura local parcial retryable; incluir lista `documento` no contrato e erro sintético local no módulo. Preservar erro real, sem novo enum/mensagem, CSV incompleto bloqueado. Baseline/revisões R1–R6 convergidas; `APROVADO` de implementação pendente.
+- [x] `D-RM-I03/R3`: usuário respondeu `Aprovo` em `2026-10-01` à Opção A. A regra de parar todo `partial/failed` com prazo nulo foi rejeitada. Contrato/testes atualizados, congelados e revisados; implementação ainda não autorizada nem iniciada.
 
 ## Module Decision Baseline Snapshot
 
@@ -772,8 +772,9 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 ## Plan Review Gate
 
 - **Status:** `converged-findings-integrated`; R5 confirmou o desenho MVCC do horizonte e sua única lacuna de teste no caminho sem anchor foi incorporada em `VAL-RM-C17`.
-- **Incident delta status:** `R3-option-A-user-validated; revised-baseline-review-pending`; the earlier R5 result applies only to `D-RM-C01..C27`. R1/R2 findings were integrated; R3 of pushed `ad9b4e4` exposed a recovery regression and undefined static-capacity projection source. The user selected Option A on `2026-10-01`; revised freeze/review/guards and renewed implementation `APROVADO` remain pending.
+- **Incident delta status:** `R6-converged; implementation-approval-pending`; R1–R5 incident findings are integrated, and fresh R6 architecture/critique of pushed `a625838` returned no material findings. The earlier C01..C27 evidence remains historical; only renewed implementation `APROVADO` can authorize product code.
 - **R4 review outcome:** the architecture opinion and critique of pushed Option A baseline `f5740f7` support the direction but found an unbounded 2-second recoverable-failure polling path, missing provider-backed `documento` response coverage and an undocumented synthetic local `unexpected` meaning. The 30-second per-query cadence, all-producer contract test and canonical-module-first execution step are incorporated below; these material refinements require a refreshed pushed baseline and focused re-review before the plan gate can converge.
+- **R6 convergence / approval preflight:** fresh no-context architecture opinion and critique of pushed Option A content baseline `a625838` returned zero material findings; both confirmed the all-partial `max(30s, retryAfterSeconds)` rule closes the last 2-second polling path in the plan. `audit_escalation_guard.py` returned `go`; `assumption_code_coherence_guard.py` returned `go` (2 live assumptions); `review_scope_drift_guard.py` returned `go` (0/23 material sections changed); and `todo_authority_guard.py --pre-approval` returned `preflight-go` on `2026-10-01`. These are planning/readiness results only, not code execution or deployment authority.
 
 ### Review Sections
 
@@ -911,8 +912,8 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Decision review lifecycle:** `after diagnosis is closed and before APROVADO`
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set`
-- **Decision review status:** `blocked`
-- **Decision review evidence / resolution:** R1/R2 findings remain integrated. R3 found the missing static-capacity projection source; user-validated Option A uses typed read-only coordinator capability and explicit precedence. R4 of pushed `f5740f7` found two medium refinements: 30-second recoverable-failure cadence and canonical documentation of the synthetic local `unexpected` meaning. They are incorporated in the TODO; focused re-review of the refreshed baseline remains required. R5 is historical C01..C27 evidence only.
+- **Decision review status:** `no_material_findings`
+- **Decision review evidence / resolution:** R1–R5 incident findings are integrated in the frozen Option A baseline `a625838`. Fresh R6 no-context architecture opinion found no new material finding and confirmed the 30-second floor closes the idle/no-row, syncing/null and failed/null polling paths. Product implementation and canonical module change remain pending renewed approval; prior C01..C27 R5 delivery evidence is historical only.
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -932,7 +933,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Findings summary:** prior C01..C27 baseline `9d3bf55` passed R5. Option A baseline `f5740f7` received R4 independent findings, integrated at `aee2d61`. Focused R5 found that idle/syncing partial responses still had 2-second polling; the all-partial 30-second cadence is frozen at `a625838` for a final focused review. The baseline-evidence metadata commit changes no scope-governing decision.
 - **Evidence / reference:** `https://github.com/unifast-tech/uninotas-foundation/commit/a62583870d6c970b11b2f7ea2c37a5e542dbd843`; prior R5 evidence remains in its resolution ledger below.
 - **Waiver authority / reference:** `n/a`
-- **2026-10-01 incident delta:** `a625838` is the refreshed Option A content baseline for I01..I03; focused re-review, scope-drift and renewed human approval remain pending.
+- **2026-10-01 incident delta:** `a625838` is the pushed Option A content baseline for I01..I03; focused R6 review and scope-drift guard passed, renewed human implementation approval remains pending.
 
 ## Gate: Review Scope Drift
 
@@ -943,10 +944,10 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Material sections compared:** `Context|Contract Boundary|Scope|Out of Scope|Definition of Done|Validation Steps|Execution Lane Tracking|Canonical Module Anchors|Decisions|Decision Baseline|Architecture Change Governance|Questions To Close|Assumptions Preview|Execution Plan|Flow Evidence Planning Matrix|Local CI-Equivalent Suite Matrix|Runtime / Rollout Notes|Security Risk Assessment|Performance & Concurrency Risk Assessment`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-fiscal-note-read-model.md`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** guard against the new pushed baseline `ad9b4e4` returned `go`, 0 of 23 material sections changed, on 2026-10-01. The prior `96ca8de` four-section drift was resolved by the second-round finding integration and re-freeze, not waived. User validation of the new frontend timer scope remains separate.
-- **Evidence / reference:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo uninotas-foundation/todos/active/features/TODO-uninotas-fiscal-note-read-model.md`: `Overall outcome: go`, `Changed material sections: 0` against `ad9b4e4961daefac48deab903668820aa744d8bf` on 2026-10-01.
+- **Findings summary:** guard against pushed Option A content baseline `a625838` returned `go`, 0 of 23 material sections changed, on 2026-10-01. The prior incident rounds were integrated and re-frozen, not waived; the user validated the additive field before this baseline.
+- **Evidence / reference:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo uninotas-foundation/todos/active/features/TODO-uninotas-fiscal-note-read-model.md`: `Overall outcome: go`, `Changed material sections: 0` against `a62583870d6c970b11b2f7ea2c37a5e542dbd843` on 2026-10-01.
 - **Waiver authority / reference:** `n/a`
-- **2026-10-01 incident delta:** second-round findings are now in pushed `ad9b4e4`; a fresh review and renewed human approval are still required before implementation.
+- **2026-10-01 incident delta:** R6 independent architecture/critique and post-review drift passed; renewed human implementation approval remains required.
 
 ## Independent No-Context Critique Gate
 
@@ -958,9 +959,9 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Critique isolation mode:** `fresh internal no-context reviewer`
 - **Internal reviewer mandate:** `required after baseline freeze; reviewer cannot be implementing agent`
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
-- **Critique status:** `blocked`
-- **Findings summary:** R1–R5 remain historical for C01..C27; incident R1–R3 findings are integrated. R4 critique of pushed `f5740f7` found high-severity sustained 2-second polling for recoverable failed/null responses and medium missing provider-backed `documento` response coverage. The TODO now specifies a 30-second per-query minimum and all-producer HTTP/normalizer tests; focused re-review remains pending, and no implementation `APROVADO` is claimed.
-- **Evidence / reference:** R3 derived result `artifacts/tmp/uninotas-incident-r3-critique-merged.md`; the authoritative resolution is consolidated in the incident ledger below, not in the disposable dispatch artifacts.
+- **Critique status:** `no_material_findings`
+- **Findings summary:** R1–R5 remain historical for C01..C27; incident R1–R5 findings are integrated. Fresh R6 no-context critique of pushed `a625838` found no new material issue and confirmed the all-partial `max(30s, retryAfterSeconds)` rule closes the 2-second path. This is planning evidence only; no implementation `APROVADO` or code result is claimed.
+- **Evidence / reference:** R4–R6 no-context reviewer results and the authoritative resolution in the incident ledger below; R6 bounded package `artifacts/tmp/uninotas-incident-plan-r6-package.md`.
 - **Waiver authority / reference:** `n/a`
 
 | Finding ID | Resolution (`Integrated|Challenged|Deferred`) | Usefulness (`useful|noise|mixed|unknown`) | Formalizable (`yes|partial|no|unknown`) | Candidate Rule Level (`paced|project|none|unknown`) | Candidate Rule ID | Rationale / Evidence |
@@ -1028,13 +1029,13 @@ The critique and architecture opinion were fresh no-context reviews of the pushe
 | `ARCH-R2-02` | medium | Complete/stale rolling has different public failure semantics from incomplete coverage. | I03 explicitly keeps `complete/idle` and existing stale-freshness/manual refresh; operational fault remains in existing metadata and sanitized logs, not a new banner. | `Integrated` |
 | `ARCH-R2-03` | medium | Bootstrap currently clears a prior error before admission. | I01 now places admission before every bootstrap/rolling error/state/generation mutation and tests failed-checkpoint then local refusal. | `Integrated` |
 | `ARCH-R2-04` | medium | Automatic update timestamp as eligibility marker could drift and reorder true errors. | I01 allows only explicit deferred transition to set its persisted clock; pending reads/seeding/retention never reset it, and true failed row/error/timestamp remain untouched by local refusal. | `Integrated` |
-| `I-R3-CRIT-01` | high | Terminal timer stop also hides recoverable background publication after the response snapshot. | User-validated Option A adds typed static-capacity signal + public `autoRetry`; recoverable failures retain automatic observation. | `Integrated; fresh review pending` |
-| `I-R3-CRIT-02` | medium | A long-held lease makes the first deferred timestamp expire and reopens 2-second polling. | I01 renews the persisted 60-second clock on each new eligible refusal only; multi-window/multi-viewer/restart tests required. | `Integrated; fresh review pending` |
-| `ARCH-R3-01` | medium | Static-capacity fault has no authoritative projection source when a new rolling window has no sync row. | User-validated Option A reads typed coordinator capability in the snapshot projection, preserving genuine error precedence and no sync-row/generation mutation. | `Integrated; fresh review pending` |
-| `I-R4-CRIT-01`, `ARCH-R4-01` | high/medium | Recoverable `partial/failed/null` could continue one two-second DB read/pump nudge per viewer indefinitely. | I03 now requires a 30-second minimum per active query and VAL-I03 bounds ten concurrent viewers over multiple minutes while proving eventual publication/CSV recovery. | `Integrated; focused re-review pending` |
-| `I-R4-CRIT-02` | medium | Provider-backed `documento` list has a separate readModel producer and could omit the always-emitted new field. | I03 requires `autoRetry=true` on that branch, and VAL-I03 covers HTTP/normalizer/no-coverage-poll behavior. | `Integrated; focused re-review pending` |
-| `ARCH-R4-02` | medium | Synthetic local `failed/unexpected` without a sync row could be mistaken for evidence of a provider attempt. | I03 explicitly defines it as operational projection, preserves genuine-error precedence, and orders canonical fiscal module API update before product code after renewed approval. | `Integrated; focused re-review pending` |
-| `I-R5-CRIT-01`, `ARCH-R5-01` | high/medium | The 30-second bound only covered recoverable `failed/null`; idle/no-row and syncing/null still used 2-second polling. | I03 now applies `max(30s, retryAfterSeconds)` to every automatically retried local partial response; `VAL-RM-I03-R5` adds ten-viewer fake-clock idle/syncing/failure, longer cooldown, eventual publication and old-timer cancellation. | `Integrated; focused re-review pending` |
+| `I-R3-CRIT-01` | high | Terminal timer stop also hides recoverable background publication after the response snapshot. | User-validated Option A adds typed static-capacity signal + public `autoRetry`; recoverable failures retain automatic observation. | `Integrated; R6 no material finding` |
+| `I-R3-CRIT-02` | medium | A long-held lease makes the first deferred timestamp expire and reopens 2-second polling. | I01 renews the persisted 60-second clock on each new eligible refusal only; multi-window/multi-viewer/restart tests required. | `Integrated; R6 no material finding` |
+| `ARCH-R3-01` | medium | Static-capacity fault has no authoritative projection source when a new rolling window has no sync row. | User-validated Option A reads typed coordinator capability in the snapshot projection, preserving genuine error precedence and no sync-row/generation mutation. | `Integrated; R6 no material finding` |
+| `I-R4-CRIT-01`, `ARCH-R4-01` | high/medium | Recoverable `partial/failed/null` could continue one two-second DB read/pump nudge per viewer indefinitely. | I03 now requires a 30-second minimum per active query and VAL-I03 bounds ten concurrent viewers over multiple minutes while proving eventual publication/CSV recovery. | `Integrated; R6 no material finding` |
+| `I-R4-CRIT-02` | medium | Provider-backed `documento` list has a separate readModel producer and could omit the always-emitted new field. | I03 requires `autoRetry=true` on that branch, and VAL-I03 covers HTTP/normalizer/no-coverage-poll behavior. | `Integrated; R6 no material finding` |
+| `ARCH-R4-02` | medium | Synthetic local `failed/unexpected` without a sync row could be mistaken for evidence of a provider attempt. | I03 explicitly defines it as operational projection, preserves genuine-error precedence, and orders canonical fiscal module API update before product code after renewed approval. | `Integrated; R6 no material finding` |
+| `I-R5-CRIT-01`, `ARCH-R5-01` | high/medium | The 30-second bound only covered recoverable `failed/null`; idle/no-row and syncing/null still used 2-second polling. | I03 now applies `max(30s, retryAfterSeconds)` to every automatically retried local partial response; `VAL-RM-I03-R5` adds ten-viewer fake-clock idle/syncing/failure, longer cooldown, eventual publication and old-timer cancellation. | `Integrated; R6 no material finding` |
 
 ## Gate: Assumption Code Coherence
 
