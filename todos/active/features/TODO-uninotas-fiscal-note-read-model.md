@@ -22,19 +22,20 @@
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** executar a migration e as integrações PostgreSQL em banco local disponível, concluir os gates independentes e somente então preparar promoção separadamente autorizada.
+- **Next exact step:** congelar/publicar a baseline de revisão do plano `D-RM-I01..I03`, revisar os gates de planejamento e pedir aprovação renovada somente para correção da admissão local e diagnóstico sanitizado; o parser continua inalterado até a causa ser observada.
 
 ## Active Work State
 
-- **Work state:** `implementation`
-- **Why this state now:** a baseline C01..C22 permanece implementada e publicada na branch; C23..C27 estão implementadas no working tree com migration aditiva, projeção/CSV completos e regressões unitárias/estáticas aprovadas. A validação PostgreSQL real permanece pendente porque `TEST_DATABASE_URL` aponta para o PostgreSQL local desligado.
-- **Exit condition:** baseline corretiva revisada, aprovada, implementada e validada na branch `release/uninotas`.
+- **Work state:** `review`
+- **Why this state now:** a baseline `D-RM-C01..C27` foi implementada localmente, mas a consulta operacional fornecida pelo usuário em `2026-10-01` revelou falhas de admissão local e de contrato do provedor não cobertas pela evidência anterior. O delta corretivo abaixo é somente planejamento; a aprovação anterior não autoriza alterar a estratégia de recuperação.
+- **Exit condition:** congelar e revisar a baseline `D-RM-I01..I03`, obter `APROVADO` renovado para a correção de admissão/diagnóstico e então executar os testes e código dentro desse limite. A causa exata da rejeição de contrato é resultado esperado da instrumentação implantada, não pré-condição impossível para aprová-la.
 
 ## Provisional Notes
 
 - **Missing for production-ready:** concluir os gates independentes requeridos pelo audit floor e, após promoção autorizada, atestar a revisão implantada, reparar sem destruição e validar o stage com perfil RLS.
 - **Revisit criteria:** todos os critérios `DOD-RM-C*` e `VAL-RM-C*` aprovados e evidenciados, incluindo smoke de stage com revisão exata em execução.
 - **Dependencies unblocked:** o TODO de cancelamento pode continuar em planejamento, mas sua implementação não deve preceder a estabilização deste read model.
+- **New incident qualifier:** o usuário confirmou que `main@fb8d88137212bbe549707aa064cc03185a14e6db` era o deploy ativo no horário das cinco falhas fornecidas. Logs sanitizados de ambos os contextos confirmam respostas HTTP 200 com erro de contrato, mas não a validação exata; o ambiente/banco consultado ainda não foi nomeado explicitamente e resultados anteriores de testes/revisões não fecham este delta.
 
 ## Implementation Intent
 
@@ -131,6 +132,48 @@ This proposal replaces the current per-request/per-period full coverage strategy
 - The persisted-error mapper preserves only `SmartNotasLimiteExterno`; pagination inconsistency, timeout and unexpected failures are collapsed into `SmartNotasIndisponivel`, hiding the actual reason.
 - The existing seven cache-service tests pass but keep provider totals immutable. They do not cover a changed total after checkpoint resume, a stale `bootstrap_running` record after process restart, interval-complete export during global partial coverage, or truthful error mapping.
 - The local `DATABASE_URL` inspected on `2026-09-29` contained zero read-model sync/cache rows, so the exact stage `erroCodigo` remains runtime evidence to collect. This does not invalidate the code-level failure path above.
+
+### Operational Incident Evidence — 2026-10-01 (Provisional; Approval Pending)
+
+- **Source and limits:** user-provided, read-only result from `monitor_fiscal_note_syncs`, ordered by `atualizado_em DESC`; no note payload, token or PII was provided. The user supplied the Railway/GitHub-linked revision [`main@fb8d88137212bbe549707aa064cc03185a14e6db`](https://github.com/unifast-tech/MonitorNotes/commit/fb8d88137212bbe549707aa064cc03185a14e6db), titled `Merge pull request #15 from unifast-tech/release/uninotas feat: export complete fiscal note projection`, and explicitly confirmed that this deploy was active at `10:17:48–10:18:03` on `2026-10-01`. This is user attestation of the incident revision, not independent inspection of the private commit; the environment/database queried has not been named explicitly. The earlier `2026-09-29` local-empty observation above is historical and no longer means that the runtime error codes are unknown.
+
+| contexto_fiscal | data_inicio | data_fim | estado | erro_codigo | itens_por_pagina | pagina_concluida | atualizado_em (as supplied; timezone unconfirmed) |
+| --- | --- | --- | --- | --- | ---: | ---: | --- |
+| prosperar | 2025-10-01 | 2025-10-31 | bootstrap_failed | ExportacaoFiscalOcupada | null | 0 | 2026-10-01 10:18:03 |
+| prosperar | 2026-08-01 | 2026-08-31 | bootstrap_failed | ExportacaoFiscalOcupada | null | 0 | 2026-10-01 10:18:00 |
+| unifast | 2025-11-01 | 2025-11-30 | bootstrap_failed | ExportacaoFiscalOcupada | 200 | 4 | 2026-10-01 10:17:57 |
+| unifast | 2026-05-01 | 2026-05-31 | bootstrap_failed | ExportacaoFiscalOcupada | 200 | 3 | 2026-10-01 10:17:54 |
+| unifast | 2026-03-01 | 2026-03-31 | bootstrap_failed | SmartNotasContratoInvalido | 200 | 1 | 2026-10-01 10:17:48 |
+
+- **Confirmed by code:** `ExportacaoFiscalOcupada` originates in local `FiscalRateCoordinator.startExport()`/page admission; `walkPages()` currently persists it as `bootstrap_failed`. The historical walk reuses `read-model:bootstrap:<context>` as the actor, whose admitted cooldown lasts 60 seconds. Four nearby occupied rows are consistent with that cooldown, but the precise rejection branch (cooldown, lease, configured capacity) is not proven without redacted runtime configuration/telemetry. `itens_por_pagina=200` and checkpoints 3/4 prove that those Unifast generations staged pages before the later local refusal; null/zero Prosperar rows do not prove a provider request occurred.
+- **Separate provider-boundary failure:** `SmartNotasContratoInvalido` is emitted by `SmartNotasAdapter` for an invalid status, bounded-body/JSON condition or rejected normalized field. The March checkpoint shows one page staged; the next attempted page would be page 2 for that generation, but the failing request and exact validation branch still need sanitized correlation evidence. No raw response or recipient values may be logged into this TODO.
+- **Railway application-log evidence, user pasted on 2026-10-01:** 21 `SmartNotasAdapter` `operation=list` failures between `13:10:47` and `13:24:31` as displayed in the log excerpt: 11 Unifast, 10 Prosperar. All have `outcome=SmartNotasContratoInvalido`, `upstreamStatus=200` and durations of 67–239 ms. The Unifast event at `13:17:48` (`correlationId=c0837651-bc69-4c17-89b9-b58785c0803f`) matches the March sync-row second `10:17:48` after a three-hour UTC→São Paulo conversion; this is strong temporal/contextual correlation, not proof of the log display/database session timezones or of the page number, because neither is recorded with the event. These events rule out a non-200 provider status and adapter timeout for those attempts; they do not distinguish oversized/missing body, malformed JSON, envelope/page metadata or one rejected field. The adapter logs no response size, validation category, page or sync-window identifier, and `walkPages()` does not pass a sync trace to `list()`. Both contexts are affected, but whether they fail for one shared response shape or different records is unknown. No provider payload, token or PII was copied.
+- **Invalidated hypothesis:** these five `erro_codigo` values do not support the prior Prisma-interactive-transaction timeout hypothesis; a generic Prisma exception would be persisted as `unexpected_error`. A 200-item page count reduces provider requests but does not remove local admission or contract failures.
+- **User-visible gap:** `publicSyncError()` maps both codes to `unexpected`, and React renders the same generic failure plus a 60-second local persisted cooldown. This can present expected local backpressure as a failed provider synchronization.
+
+**Bug-fix evidence gate (before any new implementation):**
+
+| Required question | Current answer |
+| --- | --- |
+| End-to-end tests from provider/admission to UI? | No incident-specific chain: coordinator and adapter have mocked cases, but no test proves consecutive historical windows under the same 60-second actor cooldown through persisted sync state and UI. |
+| Real DB/backend payload inspected? | Persisted sync metadata and 21 sanitized adapter logs: yes. User attests `main@fb8d88137212bbe549707aa064cc03185a14e6db` was active at the failure time. Exact environment/database name, provider response body and rejected validation branch: not supplied; the current logs do not encode the latter. |
+| Which existing test failed? | None was rerun for this intake; prior green suites used deterministic mocks and did not exercise this runtime sequence or the real rejected page. They cannot be claimed as incident closure. |
+| New fail-first tests needed? | Same-context consecutive windows/resume with admission refusal and eventual retry; page-2 contract rejection with sanitized diagnostic category; persisted-state → API → UI distinction between waiting and genuine failure. |
+| Analyzer-enforced rule? | `no-rule-needed` for now: the observed timing and provider-data shape are runtime conditions, not a reliably recognizable static code pattern. Reassess only if the causal tests expose a recurring forbidden architecture shape. |
+
+**Proposed correction boundary, not yet approved:** keep local admission pressure as scheduled/deferred work without falsely recording a provider failure or losing generation/checkpoint; preserve one in-process pump, fiscal-context separation, provider quota, bounded retries and complete-only export. Add bounded, PII-free internal diagnostics for the specific rejected status/body/field category, then decide whether the provider adapter needs a contract change from sanitized evidence. Do not increase response-size, timeout, quota or concurrency limits merely to clear the generic message; do not add a new worker, queue, replica, migration or raw-payload persistence. Any public read-model/UI change must be explicitly frozen and approved before implementation.
+
+### Incident Execution Contract — Prepared for Renewed Approval
+
+This is one bounded incident slice: stop classifying **local admission refusal** as a provider failure and make the independent HTTP-200 contract rejection diagnosable. It does not promise that every historical window will complete before the rejected provider shape is identified. The follow-up parser decision stays inside this TODO's incident conversation but requires fresh evidence and renewed approval if it changes accepted fiscal data.
+
+| Decision | Proposed baseline for this slice | Module relationship and boundary |
+| --- | --- | --- |
+| `D-RM-I01` Local admission | `ExportacaoFiscalOcupada` from `startExport()` or `reserveExportPage()` is deferred work, not a failed Smart Notas traversal. Do not erase candidate rows, generation, raw count or checkpoint. A refused new rolling attempt must not rotate its generation or delete candidates before admission succeeds; a refused/resumable traversal becomes internally pending and retries at the next scheduled/nudged single-pump opportunity **no earlier than** the coordinator's bounded eligibility, without a busy loop, concurrent duplicate or extra provider call. Actual provider/contract errors remain failed and keep their existing bounded cooldown. | Preserves `FISC-RM-02/03/06`, one-replica coordination and complete-only export. No new worker, queue, replica or database migration is authorized. |
+| `D-RM-I02` Contract diagnostics only | On `SmartNotasContratoInvalido`, emit at most one structured failure event per request with allowlisted category (`body_missing`, `body_declared_oversize`, `body_stream_oversize`, `json_invalid`, `envelope_invalid`, `page_metadata_invalid`, `record_invalid`), optional allowlisted field **name** and failure kind (`missing`, `type`, `empty`, `length`, `format`), observed byte count when known, context, date window, page, correlation ID, upstream status and duration. Never emit URL/query strings, provider body, record value, token, recipient data or raw exception. Keep the public error code and fail-closed parser unchanged. | Preserves the Smart Notas authority, positive DTO allowlist and `FISC-RM-07`; internal observability only. A future parser/limit change is explicitly excluded until real sanitized causal evidence is reviewed and newly approved. |
+| `D-RM-I03` Consumer behavior | Reuse the existing public `coverage=partial`, `syncState=idle|syncing|failed`, `lastSyncError` and `retryAfterSeconds` contract. A locally deferred pending unit has no new provider error; its UI remains the existing “Sincronização pendente” with automatic local revalidation. A genuine contract rejection remains `failed`/`unexpected` until its safe subtype is known. CSV stays disabled until exact daily coverage is complete. | Preserves `FISC-RM-04/06`, React's closed enums and current API shape. No frontend production change or new public enum/message is included; backend/API/browser regression evidence is required. |
+
+**Execution phases and stop line:** first add fail-first tests for local refusal/checkpoint survival and PII-free diagnostic categories; then implement `D-RM-I01/I02`, validate the unchanged public consumer contract, and only after a separately authorized Stage deployment observe one normal retry. If the resulting category identifies a provider-shape mismatch, return to the decision/review/approval loop before changing parser acceptance, body limit, timeout or page size. No manual bulk retry, direct Stage data repair or production write is authorized by this plan.
 
 ### Decision Baseline (Frozen Before Implementation)
 
@@ -298,6 +341,8 @@ The backend remains authoritative: a stale client that submits export during par
 - **Waiver / exception reference:** `n/a`
 - **Guard evidence:** routing guard returned `Overall outcome: go`; `todo_authority_guard.py ... --pre-approval` returned `Overall outcome: preflight-go` with zero violations.
 
+**Routing refresh for the 2026-10-01 incident (not yet preflighted):** the block above proves only the earlier implementation. The linked Delphi contract now selects `gpt-6-luna` for routine execution and `gpt-6.1-sol` for strongest review. The user explicitly chose `gpt-6-sol` for selectable lanes in this WSL window because `gpt-6.1-sol` is available in Windows VS Code but not here; this does not retroactively switch the primary chat model. Before a required incident review/execution gate, validate the actual model availability and run `agent_role_routing_guard.py` with the appropriate declared exception/waiver evidence; the prior `go` cannot be reused and no model/gate outcome is claimed here. No worktree or parallel code-writer authority follows from this preference.
+
 ## Historical Execution Plan — Delivered Baseline
 
 1. Verify current package, Prisma schema/migration state, fiscal module ownership and existing tests.
@@ -345,6 +390,8 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - [ ] Ampliar o record de listagem, candidate/cache Prisma e CSV para todos os campos conhecidos do `GET /notas`, incluindo nome, documento, e-mail e localização do tomador, sem chamadas ao detalhe.
 - [ ] Adicionar migration expand-only com colunas nullable, preservar linhas existentes e permitir backfill somente por sincronização normal do provedor.
 - [ ] Atualizar regressões de adapter, serializer, cache, migration e contrato HTTP para a projeção/ordem completa e para a não exposição de PII em logs.
+- [ ] **Incidente proposto; aprovação pendente:** separar espera de admissão local (`ExportacaoFiscalOcupada`) de falha efetiva da sincronização, preservando geração/checkpoint e limites de concorrência enquanto a unidade aguarda sua próxima oportunidade.
+- [ ] **Incidente proposto; aprovação pendente:** identificar com metadados sanitizados a categoria exata de `SmartNotasContratoInvalido` e correlacionar janela/página; o checkpoint de março sugere a página seguinte, mas o log atual não contém página. Nenhuma validação pública/privada muda nesta autorização.
 
 ## Out of Scope
 
@@ -356,6 +403,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - Exportação parcial, botão para “baixar o que já existe” ou qualquer CSV apresentado como completo sem cobertura integral do intervalo.
 - Fila/worker externo, nova réplica, lease distribuído, alteração do scheduler de infraestrutura ou operação destrutiva direta no banco de stage.
 - Persistência de payload bruto, campos exclusivos do detalhe, telefone/endereço completo, PDF, XML ou URL efêmera.
+- Para este incidente: aumentar arbitrariamente `timeout`, 2 MiB de corpo, `perPage`, quota ou concorrência; relaxar o parser para aceitar dados fiscais desconhecidos; executar consulta/correção destrutiva em produção.
 
 ## Historical Canonical Anchors — Delivered Baseline
 
@@ -403,6 +451,9 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 | contract test | list/export errors and metadata | Nest application specs | cobertura incompleta disfarçada de provider error ou CSV parcial | `implement-in-this-todo` | exact status/code/body/header assertions |
 | browser test | React list/export | existing frontend E2E/unit runner | aviso permanente, erro incorreto ou download parcial | `implement-in-this-todo` | source-owned test + stage smoke |
 | performance/load | DB pagination/export + sync pacing | EPS/RLS artifacts | provider call on covered export, query regression or sync storm | `implement-in-this-todo` | machine-checkable `pcv-1` evidence |
+| incident state-machine tests | coordinator/cache + PostgreSQL | `fiscal-rate-coordinator*.spec.ts`, `fiscal-note-cache*.spec.ts`, read-model integration spec | local `ExportacaoFiscalOcupada` falsely persisted as provider failure or destroys rolling/historical checkpoint | `implement-in-this-todo after renewed approval` | `DOD/VAL-RM-I01`, RED/GREEN and zero-extra-provider-call assertions |
+| incident observability/privacy tests | Smart Notas adapter | `smart-notas.adapter.spec.ts` and bounded log spy | invalid HTTP-200 response has no safe subtype or logs a provider value/URL/PII | `implement-in-this-todo after renewed approval` | `DOD/VAL-RM-I02`, one-event/category/negative-content assertions |
+| incident consumer contract tests | Nest API + React existing normalizer/browser | source-owned contract/browser tests | local wait shown as provider failure or CSV enabled under partial coverage | `implement-in-this-todo after renewed approval` | `DOD/VAL-RM-I03`, no public enum change |
 
 ## Definition of Done
 
@@ -427,6 +478,9 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - [ ] `DOD-RM-C19` A abertura padrão usa ontem/hoje; a tela revalida somente a consulta local parcial aplicada, cancela timers obsoletos e habilita exportação automaticamente após cobertura completa.
 - [ ] `DOD-RM-C20` A projeção local e o CSV incluem exatamente todos os campos allowlisted de `GET /notas`, preservam CPF/CNPJ como texto, não consultam detalhe por linha e não registram PII em observabilidade.
 - [ ] `DOD-RM-C21` A migration adiciona campos nullable em cache/candidates, preserva linhas antigas e o sync subsequente preenche os novos valores sem operação destrutiva.
+- [ ] `DOD-RM-I01` **Proposto; aprovação pendente:** recusa de admissão local não é persistida nem apresentada **como falha do provedor**, não apaga checkpoint/candidates/geração, não reinicia rolling antes da admissão e permite retomada bounded conforme `retryAfterSeconds`, sem busy-loop, chamadas extras ao provedor ou starvation entre contextos.
+- [ ] `DOD-RM-I02` **Proposto; aprovação pendente:** rejeição real do contrato Smart Notas continua fail-closed, mas uma única linha estruturada por tentativa informa categoria allowlisted, contexto/janela/página/correlação, tamanho quando conhecido e nome/tipo da validação quando seguro, sem corpo bruto, URL, valores de campos, credenciais ou PII; nenhuma aceitação nova é introduzida antes da evidência sanitizada e da aprovação posterior.
+- [ ] `DOD-RM-I03` **Proposto; aprovação pendente:** API/React reutilizam os estados públicos existentes para distinguir espera local de falha real, sem novo enum/mensagem; CSV continua proibido até cobertura diária completa.
 
 ## Validation Steps
 
@@ -451,6 +505,9 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - [ ] `VAL-RM-C19` Provar em testes unitários/browser que a URL vazia usa ontem/hoje, partial dispara revalidação automática sem clique, troca de filtro cancela o ciclo antigo e CSV é habilitado ao receber cobertura completa.
 - [ ] `VAL-RM-C20` Executar regressões do adapter, serializer, cache e contrato HTTP provando a ordem completa do CSV, nulls, zeros à esquerda, fórmula, caracteres especiais e ausência de chamadas ao detalhe.
 - [ ] `VAL-RM-C21` Executar `prisma validate`, `prisma generate` e aplicar a migration em bancos PostgreSQL descartáveis vazio e baseline, provando linhas legadas preservadas e novos campos nullable.
+- [ ] `VAL-RM-I01` **Proposto; aprovação pendente:** reproduzir RED e depois GREEN para duas janelas do mesmo contexto iniciadas dentro de 60s, checkpoint de 3/4 páginas e rolling previamente candidato, recusas por cooldown/lease/capacidade, zero chamada adicional ao provedor, geração/candidates intactos, retomada após `retryAfterSeconds` e sem falso `bootstrap_failed`/`rolling_failed`; repetir com ambos os contextos.
+- [ ] `VAL-RM-I02` **Proposto; aprovação pendente:** reproduzir RED e depois GREEN para resposta HTTP 200 com corpo ausente, tamanho declarado/stream acima de 2 MiB, JSON inválido, envelope/metadados de página e campo inválido em página 2; verificar categoria allowlisted, janela/página/correlação, limite de um log por tentativa, status público inalterado e ausência de URL, payload, token, nome/CPF/e-mail e valores de campos nos logs.
+- [ ] `VAL-RM-I03` **Proposto; aprovação pendente:** validar em PostgreSQL, contrato HTTP e browser que espera local resulta em `coverage=partial`, `syncState=idle`, `lastSyncError=null`/mensagem pendente e sem CSV, enquanto a rejeição HTTP 200 real continua `failed`/`unexpected`; a exportação só libera após prova completa. Depois de deploy separadamente autorizado, atestar `branch@sha` e repetir consulta agregada sem dados de notas.
 
 ## Test Decisions — Frozen
 
@@ -551,9 +608,12 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Planned decision promotion targets:** `Canonical Decision Register`, `Purpose, Owned Entities, and Workflows`, `Locally implemented filtered CSV export boundary`, `API Endpoint Definitions`, `Export success and transport boundary`, `Export traversal`, `Errors`, `Limits and admission`, `Observability`, `Invariants`.
 - **Module decision consolidation targets:** novas decisões `FISC-RM-*` para janelas/cobertura/leitura local e supersessão explícita de `FISC-EX-02/FISC-EX-04` onde elas exigem travessia direta do provedor.
 
-## Decision Pending
+## Decision Resolution / Renewed Approval Pending
 
-- [x] `none`; as opções materiais foram comparadas, `D-RM-C01..C20` foram congeladas em `2026-09-29`, `D-RM-C21..C22` receberam direção humana renovada em `2026-09-30` e `D-RM-C23..C27` receberam aprovação explícita em `2026-09-30` após confirmação do payload real de `GET /notas`.
+- [x] `D-RM-C01..C27`: as opções da baseline anterior foram comparadas e aprovadas nas datas registradas; sua aprovação não se estende automaticamente ao incidente de `2026-10-01`.
+- [x] `D-RM-I01`: recomendação de planejamento convergida: preservar geração/checkpoint/candidates e representar a recusa local como pendência, sem erro do provedor; respeitar elegibilidade bounded do coordenador antes de nova tentativa. Aguardando revisão e `APROVADO`, não implementado.
+- [x] `D-RM-I02`: os 21 logs confirmam HTTP 200 em ambos os contextos mas não informam subtipo. Recomendação de planejamento convergida: instrumentação sanitizada e correlacionável **sem alterar o parser**, seguida de observação e nova decisão/ aprovação se o contrato aceito mudar. Aguardando revisão e `APROVADO`, não implementado.
+- [x] `D-RM-I03`: recomendação de planejamento convergida: reutilizar `idle` para espera local, `failed` para falha real e os textos/contrato já existentes; nenhuma mudança de enum/mensagem pública. Aguardando revisão e `APROVADO`, não implementado.
 
 ## Module Decision Baseline Snapshot
 
@@ -577,9 +637,12 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 | `A-RM-C02` | The moving total can change because the delivered bootstrap includes the current day and freezes metadata across pages/retries. | `backend/src/fiscal-notes/fiscal-note-cache.service.ts:164`; `backend/src/fiscal-notes/fiscal-note-cache.service.ts:249`; `backend/src/fiscal-notes/fiscal-note-cache.service.ts:326` | if provider guarantees immutable totals, windowing remains bounded and safer but root cause may be another stored error | `High` | `Keep as Assumption` |
 | `A-RM-C03` | Existing canonical cache/sync rows cannot prove atomic complete-window publication because page writes are immediately visible and have no isolated generation ownership. | `schema.prisma:91-109`; `fiscal-note-cache.service.ts` page upserts | an expand-only candidate-generation migration is required and must be validated on empty and delivered-baseline schemas | `High` | `Resolved into D-RM-C11/C12` |
 | `A-RM-C04` | Stage runs one API replica. | dependency readiness records `replicas=1` | distributed lease becomes required before deployment | `Medium` | `Block deployment, not planning` |
-| `A-RM-C05` | The exact stage failure row/error code is unknown from the local DB. | local read-only query returned empty sync/cache; user supplied public stage symptoms | operational repair branch may differ, but list/export contract remains valid | `High` | `Operational runtime evidence pending; not a code assumption` |
+| `A-RM-C05` | Historical 2026-09-29 observation: the exact runtime sync error was unknown from the empty local DB. | local read-only query returned empty sync/cache at that time | later operational evidence may select a different repair branch | `High` for that date | `Superseded by user-provided 2026-10-01 sync rows and attested deploy revision; provider subcause remains open in A-RM-I02` |
 | `A-RM-C06` | Historical statuses older than `D-1` may change externally, but broad periodic deep reconciliation is outside this correction. | Smart Notas authority + no changed-since contract | stale older status remains residual risk; cancellation overlay covers only Monitor-owned cancellation | `Medium` | `Keep as Assumption; document residual risk` |
 | `A-RM-C07` | `GET /notas` returns the complete listed recipient fields (`nome`, `documento`, `email`, `cidade`, `estado`, `pais`) on each summary record. | user-provided real response sample plus the previously observed `GET /notas` payload | if a field is omitted/null, the nullable projection and CSV emit an empty cell; invalid typed/non-null values remain a provider contract error | `High` | `Keep as Assumption; cover adapter acceptance/nullability` |
+| `A-RM-I01` | The four occupied rows likely share the local 60-second bootstrap-actor cooldown, but the exact admission branch and runtime limits are not yet known. | user-provided sync rows seconds apart; `fiscal-rate-coordinator.ts:startExport`; `fiscal-note-cache.service.ts:walkPages` | a lease/capacity configuration or deployed-code difference may require a different bounded scheduler correction | `Medium` | `Confirm with redacted runtime metadata before freezing D-RM-I01` |
+| `A-RM-I02` | HTTP status 200 is known for the temporally matched March event, but the body/envelope/field rejection subtype is unknown; 200 per page alone is not proof of a size overflow. | checkpoint 1; 21 user-pasted adapter events with `upstreamStatus=200`; adapter logs only outcome/status/duration/correlation, not validation category/page/window | widening validation blindly could admit invalid fiscal data or expose PII | `High` for status; `Low` for subtype | `Instrument sanitized validation category and sync correlation after approval; block parser/limit change until causal evidence` |
+| `A-RM-I03` | The incident ran under `main@fb8d88137212bbe549707aa064cc03185a14e6db`, which is not automatically the local `release/uninotas` checkout. | user-supplied revision link plus explicit confirmation that it was active at the failure time; private commit not independently inspected | local-only code analysis could still diverge from the deployed merge, and the target database must be identified before any repair | `High` for user attestation; `Low` for local-code equivalence | `Use the attested SHA for incident attribution; verify deployed/local code differences and exact database target before a runtime-fix or stage-smoke claim` |
 
 ## Execution Plan
 
@@ -603,12 +666,18 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 9. Expand the normalized `GET /notas` record and candidate/cache schema with nullable recipient document/e-mail/city/state/country fields, then propagate them through normal synchronization without detail calls.
 10. Replace the partial fiscal CSV allowlist with the approved complete list projection, preserving deterministic order, quoting, formula neutralization, size bounds and no-store transport.
 11. Validate the additive migration on empty/baseline PostgreSQL plus focused adapter/serializer/cache/application regressions; no frontend change is required because the download contract remains the same.
+12. **Incident delta, approval pending:** preserve the user-attested incident `main@fb8d88137212bbe549707aa064cc03185a14e6db` and 21 status-200 logs as baseline; confirm the read-only target environment/database before any Stage operation. No more copies of identical logs are required.
+13. **Incident delta, approval pending:** before product edits, refresh/freeze/push the TODO-only review baseline, run renewed plan/audit/critique/coherence/scope-drift/pre-approval gates, and obtain `APROVADO` specifically for `D-RM-I01..I03`. Prior approval and green tests apply only to `D-RM-C01..C27`.
+14. **Incident delta, approval pending:** test-first: make same-context consecutive windows inside 60s and refused rolling admission fail on the current code; assert checkpoint 3/4, generation/candidates and existing covered projection survive, no extra Smart Notas call occurs, and retry honors bounded coordinator eligibility. Add synthetic adapter cases for each safe HTTP-200 contract category and assert logs contain no raw values/PII.
+15. **Incident delta, approval pending:** after renewed approval, make admission occur before destructive rolling transition or restore a pending state without losing the generation; keep one pump and no public enum change. Add only private structured diagnostics from allowlisted validation branches; log the safe list window/page directly from the query, never the request URL or document/purchase filters. Preserve fail-closed parsing and complete-only export.
+16. **Incident delta, approval pending:** rerun scoped CI-equivalent and PostgreSQL/API/browser checks, independent test-quality/final-review gates and exact-revision Stage smoke after a **separately authorized deployment**. Observe one normal scheduled retry to learn the rejected category. Only then decide a parser/limit correction through refreshed TODO decisions and renewed approval; previous green evidence remains baseline-only.
 
 ### Test Strategy
 
 - **Strategy:** `test-after (variance from the approved test-first intent)`
 - **Why:** production-like stage symptoms passed all existing immutable-total unit tests, but this execution did not preserve an immutable pre-fix RED run. The final evidence therefore proves causal regressions only and must not be described as TDD/RED-GREEN.
 - **Regression targets:** provider total changes after page 1/resume; duplicate provider ID across pages separated by durable restart; late-page failure with zero visible partial publication; stale/superseded generation; removed/moved/null/malformed/out-of-window notes; complete-zero freshness; historical-only/mixed/stale-rolling states; month/year/leap-day rolling→daily transition and retention; publication between coverage/count/items; BEGIN-before-midnight with retention commit before/after the first horizon snapshot read; exact horizon boundaries/URL/path `documento`; simultaneous ticks/startup/requests/shutdown; rolling priority/context fairness; covered/partial zero-row UI; incomplete export exact `409`; no provider call on covered reads; 20.000-row set-based timeout/rollback; exact provider-error preservation.
+- **Incident test strategy (not yet executed):** `test-first` for `D-RM-I01..I03`, with deterministic RED on false failure/checkpoint loss after local admission refusal and on missing sanitized contract subtype; GREEN and cross-layer replay only after renewed approval. The adapter fixtures are synthetic and never include a real recipient payload. Existing `test-after` evidence above remains historical and cannot be relabeled RED.
 
 ### Package-First Assessment
 
@@ -638,6 +707,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 | covered/partial/empty interval semantics | backend projection consumed by list | `web-only` | Playwright readonly + API integration | `no` | `yes` | deterministic DB fixture and stage period with known data | n/a |
 | CSV export covered vs incomplete | visible download/error | `web-only` | Playwright readonly/download + API integration | `no` | `yes` | assert download only for covered interval and zero-byte/error for incomplete | n/a |
 | detail/PDF/XML/document filter regression | provider-backed unchanged contract | `web-only` | existing integration/browser regression | `no` | `no` for automated; stage smoke only if safe | existing mocked provider tests | n/a |
+| incident local wait versus genuine contract failure | financial user's list/export readiness and notices | `web-only` | backend API + source-owned browser regression | `no` | `no` for synthetic regression; read-only Stage smoke after separate deploy approval | `partial/idle/null` says pending and blocks CSV; `partial/failed/unexpected` says real failure; no new public enum | n/a |
 
 ## Frontend / Consumer Matrix
 
@@ -648,6 +718,8 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 | local list/export horizon admission | URL normalizer + date controls + `ListaNotas` | interval inside request-captured `[D-366,D]` proceeds | stale/outside URL handles `422 PeriodoFiscalForaDoHorizonte`, preserves filters, offers yesterday/today reset and downloads nothing | backend boundary contract + browser stale-URL flow | consumer must be added/evidenced in this TODO |
 | provider-backed detail/PDF/XML/document-filter paths | `DetalheNota`, `AcoesDocumento`, document-filter list | existing provider behavior remains unchanged | provider errors retain existing user-visible behavior | existing unit/browser regression suites | preserve without new consumer behavior |
 | background historical/rolling synchronization | no direct UI command surface | UI consumes only explicit read-model metadata | no polling loop or provider traversal is owned by React | backend scheduler tests + frontend negative assertion | consumer intentionally observes metadata only |
+| incident: local admission/backpressure | `GET /api/v1/notas` → `ListaNotas` | a janela sem vaga permanece incompleta, `syncState=idle`/`lastSyncError=null` e aguarda retry bounded com checkpoint preservado | recusa local usa a mensagem pendente já existente, não falha da Smart Notas nem novo enum | fail-first coordinator/cache + API parser + browser state | `prepared-pre-freeze; approval pending`; old green evidence does not cover it |
+| incident: invalid provider contract | internal Smart Notas list adapter → persisted sync → `ListaNotas` | rejeição fail-closed com categoria **interna** sanitizada e sem dados pessoais | erro real continua `failed`/`unexpected`; aceitação/parser e contrato público só mudam após evidência e aprovação posteriores | synthetic status/body/field negatives + bounded real correlation metadata | `prepared-pre-freeze; exact rejected branch unknown` |
 
 ## Local CI-Equivalent Suite Matrix
 
@@ -659,17 +731,20 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 | PostgreSQL real integration | relational publication/coverage/repair path | generation rollback, service-level snapshot barriers, daily proof/retention, `20x5` overlap, restart duplicate, mutable total, resumable final publication, exact legacy collision and disposable legacy upgrade | local baseline schema fixture | `TEST_DATABASE_URL=... npx jest fiscal-note-read-model.integration.spec.ts fiscal-note-read-model.migration.integration.spec.ts --runInBand` | `Local-Implemented` | `passed-local` | 23/23 passed; migrations 2/2 up to date; 20k publication remains within the 35s bound | only project PostgreSQL container was started; no stage or remote DB mutation |
 | frontend unit/build | metadata/messages/download lifecycle | partial/complete notices and incomplete export | deterministic API fixtures | `cd frontend && npm run test:notas && npm run lint && npm run build` | `Local-Implemented` | `passed-local` | all three commands exited 0 | complete-zero and exact 409/422 covered |
 | browser flow | actual list/export UX | partial notice disappears when covered; incomplete export downloads nothing | Vite production preview + deterministic backend fixture | Windows Chrome against source-owned `frontend/e2e/notas.mjs` | `Local-Implemented` | `passed-local` | `OK mocked fiscal/cache/privacy/session and legacy PATCH flows` | local preview processes were stopped after execution |
+| incident RED + cross-layer replay | local admission and provider-contract regression | no false `failed` or candidate loss on local refusal; 200-invalid page remains fail-closed with a safe subtype; unchanged API/UI/export states | two same-context windows within 60s, persisted checkpoint 3/4, refused rolling candidate, synthetic invalid 200 page; no live PII | focused Jest coordinator/cache/adapter + real PostgreSQL integration + `npm run test:notas` + source-owned browser scenario, then full in-scope CI | renewed `Local-Implemented` | `planned-not-run` | no incident GREEN evidence | previous passed rows are baseline-only, not proof for `D-RM-I01..I03` |
 
 ## Runtime / Rollout Notes
 
 - Default rollout is expand/repair/switch without deleting cache rows. If schema expansion is unnecessary, code must still handle legacy sync rows deterministically.
 - Feature flags or deploy topology changes are not assumed. Stage repair runs only after the exact deployed revision and target database are attested through the DevOps handoff.
 - A rollback must disable new scheduling/read switching without erasing coverage/cache metadata. No manual `UPDATE ... bootstrap_complete` is an acceptable rollback or repair.
-- The stage provider is currently `rate-limited/degraded` from user-visible evidence; validation must use bounded calls and redacted aggregate logs.
+- The earlier stage symptom was described as `rate-limited/degraded`; the five new rows contain no `SmartNotasLimiteExterno`, so current provider rate limiting is unproven. Validation still requires bounded calls and redacted aggregate logs.
+- The user attested that `main@fb8d88137212bbe549707aa064cc03185a14e6db` was active throughout the `2026-10-01 10:17:48–10:18:03` incident interval. The queried environment/database has not been named, the private commit has not been independently inspected and the exact `SmartNotasContratoInvalido` validation category is unknown. No runtime repair, parser relaxation, stage smoke or promotion claim follows from revision attestation alone. Capture only status/size/validation category/correlation, never provider body, recipient fields or secrets.
 
 ## Plan Review Gate
 
 - **Status:** `converged-findings-integrated`; R5 confirmou o desenho MVCC do horizonte e sua única lacuna de teste no caminho sem anchor foi incorporada em `VAL-RM-C17`.
+- **Incident delta status:** `prepared-pre-freeze`; the earlier R5 result applies only to `D-RM-C01..C27`. The bounded `D-RM-I01..I03` proposal below is not a passed review. Its pushed baseline, independent critique, assumption-code coherence, scope-drift and authority preflight require fresh evidence before renewed `APROVADO`.
 
 ### Review Sections
 
@@ -731,6 +806,26 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
     - **Effort:** low; **Risk:** high; **Blast radius:** database/provider; **Maintenance:** medium; **Performance:** regresses; **Elegance:** regresses; **Structural soundness:** neutral.
   - **Recommendation:** Option A; coverage must be proven without discarding useful projection data.
 
+**Incident issue cards (packet preparation only; not yet freeze-backed review):**
+
+- **Issue ID:** `OPS-RM-I01`; **severity:** high; **evidence:** `backend/src/fiscal-notes/fiscal-note-cache.service.ts:532-545,548-620` and `fiscal-rate-coordinator.ts:94-143`; four `ExportacaoFiscalOcupada` persisted rows on 2026-10-01.
+  - **Why now:** `runRolling()` rotates generation/deletes candidates before `walkPages()` asks for admission; the latter persists a local refusal as `*_failed`.
+  - **A (recommended):** admit before destructive state change, and defer a refused/resumable unit as pending while preserving generation/checkpoint and respecting coordinator retry eligibility. **Effort:** medium; **risk:** medium (state transitions); **blast radius:** fiscal backend; **maintenance:** low; **performance:** no extra provider calls, fewer futile retries; **elegance:** high; **structural soundness:** high.
+  - **B:** leave the failed row and suppress the UI error only. **Effort:** low; **risk:** high (false persisted state); **blast radius:** API/UI; **maintenance:** high; **performance:** neutral; **elegance:** low; **structural soundness:** low.
+  - **C (do nothing):** keep local refusal as `failed`. **Effort:** none; **risk:** high (non-convergent visible error); **blast radius:** all contexts/periods; **maintenance:** recurring operations; **performance:** repeated futile pumps; **elegance:** low; **structural soundness:** low.
+
+- **Issue ID:** `OBS-RM-I02`; **severity:** high; **evidence:** `backend/src/fiscal-notes/smart-notas.adapter.ts:149-194,207-232,309-338,388-477`; 21 status-200 contract failures in the user-pasted log.
+  - **Why now:** current logs do not identify body, JSON, envelope, page metadata or field rejection, and they lack safe window/page correlation; relaxing the parser now would be speculative.
+  - **A (recommended):** allowlisted internal failure category plus safe query window/page/correlation and byte count when known, logged once per failed request; leave acceptance and public envelope unchanged. **Effort:** medium; **risk:** low with negative privacy tests; **blast radius:** fiscal adapter/tests; **maintenance:** low; **performance:** negligible error-only metadata; **elegance:** high; **structural soundness:** high.
+  - **B:** capture raw response/provider note for manual inspection. **Effort:** low; **risk:** critical (PII/secrets retention); **blast radius:** logs/compliance; **maintenance:** high; **performance:** log-volume increase; **elegance:** low; **structural soundness:** low; **rejected:** violates the no-payload boundary.
+  - **C (do nothing):** continue logging only `SmartNotasContratoInvalido`. **Effort:** none; **risk:** high (cause remains unknown); **blast radius:** both fiscal contexts; **maintenance:** repeated manual triage; **performance:** repeated failed syncs; **elegance:** low; **structural soundness:** low.
+
+- **Issue ID:** `UX-RM-I03`; **severity:** medium; **evidence:** `fiscal-note-cache.service.ts:221-240`, `frontend/src/notas/apresentacaoFiscal.ts:6-29`, `frontend/src/notas/normalizacaoFiscal.ts:87-129`.
+  - **Why now:** pending local work must not masquerade as provider failure, but a new public enum would widen the incident unnecessarily.
+  - **A (recommended):** reuse `partial/idle/null` for deferred work and `failed/unexpected` for genuine contract rejection; assert current browser messages and CSV gate. **Effort:** low; **risk:** low; **blast radius:** backend state + tests; **maintenance:** low; **performance:** neutral; **elegance:** high; **structural soundness:** high.
+  - **B:** introduce a public `waiting_for_capacity` state and new React message. **Effort:** medium; **risk:** medium (contract/client drift); **blast radius:** API + React; **maintenance:** medium; **performance:** neutral; **elegance:** medium; **structural soundness:** valid only if existing states prove insufficient.
+  - **C (do nothing):** retain false `failed/unexpected` after local refusal. **Effort:** none; **risk:** high; **blast radius:** finance UI/CSV readiness; **maintenance:** operational confusion; **performance:** neutral; **elegance:** low; **structural soundness:** low.
+
 ### Failure Modes & Edge Cases
 
 - [ ] Provider total changes inside a closed month: invalidate/restart only that month with bounded attempts/backoff.
@@ -742,10 +837,13 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - [ ] Provider 429/5xx during background work: persist sanitized reason/cooldown, keep serving stored rows and avoid request-triggered retry storms.
 - [ ] Stage legacy row is malformed/incompatible: fail closed for coverage, preserve rows, expose repair telemetry and require bounded revalidation.
 - [ ] Document filter is applied: retain provider-backed path and do not claim DB-only list/export.
+- [ ] Local refusal between historical windows, after page 3/4, or before rolling admission: keep candidate/coverage unchanged and retry only when eligible; never mark provider failure or leak a stale lease.
+- [ ] Provider returns HTTP 200 with oversized declared/stream body, invalid JSON, unknown envelope/page or invalid recipient field: fail closed and emit one bounded category without any value, URL or payload.
+- [ ] A real provider failure follows a local refusal: retain the real provider error; do not overwrite it with an invented local-failure category or claim completion without daily proof.
 
 ### Residual Unknowns / Risks
 
-- [ ] Exact stage `erroCodigo`, checkpoint and row counts remain unknown until DevOps collects redacted aggregate evidence from the revision-attested target.
+- [ ] The exact provider response subtype remains unknown despite 21 status-200 logs; it must not be inferred from `perPage=200`. The queried database environment is not explicitly named, though the incident deploy SHA is user-attested.
 - [ ] Smart Notas may backfill/change closed historical months; without a changed-since contract, periodic deep reconciliation remains outside this correction.
 - [ ] Multi-replica scheduling remains unsupported; topology change requires distributed coordination before rollout.
 - [ ] Exact browser runner and stage test identity must be resolved from project-owned runtime surfaces before flow evidence.
@@ -805,6 +903,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Findings summary:** the converged design, R5 no-anchor test refinement and passing pre-approval gate metadata were frozen and pushed as TODO-only commits; no product/module/runtime file was changed. R4 reviewed `c5220a7`; R5 reviewed `d10c04f` and its sole finding was integrated before the final freeze.
 - **Evidence / reference:** `https://github.com/unifast-tech/uninotas-foundation/commit/9d3bf5534f0c02450805f0fe8b34f9d7bb4479a2`; the durable R5 finding and its resolution are consolidated in `R5 Critique Finding Resolution Ledger` below.
 - **Waiver authority / reference:** `n/a`
+- **2026-10-01 incident delta:** not part of the pushed baseline above. Freeze/push and re-review the revised TODO through the authorized Foundation lane before using any new planning-side review result; this note is not freeze evidence or commit/push authority.
 
 ## Gate: Review Scope Drift
 
@@ -818,6 +917,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Findings summary:** the guard reports seven changed material sections (`Scope`, `Validation Steps`, `Diff Expectation Contract`, `Architecture Change Governance`, `Execution Plan`, `Security Risk Assessment`, `Performance & Concurrency Risk Assessment`). They record the approved implementation refinements and execution evidence, but the immutable pushed review baseline cannot be refreshed without Foundation commit/push authority. This gate therefore remains explicit rather than being silently overridden.
 - **Evidence / reference:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo uninotas-foundation/todos/active/features/TODO-uninotas-fiscal-note-read-model.md` returned `Overall outcome: no-go`, `Changed material sections: 7` on `2026-09-30`.
 - **Waiver authority / reference:** `n/a`
+- **2026-10-01 incident delta:** this edit adds material `Scope`, `Definition of Done`, `Validation Steps`, `Decision Pending`, `Assumptions Preview`, `Execution Plan` and consumer/evidence changes. The earlier seven-section count is historical, not a new guard result. Refresh the review baseline and rerun the exact guard after the incident plan converges and before renewed `APROVADO`.
 
 ## Independent No-Context Critique Gate
 
@@ -1161,6 +1261,7 @@ Versionar a implementação na branch `release/uninotas`; depois do deploy de st
 - **Attack simulation decision:** `required`
 - **Review evidence:** bounded `security-adversarial-review` executed on `2026-09-30` against the prior name-only projection; no material finding. JWT and role guards remain global/class-scoped; every local read/write is context-scoped; production raw SQL uses tagged parameter binding with explicit UUID casts; public summary still excludes recipient document/e-mail/location, while candidates/cache now retain these allowlisted fields solely for the authenticated Finance CSV under C23..C27; logs expose only actor, operation, context, outcome and correlation ID; CSV formula neutralization tests pass. `$executeRawUnsafe` is confined to a local integration-test trigger name derived from an internally generated alphanumeric context. An independent security rerun for the expanded projection remains pending.
 - **Residual security risk:** stage diagnostics could leak PII if unredacted; stage evidence remains restricted to counts, dates, states, page progress and sanitized codes. All authenticated financial roles intentionally see both fiscal contexts per prior human decision, so context selection is data partitioning rather than per-user tenant authorization.
+- **Incident diagnostic security delta (prepared-pre-freeze):** the proposed event is emitted only on contract rejection and contains a fixed category/failure-kind vocabulary, allowlisted field **name**, context/window/page/correlation, numeric byte count when known, status and duration. Logging request URL, `documento`, `idCompra`, response bytes/body, record values, raw exceptions or credentials is forbidden. A negative log-content test and bounded one-event assertion are mandatory before release; the prior name-only security review is not incident approval.
 
 ## Performance & Concurrency Risk Assessment
 
@@ -1175,6 +1276,8 @@ Versionar a implementação na branch `release/uninotas`; depois do deploy de st
 | `FRC` | `frontend-race-condition-validation` | `required` | `medium` | `FRC-STALE-RESPONSE` | `before_local_implemented` | `FRC-E2` | `passed` | browser and source-owned race fixtures passed | `none` |
 | `BCI` | `backend-concurrency-idempotency-validation` | `required` | `high` | `BCI-JOB-WEBHOOK-API-OVERLAP` | `before_local_implemented` | `BCI-E3` | `passed` | real PostgreSQL `20x5`, rollback and reader-retention barriers passed | `none` |
 | `RLS` | `runtime-load-stress-validation` | `required` | `high` | `RLS-CACHE-INDEX-SENSITIVE-PATH-CHANGED` | `before_production_ready` | `RLS-E2` | `pending` | real stage quota/latency remains unknown | `U-RUNTIME-PRESSURE-UNKNOWN` |
+
+**Incident delta (prepared-pre-freeze):** `D-RM-I01` changes admission/checkpoint concurrency and requires a fresh BCI proof for two contexts, same-actor cooldown, refused rolling generation and eventual bounded retry. `D-RM-I02` adds only one error-path metadata event per failed request; profile its bounded cost and log cardinality without increasing provider call rate. Earlier `passed` lane rows certify the C01..C27 baseline only; they are not evidence for I01..I03. No new FRC-sensitive frontend production code is planned, but the existing browser contract remains a required regression surface. RLS remains pending until an authorized deployment.
 
 ### EPS
 - **Trigger rationale:** list/export query and coverage shape changes materially.
@@ -1260,6 +1363,6 @@ Versionar a implementação na branch `release/uninotas`; depois do deploy de st
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
-- **Disposition reason:** corrective implementation, local PostgreSQL evidence, diff expectation and fresh independent reaudits pass, but scope-drift resolution, cutover audit, RLS and authorized stage evidence remain open; closing or promoting now would overstate delivery.
+- **Disposition reason:** corrective baseline implementation and local evidence remain historical; the new `2026-10-01` local-admission/provider-contract incident adds unresolved decisions and tests. Scope-drift resolution, cutover audit, RLS and exact-revision runtime evidence also remain open; closing or promoting now would overstate delivery.
 - **Post-commit/push status:** `MonitorNotes release/uninotas@6f48e60c5c0690a02f9ca0dbed8a6d31e2761475 pushed; remote SHA attested equal; PR/merge/deploy remain user-owned and pending`
-- **Next path/status action:** user opens and merges the recovery PR to `main`; in parallel, resolve Foundation scope-drift/cutover gates, then validate the exact deployed revision with RLS and authenticated smoke before claiming the TODO complete.
+- **Next path/status action:** use the user-attested revision behind the five supplied sync rows, collect the sanitized cause for the March contract rejection, then reconverge `D-RM-I01..I03` and the updated review baseline for renewed `APROVADO`; promotion and production-ready claims remain separate and pending.
