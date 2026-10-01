@@ -22,7 +22,7 @@
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** congelar/publicar a baseline de revisão do plano `D-RM-I01..I03`, revisar os gates de planejamento e pedir aprovação renovada somente para correção da admissão local e diagnóstico sanitizado; o parser continua inalterado até a causa ser observada.
+- **Next exact step:** obter validação do usuário para a Opção A de `D-RM-I03/R3` (booleano público aditivo `autoRetry`), incorporar a decisão e os testes no TODO, congelar/revisar a nova baseline e só então pedir `APROVADO` renovado para código; o parser continua inalterado até a causa ser observada.
 
 ## Active Work State
 
@@ -185,6 +185,16 @@ This is one bounded incident slice: stop classifying **local admission refusal**
 | Impossible static export capacity | Do not convert to deferred; record a distinct sanitized operational configuration fault **once for unchanged process configuration** and stop repeated admission attempts. Do not clear any prior genuine provider error or published projection. | Partial coverage: existing `failed/unexpected` with `retryAfterSeconds=null`, no automatic React polling, manual refresh allowed. Complete/stale rolling: established `complete/idle`, stale-freshness/manual-refresh UI, existing error metadata and sanitized operational log. Re-evaluate after configuration correction/restart. |
 
 **Deferred-state inventory that implementation must close:** update every state enumerator/guard, not just `walkPages`: `runPump` context selection; historical `ensureHistoricalWindow`, demanded-window selection and post-run completion; `processHistoricalWindow` eligibility/resume; both `seedHistoricalWindows` in-progress/covering checks; `ensureRollingInBackground`; `coverageForWith` active/error/deferred projection; moved-note publication conflict guard; and retention's candidate-preservation SQL. `bootstrap_deferred|rolling_deferred` must remain selected for the next eligible pump, must prevent reseeding/rotation and must retain staged candidates through restart and retained-horizon advancement. A read/nudge before eligibility must not write the row or call the provider. No periodic retry is promised for static incapacity; client and backend stop independently until configuration/restart or a manual recheck.
+
+**R3 approval-material decision pending (2026-10-01):** the independent re-review of `ad9b4e4` confirmed the R2 fixes but exposed a contradiction in `D-RM-I03`: `partial/failed` with `retryAfterSeconds=null` also describes a **recoverable** provider failure older than 60 seconds. Stopping all such React timers would miss a background publication that completes just after the list response, so CSV might stay disabled until manual refresh. In addition, static incapacity has no authoritative persisted sync row for a new rolling window, and `coverageForWith()` currently ignores rows without `generationId`; the proposed failed/metadata projection is therefore not yet proven. Do **not** implement the current timer rule as frozen intent.
+
+| Choice | Proposed treatment | Tradeoff |
+| --- | --- | --- |
+| `A` **recommended; needs user validation** | Add one backward-compatible public boolean such as `readModel.autoRetry` (default `true` for older responses), sourced from a typed read-only coordinator capability for impossible static export configuration. `coverageForWith()` projects this signal even with no sync row; true provider errors keep precedence in `lastSyncError`, and no generation/candidate is changed merely for presentation. React stops automatic polling only when `autoRetry=false`; recoverable errors keep bounded revalidation. For complete/stale rolling coverage, preserve `complete/idle`, stale-freshness UI and manual refresh while exposing the operational fault through existing metadata/logs. No database migration or new public enum/message. | Small additive API/normalizer/timer change, testable and preserves automatic recovery. |
+| `B` | Keep the current no-new-field timer stop for every `partial/failed` with null retry deadline. | Less code, but breaks automatic observation of recoverable background completion; not recommended. |
+| `C` | Keep existing automatic polling for all partial failures. | Preserves recovery, but static incapacity keeps many viewers reading/nudging every two seconds indefinitely; not recommended. |
+
+Separately, `D-RM-I01` must treat each **new** eligible-but-refused admission as a fresh deferred transition with a new persisted 60-second clock; reads/nudges before that eligibility never reset it. This bounds a lease/capacity contention lasting beyond one minute. Test several viewers over multiple windows and after restart. This refinement and the chosen I03 option require a refreshed pushed baseline and review before `APROVADO`.
 
 **Execution phases and stop line:** first add fail-first tests for local refusal/checkpoint survival and PII-free diagnostic categories; then implement `D-RM-I01/I02`, validate the unchanged public consumer contract, and only after a separately authorized Stage deployment observe one normal retry. If the resulting category identifies a provider-shape mismatch, return to the decision/review/approval loop before changing parser acceptance, body limit, timeout or page size. No manual bulk retry, direct Stage data repair or production write is authorized by this plan.
 
@@ -627,6 +637,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - [x] `D-RM-I01`: direção revisada: preservar geração/checkpoint/candidates; recusa **transitória** vira espera com relógio persistido, enquanto configuração sem capacidade é falha operacional visível sem loop. Linhas legadas ocupadas ganham projeção/retomada segura. Achados da primeira rodada integrados; requer nova baseline/revisão e `APROVADO`, não implementado.
 - [x] `D-RM-I02`: os 21 logs confirmam HTTP 200 em ambos os contextos mas não informam subtipo. Direção revisada: enriquecer o único evento existente de `list` com categoria sanitizada, inclusive comprimento declarado inválido, **sem alterar o parser**; outra decisão/aprovação será necessária se o contrato aceito mudar. Requer nova baseline/revisão e `APROVADO`, não implementado.
 - [x] `D-RM-I03`: direção revisada: reutilizar `idle`/`failed` e `retryAfterSeconds` públicos existentes para evitar polling de 2s durante a espera; preservar erro real anterior e bloquear CSV incompleto. Sem novo enum/mensagem. Requer nova baseline/revisão e `APROVADO`, não implementado.
+- [ ] `D-RM-I03/R3`: decidir com o usuário se aceita o booleano aditivo `readModel.autoRetry` (Opção A recomendada) para diferenciar incapacidade estática de falha recuperável. A regra atual de parar todo `partial/failed` com prazo nulo **não** pode ser executada porque perdeu a atualização automática após publicação assíncrona. Após a decisão, atualizar contrato/testes, congelar baseline e revalidar; nada implementado.
 
 ## Module Decision Baseline Snapshot
 
@@ -758,7 +769,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 ## Plan Review Gate
 
 - **Status:** `converged-findings-integrated`; R5 confirmou o desenho MVCC do horizonte e sua única lacuna de teste no caminho sem anchor foi incorporada em `VAL-RM-C17`.
-- **Incident delta status:** `R2-findings-integrated-refreeze-required`; the earlier R5 result applies only to `D-RM-C01..C27`. Reviews of `af6c34a` and `96ca8de` returned material findings now integrated into I01..I03, including one scoped React timer change. The changed baseline requires fresh push/review and user scope validation before renewed `APROVADO`.
+- **Incident delta status:** `R3-decision-pending`; the earlier R5 result applies only to `D-RM-C01..C27`. R1/R2 findings were integrated; R3 of pushed `ad9b4e4` exposed a high-severity recovery regression in the timer rule and an undefined static-capacity projection source. Option A is proposed but not chosen; the TODO is not ready for `APROVADO` or implementation until the user validates this public-contract choice and the revised baseline is reviewed.
 
 ### Review Sections
 
@@ -896,8 +907,8 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Decision review lifecycle:** `after diagnosis is closed and before APROVADO`
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set`
-- **Decision review status:** `findings_integrated`
-- **Decision review evidence / resolution:** primeira revisão contra `af6c34a` teve quatro achados integrados; a segunda contra `96ca8de` encontrou `ARCH-R2-01..04`, também integrados: inventário de estados/retenção, projeção completa de rolling, admissão antes de limpar erro bootstrap e invariante exata do relógio. Os resultados ainda exigem nova baseline/revisão porque o timer React entrou no escopo. Artefato derivado da primeira rodada: `artifacts/tmp/uninotas-incident-architecture-merged.md`; R5 é histórico apenas de C01..C27.
+- **Decision review status:** `blocked`
+- **Decision review evidence / resolution:** R1/R2 findings remain integrated. Fresh R3 architecture opinion of pushed `ad9b4e4` found `ARCH-R3-01` (medium): impossible static capacity has no authoritative source for public partial/complete projection when no sync row exists. Recommended typed coordinator capability + explicit read-time precedence is recorded as Option A above but awaits user validation, new freeze and review. Derived result: `artifacts/tmp/uninotas-incident-r3-architecture-merged.md`; no architecture approval is claimed; R5 is historical C01..C27 evidence only.
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
@@ -911,13 +922,13 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Why this decision:** big architecture correction needs a committed/pushed immutable TODO packet before independent review.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `96ca8de6405327e97ca62b055067096d55c08ff9`
+- **Baseline commit:** `ad9b4e4961daefac48deab903668820aa744d8bf`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
-- **Findings summary:** the previous C01..C27 baseline at `9d3bf55` passed R5. The first incident baseline `af6c34a` received two independent reviews with findings integrated; the refined I01..I03 plan is frozen and pushed at `96ca8de` as a TODO-only commit, without product/module/runtime changes. Fresh review of this refined baseline remains pending.
-- **Evidence / reference:** `https://github.com/unifast-tech/uninotas-foundation/commit/96ca8de6405327e97ca62b055067096d55c08ff9`; prior R5 evidence remains in its resolution ledger below.
+- **Findings summary:** prior C01..C27 baseline `9d3bf55` passed R5. Incident `af6c34a` and `96ca8de` received independent critique/architecture findings, all integrated; the second-round refinement (scoped React timer, exhaustive deferred state handling, exact retry/error precedence) is frozen and pushed at `ad9b4e4` as a TODO-only commit. Fresh review of this refined baseline remains pending.
+- **Evidence / reference:** `https://github.com/unifast-tech/uninotas-foundation/commit/ad9b4e4961daefac48deab903668820aa744d8bf`; prior R5 evidence remains in its resolution ledger below.
 - **Waiver authority / reference:** `n/a`
-- **2026-10-01 incident delta:** `96ca8de` is the current pushed review baseline for I01..I03. The prior review of `af6c34a` is finding evidence, not approval of the refined plan; re-review, scope-drift and pre-approval remain pending.
+- **2026-10-01 incident delta:** `ad9b4e4` is the current pushed review baseline for I01..I03. Prior rounds are finding evidence, not approval of the refined plan; re-review, scope-drift and renewed human approval remain pending.
 
 ## Gate: Review Scope Drift
 
@@ -927,11 +938,11 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Baseline source:** `Review Baseline Freeze -> Baseline commit`
 - **Material sections compared:** `Context|Contract Boundary|Scope|Out of Scope|Definition of Done|Validation Steps|Execution Lane Tracking|Canonical Module Anchors|Decisions|Decision Baseline|Architecture Change Governance|Questions To Close|Assumptions Preview|Execution Plan|Flow Evidence Planning Matrix|Local CI-Equivalent Suite Matrix|Runtime / Rollout Notes|Security Risk Assessment|Performance & Concurrency Risk Assessment`
 - **Guard command:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo foundation_documentation/todos/active/features/TODO-uninotas-fiscal-note-read-model.md`
-- **Gate status:** `blocked`
-- **Findings summary:** the guard against pushed `96ca8de` returned `no-go` on 2026-10-01 with four changed material sections (`Definition of Done`, `Validation Steps`, `Execution Plan`, `Performance & Concurrency Risk Assessment`). The second-round findings require a scoped React timer change, deferred-state inventory and retry-clock clarification. Re-freeze/push and re-review before asking user to validate the evolved scope; the prior `go` on unchanged `96ca8de` is historical.
-- **Evidence / reference:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo uninotas-foundation/todos/active/features/TODO-uninotas-fiscal-note-read-model.md` against `96ca8de6405327e97ca62b055067096d55c08ff9`: `Overall outcome: no-go`, `Changed material sections: 4` on 2026-10-01.
+- **Gate status:** `no_material_findings`
+- **Findings summary:** guard against the new pushed baseline `ad9b4e4` returned `go`, 0 of 23 material sections changed, on 2026-10-01. The prior `96ca8de` four-section drift was resolved by the second-round finding integration and re-freeze, not waived. User validation of the new frontend timer scope remains separate.
+- **Evidence / reference:** `python3 delphi-ai/tools/review_scope_drift_guard.py --todo uninotas-foundation/todos/active/features/TODO-uninotas-fiscal-note-read-model.md`: `Overall outcome: go`, `Changed material sections: 0` against `ad9b4e4961daefac48deab903668820aa744d8bf` on 2026-10-01.
 - **Waiver authority / reference:** `n/a`
-- **2026-10-01 incident delta:** second-round findings changed the material scope after `96ca8de`; no implementation or approval is allowed until new pushed baseline and review converge.
+- **2026-10-01 incident delta:** second-round findings are now in pushed `ad9b4e4`; a fresh review and renewed human approval are still required before implementation.
 
 ## Independent No-Context Critique Gate
 
@@ -943,9 +954,9 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Critique isolation mode:** `fresh internal no-context reviewer`
 - **Internal reviewer mandate:** `required after baseline freeze; reviewer cannot be implementing agent`
 - **Critique lenses:** `correctness|performance|elegance|structural-soundness|risk`
-- **Critique status:** `findings_integrated`
-- **Findings summary:** R1–R5 remain historical for C01..C27. First incident critique of `af6c34a` returned one high and three medium findings (`I-CRIT-01..04`), integrated. Second critique of `96ca8de` found `I-R2-CRIT-01`: static-capacity failure would still make React poll every two seconds; integrated as a scoped timer stop for terminal partial failure. This approval-material frontend addition requires a refreshed pushed baseline, independent re-review and user validation before `APROVADO`.
-- **Evidence / reference:** `artifacts/tmp/uninotas-incident-critique-merged.md`; the authoritative resolution is consolidated in the incident ledger below, not in the disposable dispatch artifact.
+- **Critique status:** `blocked`
+- **Findings summary:** R1–R5 remain historical for C01..C27; incident R1/R2 findings are integrated. Fresh R3 critique of pushed `ad9b4e4` found `I-R3-CRIT-01` (high): stopping all failed/null timers suppresses automatic observation of a recoverable asynchronous publication, and `I-R3-CRIT-02` (medium): repeated transient refusal after the first 60-second window can return to two-second polling. The public-signal choice is pending user validation; no critique convergence or `APROVADO` is claimed.
+- **Evidence / reference:** R3 derived result `artifacts/tmp/uninotas-incident-r3-critique-merged.md`; the authoritative resolution is consolidated in the incident ledger below, not in the disposable dispatch artifacts.
 - **Waiver authority / reference:** `n/a`
 
 | Finding ID | Resolution (`Integrated|Challenged|Deferred`) | Usefulness (`useful|noise|mixed|unknown`) | Formalizable (`yes|partial|no|unknown`) | Candidate Rule Level (`paced|project|none|unknown`) | Candidate Rule ID | Rationale / Evidence |
@@ -955,6 +966,8 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 | `I-CRIT-03` | `Integrated` | `useful` | `yes` | `project` | `n/a` | I03 reuses retryAfterSeconds; VAL-I03 asserts multi-viewer cadence. |
 | `I-CRIT-04` | `Integrated` | `useful` | `yes` | `project` | `n/a` | I02 scopes list diagnostics, includes declared-invalid length and enriches existing event. |
 | `I-R2-CRIT-01` | `Integrated` | `useful` | `yes` | `project` | `n/a` | I03 scopes one React timer condition: no automatic polling on partial/failed with null retry deadline; manual refresh remains. |
+| `I-R3-CRIT-01` | `Deferred` | `useful` | `yes` | `project` | `n/a` | Option A proposes an explicit public auto-retry signal; human scope validation and re-review are required before changing I03. |
+| `I-R3-CRIT-02` | `Deferred` | `useful` | `partial` | `project` | `n/a` | I01 proposal resets the persisted eligibility clock only after a new eligible admission refusal; must be frozen/re-reviewed with the selected I03 option. |
 
 ### Critique Finding Resolution Ledger
 
@@ -1011,6 +1024,9 @@ The critique and architecture opinion were fresh no-context reviews of the pushe
 | `ARCH-R2-02` | medium | Complete/stale rolling has different public failure semantics from incomplete coverage. | I03 explicitly keeps `complete/idle` and existing stale-freshness/manual refresh; operational fault remains in existing metadata and sanitized logs, not a new banner. | `Integrated` |
 | `ARCH-R2-03` | medium | Bootstrap currently clears a prior error before admission. | I01 now places admission before every bootstrap/rolling error/state/generation mutation and tests failed-checkpoint then local refusal. | `Integrated` |
 | `ARCH-R2-04` | medium | Automatic update timestamp as eligibility marker could drift and reorder true errors. | I01 allows only explicit deferred transition to set its persisted clock; pending reads/seeding/retention never reset it, and true failed row/error/timestamp remain untouched by local refusal. | `Integrated` |
+| `I-R3-CRIT-01` | high | Terminal timer stop also hides recoverable background publication after the response snapshot. | Option A proposes a typed static-capacity signal + public `autoRetry` boolean; awaiting human scope validation and fresh review. | `Deferred—approval pending` |
+| `I-R3-CRIT-02` | medium | A long-held lease makes the first deferred timestamp expire and reopens 2-second polling. | Proposed repeat-deferral clock renewal only after an eligible refusal, with multi-window test; not frozen/approved. | `Deferred—approval pending` |
+| `ARCH-R3-01` | medium | Static-capacity fault has no authoritative projection source when a new rolling window has no sync row. | Option A proposes read-only coordinator capability and explicit error precedence with no sync-row/generation mutation; awaiting human validation and review. | `Deferred—approval pending` |
 
 ## Gate: Assumption Code Coherence
 
