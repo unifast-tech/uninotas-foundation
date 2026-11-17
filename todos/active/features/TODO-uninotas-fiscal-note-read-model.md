@@ -16,13 +16,13 @@
 - **Primary profile:** `Operational / Coder`
 - **Technical scope:** `nestjs, react, vite, postgresql, prisma`
 - **Current work state:** `implementation-authorized`
-- **Implementation authority:** `APROVADO received on 2026-10-01 for D-RM-I01..I03 at reviewed Option A baseline a625838; prior D-RM-C01..C27 authority retained as history`.
+- **Implementation authority:** `User renewed authorization on 2026-11-17: Vamos fazer essa correção priorizando a resolução dos problemas, after the concrete October investigation and recommended correction were presented. Current bounded delta D-SYNC-01..05 below; earlier decisions retained except the explicitly superseded nonempty-document requirement`.
 
 ## Delivery Status Canon
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** atualizar a auditoria independente completa sobre o delta final de testes e reconciliar as matrizes/gates de fechamento. Testes locais concluídos: PostgreSQL26/26 em schema UUID isolado; backend full451 passed/2 skipped, build/lint aprovados; frontend lint/build/unit/race e browser completo aprovados, incluindo dez viewers/publicação/CSV. Schema local ambient defasado permanece intacto. Sem fechamento/promoção/parser relaxado.
+- **Next exact step:** revisar e executar o delta aprovado D-SYNC-01..05 com RED/GREEN e PostgreSQL descartável; as evidências anteriores não fecham o incidente de novembro.
 
 ## Active Work State
 
@@ -65,10 +65,58 @@
 
 ## Approval
 
-- **Approved by:** `usuário — APROVADO em 2026-10-01 após R6/preflight-go`
-- **Approval scope:** `D-RM-I01..I03: transient deferred admission preserving checkpoint/generation/true errors, safe list contract diagnostics without parser relaxation, additive readModel.autoRetry, all-partial max(30s,retryAfterSeconds) React cadence, causal tests and canonical module synchronization on release/uninotas; no migration`
+- **Approved by:** `usuário — renewed direct instruction on 2026-11-17 after the concrete diagnosis: Vamos fazer essa correção priorizando a resolução dos problemas`
+- **Approval scope:** `D-SYNC-01..05: normalize blank optional provider documento to null; recover actual uncovered historical intervals without starvation from obsolete overlapping windows; distinguish provider contract errors; truthful automatic-retry text; regression tests and fiscal-module contract synchronization. Principal checkout, single code writer, no migration or remote database writes.`
 - **Execution not authorized by approval:** deploy/merge/promoção, credenciais/quota, mudança Railway/topologia, escrita em logs, cancelamento fiscal ou operações destrutivas no banco de stage.
 - **Renewed approval required when:** mudar janela histórica, semântica de cobertura/exportação, contrato público, estratégia de recuperação, schema, topologia, limites, riscos ou evidências obrigatórias.
+
+## November October-Recovery Delta — Authorized 2026-11-17
+
+This is the current bounded correction inside the same governing read-model TODO. Older implementation/review evidence is historical for this delta. Direct-to-TODO: one diagnosed recovery story, no new feature or constitutional change. Delta complexity `medium`; primary profile `Operational / Coder`, scopes `nestjs, react, postgresql, prisma`; Vite is used only for verification. Root branch `fix/fiscal-sync-recovery`, baseline `b4fb44b`; Foundation remains `main`, pre-delta baseline `2f82e096702530ea8fb94d759f6af5d186e5860b`. No worktree or auxiliary checkout is authorized.
+
+Human authorization is the user's latest instruction after the completed investigation and three-point concrete correction were presented; no repeated permission is needed for this scope. Subagent execution and independent reviews follow the explicit Delphi skill requirements, with one product/runtime writer. No deploy, merge, product commit/push, provider write, schema migration, remote DB repair, credential/configuration change or new dependency is authorized.
+
+### Delta Decision Baseline (Frozen)
+
+| ID | Approved decision | Prior module decisions / handling |
+| --- | --- | --- |
+| D-SYNC-01 | Missing, null and whitespace-only provider `documento` become `null` in the shared list/detail adapter. Keep string-only typing, 32-code-point bound, ASCII-control/DEL rejection, unchanged nonempty text, unchanged user-entered document search and public-list PII allowlist. No note may be skipped. | Preserve FISC-EX-08/VIS-02 and prior D-DOC-02/03; intentionally supersede only D-DOC-01's rejection of empty optional document. |
+| D-SYNC-02 | Historical recovery derives missing days from version-2 coverage, excludes covered days and the rolling/expired horizon, and processes at most one bounded month-clipped contiguous missing interval per pump. Existing exact checkpoints remain resumable; obsolete broad overlaps cannot prevent smaller missing intervals from progressing. Eligibility/cooldown and failure rotation must let other missing intervals progress; completed coverage removes a demand even with obsolete failed sync rows. | Preserve FISC-RM-01..07, daily proof, atomic publication, one historical unit, bounded deduplicated demands, context fairness and every-fourth background reservation. FISC-RM-06 recovery selection becomes coverage-driven. |
+| D-SYNC-03 | Expose `provider_invalid_response` as an additive sanitized `lastSyncError` for SmartNotasContratoInvalido, admitted by backend and frontend normalizer and rendered as an actionable provider-data incompatibility. No raw provider field/value reaches the browser/logs. | Preserve FISC-EX-05 and safe diagnostic logging; refine FISC-RM-08 error classification. |
+| D-SYNC-04 | Replace the static apparent countdown with truthful retry text conditioned on `autoRetry`; keep the existing max(30s,retryAfterSeconds) request cadence, duplicate suppression and cancellation. No new one-second timer or state owner. | Preserve FISC-RM-08, UI/cache ownership and rate bounds. |
+| D-SYNC-05 | Test-first: adapter list/detail both contexts and invalid inputs; actual scheduler/read-model recovery from 28/31 with overlapping failed windows, restart checkpoints, cooldown fairness, no false coverage and protected other context; consumer error/retry/browser behavior. No remote writes; all PostgreSQL mutations confined to existing loopback disposable-schema harness. | Preserve durable invariant tests and source-owned browser fixtures; no broad live provider scan or unvalidated runtime claim. |
+
+### Delta Assumptions Preview / Plan Review
+
+- High confidence: read-only incident evidence reproduced 28/31 and provider blank document; exact details are in `artifacts/tmp/sync-october-2026/investigation.md`. If current payload changes, deterministic synthetic fixtures still preserve the observed regression.
+- High confidence: `backend/src/fiscal-notes/fiscal-note-cache.service.ts:374` currently chooses a broad overlapping window before single-day gaps; `smart-notas.adapter.ts:503` rejects blank optional documents. The three missing days were individually accepted. Coverage is the completion authority, never unfinished-window count.
+- Runtime limitation: standard local app ports did not respond during investigation. Use a freshly built isolated browser fixture; do not claim the user's running app or remote database recovered. Local `TEST_DATABASE_URL` is the only authorized mutation target and must pass loopback/schema checks.
+- Dominant option: coverage-driven contiguous repair, preserving existing atomic publisher/coordinator. Rejected alternatives: browser-side full-page scanning (wrong owner/extra load), discarding invalid notes or marking coverage complete (data loss/false proof), deleting remote sync rows (unnecessary remote mutation), unconditional single-day bootstrap (degrades full-history throughput).
+- Failure modes: multiple gaps with one cooling/failing; changed provider totals; stale/shifted horizon; covered interval with stale failed rows; context switch/logout while polling; controls-only documents must remain rejected. No new analyzer rule: runtime payload/state interaction is not a reliable static-rule target.
+
+### Delta Execution Plan and Consumer Matrix
+
+1. Independent bounded critique of D-SYNC-01..05; resolve blocking findings inside the approved correction. Freeze/record current review baseline.
+2. Sole routine executor creates RED regressions on the existing adapter, cache service/PostgreSQL harness and frontend fixture, then implements the shared normalization, bounded coverage-driven recovery and sanitized error/retry semantics.
+3. Executor updates `modules/fiscal-notes-and-documents.md`, runs affected suites, full backend tests, backend/frontend lint/build, frontend unit/race/browser checks against fresh artifacts. Database integration uses an owned disposable schema only; stop if local prerequisite cannot be made ready safely.
+4. Dedicated Performance + Test Quality audit, independent final review and deterministic gates; preserve this TODO's broad promotion-pending status and report exact local evidence/limitations.
+
+| Producer surface | Consumer | Required evidence |
+| --- | --- | --- |
+| nullable recipient document | existing detail/CSV + candidate/cache | list/detail adapter matrices, persistence/CSV and frontend null compatibility |
+| coverage-driven repair | list coverage/export eligibility | real PostgreSQL 28→31 recovery, counts/proofs/CSV; concurrent pump coalescing |
+| sanitized contract-error classification | frontend normalizer and fiscal message | backend projection, frontend unit and rendered browser error |
+| retry state | same-query frontend polling | browser automatic retry/convergence, no frozen numerical countdown, autoRetry=false and filter-change cancellation |
+
+Package-first query `bash delphi-ai/tools/query_packages.sh --project-root /mnt/c/Unifast/MonitorDeNotas --search fiscal` returned zero packages on 2026-11-17. Existing host-owned module is the correct boundary; no package/dependency addition.
+
+Planned implementation routing: `codex / implementation / routine-executor / gpt-6-luna / medium / declared`, `primary-checkout-single-writer`, `not-authorized` worktrees. Guard returned `go` on 2026-11-17. Critique/final review routing: contract `gpt-6.1-sol / xhigh`, fresh no-context reviewers. Technical-review model availability must be checked against the live tool; unavailable configured models require explicit routing handling, not false proof.
+
+Rules/workflows ingested for the renewal: `rules/core/todo-driven-execution-model-decision.md`, `workflows/docker/todo-{lane-framing,contract-refinement,approval-gates,execution-boundary,delivery-gates}-method.md`, `workflows/docker/effort-selection-method.md`, `workflows/nestjs/change-application-boundary-method.md`, `workflows/react/change-ui-boundary-method.md`, `workflows/postgresql/change-relational-contract-method.md`; skills `bug-fix-evidence-loop`, `test-creation-standard`, `test-orchestration-suite`, `endpoint-performance-scrutiny`, `frontend-race-condition-validation`, `backend-concurrency-idempotency-validation`, `test-quality-audit`, `audit-protocol-triple-review`. All reads precede their corresponding work. Approval is recorded above; rerun authority guard before code execution.
+
+Delta DoD/validation: D-SYNC-01..05 each require causal RED/GREEN plus current-branch evidence, dedicated audit resolutions and decision adherence. EPS: required bounded/indexed gap lookup; FRC: required existing browser race/cadence; BCI: required real PostgreSQL coalescing/atomic publication; RLS: recommended existing fiscal load suite. Do not infer production recovery from any of these.
+
+Delta gate evidence: review baseline freeze pending; critique pending; test-quality/performance/final reviews pending; no delta delivery claim.
 
 ### Bounded live validation authorization — 2026-10-02
 
