@@ -3,7 +3,7 @@
 ## Artifact Identity
 
 - **Artifact type:** `tactical_execution_contract`
-- **Status:** `Active / Local-Implemented / Independent-Gates-Pending`
+- **Status:** `Active / Bounded-Delta-Locally-Validated / Broader-Runtime-Pending`
 - **Created:** `2026-09-29`
 - **Owner:** `Delphi / Operational Coder`, sob autoridade humana do usuário
 - **Feature brief:** `foundation_documentation/artifacts/feature-briefs/uninotas-fiscal-note-read-model.md`
@@ -22,20 +22,20 @@
 
 - **Current delivery stage:** `Pending`
 - **Qualifiers:** `Provisional`
-- **Next exact step:** revisar e executar o delta aprovado D-SYNC-01..05 com RED/GREEN e PostgreSQL descartável; as evidências anteriores não fecham o incidente de novembro.
+- **Next exact step:** user opens the GitHub PR from fix/fiscal-sync-recovery, then validates the exact released revision and October2026/Unifast normal recovery. Production release remains user-owned.
 
 ## Active Work State
 
-- **Work state:** `implementation`
-- **Why this state now:** usuário autorizou em 2026-11-17 a correção concreta diagnosticada, D-SYNC-01..05; revisões e evidências antigas não fecham esse delta.
-- **Exit condition:** implementar e validar D-SYNC-01..05, obter revisões independentes e registrar evidências locais. Recuperação do banco remoto e implantação continuam sem autorização.
+- **Work state:** `review`
+- **Why this state now:** D-SYNC-01..05 foi implementado, validado localmente e aprovado pelas revisões independentes atuais; o TODO amplo permanece ativo para observação do aplicativo, runtime e promoção.
+- **Exit condition:** registrar observação da revisão exata em execução e atender aos gates mais amplos de runtime/promoção/RLS antes de fechar o TODO.
 
 ## Provisional Notes
 
-- **Missing for production-ready:** concluir os gates independentes requeridos pelo audit floor e, após promoção autorizada, atestar a revisão implantada, reparar sem destruição e validar o stage com perfil RLS.
+- **Missing for production-ready:** após promoção autorizada, atestar a revisão implantada, observar a recuperação normal e validar o stage com perfil RLS; revisões independentes locais do delta novembro concluídas.
 - **Revisit criteria:** todos os critérios `DOD-RM-C*` e `VAL-RM-C*` aprovados e evidenciados, incluindo smoke de stage com revisão exata em execução.
 - **Dependencies unblocked:** o TODO de cancelamento pode continuar em planejamento, mas sua implementação não deve preceder a estabilização deste read model.
-- **New incident qualifier:** o usuário confirmou que `main@fb8d88137212bbe549707aa064cc03185a14e6db` era o deploy ativo no horário das cinco falhas fornecidas. Logs sanitizados de ambos os contextos confirmam respostas HTTP 200 com erro de contrato, mas não a validação exata; o ambiente/banco consultado ainda não foi nomeado explicitamente e resultados anteriores de testes/revisões não fecham este delta.
+- **Historical October incident qualifier:** o usuário confirmou que `main@fb8d88137212bbe549707aa064cc03185a14e6db` era o deploy ativo no horário das cinco falhas fornecidas. Logs sanitizados de ambos os contextos confirmam respostas HTTP 200 com erro de contrato, mas não a validação exata; o ambiente/banco consultado ainda não foi nomeado explicitamente e resultados anteriores de testes/revisões não fecham este delta.
 
 ## Implementation Intent
 
@@ -110,13 +110,95 @@ Human authorization is the user's latest instruction after the completed investi
 
 Package-first query `bash delphi-ai/tools/query_packages.sh --project-root /mnt/c/Unifast/MonitorDeNotas --search fiscal` returned zero packages on 2026-11-17. Existing host-owned module is the correct boundary; no package/dependency addition.
 
-Planned implementation routing: `codex / implementation / routine-executor / gpt-6-luna / medium / declared`, `primary-checkout-single-writer`, `not-authorized` worktrees. Guard returned `go` on 2026-11-17. Critique/final review routing: contract `gpt-6.1-sol / xhigh`, fresh no-context reviewers. Technical-review model availability must be checked against the live tool; unavailable configured models require explicit routing handling, not false proof.
+Planned implementation routing: `codex / implementation / routine-executor / gpt-6-luna / medium / declared`, `primary-checkout-single-writer`, `not-authorized` worktrees. Guard returned `go` on 2026-11-17. Critique/final review routing: contract `gpt-6.1-sol / xhigh`, fresh no-context reviewers. Technical-review routing waiver: user explicitly answered `Autorizar gpt-6.1-terra` on 2026-11-17 to replace unavailable configured `gpt-5.6-terra` for the independent test audit. `waiver_reason=model identifier unavailable in active tool`, `approver_id=current-user`, `approval_reference=2026-11-17 user reply Autorizar gpt-6.1-terra`, `mitigation_summary=fresh no-context gpt-6.1-terra/xhigh with full required audit workload`, `follow_up_owner=Delphi`, `follow_up_task_id=current bounded audit; no Delphi-config edit`. This grants only the reviewer substitution, not new product scope or Git authority.
 
 Rules/workflows ingested for the renewal: `rules/core/todo-driven-execution-model-decision.md`, `workflows/docker/todo-{lane-framing,contract-refinement,approval-gates,execution-boundary,delivery-gates}-method.md`, `workflows/docker/effort-selection-method.md`, `workflows/nestjs/change-application-boundary-method.md`, `workflows/react/change-ui-boundary-method.md`, `workflows/postgresql/change-relational-contract-method.md`; skills `bug-fix-evidence-loop`, `test-creation-standard`, `test-orchestration-suite`, `endpoint-performance-scrutiny`, `frontend-race-condition-validation`, `backend-concurrency-idempotency-validation`, `test-quality-audit`, `audit-protocol-triple-review`. All reads precede their corresponding work. Approval is recorded above; rerun authority guard before code execution.
 
 Delta DoD/validation: D-SYNC-01..05 each require causal RED/GREEN plus current-branch evidence, dedicated audit resolutions and decision adherence. EPS: required bounded/indexed gap lookup; FRC: required existing browser race/cadence; BCI: required real PostgreSQL coalescing/atomic publication; RLS: recommended existing fiscal load suite. Do not infer production recovery from any of these.
 
-Delta gate evidence: review baseline freeze `uninotas-foundation:main@586b51b`, pushed to origin/main on 2026-11-17; content includes D-SYNC-01..05 and no scope change follows from this evidence update. Critique pending; test-quality/performance/final reviews pending; no delta delivery claim.
+Technical-review waiver execution detail: the default routing guard still rejects a model mismatch even with `proof-mode=waiver`. The user's exact approved substitution is therefore represented in a derived session-only contract at `artifacts/tmp/sync-october-2026/approved-review-routing.json` (only Codex technical_review model differs). Guard uses `--contract` plus `--proof-mode waiver` and explicit human reference. The canonical Delphi contract remains unchanged; this records the approved exception rather than claiming canonical model agreement.
+
+Bounded read-only verification detail: after deterministic GREEN, the current user request to correct the confirmed failure also covers one optional read-only recheck of the exact diagnosed Unifast `GET /notas`, 2026-10-01..2026-10-30, page 2, using the current adapter and existing credentials. One request, existing timeout/body limits, no retry, other page/context, scheduler, DB write or broad live scan; stop and report the sanitized category/field/kind if another incompatibility appears. This verifies the actual offending page rather than extending product scope, and supersedes only the executor handoff's conservative blanket prohibition of live calls. No payload or field value may be retained.
+
+Delta gate evidence: decision freeze `uninotas-foundation:main@586b51b`, metadata-aligned freeze `a62a1de`, both pushed origin/main on 2026-11-17. Independent no-context critique/architecture review `sync_planning_review` completed (`gpt-6.1-sol/xhigh`): proceed within D-SYNC-01..05, no new authorization. P1 planning hazards integrated: both demanded and background historical paths must use bounded coverage-driven selection; explicit interval rotation after failure must provide fairness beyond the 60s cooldown. Exact checkpoint identity, atomic publication and bounded query constraints retained. Performance/elegance/structural/operational positions acceptable by design. Evidence `artifacts/tmp/sync-october-2026/planning-review.md`. Assumption-code-coherence, review-scope-drift (0 changed material sections), execution-readiness and normal authority guards returned go/preflight-go as applicable. Test-quality/performance/final reviews pending; no delta delivery claim.
+
+### November Delivery Audit — Round 01 / Corrections In Progress
+
+Source freeze 01: `fix/fiscal-sync-recovery@b4fb44b + code.diff`, source hashes in `artifacts/tmp/sync-october-2026/source-manifest.json`. Executor reported backend 472 passed / 2 opt-in skipped, final focused 214 passed including the added EXPLAIN; Nest/Vite builds, full lint, fiscal frontend unit, fresh intercepted browser and 5/10/20 race probes passed. This evidence predates the following audit corrections and does not close them. No provider recheck was performed. The full workload is in `validation.md/json` and the self-contained `delivery-package.md`.
+
+Independent CLI runners used closed embedded packages and xhigh, no inherited conversation, with `turn.completed` collection. Performance `gpt-6.1-sol`; test-quality `gpt-6.1-terra` under the user's model substitution. Additional conservative cutover scrutiny is a technical-review lens of the same bounded audit; the same approved unavailable-model substitution is recorded by the derived routing contract. An initial sol cutover opinion is supporting evidence only because its routing did not satisfy the technical-review model; after objective terminal completion, a fresh terra cutover run satisfied routing. Canonical routing configuration was untouched. Diagnostic artifacts were sanitized for credential-shaped startup metadata; do not copy raw startup logs.
+
+Performance and test findings are additive, not contradictory design mandates. Runner `needs_adjudication` is resolved by the explicit classifications below, not by treating zero findings as the target. All current audit attempts are terminal before corrections begin; executor is again the only product/test/module writer. No new product scope, migration, worktree or runtime change is admitted.
+
+| Finding | Classification | Current disposition / required evidence |
+| --- | --- | --- |
+| SYNC-PERF-01 | release-blocker | Integrate bounded retirement of provably superseded/expired candidates after admission; preserve resumable exact generations; real PostgreSQL regression pending. |
+| SYNC-OPS-02 | release-blocker | Integrate rotation progress that survives distinct bounded demand subsets; normal-pump multi-demand fairness regression pending. |
+| TQA-DSYNC-01 | release-blocker | Extend recovery to actual list/CSV/count oracles and unchanged Prosperar projection; PostgreSQL execution pending. |
+| TQA-DSYNC-02 / CUTOVER-01 | release-blocker | Add rendered provider_invalid_response browser scenario with safe message/retry wording and fresh-build evidence. |
+| TQA-DSYNC-03 | by-design/no-action | Challenged: no owning CI workflow exists in this repository and no remote-CI or pipeline-parity delivery is claimed. Existing conditional integration enrollment is unchanged; the required local gate explicitly supplies validated loopback TEST_DATABASE_URL and executed every database test. Do not invent CI configuration or widen this bugfix to deployment governance. Remote pipeline claims remain absent. |
+| TQA-DSYNC-04 | release-blocker | Baseline replay error classification and retry presentation, then current GREEN; label chronology honestly. |
+| TQA-DSYNC-05 | release-blocker | Strengthen same existing EXPLAIN regression using the actual Prisma-generated OR/limit SQL, not handwritten tuple-IN evidence. Non-severe evidence weakness fixed in-scope. |
+| CUTOVER-SYNC-01 (supporting opinion) | release-blocker | Project activity only for canonical recovery lifecycle; abandoned broad running row must not mask exact-gap failure. Causal RED + actual public list regression pending. |
+| CUTOVER-02 / CUTOVER-DOC-02 | release-blocker | Remove contradictory retired-seeding paragraph from canonical module in same serialized edit; no separate audit round solely for this documentation change. |
+
+These are implementation/evidence refinements of D-SYNC-02..05, including their already approved fairness, admission, truthful state, context and consumer contracts. No renewed authorization is required. Full real-provider/hosted recovery and deployment remain unverified and outside this local correction. Source freeze 02 and a round-02 delta audit must include this adjudication and resolved evidence before a local completion claim.
+
+### November Freeze02 — Current Local Evidence / Reviews Running
+
+Sole executor released source/test/module ownership after final validation; no product edits while round02 reviewers are live. Authoritative source `fix/fiscal-sync-recovery@b4fb44b + dirty patch`; exact file hashes `artifacts/tmp/sync-october-2026/delivery-audit/round-02/source-manifest.json`, complete self-contained package and prior dispositions in the same round folder. Round01 status resolved after integration; TQA-DSYNC-03 is challenged with the explicit local-only/no-CI-contract rationale. Source freeze01 is historical; its immutable embedded diff in round01 package remains the trace, while the top-level manifest now names the current freeze02.
+
+Current execution evidence: final full backend `475 passed / 2 existing opt-in skipped`, PostgreSQL `32/32`, full non-mutating lint and Nest/Vite builds, frontend unit, production browser and required medium race `10 triggers x3 repetitions` for both source-owned required scenarios. Browser served HTML/JS bytes matched local dist before tests; fingerprints/URL in `validation.json`. The inherited WSL interop channel failed before Jest output; process-local selection of the active channel restored the canonical Windows Node22 runner. No persistent environment/runtime change or false pass was accepted.
+
+One separately authorized read-only actual provider page recheck succeeded after GREEN: Unifast October1..30/page2, HTTP200/200 decoded items, current compiled adapter; no retry/otherpage/DB/scheduler/raw payload. This confirms the offending page acceptance, not the actual user database's recovery. Final `validation.md/json` replaces pre-correction counts. Current EPS/FRC/BCI evidence objects with canonical hashes: `artifacts/tmp/sync-october-2026/pcv/{eps,frc,bci}.json`; full wallclock RLS and hosted runtime proof remain pending before production-ready.
+
+| Decision | Current implementation and criterion-specific evidence | Adherence |
+| --- | --- | --- |
+| D-SYNC-01 | Shared optionalDocument maps absent/null/blank to null; preserved type/control/32-codepoint and user-filter constraints. Both-context list/detail adapter RED then125/125; cache/CSV null compatibility; exact live diagnosed page accepted200items. | Adherent locally |
+| D-SYNC-02 | Both selectors use canonical bounded daily-proof gaps, exact admitted checkpoint reuse, per-demand/background fairness, truthful activity and admitted transactional retirement of covered/expired bootstrap generations. Real PG32/32 includes28→31, public list+CSV, protectedProsperar, legacyrestart, failed/gated fairness, rollback/publication and candidate lifecycle. | Adherent locally; independent round02 pending |
+| D-SYNC-03 | Additive sanitized provider_invalid_response projected through backend/API/normalizer/rendering; classifier baseline RED, broad-running mask causal RED, actual service and browser GREEN; no raw provider values. | Adherent locally |
+| D-SYNC-04 | Replaced static numeric countdown with automatic-retry copy conditioned on autoRetry; cadence/cancellation owner unchanged. Separate timeout/retry17 baseline RED, unit/browser and medium race6/6GREEN. | Adherent locally |
+| D-SYNC-05 | Real declared PostgreSQL boundary, actual generated-query EXPLAIN, backend full/static/build, consumer/browser freshness and explicit race repetitions; chronology distinguishes test-before and baseline replay. No provider mutation/schema/runtime/dependency change. | Adherent locally; audit/final/adherence gates pending |
+
+Bounded security review: nullable data does not widen the public-list PII allowlist or user-entered query contract; controls/non-string/overlong provider values remain rejected, CSV neutralization/auth/context tests remain in the full suite, and public error is a fixed enum without value/URL/body. Candidate retirement is context-scoped and only occurs in admitted publication transaction; no remote manual mutation. This is not a new broad adversarial or production security claim.
+
+Bounded verification debt: no inline TODO/FIXME/HACK in touched product files; broad historical TODO and runtime/promotion obligations remain open. Final scanner classifications, dedicated audit results, architecture adherence and final review still need registration before the local completion claim. No production-ready or remote-CI claim is made.
+
+### November Audit Round02 — Snapshot / Historical-Bound Corrections
+
+All three round02 lanes completed successfully on freeze02; their findings are additive. Deduplicated findings remain inside D-SYNC-02/03/05 and the existing FISC-RM-05 snapshot contract. No fresh architecture or approval-material scope change is introduced. Normal execution-authority guard returned go; sole executor regained source ownership only after all review attempts terminated.
+
+| Finding IDs | Classification | Disposition |
+| --- | --- | --- |
+| R2-PERF-01 / TQA-R2-01 / CUTOVER-R2-02 | release-blocker | New activity helper used ordinary Prisma while the caller held RepeatableRead tx; fix by explicit same-client plumbing, preserving scheduler ordinary-client calls. Add constrained-pool concurrent list and publication-barrier snapshot regressions. |
+| R2-OPS-02 / TQA-R2-02 / CUTOVER-R2-01 | release-blocker | Activity-derived month gap extended into rolling/future days; clip with the same retained/horizon-minus-two historical bounds and verify legitimate current-month running state. |
+| TQA-R2-03 | release-blocker | Make fairness/retention fixtures clock-relative, explicitly in-horizon and disjoint from the covered/expired subjects; prove month-start/boundary validity. |
+
+Freeze02 backend passes remain historical until these changes rerun; no current local completion is claimed. Frontend source and its served-build evidence are unchanged by this backend-only refinement and must be hash-checked, not reinterpreted as a new hosted run. Existing provider one-page success remains the single authorized request, never repeated. Final/adherence gates remain pending.
+
+### November Freeze03 — Current Backend Evidence
+
+Round02 deduplicated findings were integrated: same transaction client for activity bounds/gaps, historical frontier clipping and clock-relative/disjoint changed fixtures. Source writer released ownership after final GREEN. Full backend478passed/2unchanged opt-in skipped, PostgreSQL35/35, full non-mutating lint with zero warnings and Nest build passed. Real pool starvation was reproduced with two held read transactions / two connections / pool timeout2, then all concurrent list calls passed; a separate committed-publication barrier validates one read snapshot. Current-month and retained-start activity boundaries pass alongside the obsolete broad-row negative.
+
+Freeze03 changes relative to freeze02 are exactly the cache service and its PostgreSQL integration spec; frontend and module hashes are identical. Frontend served-build/browser/race evidence belongs to that unchanged frontend version, not a newly claimed full-stack/hosted run. Exact manifest archived under `artifacts/tmp/sync-october-2026/delivery-audit/round-03/source-manifest.json`. Full current commands/chronology remain `validation.md/json`; third audit packet is bounded to the changed transaction/calendar paths and complete affected regressions, with both prior adjudications embedded. All prior source passes are historical; these are current backend counts. All reviewers receive the same source freeze; no product edits while live.
+
+EPS/FRC/BCI objects refreshed with current run/hash and explicit frontend source-reuse attestation. RLS remains pending before production-ready. Normal authority and unchanged-scope guards remain required; independent audit/adherence/final verdicts are still pending here. No additional provider request was made after the successful single page check.
+
+### November Final Local Disposition — D-SYNC-01..05
+
+Bounded local delta complete; no product commit/push/merge/deploy or manual application-database repair. Round03 Performance and Cutover: zero findings. Round03 TQA low TQA-R3-01 integrated with elapsed-day17 fixture and old-bound RED/restored GREEN, then full PostgreSQL35/35 and backend lint. Fresh supplemental full-rubric TQA: zero findings. Fresh independent final_review and separate architecture_adherence (gpt-6.1-sol/xhigh): zero findings. All merged structured outputs under artifacts/tmp/sync-october-2026/final-assurance/. Reviewers accepted only the embedded bounded local change; execution was performed by the sole executor and is evidenced separately, not claimed independently rerun by reviewers.
+
+Current frozen source manifest has12 paths (11 root product/tests + module). Full backend478passed/2unchanged opt-in skipped was run before the final test-fixture-only correction, with identical production hashes; PG35/35 and full non-mutating backend lint reran after it. Frontend source and served build fingerprints remain unchanged and keep their prior fresh browser/race evidence. Strict control/type/size validation, context/public allowlist, exact checkpoint resume, daily-proof-only completion and transaction ownership preserved. No new local finding deferred. Actual diagnosed page2 accepted HTTP200/200records in one read-only check, not proof of the user's database recovery.
+
+Post-session method is not triggered: the user has not ended the session. This is task closeout only. Next operational observation is the corrected app's normal synchronization for missing October19/21/25; do not mark those remote days covered manually. Broad TODO remains Pending/Provisional, with hosted/runtime/RLS/promotion obligations open.
+
+### November GitHub Publication — Authorized 2026-11-17
+
+Human instruction: `Suba tudo pro gh então para que eu faça o PR e faça os testes na prod de liberação`. This extends authority to commit and push the validated root fix/fiscal-sync-recovery branch and its two canonical Foundation documents on Foundation main. The user retains PR creation, merge and production/release validation. No code change, deploy, remote database repair, branch promotion, temporary-artifact publication or gitlink topology change is included. This supersedes prior no-commit/no-push statements for this publication only; earlier audit/runtime boundaries remain unchanged.
+
+Profile Operational / DevOps for Git publication; declared scope root Git and canonical Foundation docs, with unchanged NestJS/React/PostgreSQL/Prisma product hashes. Genesis ineligible because this is established project delivery. Owned commits contain exactly the11 validated product/test paths and two Foundation documents. Preserve72 pre-existing root artifact files, ignored temporary review material, and the excluded root Foundation gitlink. Full local validation and independent review evidence is unchanged; no gratuitous test rerun for commit-only movement. GitHub branch upload does not certify production recovery.
+
+Publication state: product commit `1b94592b0d592adb5c0931b59bc26425bfa83a07` pushed to `MonitorNotes/fix/fiscal-sync-recovery`; GitHub accepted the new branch and its PR creation URL is https://github.com/unifast-tech/MonitorNotes/pull/new/fix/fiscal-sync-recovery . This documentation commit carries the two canonical Foundation changes on main. Remote SHA attestation is recorded in the local publication artifact after push. Broader TODO stays Pending/Provisional for user-owned PR, application recovery and runtime/RLS obligations.
 
 ### Bounded live validation authorization — 2026-10-02
 
@@ -879,15 +961,16 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 
 ## Local CI-Equivalent Suite Matrix
 
+Current bounded D-SYNC-01..05 local verification on the principal `fix/fiscal-sync-recovery@b4fb44b + freeze03 patch`. This repository exposes no owning remote CI workflow, so these are scope-complete local product commands, not a remote-pipeline or stage-full parity claim. Earlier matrix counts remain historical in Git and the historical evidence sections. Windows commands use process-local active WSL interop; database prerequisites are explicitly validated and no skipped DB suite is accepted as proof.
+
 | Repository / CI Surface | Why In Scope | Behavior / Scenario Covered | Fixture / Seed / Runtime Preconditions | Local CI-Equivalent Command | Required Before | Status | Evidence Artifact / Command | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| backend cache focused | state machine correction | moving total, restart, daily proof, rolling, horizon, coverage/export/error semantics | deterministic provider pages + sync/coverage rows | `cd backend && npx jest fiscal-note-cache.service.spec.ts --runInBand` | `Local-Implemented` | `passed-local` | focused suite passed in current working tree | database-only assertions remain gated separately |
-| backend full | API/error/provider regressions | all fiscal endpoints and common error envelope | `TEST_DATABASE_URL`, no live provider | `cd backend && DOTENV_CONFIG_PATH=.env node -r dotenv/config node_modules/jest/bin/jest.js --runInBand` | `Local-Implemented` | `passed-local` | 18 suites passed, 1 skipped; 403 passed, 2 skipped, 405 total | includes 23 PostgreSQL cases across publication and disposable-schema migration suites; the remaining skipped suite is the separate RLS surface |
-| backend static/build | Nest/TypeScript/Prisma | compile and schema/client coherence | installed dependencies | `cd backend && npx prisma validate && npm run prisma:generate && npx eslint "src/**/*.ts" && npm run build` | `Local-Implemented` | `passed-local` | Prisma validation, lint and build exited 0 | use repo-owned versions |
-| PostgreSQL real integration | relational publication/coverage/repair path | generation rollback, service-level snapshot barriers, daily proof/retention, `20x5` overlap, restart duplicate, mutable total, resumable final publication, exact legacy collision and disposable legacy upgrade | local baseline schema fixture | `TEST_DATABASE_URL=... npx jest fiscal-note-read-model.integration.spec.ts fiscal-note-read-model.migration.integration.spec.ts --runInBand` | `Local-Implemented` | `passed-local` | 23/23 passed; migrations 2/2 up to date; 20k publication remains within the 35s bound | only project PostgreSQL container was started; no stage or remote DB mutation |
-| frontend unit/build | metadata/messages/download lifecycle | partial/complete notices and incomplete export | deterministic API fixtures | `cd frontend && npm run test:notas && npm run lint && npm run build` | `Local-Implemented` | `passed-local` | all three commands exited 0 | complete-zero and exact 409/422 covered |
-| browser flow | actual list/export UX | partial notice disappears when covered; incomplete export downloads nothing | Vite production preview + deterministic backend fixture | Windows Chrome against source-owned `frontend/e2e/notas.mjs` | `Local-Implemented` | `passed-local` | `OK mocked fiscal/cache/privacy/session and legacy PATCH flows` | local preview processes were stopped after execution |
-| incident RED + cross-layer replay | local admission, provider-contract and scoped React timer regression | no false `failed`/candidate loss on transient refusal; static incapacity has no auto-poll; 200-invalid page remains fail-closed with a safe subtype; existing public API/export shape | same-context windows within 60s, persisted checkpoint 3/4, deferred retention, prior true error, complete rolling, several viewers, synthetic invalid 200 page; no live PII | focused Jest coordinator/cache/adapter + real PostgreSQL integration + `npm run test:notas` + source-owned browser scenario, then full in-scope CI | renewed `Local-Implemented` | `planned-not-run` | no incident GREEN evidence | previous passed rows are baseline-only, not proof for `D-RM-I01..I03` |
+| backend full | current fiscal producer and scheduler delta | adapter bounds, context/auth/error envelopes, admitted checkpoint lifecycle, publication, rollback and existing API compatibility | Windows Node22, explicit dotenv preload, validated loopback TEST_DATABASE_URL, UUID migrated schema | `cd backend && node.exe -r dotenv/config node_modules/jest/bin/jest.js --runInBand` | local bounded delivery | `passed` | `artifacts/tmp/sync-october-2026/validation.json`:478passed/2unchanged opt-in skipped | the opt-in live probe and full wallclock RLS are not local correctness proof |
+| PostgreSQL recovery | persistence and actual consumers |28→31, list/count/CSV pre/post, nullable document, protectedProsperar, obsolete running state, fairness, coherent candidate retirement, exactresume,20x5publish, actualORM EXPLAIN | owned guarded UUID schema on existing project PG16; no remote DB write | `cd backend && node.exe -r dotenv/config node_modules/jest/bin/jest.js --runInBand src/fiscal-notes/fiscal-note-read-model.integration.spec.ts` | local bounded delivery | `passed` | `validation.json`:35/35 | complete integration suite, not name-filtered execution |
+| backend static/build | touched Nest TypeScript | non-mutating lint and compile | installed repo-owned versions; unchanged Prisma schema/client | `cd backend && node.exe node_modules/eslint/bin/eslint.js "{src,test}/**/*.ts"` and `node.exe node_modules/@nestjs/cli/bin/nest.js build` | local bounded delivery | `passed` | `validation.json` exit0 | no schema/dependency/CI/runtime file changed |
+| frontend unit/static/build | shared consumer contract and text | error enum normalization, truthful copy, filters/privacy and existing async ownership | canonical Windows Node22, installed dependencies | `cd frontend && node.exe --experimental-strip-types e2e/notas-unit.ts`; source-owned ESLint/tsc/Vite commands in `validation.json` | local bounded delivery | `passed` | `validation.json` exit0 | no new timer/state owner |
+| fresh browser | rendered fiscal error and applied query lifecycle | provider_invalid_response actionable message, retry action, no raw detail, autoRetry true/false; existing list/export/auth flows | current production dist served at127.0.0.1:5173, HTML/JS hashes compared before test, Chrome, intercepted API | `frontend/e2e/notas.mjs` with scoped CHROME/ALVO | local bounded delivery | `passed` | `validation.json#runtime` fingerprints; browser exit0 | fixture is not actual user DB/hosted runtime proof |
+| frontend race | protect existing cancellation/dedupe | clear-late and same-key-refresh at10triggers each,3repetitions | sequential canonical Windows Node22 invocations | `frontend/e2e/notas-race-required.mjs`, DELPHI_RACE_BURST_LEVEL=10, repeat3 | local bounded delivery | `passed` | `validation.json`, `pcv/frc.json`:6/6 | earlier5/20ones are supplemental, not a high-profile claim |
 
 ## Runtime / Rollout Notes
 
@@ -1041,13 +1124,13 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Decision review kind:** `architecture_opinion`
 - **Decision review package:** `bounded-file-set`
 - **Decision review status:** `no_material_findings`
-- **Decision review evidence / resolution:** R1–R5 incident findings are integrated in the frozen Option A baseline `a625838`. Fresh R6 no-context architecture opinion found no new material finding and confirmed the 30-second floor closes the idle/no-row, syncing/null and failed/null polling paths. Product implementation and canonical module change remain pending renewed approval; prior C01..C27 R5 delivery evidence is historical only.
+- **Decision review evidence / resolution:** current D-SYNC-01..05 freeze a62a1de and fresh planning-review.md establish coverage-driven selection, fairness, admission and strict nullable document contracts. Earlier Option A/C01..C27 opinions remain historical.
 - **Architecture adherence review:** `required`
 - **Adherence review lifecycle:** `after implementation and before Completed`
 - **Adherence review kind:** `architecture_adherence`
 - **Adherence review package:** `bounded-summary`
-- **Adherence review status:** `findings_integrated_pending_rerun`
-- **Adherence review evidence / resolution:** the first final review found historical-seeding, resumable-candidate retention and durable-cardinality defects. These are corrected and exercised against PostgreSQL; a fresh reviewer must attest the new diff before Completed.
+- **Adherence review status:** `no_material_findings`
+- **Adherence review evidence / resolution:** fresh no-context gpt-6.1-sol/xhigh architecture_adherence found zero findings on current D-SYNC-01..05. Evidence artifacts/tmp/sync-october-2026/final-assurance/adherence.{raw,merge}.json; same-client snapshot/bounds, coverage selectors, admission/exact resume/fairness, module/privacy/polling contracts all adherent locally. No broader runtime closure.
 
 ## Gate: Review Baseline Freeze
 
@@ -1055,7 +1138,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Why this decision:** big architecture correction needs a committed/pushed immutable TODO packet before independent review.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `586b51b`
+- **Baseline commit:** `a62a1de`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
 - **Findings summary:** prior C01..C27 baseline `9d3bf55` passed R5. Option A baseline `f5740f7` received R4 independent findings, integrated at `aee2d61`. Focused R5 found that idle/syncing partial responses still had 2-second polling; the all-partial 30-second cadence is frozen at `a625838` for a final focused review. The baseline-evidence metadata commit changes no scope-governing decision.
@@ -1324,6 +1407,26 @@ The critique and architecture opinion were fresh no-context reviews of the pushe
 
 ## Promotion Finding Routing Ledger
 
+Current D-SYNC-01..05 findings only. Prior incident ledger is historical; its broader obligations remain governed by the active TODO and are not asserted completed here. Current evidence: artifacts/tmp/sync-october-2026/delivery-audit/round-{01,02,03}/resolution.md and final-assurance/fixture-tqa.merge.md.
+
+| Finding ID | Severity | Classification | Routing Decision | Same TODO / Split Rationale | Status | Approval / Follow-up Reference |
+| --- | --- | --- | --- | --- | --- | --- |
+| `SYNC-PERF-01` | high | `release-blocker` | candidate retirement after admitted publication | within approved D-SYNC delta | `Integrated` | current causal GREEN; round resolutions and validation.md |
+| `SYNC-OPS-02` | high | `release-blocker` | per-demand failure rotation and bounded cursor lifecycle | within approved D-SYNC delta | `Integrated` | current causal GREEN; round resolutions and validation.md |
+| `TQA-DSYNC-01` | medium | `release-blocker` | actual PostgreSQL list/count/CSV and protected other context | within approved D-SYNC delta | `Integrated` | current causal GREEN; round resolutions and validation.md |
+| `TQA-DSYNC-02 / CUTOVER-01` | medium | `release-blocker` | fresh rendered sanitized error/retry browser scenario | within approved D-SYNC delta | `Integrated` | current causal GREEN; round resolutions and validation.md |
+| `TQA-DSYNC-04` | medium | `release-blocker` | baseline classifier/retry causal replay | within approved D-SYNC delta | `Integrated` | current causal GREEN; round resolutions and validation.md |
+| `TQA-DSYNC-05` | medium | `release-blocker` | actual Prisma SQL indexed EXPLAIN | within approved D-SYNC delta | `Integrated` | current causal GREEN; round resolutions and validation.md |
+| `CUTOVER-SYNC-01` | medium | `release-blocker` | exclude obsolete running windows from truthful activity | within approved D-SYNC delta | `Integrated` | current causal GREEN; round resolutions and validation.md |
+| `CUTOVER-02 / CUTOVER-DOC-02` | low | `release-blocker` | remove retired contradictory module text | within approved D-SYNC delta | `Integrated` | current causal GREEN; round resolutions and validation.md |
+| `R2-PERF-01 / TQA-R2-01 / CUTOVER-R2-02` | high | `release-blocker` | same transactional client, pool and snapshot barriers | within approved D-SYNC delta | `Integrated` | current causal GREEN; round resolutions and validation.md |
+| `R2-OPS-02 / TQA-R2-02 / CUTOVER-R2-01` | medium | `release-blocker` | horizon-minus-two clipped historical activity | within approved D-SYNC delta | `Integrated` | current causal GREEN; round resolutions and validation.md |
+| `TQA-R2-03` | medium | `release-blocker` | retained clock-relative disjoint fixtures | within approved D-SYNC delta | `Integrated` | current causal GREEN; round resolutions and validation.md |
+| `TQA-R3-01` | low | `release-blocker` | latest elapsed day17 calendar-sensitive regression corrected | within approved D-SYNC delta | `Integrated` | current causal GREEN; round resolutions and validation.md |
+| `TQA-DSYNC-03` | medium | `by-design/no-action` | Challenge request to create CI | no owning CI workflow; approved scope excludes CI changes; required local PG gate executed | `Challenged` | round01 adjudication; no remote-CI/parity claim |
+
+## Prior Incident Promotion Routing — Historical
+
 Incident I01..I03 fresh architecture review completed with acceptable source-level adherence. Four original findings were preserved and merged from `artifacts/tmp/uninotas-incident-delivery-architecture-result.json` in the principal checkout; this is supporting evidence under the recorded human model selection, not a delivery-guard pass. Focused final cache/coordinator/adapter run reports 3 suites / 166 tests passed. Real PostgreSQL and final cross-layer evidence remain separate.
 
 | Finding ID | Severity | Classification | Routing Decision | Same TODO / Split Rationale | Status | Approval / Follow-up Reference |
@@ -1464,17 +1567,17 @@ The rows below are current incident evidence, not reuse of the historical C01..C
 
 | Reviewer Surface / Package | Review Focus | Status | Evidence Artifact / Command | Findings | Resolution / Notes |
 | --- | --- | --- | --- | --- | --- |
-| corrective implementation diff + frozen decisions + CI evidence | P1/P2 state-machine, API, schema, UI and evidence failures | `no-material-findings` | fresh R5 test-quality and R3 final reviews plus current local CI evidence | exact legacy collision, final-checkpoint retry, mutable-total cleanup and local export audit findings integrated; no unresolved local P1/P2 | PostgreSQL, diff expectation and independent-review evidence are complete locally; scope-drift, cutover and stage gates still block delivery |
+| D-SYNC frozen diff and local evidence | state machine, admission, transaction, API/consumer, evidence | `passed` | artifacts/tmp/sync-october-2026/delivery-audit/round-03/round-summary.md; final-assurance/fixture-tqa.merge.md; validation.md | none | Previous material findings integrated and causally verified; final/adherence results recorded separately. Local delivery scope only; no remote pipeline claim. |
 
 ## Rule-Spirit Anti-Pattern Hunt
 
 | Rule / Principle Surface | Bypass or Anti-Pattern Search Lens | Status | Evidence Artifact / Command | Findings | Resolution / Notes |
 | --- | --- | --- | --- | --- | --- |
-| derived read model / P-6 | PostgreSQL treated as fiscal authority or manual completion | `passed-local` | module/code diff and provider-preservation regressions | none found locally | Smart Notas remains authority; local rows are rebuildable summaries |
-| non-blocking local reads | hidden `await`/provider traversal in list/export | `passed-local` | service call-count and incomplete-export negative oracles | none found locally | covered ordinary list/export perform zero provider calls |
-| interval coverage | global boolean or count-only proof | `passed-local` | daily-proof, complete-zero and snapshot integration tests | none found locally | exact context/day coverage is required |
-| truthful errors | local coverage mapped to provider outage | `passed-local` | exception filter, service and UI contract tests | none found locally | incomplete/out-of-horizon/provider errors remain distinct |
-| test quality | immutable-total-only fixtures or weakened assertions | `findings-integrated-pending-rerun` | independent audit plus mutable-total/restart PostgreSQL regressions | prior P2 gaps integrated | fresh no-context test-quality verdict pending |
+| provider authority | manual completion or skipped notes | `passed` | rule-spirit.json and adapter/coverage tests | none | Optional blank document accepted, strict invalid-type/control/size retained. |
+| bounded local reads | hidden provider traversal, unbounded exact lookup | `passed` | actual Prisma indexed OR/LIMIT EXPLAIN; public read and CSV tests | none | Local reads and exact checkpoints; bounded retained proof query. |
+| snapshot and isolation | root-client escape, unsafe retirement | `passed` | PG snapshot barrier, two-connection pool and context-preservation cases | none | Same-client read snapshot; retirement in admitted publication. |
+| truthful status | stale running mask, fixed countdown | `passed` | obsolete-running negative, historical frontier positive, browser retry assertions | none | Fixed sanitized enum and conditional automatic retry text. |
+| test quality | bypass, fabricated parity, ineffective fixtures | `passed` | round03 plus final-assurance/fixture-tqa.merge.md | none | Scanner skip signal is Prisma pagination; owned aggregates/clock/schema explain first-row matches. Required PG ran35/35. |
 
 ## Security Risk Assessment
 
@@ -1528,68 +1631,64 @@ The rows below are current incident evidence, not reuse of the historical C01..C
 
 ## Verification Debt Assessment
 
-- **Audit outcome:** `local-independent-gates-approved / external-and-stage-gates-open`
-- **Why this outcome:** deterministic, browser, disposable migration fixture, 23 real-PostgreSQL cases, C20 barriers, resumable failure, restart duplicate, `20x5` BCI and EPS plan/load/lock evidence pass. Fresh R5 test-quality and R3 final reviewers found no material local issue after all product, audit-log and falsifiability gaps were integrated; external drift and runtime gates remain separate.
-- **Inline code TODO debt:** no skipped corrective test block remains; UI action-matrix strengthening and stage RLS remain explicit evidence debt.
-- **Evidence / audit artifact:** first final review returned `NOT_APPROVABLE` and first test-quality audit returned `FINDINGS_INTEGRATED_REQUIRED`; their P1/P2 implementation findings are addressed in the current working tree.
-- **Accepted residual debt:** P3 browser hardening for explicit retry presence in `failed` and retry/refresh absence in `historical_snapshot`; this does not weaken the validated backend contract.
+- **Audit outcome:** `bounded-local-delta-validated / broader-runtime-and-promotion-open`
+- **Why this outcome:** current D-SYNC backend 478 passed / 2 unchanged opt-in skipped, PG35/35, frontend unit/build/lint/browser/race evidence; dedicated audit and final fixture TQA resolved. Fresh final/adherence verdicts registered below when terminal.
+- **Inline code TODO debt:** zero in touched product files; static audit signals were adjudicated, not suppressed.
+- **Evidence / audit artifact:** artifacts/tmp/sync-october-2026/validation.md/json; delivery-audit round01..03 resolutions; final-assurance/fixture-tqa.merge.md.
+- **Accepted residual debt:** no new local defect deferred. Broader TODO remains Pending/Provisional: deployed revision, actual application database recovery, authorized runtime/promotion and full RLS evidence remain outstanding. No production-ready claim.
 
 ## Independent Test Quality Audit Gate
 
-**Incident scope status:** fresh independent audit completed with material verification findings; no closure verdict. Full rubric and structured results: principal-checkout `artifacts/tmp/uninotas-incident-delivery-test-result.json` and `uninotas-incident-delivery-test-merged.md`. Four findings are classified in the current ledger above. HTTP gap integrated (67/67); browser reinforcement authored with runtime rerun pending; real PostgreSQL and proper restart/pump proof remain blocked/pending. The fields below apply only to the historical C01..C27 baseline.
-
 - **Audit decision:** `required`
-- **Why this decision:** bugfix/architecture/public-contract change with new test logic and a known prior coverage gap.
-- **Trigger signals in scope:** `changed test logic|bugfix/regression|behavior-defining change|architectural change|shared API/schema|critical user journey`
-- **Required evidence matrix:** `unit|integration PostgreSQL|browser web|stage smoke`
+- **Why this decision:** critical recovery behavior and changed tests/public error consumer.
+- **Trigger signals in scope:** `changed test logic|bugfix/regression|behavior-defining change|shared API|critical user journey`
+- **Required evidence matrix:** `unit|integration PostgreSQL|browser web`; hosted/RLS remains a separate broader TODO gate.
 - **Package mode:** `bounded-file-set`
 - **Canonical method:** `wf-docker-independent-test-quality-audit-method`
 - **Audit isolation mode:** `fresh internal no-context reviewer`
 - **Internal reviewer mandate:** `required after implementation; reviewer cannot be implementing agent`
-- **Audit focus:** `product/test delta alignment|fail-first alignment|bypass detection|assertion efficacy/efficiency|moving-total/restart/coverage sufficiency`
+- **Audit focus:** `architecture|code quality|tests|performance|security|causal sensitivity|real boundary|command/platform parity`
 - **Audit status:** `no_material_findings`
-- **Findings summary:** fresh R5 confirmed the prior durable restart/total/generation/membership, legacy-upgrade, incomplete-export, audit-log and evidence-classification findings are integrated with no new material issue. The failed/historical browser action matrix remains explicitly classified as P3 hardening.
-- **Evidence / reference:** fresh no-context R5 on `2026-09-30`; PostgreSQL suites 23/23, focused post-correction set 50/50, backend full suite 403 passed/2 skipped/405 total, deterministic scanner `low` with no bypass or weak-assertion signal.
-- **Waiver authority / reference:** `n/a`
+- **Findings summary:** round01/02 findings integrated; round03 low TQA-R3-01 fixed inline, old-bound RED/restored GREEN and full PG35/35. Fresh final fixture audit has zero findings. Full backend478 evidence precedes final test-only correction; production hashes unchanged.
+- **Evidence / reference:** artifacts/tmp/sync-october-2026/delivery-audit/round-03/round-summary.md and resolution.md; final-assurance/fixture-tqa.{raw,merge}.json; validation.md.
+- **Waiver authority / reference:** user-approved session-only gpt-6.1-terra technical-review model substitution, documented in November scope; no workload waiver.
 
 ## Independent No-Context Final Review Gate
 
-**Incident scope status:** fresh independent final review completed; source-level I01/I03 generally adherent, with one bounded I02 logging finding under correction and four verification/audit findings. Full structured review and successful merge are principal-checkout `artifacts/tmp/uninotas-incident-delivery-final-result.json` and `uninotas-incident-delivery-final-merged.md`. Supporting evidence under human model override, not routing GO or closure. Current ledger governs dispositions. The results below apply only to the historical C01..C27 baseline.
-
 - **Final review decision:** `required`
-- **Why this decision:** big cross-stack correction intentionally supersedes module decisions and changes a critical list/export contract.
-- **Impact signals in scope:** `cross-stack|public API|runtime scheduler|intentional module supersede|high-severity issues`
+- **Why this decision:** critical cross-stack recovery, public error and scheduler change.
+- **Impact signals in scope:** `public API|runtime scheduler|critical journey|canonical recovery`
 - **Package mode:** `bounded-summary`
 - **Review isolation mode:** `fresh internal no-context reviewer`
 - **Internal reviewer mandate:** `required after test-quality audit; reviewer cannot be implementing agent`
-- **Review focus:** `adherence|regressions|validation/test evidence|security/performance|elegance|structural soundness|verification debt`
+- **Review focus:** `adherence|regressions|full applicable test audit|security/performance|elegance|structural soundness|verification debt`
 - **Final review status:** `no_material_findings`
-- **Findings summary:** fresh R3 found no remaining local P1/P2 after rechecking exact monthly/frontier legacy recovery, final-checkpoint publication retry, mutable-total cleanup, export-cache aggregate audit logging and all canonical PCV hashes. The failed/historical browser action matrix remains P3 hardening; scope/runtime blockers remain separate and explicit. The later artifact-pruning pass changed no product code and the diff expectation guard now passes.
-- **Evidence / reference:** fresh no-context final R3 on `2026-09-30`; focused post-correction set 50/50, PostgreSQL 23/23 and full backend 403 passed/2 skipped/405 total.
-- **Waiver authority / reference:** `n/a`
+- **Findings summary:** fresh gpt-6.1-sol/xhigh final reviewer found zero findings and accepted bounded local D-SYNC-01..05 delivery. Earlier round resolutions, technical model substitution and source-evidence reuse are explicitly included. Broader full-load/hosted/deployment/user-database obligations remain open.
+- **Evidence / reference:** artifacts/tmp/sync-october-2026/final-assurance/final.{raw,merge}.json; frozen final-package.md and source-manifest.json.
+- **Waiver authority / reference:** `n/a`.
 
 ## Independent Cutover Integrity Audit Gate
 
 - **Cutover audit decision:** `required`
-- **Why this decision:** provider-per-request export and legacy global bootstrap are being retired while a temporary partial-list bridge remains.
-- **Cutover signals in scope:** `canonical cutover|legacy-path retirement|temporary fallback bridge`
+- **Why this decision:** canonical coverage-driven recovery and retirement of superseded broad checkpoints.
+- **Cutover signals in scope:** `canonical cutover|legacy-path retirement`
 - **Package mode:** `bounded-summary`
-- **Audit focus:** `true DB-covered canonical path|partial-list exception|legacy sync retirement|no hidden provider traversal`
-- **Cutover audit status:** `not_run`
-- **Findings summary:** pending implementation.
-- **Evidence / reference:** pending.
-- **Waiver authority / reference:** `n/a`
+- **Audit focus:** `version2 daily proof|exact resume|no provider traversal|snapshot|no bridge`
+- **Cutover audit status:** `no_material_findings`
+- **Findings summary:** round03 fresh terra reviewer has zero findings; prior running-state, snapshot and historical-bound findings integrated. Bounded local delta only.
+- **Evidence / reference:** artifacts/tmp/sync-october-2026/delivery-audit/round-03/merge/cutover-integrity.merge.json and round resolutions.
+- **Waiver authority / reference:** same current-user approved technical-review model substitution; no scope/workload waiver.
 
 ## Module Consolidation Gate
 
 - [x] Canonical fiscal module records interval coverage, windowed sync, local list/export and truthful errors.
 - [x] `FISC-EX-02/FISC-EX-04` are intentionally superseded with traceability to `D-RM-C*`.
 - [x] Provider-backed detail/documents and legacy module transition remain preserved.
-- [ ] TODO/module cross-links and final decision/adherence evidence are recorded after PostgreSQL execution.
+- [x] Current bounded D-SYNC-01..05 TODO/module cross-links and final decision/adherence evidence recorded after PostgreSQL35/35; broader TODO runtime/promotion remains open.
 
 ## TODO Closeout Disposition
 
 - **Disposition:** `keep-active`
-- **Disposition reason:** corrective baseline implementation and local evidence remain historical; the new `2026-10-01` local-admission/provider-contract incident adds unresolved decisions and tests. Scope-drift resolution, cutover audit, RLS and exact-revision runtime evidence also remain open; closing or promoting now would overstate delivery.
-- **Post-commit/push status:** `MonitorNotes release/uninotas@6f48e60c5c0690a02f9ca0dbed8a6d31e2761475 pushed; remote SHA attested equal; PR/merge/deploy remain user-owned and pending`
-- **Next path/status action:** implement and validate the approved `D-RM-I01..I03` incident slice, run its fresh reviews and record evidence. Subsequent deployment/observation identifies the real March contract rejection subtype; promotion and production-ready claims remain separate and pending.
+- **Disposition reason:** current bounded D-SYNC-01..05 local correction is validated and independently accepted. Keep the broader governing TODO active for actual application database recovery, authorized promotion, exact-revision runtime and full RLS evidence; no production-ready claim.
+- **Post-commit/push status:** `MonitorNotes fix/fiscal-sync-recovery@1b94592b0d592adb5c0931b59bc26425bfa83a07 pushed; Foundation main receives this canonical evidence/module commit separately. No PR created, merge or deploy performed. Root gitlink and temporary artifacts excluded intentionally.`
+- **Next path/status action:** user-owned PR and release testing on the published correction branch; verify exact deployed revision, October2026/Unifast coverage and the separately required runtime/RLS evidence. No further product scope is preauthorized.
