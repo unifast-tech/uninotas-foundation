@@ -27,8 +27,8 @@
 ## Active Work State
 
 - **Work state:** `implementation`
-- **Why this state now:** usuário respondeu APROVADO em 2026-10-01 após revisão R6 sem achados materiais e preflight-go, autorizando o delta D-RM-I01..I03.
-- **Exit condition:** implementar e validar a baseline aprovada `D-RM-I01..I03`, executar as revisões independentes exigidas e consolidar evidências locais. A causa exata da rejeição de contrato é resultado esperado da instrumentação implantada, não pré-condição impossível para implementar a instrumentação. Implantação e observação do ambiente permanecem separadas.
+- **Why this state now:** usuário autorizou em 2026-11-17 a correção concreta diagnosticada, D-SYNC-01..05; revisões e evidências antigas não fecham esse delta.
+- **Exit condition:** implementar e validar D-SYNC-01..05, obter revisões independentes e registrar evidências locais. Recuperação do banco remoto e implantação continuam sem autorização.
 
 ## Provisional Notes
 
@@ -46,7 +46,7 @@
 
 ## Execution Lane Tracking
 
-- **Local implementation branches:** `MonitorNotes:release/uninotas`, `uninotas-foundation:main`
+- **Local implementation branches:** `MonitorNotes:fix/fiscal-sync-recovery` (November delta), `uninotas-foundation:main`; older release/uninotas evidence is historical.
 - **Promotion lane path:** `release/uninotas -> PR definido pelo usuário`; Foundation permanece na autoridade canônica `main` e sua publicação segue governança própria.
 - **Lane-promoted threshold for this TODO:** PR da branch `release/uninotas` aprovado/mesclado no alvo informado pelo usuário.
 - **Production-ready threshold for this TODO:** revisão exata implantada em Railway Stage, reparação concluída e smoke autenticado/list-export aprovado.
@@ -116,7 +116,7 @@ Rules/workflows ingested for the renewal: `rules/core/todo-driven-execution-mode
 
 Delta DoD/validation: D-SYNC-01..05 each require causal RED/GREEN plus current-branch evidence, dedicated audit resolutions and decision adherence. EPS: required bounded/indexed gap lookup; FRC: required existing browser race/cadence; BCI: required real PostgreSQL coalescing/atomic publication; RLS: recommended existing fiscal load suite. Do not infer production recovery from any of these.
 
-Delta gate evidence: review baseline freeze pending; critique pending; test-quality/performance/final reviews pending; no delta delivery claim.
+Delta gate evidence: review baseline freeze `uninotas-foundation:main@586b51b`, pushed to origin/main on 2026-11-17; content includes D-SYNC-01..05 and no scope change follows from this evidence update. Critique pending; test-quality/performance/final reviews pending; no delta delivery claim.
 
 ### Bounded live validation authorization — 2026-10-02
 
@@ -665,8 +665,8 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 
 | Repository | Path | Baseline ref | Comparison mode |
 | --- | --- | --- | --- |
-| `MonitorNotes` | `.` | `release/uninotas@5cd1d5bc0c91c784ac4be985baba8a21fdc702f4` | `working_tree` |
-| `uninotas-foundation` | `uninotas-foundation` | `main@d10c04f` | `working_tree` |
+| `MonitorNotes` | `.` | `b4fb44b` | `working_tree` |
+| `uninotas-foundation` | `uninotas-foundation` | `2f82e096702530ea8fb94d759f6af5d186e5860b` | `working_tree` |
 
 ### Expected Changed Paths
 
@@ -684,6 +684,7 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 | `MonitorNotes` | `frontend/e2e/**` | `A, M, ??` | browser-visible list/export regressions when this is the source-owned runner |
 | `MonitorNotes` | `frontend/src/**/*.spec.ts*` | `A, M, ??` | frontend contract/render regressions |
 | `MonitorNotes` | `artifacts/tmp/uninotas-incident*` | `A, M, ??` | derived bounded incident review/dispatch evidence mandated by the approved workflow; not product/runtime code and excluded from product staging |
+| `MonitorNotes` | `artifacts/tmp/**` | `??` | 72 pre-existing diagnostic artifacts inventoried before the November correction; preserve unchanged and exclude from product staging |
 | `MonitorNotes` | `delphi-ai` | `M` | pre-existing workspace link reflects the separately approved Delphi helper commit; excluded from product staging |
 | `MonitorNotes` | `foundation_documentation` | `M` | pre-existing Foundation workspace link reflects TODO evidence; excluded from product staging |
 | `MonitorNotes` | `uninotas-foundation` | `M, T` | pre-existing tracked-gitlink versus workspace-symlink topology; excluded from product staging |
@@ -1054,11 +1055,11 @@ Exportações grandes percorrem o Smart Notas e podem receber `429` do provedor.
 - **Why this decision:** big architecture correction needs a committed/pushed immutable TODO packet before independent review.
 - **Trigger stage:** `before the first planning-side review or guard run`
 - **Baseline branch:** `uninotas-foundation:main`
-- **Baseline commit:** `a62583870d6c970b11b2f7ea2c37a5e542dbd843`
+- **Baseline commit:** `586b51b`
 - **Baseline push reference:** `origin/main`
 - **Gate status:** `no_material_findings`
 - **Findings summary:** prior C01..C27 baseline `9d3bf55` passed R5. Option A baseline `f5740f7` received R4 independent findings, integrated at `aee2d61`. Focused R5 found that idle/syncing partial responses still had 2-second polling; the all-partial 30-second cadence is frozen at `a625838` for a final focused review. The baseline-evidence metadata commit changes no scope-governing decision.
-- **Evidence / reference:** `https://github.com/unifast-tech/uninotas-foundation/commit/a62583870d6c970b11b2f7ea2c37a5e542dbd843`; prior R5 evidence remains in its resolution ledger below.
+- **Evidence / reference:** `https://github.com/unifast-tech/uninotas-foundation/commit/586b51b`; pushed November delta D-SYNC-01..05; older R5/R6 references below are historical.
 - **Waiver authority / reference:** `n/a`
 - **2026-10-01 incident delta:** `a625838` is the pushed Option A content baseline for I01..I03; focused R6 review and scope-drift guard passed, renewed human implementation approval remains pending.
 
